@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-smoke-test:
+    name: Build and smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build distributable artifacts
+        run: npm run build
+
+      - name: Start API for smoke tests
+        run: |
+          node ./api/index.js > /tmp/cyvx-ci.log 2>&1 &
+          echo $! > /tmp/cyvx-ci.pid
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/healthz >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/cyvx-ci.log
+          exit 1
+
+      - name: Smoke test health, overview, and command routes
+        run: |
+          curl -fsS http://127.0.0.1:3000/healthz
+          curl -fsS http://127.0.0.1:3000/status
+          curl -fsS http://127.0.0.1:3000/api/v1/overview
+          curl -fsS http://127.0.0.1:3000/api/v1/insights
+          curl -fsS -X POST http://127.0.0.1:3000/api/v1/command \
+            -H 'content-type: application/json' \
+            -d '{"task":"optimize:cluster"}'
+
+      - name: Stop API
+        if: always()
+        run: |
+          if [ -f /tmp/cyvx-ci.pid ]; then
+            kill "$(cat /tmp/cyvx-ci.pid)" || true
+          fi
+

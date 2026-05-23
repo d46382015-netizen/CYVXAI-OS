@@ -2,7 +2,7 @@
 **Created by Dakota Lee Jonsgaard**  
 © 2026 Dakota Lee Jonsgaard. All rights reserved.
 
-CYVX is an autonomous infrastructure intelligence system for sensing, reasoning, planning, evolving, and reporting across distributed compute environments.
+CYVXAI-OS is an advanced autonomous infrastructure operating system for sensing, reasoning, planning, evolving, and reporting across distributed compute environments.
 
 ## Architecture
 - Perception: live infrastructure sensors

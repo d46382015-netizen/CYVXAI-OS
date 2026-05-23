@@ -1,0 +1,20 @@
+{
+  "name": "cyvx",
+  "version": "6.0.0",
+  "builtAt": "2026-05-23T10:25:02.918Z",
+  "entrypoints": {
+    "api": "api/index.js",
+    "ui": "ui/index.html"
+  },
+  "endpoints": [
+    "/healthz",
+    "/status",
+    "/api/v1/overview",
+    "/api/v1/insights",
+    "/api/v1/workloads",
+    "/api/v1/actions",
+    "/api/v1/command",
+    "/ask",
+    "/metrics"
+  ]
+}

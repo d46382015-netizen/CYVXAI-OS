@@ -39,6 +39,8 @@ function createApiServer(controller, options = {}) {
       const url = new URL(req.url, "http://localhost");
       if (url.pathname === "/healthz") return json(res, 200, wrap({ status: "ok" }));
       if (url.pathname === "/status") return json(res, 200, wrap(controller.status()));
+      if (url.pathname === "/api/v1/overview") return json(res, 200, wrap(controller.overview()));
+      if (url.pathname === "/api/v1/insights") return json(res, 200, wrap({ insights: controller.insights(), health: controller.overview().health }));
       if (url.pathname === "/v1/agents") return json(res, 200, wrap({ agents: controller.agentsSnapshot() }));
       if (url.pathname === "/v1/leaderboard") return json(res, 200, wrap({ leaderboard: controller.leaderboard() }));
       if (url.pathname === "/v1/roadmap") return json(res, 200, wrap(controller.roadmap()));
@@ -47,6 +49,7 @@ function createApiServer(controller, options = {}) {
       if (url.pathname === "/api/v1/status-model") return json(res, 200, wrap(controller.statusModel.snapshot().data));
       if (url.pathname === "/metrics") return text(res, 200, promMetrics(controller));
       if (url.pathname === "/ask" && req.method === "POST") return json(res, 200, wrap(await parseAsk(req, controller)));
+      if (url.pathname === "/api/v1/command" && req.method === "POST") return json(res, 200, wrap(await handleCommand(req, controller)));
       if (url.pathname === "/api/v1/workloads") return json(res, 200, wrap(await handleWorkloads(req, controller)));
       if (url.pathname === "/api/v1/actions") return json(res, 200, wrap(await handleActions(req, controller)));
       if (url.pathname === "/api/v1/state") return json(res, 200, wrap(controller.snapshot()));
@@ -118,6 +121,39 @@ async function handleActions(req, controller) {
     return controller.executeAction(body);
   }
   return { error: "method not allowed" };
+}
+
+async function handleCommand(req, controller) {
+  const body = await readJson(req);
+  const command = String(body.command || body.task || body.prompt || "").trim();
+  const normalized = command.toLowerCase();
+  const mode = String(body.mode || body.type || "").toLowerCase();
+  if (mode === "workload" || normalized.startsWith("workload:")) {
+    return controller.submitWorkload(body.workload || body);
+  }
+  if (mode === "action" || normalized.startsWith("action:") || normalized.startsWith("scale") || normalized.includes("migrate")) {
+    return controller.executeAction(body.action || inferAction(command, body));
+  }
+  return controller.ask(command, body.context || body);
+}
+
+function inferAction(command, body = {}) {
+  const normalized = String(command || "").toLowerCase();
+  if (normalized.startsWith("scale")) {
+    return {
+      type: body.type || "scale_up",
+      workload_id: body.workload_id || normalized.replace(/^scale\s+/i, "") || "workload-1",
+      replicas: Number(body.replicas || 4),
+    };
+  }
+  if (normalized.includes("migrate")) {
+    return {
+      type: body.type || "migrate",
+      workload_id: body.workload_id || normalized.replace(/^migrate\s+/i, "") || "workload-1",
+      node_id: body.node_id || "node-1",
+    };
+  }
+  return body.action || body;
 }
 
 function promMetrics(controller) {

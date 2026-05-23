@@ -15,7 +15,7 @@ if [ ! -d node_modules ]; then
   npm install
 fi
 
-if [ ! -x "./node_modules/.bin/node" ] && ! command -v node >/dev/null 2>&1; then
+if ! command -v node >/dev/null 2>&1; then
   echo "node is required"
   exit 1
 fi
@@ -26,5 +26,8 @@ fi
 
 mkdir -p ~/.cyvx
 
-exec node ./api/index.js
+export CYVX_HOST="${CYVX_HOST:-0.0.0.0}"
+export CYVX_PORT="${CYVX_PORT:-3000}"
 
+echo "Starting CYVX on http://${CYVX_HOST}:${CYVX_PORT}"
+exec node ./api/index.js

@@ -354,12 +354,12 @@ class CyvxController extends EventEmitter {
       const snapshot = this.snapshot();
       const readings = this.modules.perception.sample(snapshot).readings;
       const intelligence = this.modules.intelligence.evaluate(readings, { horizon: 60 });
-      const payload = {
+      const payload = this.compactAutonomousPayload({
         at: new Date().toISOString(),
         readings,
         intelligence: intelligence.data,
         cluster: snapshot.cluster,
-      };
+      });
       this.metrics.events += 1;
       this.metrics.evolutionCycles += 1;
       this.db.appendEvent("autonomous-loop", payload);
@@ -400,7 +400,7 @@ class CyvxController extends EventEmitter {
     const cluster = {
       nodes: [{ id: "node-1", cpu_capacity: 32, cpu_used: 18, healthy: true, cost_per_hour: 2.75 }],
       workloads: this.workloads.length ? this.workloads : [{ id: "workload-1", cpu_request: 2, replicas: 3, target_latency_ms: 120 }],
-      history: this.db.history(null, 20),
+      history: this.compactHistory(12),
     };
     return {
       agents,
@@ -409,6 +409,108 @@ class CyvxController extends EventEmitter {
       genomePool: this.genomePool,
       roadmap: this.roadmap(),
       status: this.status(),
+    };
+  }
+
+  overview() {
+    const snapshot = this.snapshot();
+    const insights = this.insights(snapshot);
+    const topAgent = snapshot.leaderboard[0] || null;
+    const health = this.healthSummary(snapshot, insights);
+    return {
+      status: snapshot.status,
+      health,
+      cluster: snapshot.cluster,
+      roadmap: snapshot.roadmap,
+      agents: {
+        count: snapshot.agents.length,
+        top: topAgent,
+      },
+      activity: {
+        events: this.metrics.events,
+        evolutionCycles: this.metrics.evolutionCycles,
+        recent: this.compactHistory(8),
+      },
+      insights,
+    };
+  }
+
+  insights(snapshot = this.snapshot()) {
+    const cluster = snapshot.cluster || {};
+    const node = cluster.nodes?.[0] || {};
+    const capacity = Math.max(1, Number(node.cpu_capacity || 1));
+    const utilization = Number(node.cpu_used || 0) / capacity;
+    const workloadDemand = (cluster.workloads || []).reduce(
+      (sum, workload) => sum + Number(workload.cpu_request || 0) * Math.max(1, Number(workload.replicas || 1)),
+      0,
+    ) / capacity;
+    const agentSpread = snapshot.agents.length ? snapshot.agents[0].credits - snapshot.agents[snapshot.agents.length - 1].credits : 0;
+    const roadmapModules = snapshot.roadmap?.statusModel?.modules?.length || 0;
+    const recommendations = [];
+
+    if (utilization > 0.7) {
+      recommendations.push({
+        id: 'cpu-pressure',
+        severity: 'warning',
+        title: 'Node utilization is elevated',
+        summary: 'Primary node is using ' + (utilization * 100).toFixed(0) + '% of available CPU.',
+        recommendation: 'Scale the active workload or migrate one replica to a cooler node.',
+      });
+    } else {
+      recommendations.push({
+        id: 'cpu-pressure',
+        severity: 'good',
+        title: 'Node utilization is within limits',
+        summary: 'Primary node is using ' + (utilization * 100).toFixed(0) + '% of available CPU.',
+        recommendation: 'Keep the current placement and continue monitoring burst traffic.',
+      });
+    }
+
+    recommendations.push({
+      id: 'workload-demand',
+      severity: workloadDemand > 0.8 ? 'warning' : 'good',
+      title: 'Workload demand is tracked',
+      summary: 'Requested CPU is ' + workloadDemand.toFixed(2) + 'x node capacity across the live workload set.',
+      recommendation: workloadDemand > 0.8
+        ? 'Prepare a scale-out action before latency rises.'
+        : 'Capacity remains healthy for the current workload profile.',
+    });
+
+    recommendations.push({
+      id: 'agent-spread',
+      severity: agentSpread > 15 ? 'info' : 'good',
+      title: 'Agent economics remain stable',
+      summary: 'Leaderboard spread is ' + agentSpread + ' credits between the top and bottom agents.',
+      recommendation: 'Use this spread to rebalance workloads only if the gap widens further.',
+    });
+
+    recommendations.push({
+      id: 'roadmap-completeness',
+      severity: roadmapModules >= 12 ? 'good' : 'info',
+      title: 'Roadmap is populated',
+      summary: roadmapModules + ' governed modules are tracked in the status model.',
+      recommendation: 'Keep status transitions updated as modules move through implementation.',
+    });
+
+    return recommendations;
+  }
+
+  healthSummary(snapshot = this.snapshot(), insights = this.insights(snapshot)) {
+    const node = snapshot.cluster?.nodes?.[0] || {};
+    const capacity = Math.max(1, Number(node.cpu_capacity || 1));
+    const utilization = Number(node.cpu_used || 0) / capacity;
+    const workloadDemand = (snapshot.cluster?.workloads || []).reduce(
+      (sum, workload) => sum + Number(workload.cpu_request || 0) * Math.max(1, Number(workload.replicas || 1)),
+      0,
+    ) / capacity;
+    const insightPenalty = insights.filter((item) => item.severity === 'warning').length * 0.07;
+    const score = Math.max(0, Math.min(1, 1 - Math.min(0.65, (utilization * 0.45) + (workloadDemand * 0.2) + insightPenalty)));
+    const label = score >= 0.8 ? 'healthy' : score >= 0.6 ? 'degraded' : 'at-risk';
+    return {
+      score,
+      label,
+      utilization,
+      workloadDemand,
     };
   }
 
@@ -466,6 +568,84 @@ class CyvxController extends EventEmitter {
     return 0;
   }
 
+  compactHistory(limit = 20) {
+    return this.db.history(null, limit).map((entry) => ({
+      type: entry.type,
+      created_at: entry.created_at,
+      summary: this.summarizeEvent(entry),
+    }));
+  }
+
+  summarizeEvent(entry = {}) {
+    const summary = {};
+    for (const [key, value] of Object.entries(entry)) {
+      if (key === "type" || key === "created_at") continue;
+      if (value == null) continue;
+      if (Array.isArray(value)) {
+        summary[key] = { kind: "array", length: value.length };
+      } else if (typeof value === "object") {
+        summary[key] = { kind: "object", keys: Object.keys(value).slice(0, 8) };
+      } else {
+        summary[key] = value;
+      }
+    }
+    return summary;
+  }
+
+  compactAutonomousPayload(payload = {}) {
+    return {
+      at: payload.at,
+      readings: Array.isArray(payload.readings)
+        ? payload.readings.slice(0, 12).map((reading) => ({
+            sensor: reading.sensor,
+            category: reading.category,
+            value: reading.value,
+            anomalyScore: reading.anomalyScore,
+            status: reading.status,
+          }))
+        : [],
+      intelligence: this.compactIntelligence(payload.intelligence),
+      cluster: this.compactCluster(payload.cluster),
+    };
+  }
+
+  compactIntelligence(intelligence = {}) {
+    const winner = intelligence.winner || {};
+    return {
+      score: intelligence.score,
+      winner: {
+        algorithm: winner.detail?.algorithm || winner.algorithm || "unknown",
+        score: winner.score,
+      },
+      risk: intelligence.risk,
+      confidence: intelligence.confidence,
+    };
+  }
+
+  compactCluster(cluster = {}) {
+    return {
+      nodes: Array.isArray(cluster.nodes)
+        ? cluster.nodes.slice(0, 5).map((node) => ({
+            id: node.id,
+            cpu_capacity: node.cpu_capacity,
+            cpu_used: node.cpu_used,
+            healthy: node.healthy,
+            cost_per_hour: node.cost_per_hour,
+          }))
+        : [],
+      workloads: Array.isArray(cluster.workloads)
+        ? cluster.workloads.slice(0, 8).map((workload) => ({
+            id: workload.id,
+            cpu_request: workload.cpu_request,
+            replicas: workload.replicas,
+            target_latency_ms: workload.target_latency_ms,
+            assigned_node_id: workload.assigned_node_id,
+          }))
+        : [],
+      history: Array.isArray(cluster.history) ? cluster.history.slice(0, 10) : [],
+    };
+  }
+
   planeRoadmap() {
     const groups = this.modules.planes || {};
     return Object.fromEntries(
@@ -505,6 +685,7 @@ class CyvxController extends EventEmitter {
       response.plan = [this.modules.runbook.generate({ title: "General Ask" }).data];
       response.explanation = "CYVX produced a generic operational plan.";
     }
+    this.metrics.events += 1;
     this.db.appendEvent("ask", response);
     this.broadcast("ask", response);
     return envelope("ask-response", {
@@ -530,17 +711,19 @@ class CyvxController extends EventEmitter {
       updated_at: new Date().toISOString(),
     };
     this.workloads.push(record);
+    this.metrics.events += 1;
     this.db.appendEvent("workload", record);
     this.broadcast("workload", record);
     return { accepted: true, workload: record, cluster: this.snapshot().cluster };
   }
 
   executeAction(action = {}) {
+    const before = this.snapshot().cluster;
     const result = {
       accepted: true,
       message: "action executed",
-      before: this.snapshot().cluster,
-      after: this.snapshot().cluster,
+      before,
+      after: null,
       action,
     };
     if (action.type === "scale_up" || action.type === "scale_down") {
@@ -551,7 +734,9 @@ class CyvxController extends EventEmitter {
       const workload = this.workloads.find((item) => item.id === action.workload_id);
       if (workload) workload.assigned_node_id = action.node_id || "node-1";
     }
+    result.after = this.snapshot().cluster;
     this.actions.push(result);
+    this.metrics.events += 1;
     this.db.appendEvent("action", result);
     this.broadcast("action", result);
     return result;

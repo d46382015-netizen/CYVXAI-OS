@@ -1,0 +1,52 @@
+# CLI Reference
+
+## Help
+- `node ./cli/cyvx.js help`
+
+## Service
+- `node ./cli/cyvx.js serve`
+
+## Read APIs
+- `status`
+- `agents`
+- `leaderboard`
+- `roadmap`
+- `cluster`
+- `workloads`
+- `actions`
+- `metrics`
+- `healthz`
+
+## Ask / Intelligence
+- `ask <task>`
+- `report`
+- `genome`
+- `simulate`
+- `evolve`
+
+## Planned command surface
+- `forecast`
+- `optimize`
+- `intervene`
+- `causal`
+- `memory`
+- `dream`
+- `join`
+- `partner`
+- `sdk`
+- `plugin`
+- `test`
+- `observability`
+- `pricing`
+- `revenue`
+- `security`
+- `compliance`
+- `cloud`
+- `web3`
+- `token`
+- `chain`
+- `nft`
+- `defi`
+- `mine`
+- `node`
+- `doc`

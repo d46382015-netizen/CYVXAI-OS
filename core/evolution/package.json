@@ -1,0 +1,16 @@
+{
+  "name": "cyvx-evolution",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "cyvx": "src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "ws": "^8.21.0"
+  }
+}

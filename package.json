@@ -1,0 +1,16 @@
+{
+  "name": "cyvx",
+  "version": "6.0.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "CYVX autonomous infrastructure intelligence system",
+  "scripts": {
+    "start": "bash ./start.sh",
+    "api": "node ./api/index.js",
+    "cli": "node ./cli/cyvx.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.98.0",
+    "ws": "^8.21.0"
+  }
+}

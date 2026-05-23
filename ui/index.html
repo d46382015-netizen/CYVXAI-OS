@@ -1,0 +1,118 @@
+<!doctype html>
+<!--
+ * CYVX — Autonomous Infrastructure Intelligence
+ * © 2026 Dakota Lee Jonsgaard. All rights reserved.
+ * Creator & Architect: Dakota Lee Jonsgaard
+ * https://cyvx.ai | dakota@cyvx.ai
+ *
+ * This software is the exclusive intellectual property
+ * of Dakota Lee Jonsgaard. Unauthorized use prohibited.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CYVX OMEGA-X</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg-grid"></div>
+    <main class="app-shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">CYVX OMEGA-X</p>
+          <h1>Cognitive Operating Environment</h1>
+          <p class="subhead">Planetary infrastructure intelligence, causal control, simulation, economics, and autonomous governance in one spatial interface.</p>
+        </div>
+        <div class="status-card">
+          <div class="status-dot"></div>
+          <div>
+            <div class="status-label">System</div>
+            <div id="systemStatus" class="status-value">Connecting...</div>
+          </div>
+        </div>
+      </header>
+
+      <section class="world-panel panel">
+        <div class="panel-head">
+          <div>
+            <h2>Global World Model</h2>
+            <p>Live digital twin of clusters, flows, risk, and governance.</p>
+          </div>
+          <div class="panel-actions">
+            <button data-view="world" class="active">World</button>
+            <button data-view="causal">Causal</button>
+            <button data-view="future">Future</button>
+            <button data-view="economic">Economic</button>
+          </div>
+        </div>
+        <div class="world-stage">
+          <canvas id="planetCanvas" width="1200" height="640"></canvas>
+          <div class="overlay-card" id="overlayCard">
+            <div class="overlay-title">Epistemic Overlay</div>
+            <div class="overlay-grid">
+              <div><span>Confidence</span><strong id="metricConfidence">0.87</strong></div>
+              <div><span>Uncertainty</span><strong id="metricUncertainty">0.13</strong></div>
+              <div><span>Contradiction</span><strong id="metricContradiction">0.04</strong></div>
+              <div><span>Volatility</span><strong id="metricVolatility">0.22</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="layer-grid">
+        <article class="panel">
+          <h3>Cognitive Layer</h3>
+          <p>Beliefs, hypotheses, policy validation, and self-auditing cognition.</p>
+          <div id="beliefList" class="chip-list"></div>
+        </article>
+        <article class="panel">
+          <h3>Prediction Layer</h3>
+          <p>Multi-horizon futures, branching trajectories, and intervention results.</p>
+          <div id="futureList" class="chip-list"></div>
+        </article>
+        <article class="panel">
+          <h3>Causal Layer</h3>
+          <p>Event dependencies, downstream impacts, and root-cause traversal.</p>
+          <div id="causalList" class="chip-list"></div>
+        </article>
+        <article class="panel">
+          <h3>Economic Layer</h3>
+          <p>Compute markets, pricing, carbon, scarcity, and placement optimization.</p>
+          <div id="economyList" class="chip-list"></div>
+        </article>
+        <article class="panel">
+          <h3>Governance Layer</h3>
+          <p>Policies, trust tiers, sovereignty, and federation negotiation.</p>
+          <div id="governanceList" class="chip-list"></div>
+        </article>
+        <article class="panel">
+          <h3>Security Layer</h3>
+          <p>Attack surfaces, containment, anomaly waves, and defensive posture.</p>
+          <div id="securityList" class="chip-list"></div>
+        </article>
+      </section>
+
+      <section class="control-grid">
+        <article class="panel">
+          <h3>Agent Observatory</h3>
+          <div id="agentList" class="agent-list"></div>
+        </article>
+        <article class="panel">
+          <h3>Reasoning Surface</h3>
+          <div id="reasoningFeed" class="feed"></div>
+        </article>
+        <article class="panel">
+          <h3>Counterfactual Sandbox</h3>
+          <textarea id="taskInput" rows="6">optimize cluster migration under GPU scarcity</textarea>
+          <div class="row">
+            <button id="askBtn">Run Intervention</button>
+            <button id="refreshBtn" class="secondary">Refresh State</button>
+          </div>
+          <pre id="askOutput" class="output"></pre>
+        </article>
+      </section>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>

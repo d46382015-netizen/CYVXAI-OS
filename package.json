@@ -10,7 +10,12 @@
     "cli": "node ./cli/cyvx.js",
     "build": "node ./scripts/build.js",
     "dev": "node ./api/index.js",
-    "serve": "node ./ui/server.js"
+    "eip:check": "node ./scripts/eip_check.js",
+    "uef:check": "node ./scripts/uef_check.js",
+    "eos:check": "node ./scripts/eos_replay_check.js",
+    "serve": "node ./ui/server.js",
+    "demo:cluster": "node ./scripts/cluster-demo.js",
+    "health:cluster": "node ./scripts/health-check.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",

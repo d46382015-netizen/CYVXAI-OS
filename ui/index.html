@@ -12,55 +12,51 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#050910" />
-    <title>CYVXAI OS | Live Infrastructure Intelligence</title>
+    <meta name="theme-color" content="#07101d" />
+    <meta name="description" content="CYVX is a production-grade operations console for autonomous infrastructure control." />
+    <title>CYVXAI OS | Production Control Plane</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <div class="ambient ambient-left"></div>
     <div class="ambient ambient-right"></div>
-    <div class="noise"></div>
+    <div class="grid-noise"></div>
 
     <main class="shell">
-      <header class="topbar">
+      <header class="topbar panel">
         <div class="brand">
           <div class="brand-mark">X</div>
           <div>
             <div class="brand-name">CYVXAI OS</div>
-            <div class="brand-sub">Governable autonomous infrastructure intelligence</div>
+            <div class="brand-sub">Distributed control plane for autonomous infrastructure</div>
           </div>
         </div>
 
-        <nav class="nav">
-          <button data-view="home" class="nav-pill active">Home</button>
-          <button data-view="agents" class="nav-pill">Agents</button>
-          <button data-view="economy" class="nav-pill">Economy</button>
-          <button data-view="governance" class="nav-pill">Governance</button>
+        <nav class="nav" aria-label="Primary">
+          <button data-view="overview" class="nav-pill active" type="button">Overview</button>
+          <button data-view="operations" class="nav-pill" type="button">Operations</button>
+          <button data-view="cluster" class="nav-pill" type="button">Cluster</button>
+          <button data-view="governance" class="nav-pill" type="button">Governance</button>
         </nav>
 
-        <div class="topbar-meta">
-          <span class="live-dot"></span>
-          <span id="connectionState">Connecting</span>
+        <div class="status-row">
+          <span class="status-chip"><span class="live-dot"></span><span id="connectionState">Connecting</span></span>
+          <span class="status-chip subtle" id="runtimeMode">Live runtime</span>
         </div>
       </header>
 
       <section class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">Quantum-level. Next-gen. Revolutionary.</p>
-          <h1>The future is intelligent. The future is CYVXAI.</h1>
+        <div class="hero-copy panel">
+          <p class="eyebrow">Production grade. Observable. Recoverable.</p>
+          <h1>Command, observe, and harden the runtime from one control surface.</h1>
           <p class="lede">
-            A live operating system for infrastructure, economics, governance, and recovery.
-            Use it as a command center, observe it in real time, and drive interventions from the same screen.
+            CYVX now ships as a real operations console with live cluster state, typed actions,
+            event history, insight generation, and deployment-ready Kubernetes assets.
           </p>
 
-          <div class="cta-row">
-            <button id="launchBtn" class="cta primary">Launch App</button>
-            <button id="refreshBtn" class="cta">Refresh Live State</button>
-          </div>
-
-          <div class="stat-row">
+          <div class="stat-strip">
             <div class="stat-card">
-              <span>Agents Active</span>
+              <span>Agents</span>
               <strong id="metricAgents">0</strong>
             </div>
             <div class="stat-card">
@@ -68,32 +64,76 @@
               <strong id="metricEvents">0</strong>
             </div>
             <div class="stat-card">
-              <span>Evolution Cycles</span>
+              <span>Cycles</span>
               <strong id="metricCycles">0</strong>
             </div>
             <div class="stat-card">
-              <span>Plane Groups</span>
+              <span>Planes</span>
               <strong id="metricPlanes">0</strong>
             </div>
           </div>
+
+          <div class="cta-row">
+            <button id="refreshBtn" class="cta primary" type="button">Refresh Live State</button>
+            <button id="syncBtn" class="cta" type="button">Reconnect Streams</button>
+            <button id="exportBtn" class="cta" type="button">Export Snapshot</button>
+          </div>
+
+          <div class="hero-badges">
+            <span class="pill">Status: <strong id="roadmapState">Loading</strong></span>
+            <span class="pill">View: <strong id="viewMode">Overview</strong></span>
+            <span class="pill">Leader: <strong id="leaderBadge">Pending</strong></span>
+          </div>
         </div>
 
-        <div class="hero-art panel">
-          <canvas id="coinCanvas" width="900" height="900" aria-label="CYVX coin visualization"></canvas>
-          <div class="hero-label">
-            <div class="hero-label-title">Live Operational Identity</div>
-            <div class="hero-label-sub" id="heroSubtitle">Powered by Dakota Lee Jonsgaard</div>
+        <div class="hero-visual panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Cluster topology</p>
+              <h2 id="overlayTitle">Live control plane</h2>
+            </div>
+            <div class="mini-badge" id="systemStatus">Booting</div>
+          </div>
+          <canvas id="clusterCanvas" width="1200" height="900" aria-label="Cluster topology visualization"></canvas>
+          <div class="visual-caption">
+            <div>
+              <strong id="heroSubtitle">The runtime is healthy when consensus, recovery, and visibility move together.</strong>
+              <p>Nodes, workloads, and leader state are rendered from live API data.</p>
+            </div>
           </div>
         </div>
 
         <aside class="hero-side panel">
-          <div class="side-title">Powering the next evolution of finance and AI</div>
-          <div class="side-list" id="featureList"></div>
-          <div class="side-badge">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Operational posture</p>
+              <h2>Live signals</h2>
+            </div>
+          </div>
+          <div id="featureList" class="feature-stack"></div>
+          <div class="signal-box">
             <span class="live-dot"></span>
             <div>
-              <strong id="systemStatus">Connecting</strong>
-              <span>Realtime controller, roadmap, and event stream</span>
+              <strong>Controller</strong>
+              <p id="controllerSummary">Waiting for the first sync.</p>
+            </div>
+          </div>
+          <div class="signal-grid">
+            <div>
+              <span>Confidence</span>
+              <strong id="metricConfidence">0%</strong>
+            </div>
+            <div>
+              <span>Uncertainty</span>
+              <strong id="metricUncertainty">0%</strong>
+            </div>
+            <div>
+              <span>Contradiction</span>
+              <strong id="metricContradiction">0%</strong>
+            </div>
+            <div>
+              <span>Volatility</span>
+              <strong id="metricVolatility">0%</strong>
             </div>
           </div>
         </aside>
@@ -101,134 +141,214 @@
 
       <section class="band panel">
         <div class="band-item">
-          <span>100% Attributed</span>
-          <strong>Dakota Lee Jonsgaard</strong>
+          <span>Runtime</span>
+          <strong id="bandRuntime">Live</strong>
         </div>
         <div class="band-item">
-          <span>Running</span>
-          <strong id="runtimeMode">Live</strong>
+          <span>Health</span>
+          <strong id="bandHealth">Loading</strong>
         </div>
         <div class="band-item">
-          <span>Roadmap State</span>
-          <strong id="roadmapState">Loading</strong>
+          <span>Cluster</span>
+          <strong id="bandCluster">Pending</strong>
         </div>
         <div class="band-item">
-          <span>Dashboard Mode</span>
-          <strong id="viewMode">Home</strong>
+          <span>Roadmap</span>
+          <strong id="bandRoadmap">Pending</strong>
         </div>
       </section>
 
-      <section class="grid">
-        <article class="panel panel-large">
+      <section class="grid grid-2">
+        <article class="panel section-card" data-panel="operations">
           <div class="panel-head">
             <div>
-              <h2>Global World Model</h2>
-              <p>Planetary digital twin with causal, economic, and governance overlays.</p>
+              <p class="panel-kicker">Operations</p>
+              <h2>Typed actions and command execution</h2>
             </div>
-            <div class="panel-tags">
-              <button data-overlay="world" class="chip active">World</button>
-              <button data-overlay="causal" class="chip">Causal</button>
-              <button data-overlay="future" class="chip">Future</button>
-              <button data-overlay="economic" class="chip">Economic</button>
-            </div>
+            <button id="syncStateBtn" class="ghost-button" type="button">Sync</button>
           </div>
-          <div class="world-stage">
-            <canvas id="planetCanvas" width="1400" height="760"></canvas>
-            <div class="overlay-card">
-              <div class="overlay-title" id="overlayTitle">World Overlay</div>
-              <div class="overlay-grid">
-                <div><span>Confidence</span><strong id="metricConfidence">0.87</strong></div>
-                <div><span>Uncertainty</span><strong id="metricUncertainty">0.13</strong></div>
-                <div><span>Contradiction</span><strong id="metricContradiction">0.04</strong></div>
-                <div><span>Volatility</span><strong id="metricVolatility">0.22</strong></div>
-              </div>
+
+          <form id="commandForm" class="control-form">
+            <label>
+              <span>Command</span>
+              <textarea id="taskInput" rows="4" placeholder="Scale workload-1 to 5 replicas, migrate workload-1 to node-2, or ask for a remediation plan."></textarea>
+            </label>
+            <div class="form-actions">
+              <button class="cta primary" type="submit">Run command</button>
+              <button id="askBtn" class="cta" type="button">Ask planner</button>
             </div>
+          </form>
+
+          <div class="action-grid">
+            <form id="scaleForm" class="control-form compact">
+              <h3>Scale workload</h3>
+              <label>
+                <span>Workload ID</span>
+                <input id="scaleWorkload" type="text" value="workload-1" />
+              </label>
+              <label>
+                <span>Replicas</span>
+                <input id="scaleReplicas" type="number" min="1" step="1" value="4" />
+              </label>
+              <button class="cta primary" type="submit">Apply scale</button>
+            </form>
+
+            <form id="migrateForm" class="control-form compact">
+              <h3>Migrate workload</h3>
+              <label>
+                <span>Workload ID</span>
+                <input id="migrateWorkload" type="text" value="workload-1" />
+              </label>
+              <label>
+                <span>Target node</span>
+                <input id="migrateNode" type="text" value="node-1" />
+              </label>
+              <button class="cta primary" type="submit">Move workload</button>
+            </form>
           </div>
+
+          <div class="action-grid">
+            <form id="rebalanceForm" class="control-form compact">
+              <h3>Rebalance cluster</h3>
+              <label>
+                <span>Scope</span>
+                <select id="rebalanceScope">
+                  <option value="cluster">Cluster</option>
+                  <option value="workload">Workload</option>
+                  <option value="capacity">Capacity</option>
+                </select>
+              </label>
+              <button class="cta" type="submit">Run rebalance</button>
+            </form>
+
+            <form id="askForm" class="control-form compact">
+              <h3>Planner request</h3>
+              <label>
+                <span>Question</span>
+                <textarea id="askInput" rows="4" placeholder="What should CYVX do to reduce risk on the busiest node?"></textarea>
+              </label>
+              <button class="cta" type="submit">Generate plan</button>
+            </form>
+          </div>
+
+          <div id="askOutput" class="response-box muted">No planner response yet.</div>
         </article>
 
-        <article class="panel">
+        <article class="panel section-card" data-panel="overview">
           <div class="panel-head">
             <div>
-              <h2>Live Intelligence Feed</h2>
-              <p>Streaming controller events, roadmap changes, and intervention notes.</p>
-            </div>
-          </div>
-          <div id="reasoningFeed" class="feed"></div>
-        </article>
-
-        <article class="panel">
-          <div class="panel-head">
-            <div>
-              <h2>Agent Observatory</h2>
-              <p>Active agents and current leaderboard position.</p>
-            </div>
-          </div>
-          <div id="agentList" class="agent-list"></div>
-        </article>
-
-        <article class="panel">
-          <div class="panel-head">
-            <div>
-              <h2>Economic Surface</h2>
-              <p>Compute markets, carbon intelligence, and price discovery.</p>
-            </div>
-          </div>
-          <div id="economyList" class="chip-list"></div>
-        </article>
-
-        <article class="panel">
-          <div class="panel-head">
-            <div>
-              <h2>Governance Surface</h2>
-              <p>Policies, trust tiers, sovereignty, and federation negotiation.</p>
-            </div>
-          </div>
-          <div id="governanceList" class="chip-list"></div>
-        </article>
-
-        <article class="panel">
-          <div class="panel-head">
-            <div>
-              <h2>Command Console</h2>
-              <p>Send interventions to the controller and receive a signed response.</p>
-            </div>
-          </div>
-          <textarea id="taskInput" rows="7">optimize:cluster</textarea>
-          <div class="cta-row compact">
-            <button id="askBtn" class="cta primary">Run Intervention</button>
-            <button id="loadRoadmapBtn" class="cta">Load Roadmap</button>
-          </div>
-          <div class="quick-actions">
-            <button data-command="optimize:cluster" class="chip">Optimize Cluster</button>
-            <button data-command="scale workload-1" class="chip">Scale Workload</button>
-            <button data-command="audit state" class="chip">Audit State</button>
-          </div>
-          <pre id="askOutput" class="output"></pre>
-        </article>
-
-        <article class="panel">
-          <div class="panel-head">
-            <div>
-              <h2>Operations Overview</h2>
-              <p>Health, load, and recent actions in one glance.</p>
+              <p class="panel-kicker">Overview</p>
+              <h2>Live system summary</h2>
             </div>
           </div>
           <div id="overviewList" class="summary-grid"></div>
           <div id="insightList" class="insight-list"></div>
         </article>
+      </section>
 
-        <article class="panel">
+      <section class="grid grid-2">
+        <article class="panel section-card" data-panel="cluster">
           <div class="panel-head">
             <div>
-              <h2>Event Ledger</h2>
-              <p>Recent controller events and operator actions.</p>
+              <p class="panel-kicker">Cluster</p>
+              <h2>Node graph and workload ledger</h2>
+            </div>
+          </div>
+          <div id="nodeList" class="node-grid"></div>
+          <div id="workloadList" class="workload-list"></div>
+        </article>
+
+        <article class="panel section-card">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Ledger</p>
+              <h2>Event replay and history</h2>
             </div>
           </div>
           <div id="historyList" class="history-list"></div>
         </article>
       </section>
+
+      <section class="grid grid-2">
+        <article class="panel section-card" data-panel="agents">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Agents</p>
+              <h2>Economy and workforce overview</h2>
+            </div>
+          </div>
+          <div id="agentList" class="stack-list"></div>
+          <div class="subgrid">
+            <div>
+              <h3>Economy</h3>
+              <div id="economyList" class="stack-list small"></div>
+            </div>
+            <div>
+              <h3>Governance</h3>
+              <div id="governanceList" class="stack-list small"></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel section-card" data-panel="governance">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Governance</p>
+              <h2>Roadmap, status model, and control posture</h2>
+            </div>
+          </div>
+          <div id="roadmapList" class="roadmap-list"></div>
+          <div id="reasoningFeed" class="feed-list"></div>
+        </article>
+      </section>
+
+      <section class="grid grid-2">
+        <article class="panel section-card" data-panel="verification">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Verification</p>
+              <h2>Audit log, snapshots, and failure drills</h2>
+            </div>
+          </div>
+          <div class="action-grid">
+            <form id="replayForm" class="control-form compact">
+              <h3>Replay state</h3>
+              <label>
+                <span>Replay window</span>
+                <input id="replayLimit" type="number" min="1" step="1" value="50" />
+              </label>
+              <button class="cta primary" type="submit">Run replay</button>
+            </form>
+
+            <form id="failureForm" class="control-form compact">
+              <h3>Failure drill</h3>
+              <label>
+                <span>Failure mode</span>
+                <select id="failureKind">
+                  <option value="leader">Leader failure</option>
+                  <option value="network">Network partition</option>
+                  <option value="disk">Disk corruption</option>
+                  <option value="process">Process crash</option>
+                </select>
+              </label>
+              <button class="cta" type="submit">Simulate failure</button>
+            </form>
+          </div>
+          <div id="verificationOutput" class="response-box muted">No verification run yet.</div>
+          <div class="subgrid">
+            <div>
+              <h3>Audit Log</h3>
+              <div id="auditList" class="stack-list small"></div>
+            </div>
+            <div>
+              <h3>Snapshots</h3>
+              <div id="snapshotList" class="stack-list small"></div>
+            </div>
+          </div>
+        </article>
+      </section>
     </main>
 
-    <script src="./app.js"></script>
+    <script src="./app.js" defer></script>
   </body>
 </html>

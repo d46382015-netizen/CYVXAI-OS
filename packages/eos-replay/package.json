@@ -1,0 +1,13 @@
+{
+  "name": "eos-replay",
+  "version": "0.1.0",
+  "description": "Replayable debugging layer for Node.js apps",
+  "main": "production.js",
+  "exports": {
+    ".": "./production.js",
+    "./register": "./register.js"
+  },
+  "type": "commonjs",
+  "license": "UNLICENSED",
+  "private": true
+}

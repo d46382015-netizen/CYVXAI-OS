@@ -1,0 +1,38 @@
+namespace: cyvx
+image:
+  api: cyvx/api:latest
+  ui: cyvx/ui:latest
+  cluster: cyvx/cluster:latest
+replicaCount:
+  api: 2
+  ui: 1
+  cluster: 3
+service:
+  apiPort: 3000
+  uiPort: 80
+  clusterPort: 7000
+resources:
+  api:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 750m
+      memory: 768Mi
+  ui:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+  cluster:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+persistence:
+  storageClassName: ""
+  size: 20Gi

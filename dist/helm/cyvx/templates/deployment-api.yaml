@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cyvx-api
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.replicaCount.api }}
+  selector:
+    matchLabels:
+      app: cyvx-api
+  template:
+    metadata:
+      labels:
+        app: cyvx-api
+    spec:
+      containers:
+        - name: api
+          image: {{ .Values.image.api }}
+          ports:
+            - containerPort: {{ .Values.service.apiPort }}
+          envFrom:
+            - configMapRef:
+                name: cyvx-config
+          env:
+            - name: CYVX_DB
+              value: /var/lib/cyvx/cyvx.db
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: {{ .Values.service.apiPort }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.service.apiPort }}
+          resources:
+{{ toYaml .Values.resources.api | indent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/cyvx
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: cyvx-data

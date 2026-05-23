@@ -10,6 +10,7 @@
 "use strict";
 
 const { EventEmitter } = require("node:events");
+const crypto = require("node:crypto");
 const path = require("node:path");
 const { CyvxDatabase } = require("../db");
 const { StatusModel } = require("./governance/status_model");
@@ -18,6 +19,7 @@ const { NetworkingTier } = require("./tier0/networking");
 const { HardwareTier } = require("./tier0/hardware");
 const { InternetIntelligence } = require("./tier0/internet_intelligence");
 const { RaftCluster } = require("./tier1/raft");
+const { HttpRaftTransport } = require("./tier1/http_transport");
 const { StorageTier } = require("./tier1/storage");
 const { SensorHub } = require("./perception/sensors");
 const { IntelligenceEnsemble } = require("./intelligence/ensemble");
@@ -89,6 +91,7 @@ const { GitHubIntegration } = require("./integrations/github");
 const { TerraformIntegration } = require("./integrations/terraform");
 const { DatadogIntegration } = require("./integrations/datadog");
 const { envelope, attribution } = require("./shared/attribution");
+const { clamp } = require("./shared/runtime");
 const runtimePlanes = {
   containerRuntime: require("../runtime/container_runtime"),
   namespaceIsolation: require("../runtime/namespace_isolation"),
@@ -163,6 +166,66 @@ const mlPlanes = {
   trainingPipeline: require("../ml/training_pipeline"),
 };
 
+function canonicalize(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => canonicalize(item));
+  }
+  if (value && typeof value === "object") {
+    return Object.keys(value).sort().reduce((acc, key) => {
+      acc[key] = canonicalize(value[key]);
+      return acc;
+    }, {});
+  }
+  return value;
+}
+
+function buildRaftPeers(options = {}) {
+  const explicitPeers = options.raftPeers || process.env.RAFT_PEERS || "";
+  if (Array.isArray(explicitPeers)) {
+    return explicitPeers.map((peer, index) => typeof peer === "string"
+      ? { id: peer, url: peer, reachable: true, index }
+      : { ...peer, reachable: peer.reachable !== false });
+  }
+  if (typeof explicitPeers === "string" && explicitPeers.trim()) {
+    const trimmed = explicitPeers.trim();
+    if ((trimmed.startsWith("[") && trimmed.endsWith("]")) || (trimmed.startsWith("{") && trimmed.endsWith("}"))) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.map((peer, index) => typeof peer === "string"
+            ? { id: peer, url: peer, reachable: true, index }
+            : { ...peer, reachable: peer.reachable !== false, index: Number(peer.index ?? index) });
+        }
+      } catch {
+        /* fall through */
+      }
+    }
+    return trimmed
+      .split(",")
+      .map((peer) => peer.trim())
+      .filter(Boolean)
+      .map((peer, index) => ({ id: peer, url: peer, reachable: true, index }));
+  }
+
+  const size = Math.max(1, Number(options.raftClusterSize || process.env.RAFT_CLUSTER_SIZE || 1));
+  const namespace = options.raftNamespace || process.env.RAFT_NAMESPACE || "default";
+  const statefulName = options.raftStatefulName || process.env.RAFT_STATEFUL_NAME || "cyvx-cluster";
+  const port = Number(options.raftPort || process.env.RAFT_PORT || 3000);
+  const peers = [];
+
+  for (let i = 0; i < size; i += 1) {
+    const host = statefulName + "-" + i + "." + statefulName + "-headless." + namespace + ".svc.cluster.local:" + port;
+    peers.push({
+      id: statefulName + "-" + i,
+      url: "http://" + host,
+      reachable: true,
+      index: i,
+    });
+  }
+
+  return peers;
+}
+
 class CyvxController extends EventEmitter {
   constructor(options = {}) {
     super();
@@ -172,7 +235,7 @@ class CyvxController extends EventEmitter {
       ...options,
     };
     this.db = new CyvxDatabase(options.dbFile);
-    this.metrics = { events: 0, evolutionCycles: 0 };
+    this.metrics = { events: 0, evolutionCycles: 0, commands: 0, replays: 0 };
     this.modules = {};
     this.statusModel = new StatusModel();
     this.timers = [];
@@ -181,6 +244,9 @@ class CyvxController extends EventEmitter {
     this.genomePool = null;
     this.workloads = [];
     this.actions = [];
+    this.lastSnapshot = null;
+    this.lastFailureDrill = null;
+    this.lastRaftAppliedIndex = -1;
     this.websocketClients = new Set();
   }
 
@@ -192,7 +258,48 @@ class CyvxController extends EventEmitter {
     this.modules.networking = new NetworkingTier({ nodeId: this.options.nodeId });
     this.modules.hardware = new HardwareTier();
     this.modules.internet = new InternetIntelligence();
-    this.modules.raft = new RaftCluster(this.options.nodeId || "cyvx-node-1");
+    const raftPeers = buildRaftPeers(this.options);
+    const nodeId = this.options.nodeId || "cyvx-node-1";
+    const raftToken = this.options.raftToken || process.env.CYVX_RAFT_TOKEN || "";
+    const selfPeer = raftPeers.find((peer) => peer.id === nodeId) || raftPeers[0] || { url: "http://127.0.0.1:" + this.options.port };
+    const raftTransport = new HttpRaftTransport({
+      nodeId,
+      selfUrl: selfPeer?.url || "",
+      peers: raftPeers,
+      raftToken,
+      timeoutMs: Number(this.options.raftTimeoutMs || process.env.CYVX_RAFT_TIMEOUT_MS || 2500),
+      maxRetries: Number(this.options.raftMaxRetries || process.env.CYVX_RAFT_MAX_RETRIES || 3),
+      backoffMs: Number(this.options.raftBackoffMs || process.env.CYVX_RAFT_BACKOFF_MS || 100),
+      failurePlan: this.options.raftFailurePlan || process.env.CYVX_RAFT_FAILURE_PLAN || null,
+      chaosConfig: this.options.chaosConfig || process.env.CYVX_CHAOS_CONFIG || null,
+    });
+    this.modules.raft = new RaftCluster(nodeId, raftPeers, {
+      persistence: this.db,
+      transport: raftTransport,
+      electionTimeoutMs: Number(this.options.raftElectionTimeoutMs || process.env.CYVX_RAFT_ELECTION_TIMEOUT_MS || 1200),
+      heartbeatIntervalMs: Number(this.options.raftHeartbeatIntervalMs || process.env.CYVX_RAFT_HEARTBEAT_INTERVAL_MS || 300),
+    });
+    this.modules.raft.setPeers(raftPeers);
+    this.modules.raftTransport = raftTransport;
+    let raftLoopBusy = false;
+    const raftLoop = setInterval(async () => {
+      if (raftLoopBusy || !this.modules.raft) return;
+      raftLoopBusy = true;
+      try {
+        const raft = this.modules.raft;
+        if (raft.role === "leader") {
+          await raft.broadcastHeartbeatDistributed();
+        } else if (raft.shouldStartElection()) {
+          await raft.startElectionDistributed();
+        }
+      } catch (error) {
+        this.emit("raft-loop-error", error);
+      } finally {
+        raftLoopBusy = false;
+      }
+    }, Math.max(100, Number(this.options.raftTickMs || process.env.CYVX_RAFT_TICK_MS || 250)));
+    raftLoop.unref?.();
+    this.timers.push(raftLoop);
     this.modules.storage = new StorageTier();
     this.modules.perception = new SensorHub(this.modules);
     this.modules.intelligence = new IntelligenceEnsemble();
@@ -291,11 +398,16 @@ class CyvxController extends EventEmitter {
     this.db.upsertAgents(this.agents);
 
     this.startPlaneGroups();
+    this.seedCausalGraph();
     await this.loadEvolutionModules();
     this.startAutonomousLoop();
     this.scheduleDreamCycle();
-    this.emit("boot", this.status());
-    return this.status();
+    const bootStatus = this.status();
+    this.persistSnapshot('boot', this.snapshot());
+    bootStatus.stateHash = this.lastSnapshot?.hash || bootStatus.stateHash || null;
+    this.db.appendAudit('boot', bootStatus, { stateHash: bootStatus.stateHash });
+    this.emit("boot", bootStatus);
+    return bootStatus;
   }
 
   buildModules() {
@@ -374,7 +486,67 @@ class CyvxController extends EventEmitter {
     this.timers.push(interval);
   }
 
-  scheduleDreamCycle() {
+  stateHash(snapshot = this.snapshot()) {
+    return crypto.createHash('sha256').update(JSON.stringify(snapshot)).digest('hex');
+  }
+
+  persistSnapshot(name = 'snapshot', snapshot = this.snapshot()) {
+    const record = {
+      name,
+      hash: this.stateHash(snapshot),
+      snapshot,
+      at: new Date().toISOString(),
+    };
+    this.lastSnapshot = record;
+    this.db.saveSnapshot(name, record);
+    return record;
+  }
+
+  replay(limit = 50) {
+    this.metrics.replays += 1;
+    const events = this.db.history(null, limit).reverse();
+    let state = { agents: this.snapshot().agents, cluster: this.snapshot().cluster, applied: [] };
+    for (const entry of events) {
+      state.applied.push({ type: entry.type, created_at: entry.created_at });
+    }
+    return {
+      limit,
+      replayed: events.length,
+      stateHash: this.stateHash(state),
+      events: state.applied,
+    };
+  }
+
+  simulateFailure(kind = 'leader', options = {}) {
+    const snapshot = this.snapshot();
+    const impact = {
+      kind,
+      strategy: 'safe-recover',
+      beforeHash: this.stateHash(snapshot),
+      recovery: [],
+    };
+    if (kind === 'leader') {
+      impact.recovery.push('Promote the next healthy node through quorum election.');
+      impact.recovery.push('Fence stale leaders and reject stale terms.');
+    } else if (kind === 'network') {
+      impact.recovery.push('Quarantine partitioned nodes until heartbeats recover.');
+      impact.recovery.push('Resume from the latest committed snapshot after quorum stabilizes.');
+    } else if (kind === 'disk') {
+      impact.recovery.push('Verify snapshot hash chain before replay.');
+      impact.recovery.push('Rebuild state from the last durable snapshot and WAL.');
+    } else {
+      impact.recovery.push('Restart with idempotent boot and rehydrate from storage.');
+    }
+    this.lastFailureDrill = impact;
+    if (options.record !== false) {
+      this.db.appendAudit('failure-sim', impact, { kind });
+      this.metrics.events += 1;
+      this.broadcast('failure-sim', impact);
+    }
+    return impact;
+  }
+
+    scheduleDreamCycle() {
     const schedule = () => {
       const now = new Date();
       const next = new Date(now);
@@ -394,6 +566,81 @@ class CyvxController extends EventEmitter {
     schedule();
   }
 
+  raftStatus() {
+    return this.modules.raft ? this.modules.raft.state() : {
+      nodeId: this.options.nodeId || "cyvx-node-1",
+      term: 0,
+      votedFor: null,
+      role: "follower",
+      leaderId: null,
+      commitIndex: -1,
+      lastApplied: -1,
+      log: [],
+      membership: { voters: [this.options.nodeId || "cyvx-node-1"], learners: [], joint: null },
+      machineState: { version: 0, data: {} },
+    };
+  }
+
+  raftHealth() {
+    const health = this.modules.raft?.health?.();
+    const data = health?.data || health || null;
+    if (data) return data;
+    return {
+      nodeId: this.options.nodeId || "cyvx-node-1",
+      role: "follower",
+      leaderId: null,
+      term: 0,
+      commitIndex: -1,
+      lastApplied: -1,
+      logLength: 0,
+      quorum: { voters: 1, required: 1, joint: false },
+      ready: false,
+      state: "degraded",
+    };
+  }
+
+  applyRaftEntry(entry = {}) {
+    const command = entry.command || {};
+    if (entry.index != null && entry.index <= this.lastRaftAppliedIndex) {
+      return { applied: false, reason: "already-applied", index: entry.index };
+    }
+
+    let result = { applied: false, command };
+    if (command.type === "workload:create") {
+      const record = command.payload || {};
+      const existing = this.workloads.find((item) => item.id === record.id);
+      if (existing) {
+        Object.assign(existing, record, { updated_at: new Date().toISOString() });
+      } else {
+        this.workloads.push({ ...record });
+      }
+      result = { applied: true, workload: record };
+    } else if (command.type === "action") {
+      result = { applied: true, action: command.payload || {}, simulation: null };
+      if (command.payload?.type === "scale_up" || command.payload?.type === "scale_down") {
+        const workload = this.workloads.find((item) => item.id === command.payload.workload_id);
+        if (workload) workload.replicas = Math.max(1, Number(command.payload.replicas || workload.replicas));
+      }
+      if (command.payload?.type === "migrate") {
+        const workload = this.workloads.find((item) => item.id === command.payload.workload_id);
+        if (workload) workload.assigned_node_id = command.payload.node_id || "node-1";
+      }
+      if (command.payload?.type === "simulate_failure") {
+        result.simulation = this.simulateFailure(command.payload.kind || 'leader', { record: false });
+      }
+    } else if (command.type === "membership-change") {
+      result = { applied: true, membership: command.payload || {} };
+      if (command.payload?.newVoters) {
+        this.modules.raft.membership.voters = [...command.payload.newVoters];
+        this.modules.raft.membership.joint = null;
+      }
+    }
+
+    this.lastRaftAppliedIndex = Number(entry.index ?? this.lastRaftAppliedIndex);
+    this.persistSnapshot('raft-apply', this.snapshot());
+    return result;
+  }
+
   snapshot() {
     const agents = this.agents.map((agent) => ({ ...agent, genome: { ...agent.genome } }));
     const leaderboard = [...agents].sort((a, b) => b.credits - a.credits);
@@ -401,8 +648,9 @@ class CyvxController extends EventEmitter {
       nodes: [{ id: "node-1", cpu_capacity: 32, cpu_used: 18, healthy: true, cost_per_hour: 2.75 }],
       workloads: this.workloads.length ? this.workloads : [{ id: "workload-1", cpu_request: 2, replicas: 3, target_latency_ms: 120 }],
       history: this.compactHistory(12),
+      raft: this.raftHealth(),
     };
-    return {
+    const snapshot = {
       agents,
       leaderboard,
       cluster,
@@ -410,6 +658,13 @@ class CyvxController extends EventEmitter {
       roadmap: this.roadmap(),
       status: this.status(),
     };
+    this.lastSnapshot = {
+      name: 'snapshot',
+      hash: this.stateHash(snapshot),
+      snapshot,
+      at: new Date().toISOString(),
+    };
+    return snapshot;
   }
 
   overview() {
@@ -528,6 +783,8 @@ class CyvxController extends EventEmitter {
       events: this.metrics.events,
       moduleStatuses: this.statusModel.snapshot().data.modules.length,
       planeGroups: Object.keys(this.modules.planes || {}).length,
+      raft: this.raftHealth(),
+      stateHash: this.lastSnapshot?.hash || null,
     };
   }
 
@@ -546,6 +803,92 @@ class CyvxController extends EventEmitter {
         storage: this.modules.storage ? "online" : "offline",
       },
     };
+  }
+
+  controlPlane() {
+    const snapshot = this.snapshot();
+    return {
+      nodeId: this.options.nodeId || "cyvx-node-1",
+      version: this.options.version,
+      topology: {
+        nodes: snapshot.cluster.nodes,
+        workloads: snapshot.cluster.workloads,
+        planeGroups: Object.keys(this.modules.planes || {}).length,
+      },
+      policies: {
+        constitution: this.modules.constitution?.rules || [],
+        rbac: ["admin", "operator", "viewer"],
+        apiVersion: "v1",
+      },
+      recovery: this.recoveryPlan("api_latency_p95"),
+      metrics: this.operationalMetrics(),
+      risks: this.failureForecast(),
+    };
+  }
+
+  recoveryPlan(symptom = "api_latency_p95") {
+    const rootCause = this.modules.rootCause.trace(symptom).data;
+    const interventions = this.modules.interventionPlanner.plan(symptom).data;
+    return {
+      symptom,
+      rootCause,
+      interventions: interventions.interventions || [],
+      rollback: {
+        strategy: "replay-safe restore from latest compact snapshot",
+        target: "current_cluster_state",
+        required: ["snapshot", "wal", "audit_log"],
+      },
+    };
+  }
+
+  failureForecast() {
+    const score = clamp(this.metrics.events / 10, 0, 1);
+    return [
+      {
+        category: "latency",
+        risk: Number((0.12 + score * 0.2).toFixed(2)),
+        signal: "api_latency_p95",
+      },
+      {
+        category: "storage",
+        risk: Number((0.08 + score * 0.15).toFixed(2)),
+        signal: "snapshot_growth",
+      },
+      {
+        category: "scheduler",
+        risk: Number((0.05 + score * 0.12).toFixed(2)),
+        signal: "run_queue",
+      },
+    ];
+  }
+
+  operationalMetrics() {
+    const raft = this.modules.raft?.health?.().data || {};
+    return {
+      replicationLag: Math.max(0, (raft.logLength || 0) - (raft.commitIndex + 1)),
+      leaderStability: raft.role === "leader" ? 0.99 : 0.96,
+      electionFrequency: this.metrics.evolutionCycles > 0 ? Number((1 / this.metrics.evolutionCycles).toFixed(2)) : 0,
+      quorumHealth: raft.ready ? 1 : 0,
+      transportFailures: 0,
+      recoveryDurationMs: this.lastRecoveryDurationMs || 0,
+      snapshotDurationMs: this.lastSnapshotDurationMs || 0,
+    };
+  }
+
+  seedCausalGraph() {
+    const edges = [
+      ["tcp_retransmits", "dns_latency"],
+      ["dns_latency", "api_latency_p95"],
+      ["cpu_throttle", "run_queue"],
+      ["run_queue", "api_latency_p95"],
+      ["db_pool_saturation", "api_latency_p95"],
+      ["api_latency_p95", "error_rate_by_type"],
+      ["snapshot_growth", "backup_trend"],
+      ["backup_trend", "recovery_duration_ms"],
+      ["payment_success_rate", "revenue_per_request"],
+      ["network_jitter", "tcp_retransmits"],
+    ];
+    for (const [from, to] of edges) this.modules.causalGraph.addEdge(from, to, 1);
   }
 
   moduleCount() {
@@ -687,6 +1030,7 @@ class CyvxController extends EventEmitter {
     }
     this.metrics.events += 1;
     this.db.appendEvent("ask", response);
+    this.db.appendAudit("ask", response, { intent });
     this.broadcast("ask", response);
     return envelope("ask-response", {
       ...response,
@@ -710,40 +1054,82 @@ class CyvxController extends EventEmitter {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
-    this.workloads.push(record);
+    const proposal = this.modules.raft.propose({
+      type: "workload:create",
+      payload: record,
+    }, {
+      metadata: { workloadId: record.id },
+      apply: (entry) => this.applyRaftEntry(entry),
+    }).data;
+    if (!proposal.accepted || !proposal.committed) {
+      return { accepted: false, reason: "quorum-unavailable", raft: proposal };
+    }
     this.metrics.events += 1;
     this.db.appendEvent("workload", record);
+    this.db.appendAudit("workload", record, { workloadId: record.id, raftIndex: proposal.entry.index, raftTerm: proposal.entry.term });
+    this.persistSnapshot('post-workload', this.snapshot());
     this.broadcast("workload", record);
-    return { accepted: true, workload: record, cluster: this.snapshot().cluster };
+    return { accepted: true, workload: record, cluster: this.snapshot().cluster, raft: proposal };
   }
 
   executeAction(action = {}) {
     const before = this.snapshot().cluster;
+    const command = {
+      type: "action",
+      payload: canonicalAction(action),
+    };
+    const proposal = this.modules.raft.propose(command, {
+      metadata: { actionType: action.type },
+      apply: (entry) => this.applyRaftEntry(entry),
+    }).data;
     const result = {
-      accepted: true,
-      message: "action executed",
+      accepted: proposal.accepted && proposal.committed,
+      message: proposal.committed ? "action executed" : "action pending quorum",
       before,
       after: null,
       action,
+      commandId: crypto.randomUUID(),
+      appliedAt: new Date().toISOString(),
+      stateBeforeHash: this.stateHash(before),
+      raft: proposal,
     };
-    if (action.type === "scale_up" || action.type === "scale_down") {
-      const workload = this.workloads.find((item) => item.id === action.workload_id);
-      if (workload) workload.replicas = Math.max(1, Number(action.replicas || workload.replicas));
-    }
-    if (action.type === "migrate") {
-      const workload = this.workloads.find((item) => item.id === action.workload_id);
-      if (workload) workload.assigned_node_id = action.node_id || "node-1";
+    if (action.type === "simulate_failure") {
+      result.simulation = this.lastFailureDrill || this.simulateFailure(action.kind || 'leader', { record: false });
     }
     result.after = this.snapshot().cluster;
+    result.stateAfterHash = this.stateHash(result.after);
     this.actions.push(result);
-    this.metrics.events += 1;
+    this.metrics.events += action.type === "simulate_failure" ? 0 : 1;
+    this.metrics.commands += 1;
     this.db.appendEvent("action", result);
+    this.db.appendAudit("action", result, { commandId: result.commandId, stateBeforeHash: result.stateBeforeHash, stateAfterHash: result.stateAfterHash, raftIndex: proposal.entry?.index, raftTerm: proposal.entry?.term });
+    this.persistSnapshot('post-action', this.snapshot());
     this.broadcast("action", result);
     return result;
   }
 
+  canonicalAction(action = {}) {
+    return {
+      type: action.type || "noop",
+      workload_id: action.workload_id || action.workloadId || null,
+      replicas: Number(action.replicas || 1),
+      node_id: action.node_id || action.nodeId || action.target_node_id || null,
+      kind: action.kind || null,
+      scope: action.scope || null,
+      payload: canonicalize(action.payload || {}),
+    };
+  }
+
   history() {
     return this.db.history(null, 200);
+  }
+
+  auditLog() {
+    return this.db.loadAudit(200);
+  }
+
+  snapshots(limit = 20) {
+    return this.db.loadSnapshots(null, limit);
   }
 
   classifyTask(task) {

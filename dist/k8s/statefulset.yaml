@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cyvx-cluster
+  namespace: cyvx
+spec:
+  serviceName: cyvx-cluster
+  replicas: 3
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: cyvx-cluster
+  template:
+    metadata:
+      labels:
+        app: cyvx-cluster
+    spec:
+      terminationGracePeriodSeconds: 30
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: cyvx-cluster
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: cluster
+          image: cyvx/cluster:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 7000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: cyvx-config
+          env:
+            - name: ROLE
+              value: raft
+            - name: NODES
+              value: "3"
+            - name: NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: RAFT_NAMESPACE
+              value: cyvx
+          readinessProbe:
+            httpGet:
+              path: /raft/health
+              port: 7000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 7000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 2
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/cyvx
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi

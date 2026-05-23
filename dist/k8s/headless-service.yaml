@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cyvx-cluster
+  namespace: cyvx
+spec:
+  clusterIP: None
+  selector:
+    app: cyvx-cluster
+  ports:
+    - name: http
+      port: 7000
+      targetPort: 7000

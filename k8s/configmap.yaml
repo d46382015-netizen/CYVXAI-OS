@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cyvx-config
+  namespace: cyvx
+data:
+  CYVX_HOST: "0.0.0.0"
+  CYVX_PORT: "3000"
+  CYVX_RATE_LIMIT: "120"
+  CYVX_PUBLIC_HOST: "cyvx-ui.cyvx.svc.cluster.local"
+  RAFT_PORT: "7000"
+  RAFT_CLUSTER_SIZE: "3"
+  RAFT_HEADLESS_SERVICE: "cyvx-cluster"
+  RAFT_PEERS: "cyvx-cluster-0.cyvx-cluster.cyvx.svc.cluster.local,cyvx-cluster-1.cyvx-cluster.cyvx.svc.cluster.local,cyvx-cluster-2.cyvx-cluster.cyvx.svc.cluster.local"

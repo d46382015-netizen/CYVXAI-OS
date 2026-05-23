@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cyvx-ui
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.replicaCount.ui }}
+  selector:
+    matchLabels:
+      app: cyvx-ui
+  template:
+    metadata:
+      labels:
+        app: cyvx-ui
+    spec:
+      containers:
+        - name: ui
+          image: {{ .Values.image.ui }}
+          ports:
+            - containerPort: 8080
+          env:
+            - name: API_URL
+              value: http://cyvx-api.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.service.apiPort }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+          resources:
+{{ toYaml .Values.resources.ui | indent 12 }}

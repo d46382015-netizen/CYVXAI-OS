@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cyvx-cluster
+  namespace: {{ .Values.namespace }}
+spec:
+  serviceName: cyvx-cluster
+  replicas: {{ .Values.replicaCount.cluster }}
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels:
+      app: cyvx-cluster
+  template:
+    metadata:
+      labels:
+        app: cyvx-cluster
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: cyvx-cluster
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: cluster
+          image: {{ .Values.image.cluster }}
+          ports:
+            - containerPort: {{ .Values.service.clusterPort }}
+          env:
+            - name: ROLE
+              value: raft
+            - name: NODES
+              value: "{{ .Values.replicaCount.cluster }}"
+            - name: NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: RAFT_NAMESPACE
+              value: "{{ .Values.namespace }}"
+          readinessProbe:
+            httpGet:
+              path: /raft/health
+              port: {{ .Values.service.clusterPort }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.service.clusterPort }}
+          resources:
+{{ toYaml .Values.resources.cluster | indent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/cyvx
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}

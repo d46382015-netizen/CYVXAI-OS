@@ -1,20 +1,36 @@
 {
   "name": "cyvx",
   "version": "6.0.0",
-  "builtAt": "2026-05-23T10:31:33.152Z",
+  "builtAt": "2026-05-23T11:38:10.261Z",
   "entrypoints": {
     "api": "api/index.js",
-    "ui": "ui/index.html"
+    "ui": "ui/index.html",
+    "start": "start.sh"
   },
-  "endpoints": [
-    "/healthz",
-    "/status",
-    "/api/v1/overview",
-    "/api/v1/insights",
-    "/api/v1/workloads",
-    "/api/v1/actions",
-    "/api/v1/command",
-    "/ask",
-    "/metrics"
+  "surfaces": {
+    "controlPlane": "/api/v1/command",
+    "overview": "/api/v1/overview",
+    "insights": "/api/v1/insights",
+    "state": "/api/v1/state",
+    "cluster": "/api/v1/cluster",
+    "actions": "/api/v1/actions",
+    "workloads": "/api/v1/workloads",
+    "history": "/api/v1/metrics/history",
+    "audit": "/api/v1/audit",
+    "snapshots": "/api/v1/snapshots",
+    "replay": "/api/v1/replay",
+    "failureSim": "/api/v1/simulate/failure",
+    "telemetry": "/api/v1/telemetry",
+    "health": "/healthz",
+    "raftHealth": "/raft/health",
+    "ready": "/readyz",
+    "metrics": "/metrics"
+  },
+  "deploymentLayers": [
+    "consensus",
+    "control-plane",
+    "ui",
+    "observability",
+    "kubernetes"
   ]
 }

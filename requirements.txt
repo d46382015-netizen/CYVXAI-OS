@@ -2,3 +2,8 @@ fastapi
 uvicorn
 pandas
 python-multipart
+python-jose
+passlib[bcrypt]
+psycopg2-binary
+sqlalchemy
+stripe

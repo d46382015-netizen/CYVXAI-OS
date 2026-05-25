@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.api import router
 
-app = FastAPI(title="CYVXAI-OS SaaS")
+app = FastAPI(title="CYVXAI-OS Production SaaS")
 
 app.add_middleware(
     CORSMiddleware,
@@ -16,8 +16,8 @@ app.include_router(router)
 
 @app.get("/")
 def root():
-    return {"status": "CYVXAI-OS SAAS LIVE"}
+    return {"status": "CYVXAI-OS PRODUCTION READY"}
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"ok": True}

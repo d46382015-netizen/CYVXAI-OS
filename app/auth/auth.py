@@ -1,24 +1,21 @@
-from fastapi import Header, HTTPException
+from jose import jwt
+from passlib.context import CryptContext
+import os
 import uuid
 
-def create_user(email: str, password: str):
-    from app.db.database import USERS
-    if email in USERS:
-        raise HTTPException(400, "User exists")
-    USERS[email] = {"password": password, "id": str(uuid.uuid4()), "plan": "free"}
-    return USERS[email]
+SECRET = os.getenv("JWT_SECRET", "dev_secret")
+ALGO = "HS256"
 
-def login_user(email: str, password: str):
-    from app.db.database import USERS, SESSIONS
-    user = USERS.get(email)
-    if not user or user["password"] != password:
-        raise HTTPException(401, "Invalid login")
-    token = str(uuid.uuid4())
-    SESSIONS[token] = user["id"]
-    return token
+pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def get_user(x_token: str = Header(None)):
-    from app.db.database import SESSIONS
-    if not x_token or x_token not in SESSIONS:
-        raise HTTPException(401, "Invalid session")
-    return SESSIONS[x_token]
+def hash_password(p):
+    return pwd.hash(p)
+
+def verify_password(p, h):
+    return pwd.verify(p, h)
+
+def create_token(user_id):
+    return jwt.encode({"sub": user_id}, SECRET, algorithm=ALGO)
+
+def decode_token(token):
+    return jwt.decode(token, SECRET, algorithms=[ALGO])

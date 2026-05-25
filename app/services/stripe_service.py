@@ -1,9 +1,18 @@
+import stripe
 import os
 
-STRIPE_SECRET = os.getenv("STRIPE_SECRET", "")
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 
-def create_checkout_session():
-    # placeholder safe structure (no fake calls)
-    return {
-        "checkout_url": "https://stripe.com/checkout/session-placeholder"
-    }
+def create_checkout(customer_email: str):
+    session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        mode="subscription",
+        line_items=[{
+            "price": os.getenv("STRIPE_PRICE_ID", "price_placeholder"),
+            "quantity": 1
+        }],
+        success_url="https://example.com/success",
+        cancel_url="https://example.com/cancel",
+        customer_email=customer_email
+    )
+    return session.url

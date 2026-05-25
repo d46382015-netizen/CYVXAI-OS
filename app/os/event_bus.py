@@ -1,23 +1,23 @@
-from collections import defaultdict
+import redis
+import json
 import time
 
-EVENTS = []
+r = redis.Redis(host="localhost", port=6379, decode_responses=True)
 
-SUBSCRIBERS = defaultdict(list)
+CHANNEL = "cyvx-events"
 
-def emit(event_type: str, payload: dict):
+def emit(event_type, payload):
     event = {
         "type": event_type,
         "payload": payload,
         "ts": time.time()
     }
-    EVENTS.append(event)
+    r.publish(CHANNEL, json.dumps(event))
 
-    for fn in SUBSCRIBERS[event_type]:
-        fn(event)
+def subscribe(handler):
+    pubsub = r.pubsub()
+    pubsub.subscribe(CHANNEL)
 
-def subscribe(event_type: str, fn):
-    SUBSCRIBERS[event_type].append(fn)
-
-def get_events():
-    return EVENTS[-100:]
+    for msg in pubsub.listen():
+        if msg["type"] == "message":
+            handler(json.loads(msg["data"]))

@@ -19,3 +19,4 @@ opentelemetry-exporter-otlp
 alembic
 pydantic
 bcrypt
+networkx

@@ -1,0 +1,17 @@
+name: Release Tag Pipeline
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create release note
+        run: |
+          echo "Release triggered for CYVXAI-OS" > release.txt

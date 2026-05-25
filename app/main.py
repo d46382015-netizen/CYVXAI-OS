@@ -1,6 +1,18 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.routes.api import router
 
-app = FastAPI()
+app = FastAPI(title="CYVXAI-OS")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(router)
 
 @app.get("/")
 def root():
@@ -9,10 +21,3 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok"}
-
-@app.post("/scan")
-def scan():
-    return {
-        "status": "working",
-        "message": "backend deployed successfully"
-    }

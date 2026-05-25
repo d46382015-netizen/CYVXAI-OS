@@ -1,29 +1,40 @@
 <!DOCTYPE html>
 <html>
-<head><title>LeakOS SaaS</title></head>
+<head>
+  <title>CYVXAI-OS</title>
+</head>
 <body>
 
-<h1>LeakOS Production Dashboard</h1>
+<h1>CYVXAI-OS Dashboard</h1>
 
-<button onclick="run()">Run Scan</button>
+<input type="file" id="file" />
+<button onclick="upload()">Analyze</button>
 
 <pre id="out"></pre>
 
 <script>
-async function run(){
-  let res = await fetch("/api/scan", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      rows:[
-        {"amount":1200},
-        {"amount":900}
-      ]
-    })
-  });
+const API_URL = "http://127.0.0.1:8000"; // change to Render URL in production
 
-  document.getElementById("out").innerText =
-    JSON.stringify(await res.json(), null, 2);
+async function upload() {
+  const file = document.getElementById("file").files[0];
+
+  const form = new FormData();
+  form.append("file", file);
+
+  try {
+    const res = await fetch(`${API_URL}/scan_csv`, {
+      method: "POST",
+      body: form
+    });
+
+    const data = await res.json();
+    document.getElementById("out").innerText =
+      JSON.stringify(data, null, 2);
+
+  } catch (err) {
+    document.getElementById("out").innerText =
+      "ERROR: Backend not reachable";
+  }
 }
 </script>
 

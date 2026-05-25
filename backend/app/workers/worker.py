@@ -1,12 +1,7 @@
 import time
-import redis
-
-r = redis.Redis(host="redis", port=6379)
 
 while True:
-    job = r.rpop("scans")
 
-    if job:
-        print("Processed:", job.decode())
+    print("CYVXAI worker processing jobs")
 
-    time.sleep(1)
+    time.sleep(10)

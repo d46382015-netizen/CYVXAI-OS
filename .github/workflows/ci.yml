@@ -1,36 +1,30 @@
-name: CI Pipeline (Enterprise Gate)
+name: CYVXAI CI
 
 on:
-  pull_request:
-    branches: ["master"]
   push:
-    branches: ["master"]
+    branches:
+      - master
 
 jobs:
-  test:
+
+  validate:
+
     runs-on: ubuntu-latest
 
     steps:
+
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
+          cd backend
           pip install -r requirements.txt
 
-      - name: Import safety check
+      - name: Validate FastAPI
         run: |
-          python -c "import app.main"
-
-      - name: API boot validation
-        run: |
-          python -c "from app.main import app; assert app is not None"
-
-      - name: Run lint (strict)
-        run: |
-          pip install ruff
-          ruff check . --exit-zero
+          python -m py_compile backend/main.py

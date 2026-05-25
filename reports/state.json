@@ -1,0 +1,10 @@
+{
+  "last_alerts": [
+    {
+      "level": "medium",
+      "message": "AWS is high risk",
+      "type": "vendor_risk"
+    }
+  ],
+  "last_run": 1779687507.5271726
+}

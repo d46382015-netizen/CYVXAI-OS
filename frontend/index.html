@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head><title>LeakOS SaaS</title></head>
+<body>
+
+<h1>LeakOS Production Dashboard</h1>
+
+<button onclick="run()">Run Scan</button>
+
+<pre id="out"></pre>
+
+<script>
+async function run(){
+  let res = await fetch("/api/scan", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      rows:[
+        {"amount":1200},
+        {"amount":900}
+      ]
+    })
+  });
+
+  document.getElementById("out").innerText =
+    JSON.stringify(await res.json(), null, 2);
+}
+</script>
+
+</body>
+</html>

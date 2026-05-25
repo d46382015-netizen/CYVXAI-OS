@@ -1,0 +1,12 @@
+{
+  "last_run": 1779699048.0622509,
+  "insights": {
+    "avg_recent": 2640.0,
+    "avg_prev": 2640.0,
+    "vendor_risk": {
+      "AWS": 1320.0
+    },
+    "trend": "improving"
+  },
+  "alert_count": 1
+}

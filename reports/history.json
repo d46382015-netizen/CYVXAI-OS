@@ -1,0 +1,223 @@
+[
+  {
+    "id": "a85cf13c-7c48-4ff3-90a8-e52a02ff953a",
+    "timestamp": 1779686666.1543946,
+    "total_waste": 2640.0,
+    "issues": [
+      {
+        "type": "high_spend",
+        "vendor": "AWS",
+        "impact": 2400.0
+      },
+      {
+        "type": "duplicate_vendor",
+        "vendor": "AWS",
+        "impact": 240.0
+      }
+    ]
+  },
+  {
+    "id": "e2dea121-3880-4112-9577-697c272667f6",
+    "timestamp": 1779687031.3733907,
+    "total_waste": 2640.0,
+    "issues": [
+      {
+        "type": "high_spend",
+        "vendor": "AWS",
+        "impact": 2400.0
+      },
+      {
+        "type": "duplicate_vendor",
+        "vendor": "AWS",
+        "impact": 240.0
+      }
+    ]
+  },
+  {
+    "id": "68fc2007-34cf-4a10-be74-d22af186f290",
+    "timestamp": 1779687033.6009085,
+    "total_waste": 2640.0,
+    "issues": [
+      {
+        "type": "high_spend",
+        "vendor": "AWS",
+        "impact": 2400.0
+      },
+      {
+        "type": "duplicate_vendor",
+        "vendor": "AWS",
+        "impact": 240.0
+      }
+    ]
+  },
+  {
+    "id": "0b2ca7e3-c781-4836-a822-4cc70db9fca7",
+    "timestamp": 1779687035.8899088,
+    "total_waste": 2640.0,
+    "issues": [
+      {
+        "type": "high_spend",
+        "vendor": "AWS",
+        "impact": 2400.0
+      },
+      {
+        "type": "duplicate_vendor",
+        "vendor": "AWS",
+        "impact": 240.0
+      }
+    ]
+  },
+  {
+    "id": "ad0365a9-815a-4ef1-8e6a-200905a46b6e",
+    "timestamp": 1779687038.1949668,
+    "total_waste": 2640.0,
+    "issues": [
+      {
+        "type": "high_spend",
+        "vendor": "AWS",
+        "impact": 2400.0
+      },
+      {
+        "type": "duplicate_vendor",
+        "vendor": "AWS",
+        "impact": 240.0
+      }
+    ]
+  },
+  {
+    "id": "a767e2fd-b52e-4ba8-bb81-457153c04aa8",
+    "timestamp": 1779687040.9759798,
+    "total_waste": 2640.0,
+    "issues": [
+      {
+        "type": "high_spend",
+        "vendor": "AWS",
+        "impact": 2400.0
+      },
+      {
+        "type": "duplicate_vendor",
+        "vendor": "AWS",
+        "impact": 240.0
+      }
+    ]
+  },
+  {
+    "id": "49af4fc6-d0f6-46bc-9aa6-6d4b09000900",
+    "timestamp": 1779687042.886533,
+    "total_waste": 2640.0,
+    "issues": [
+      {
+        "type": "high_spend",
+        "vendor": "AWS",
+        "impact": 2400.0
+      },
+      {
+        "type": "duplicate_vendor",
+        "vendor": "AWS",
+        "impact": 240.0
+      }
+    ]
+  },
+  {
+    "id": "e1a40a8d-8a3a-402b-8b79-a6ed935dad95",
+    "timestamp": 1779687047.4274364,
+    "total_waste": 2640.0,
+    "issues": [
+      {
+        "type": "high_spend",
+        "vendor": "AWS",
+        "impact": 2400.0
+      },
+      {
+        "type": "duplicate_vendor",
+        "vendor": "AWS",
+        "impact": 240.0
+      }
+    ]
+  },
+  {
+    "id": "03a1d0de-49f8-4dbb-904f-8bb8efdcde0f",
+    "timestamp": 1779687235.724196,
+    "total_waste": 2640.0,
+    "issues": [
+      {
+        "type": "high_spend",
+        "vendor": "AWS",
+        "impact": 2400.0
+      },
+      {
+        "type": "duplicate_vendor",
+        "vendor": "AWS",
+        "impact": 240.0
+      }
+    ]
+  },
+  {
+    "id": "0de980ff-00c3-447d-9202-44bd73cd8479",
+    "timestamp": 1779687238.0039153,
+    "total_waste": 2640.0,
+    "issues": [
+      {
+        "type": "high_spend",
+        "vendor": "AWS",
+        "impact": 2400.0
+      },
+      {
+        "type": "duplicate_vendor",
+        "vendor": "AWS",
+        "impact": 240.0
+      }
+    ]
+  },
+  {
+    "id": "e896ef37-a29f-42df-8357-909349b3ada3",
+    "timestamp": 1779687240.0802178,
+    "total_waste": 2640.0,
+    "issues": [
+      {
+        "type": "high_spend",
+        "vendor": "AWS",
+        "impact": 2400.0
+      },
+      {
+        "type": "duplicate_vendor",
+        "vendor": "AWS",
+        "impact": 240.0
+      }
+    ]
+  },
+  {
+    "id": "be7485b8-6120-4fcd-b459-10acd0eb0469",
+    "timestamp": 1779687241.7352662,
+    "total_waste": 2640.0,
+    "issues": [
+      {
+        "type": "high_spend",
+        "vendor": "AWS",
+        "impact": 2400.0
+      },
+      {
+        "type": "duplicate_vendor",
+        "vendor": "AWS",
+        "impact": 240.0
+      }
+    ]
+  },
+  {
+    "id": "a4e0c3ae-6d9f-4041-81bd-d39b2b6509a5",
+    "timestamp": 1779687243.7951138,
+    "total_waste": 2640.0,
+    "issues": [
+      {
+        "type": "high_spend",
+        "vendor": "AWS",
+        "impact": 2400.0
+      },
+      {
+        "type": "duplicate_vendor",
+        "vendor": "AWS",
+        "impact": 240.0
+      }
+    ]
+  }
+]

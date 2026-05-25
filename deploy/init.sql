@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS scans (
+  id SERIAL PRIMARY KEY,
+  scan_id TEXT,
+  total NUMERIC,
+  created_at TIMESTAMP DEFAULT NOW()
+);

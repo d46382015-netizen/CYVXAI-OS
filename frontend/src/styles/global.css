@@ -1,0 +1,48 @@
+body {
+  margin: 0;
+  background: #070b14;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.container {
+  padding: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+  gap: 20px;
+}
+
+.card {
+  background: #111827;
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid #1f2937;
+}
+
+.title {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+.metric {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.navbar {
+  background: #0f172a;
+  padding: 16px;
+  border-bottom: 1px solid #1f2937;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+}

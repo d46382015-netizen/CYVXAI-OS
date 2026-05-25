@@ -20,10 +20,22 @@ from backend.app.api.recommendation import router as recommendation_router
 from backend.app.api.pipeline import router as pipeline_router
 from backend.app.api.webhooks import router as webhooks_router
 from backend.app.api.edge import router as edge_router
+from backend.app.api.vector import router as vector_router
+from backend.app.api.workflow import router as workflow_router
+from backend.app.api.knowledge import router as knowledge_router
+from backend.app.api.governance import router as governance_router
+from backend.app.api.forecasting import router as forecasting_router
+from backend.app.api.simulation import router as simulation_router
+from backend.app.api.marketplace import router as marketplace_router
+from backend.app.api.identity import router as identity_router
+from backend.app.api.recovery import router as recovery_router
+from backend.app.api.optimizer import router as optimizer_router
+from backend.app.api.federation import router as federation_router
+from backend.app.api.telemetry import router as telemetry_router
 from backend.app.realtime.ws import router as realtime_router
 
 app = FastAPI(
-    title="CYVXAI Ultimate Enterprise SaaS OS"
+    title="CYVXAI Global Autonomous Enterprise OS"
 )
 
 app.add_middleware(
@@ -54,6 +66,18 @@ routers = [
     pipeline_router,
     webhooks_router,
     edge_router,
+    vector_router,
+    workflow_router,
+    knowledge_router,
+    governance_router,
+    forecasting_router,
+    simulation_router,
+    marketplace_router,
+    identity_router,
+    recovery_router,
+    optimizer_router,
+    federation_router,
+    telemetry_router,
     realtime_router
 ]
 
@@ -64,10 +88,10 @@ for r in routers:
 def root():
 
     return {
-        "status": "CYVXAI GLOBAL ENTERPRISE ACTIVE",
-        "cluster": "multi-region",
-        "edge_network": True,
-        "autoscaling": True,
-        "observability": "enabled",
-        "compliance": "enterprise"
+        "status": "CYVXAI GLOBAL OPERATING SYSTEM ACTIVE",
+        "federation": "enabled",
+        "marketplace": "online",
+        "telemetry": "streaming",
+        "vector_memory": True,
+        "governance": "enterprise"
     }

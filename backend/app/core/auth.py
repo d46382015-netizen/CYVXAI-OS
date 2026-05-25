@@ -1,20 +1,28 @@
 from jose import jwt
 from passlib.context import CryptContext
-import os, datetime
+from backend.app.core.config import settings
+import datetime
 
-SECRET = os.getenv("JWT_SECRET", "dev")
-ALGO = "HS256"
+pwd = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
 
-pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
+def hash_password(p):
+    return pwd.hash(p)
 
-def hash_password(p): return pwd.hash(p)
-
-def verify(p, h): return pwd.verify(p, h)
+def verify_password(p, h):
+    return pwd.verify(p, h)
 
 def create_token(user_id, role="user"):
     payload = {
         "sub": user_id,
         "role": role,
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(days=1)
     }
-    return jwt.encode(payload, SECRET, algorithm=ALGO)
+
+    return jwt.encode(
+        payload,
+        settings.JWT_SECRET,
+        algorithm="HS256"
+    )

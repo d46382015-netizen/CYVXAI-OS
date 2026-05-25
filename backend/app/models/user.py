@@ -8,5 +8,4 @@ class User(Base):
     email = Column(String, unique=True)
     password = Column(String)
     role = Column(String, default="user")
-    stripe_customer_id = Column(String, nullable=True)
     plan = Column(String, default="free")

@@ -1,15 +1,20 @@
 from fastapi import APIRouter
-from backend.app.ai.insights import generate_insights
+from backend.app.ai.engine import analyze_risk
 
 router = APIRouter()
 
 @router.get("/ai/analyze")
-def analyze(value: float):
-    return generate_insights(value)
+def analyze(score: float):
+    return analyze_risk(score)
 
-@router.get("/ai/simulate")
-def simulate(load: float):
+@router.get("/ai/predict")
+def predict(load: float):
+
     return {
-        "prediction": "scale_needed" if load > 0.8 else "stable",
-        "confidence": 0.87
+        "prediction":
+            "scale_up"
+            if load > 0.75
+            else "stable",
+
+        "confidence": 0.94
     }

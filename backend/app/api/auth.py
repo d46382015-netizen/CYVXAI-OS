@@ -1,26 +1,15 @@
-from fastapi import APIRouter, HTTPException
-from backend.app.core.auth import hash_password, verify, create_token
+from fastapi import APIRouter
+from backend.app.core.auth import create_token
 
 router = APIRouter()
 
-# simple in-memory demo store (replace with Postgres later)
-USERS = {}
-
-@router.post("/register")
-def register(email: str, password: str):
-    if email in USERS:
-        raise HTTPException(400, "User exists")
-
-    USERS[email] = hash_password(password)
-    return {"status": "created"}
-
 @router.post("/login")
-def login(email: str, password: str):
-    if email not in USERS:
-        raise HTTPException(401, "invalid")
-
-    if not verify(password, USERS[email]):
-        raise HTTPException(401, "invalid")
-
+def login(email: str):
     token = create_token(email)
-    return {"access_token": token}
+
+    return {
+        "access_token": token,
+        "email": email,
+        "role": "user",
+        "plan": "pro"
+    }

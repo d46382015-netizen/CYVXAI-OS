@@ -1,42 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>CYVXAI-OS</title>
+  <meta charset="UTF-8">
+  <title>CYVXAI</title>
+  <script type="module" src="/src/main.jsx"></script>
 </head>
 <body>
-
-<h1>CYVXAI-OS Dashboard</h1>
-
-<input type="file" id="file" />
-<button onclick="upload()">Analyze</button>
-
-<pre id="out"></pre>
-
-<script>
-const API_URL = "http://127.0.0.1:8000"; // change to Render URL in production
-
-async function upload() {
-  const file = document.getElementById("file").files[0];
-
-  const form = new FormData();
-  form.append("file", file);
-
-  try {
-    const res = await fetch(`${API_URL}/scan_csv`, {
-      method: "POST",
-      body: form
-    });
-
-    const data = await res.json();
-    document.getElementById("out").innerText =
-      JSON.stringify(data, null, 2);
-
-  } catch (err) {
-    document.getElementById("out").innerText =
-      "ERROR: Backend not reachable";
-  }
-}
-</script>
-
+  <div id="root"></div>
 </body>
 </html>

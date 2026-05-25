@@ -1,15 +1,15 @@
-from fastapi import APIRouter, Depends
-from backend.app.core.security import get_user
+from fastapi import APIRouter
+import random
 
 router = APIRouter()
 
 @router.get("/dashboard")
-def dashboard(user=Depends(get_user)):
+def dashboard():
+
     return {
-        "user": user,
-        "stats": {
-            "scans_today": 12,
-            "risk_score": 0.34,
-            "ai_recommendation": "optimize_usage"
-        }
+        "system_health": "healthy",
+        "active_users": random.randint(50, 500),
+        "requests_today": random.randint(1000, 15000),
+        "ai_status": "online",
+        "revenue_mode": "active"
     }

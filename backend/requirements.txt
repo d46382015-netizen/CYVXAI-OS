@@ -1,5 +1,13 @@
 fastapi
-uvicorn
-redis
-psycopg2-binary
+uvicorn[standard]
+python-jose[cryptography]
+passlib[bcrypt]
 sqlalchemy
+psycopg2-binary
+python-dotenv
+pydantic
+email-validator
+python-multipart
+gunicorn
+redis
+httpx

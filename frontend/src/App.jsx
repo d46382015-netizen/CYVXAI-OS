@@ -1,29 +1,65 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function App() {
-  const [token, setToken] = useState("");
-  const [email, setEmail] = useState("");
 
-  const login = async () => {
-    const res = await fetch("http://localhost:8000/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password: "1234" })
-    });
+  const [status, setStatus] = useState({});
+  const [dashboard, setDashboard] = useState({});
+  const [ai, setAi] = useState({});
 
-    const data = await res.json();
-    setToken(data.access_token);
-  };
+  useEffect(() => {
+
+    fetch("http://localhost:8000/system/status")
+      .then(r => r.json())
+      .then(setStatus);
+
+    fetch("http://localhost:8000/dashboard")
+      .then(r => r.json())
+      .then(setDashboard);
+
+    fetch("http://localhost:8000/ai/predict?load=0.84")
+      .then(r => r.json())
+      .then(setAi);
+
+  }, []);
 
   return (
-    <div style={{ padding: 40 }}>
-      <h1>CYVXAI Dashboard</h1>
+    <div style={{
+      background:"#0b1020",
+      color:"#fff",
+      minHeight:"100vh",
+      padding:"40px",
+      fontFamily:"Arial"
+    }}>
 
-      <input placeholder="email" onChange={(e)=>setEmail(e.target.value)} />
+      <h1>CYVXAI Enterprise SaaS OS</h1>
 
-      <button onClick={login}>Login</button>
+      <div style={{
+        padding:"20px",
+        background:"#141b34",
+        marginTop:"20px"
+      }}>
+        <h2>System Status</h2>
+        <pre>{JSON.stringify(status,null,2)}</pre>
+      </div>
 
-      {token && <p>Logged in ✔</p>}
+      <div style={{
+        padding:"20px",
+        background:"#141b34",
+        marginTop:"20px"
+      }}>
+        <h2>Realtime Dashboard</h2>
+        <pre>{JSON.stringify(dashboard,null,2)}</pre>
+      </div>
+
+      <div style={{
+        padding:"20px",
+        background:"#141b34",
+        marginTop:"20px"
+      }}>
+        <h2>AI Prediction Engine</h2>
+        <pre>{JSON.stringify(ai,null,2)}</pre>
+      </div>
+
     </div>
   );
 }

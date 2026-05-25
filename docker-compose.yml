@@ -10,14 +10,8 @@ services:
     ports:
       - "8000:8000"
 
-    env_file:
-      - .env
-
     volumes:
       - ./logs:/app/logs
-
-    depends_on:
-      - redis
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -35,19 +29,20 @@ services:
     ports:
       - "6379:6379"
 
-    command: redis-server --appendonly yes
+  postgres:
+    image: postgres:16
 
-  worker:
-    build: ./backend
-
-    container_name: cyvxai-worker
+    container_name: cyvxai-postgres
 
     restart: always
 
-    command: python app/workers/worker.py
+    environment:
+      POSTGRES_USER: cyvxai
+      POSTGRES_PASSWORD: cyvxai
+      POSTGRES_DB: cyvxai
 
-    depends_on:
-      - redis
+    ports:
+      - "5432:5432"
 
   nginx:
     image: nginx:latest
@@ -60,7 +55,7 @@ services:
       - "80:80"
 
     volumes:
-      - ./infra/proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
 
     depends_on:
       - backend

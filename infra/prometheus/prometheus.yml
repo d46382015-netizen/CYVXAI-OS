@@ -4,4 +4,4 @@ global:
 scrape_configs:
   - job_name: 'cyvxai'
     static_configs:
-      - targets: ['localhost:8000']
+      - targets: ['backend:8000']

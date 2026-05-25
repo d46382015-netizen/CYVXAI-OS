@@ -1,14 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.app.middleware.auth import auth_middleware
 from backend.app.health.routes import router as health_router
+from backend.app.api.rbac import router as rbac_router
+from backend.app.api.tokens import router as tokens_router
+from backend.app.api.queue import router as queue_router
+from backend.app.api.object import router as object_router
+from backend.app.api.metrics_prometheus import router as metrics_router
 
 app = FastAPI(
-    title="CYVXAI Production Platform"
+    title="CYVXAI Global SaaS OS"
 )
-
-app.middleware("http")(auth_middleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,11 +20,24 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-app.include_router(health_router)
+routers = [
+    health_router,
+    rbac_router,
+    tokens_router,
+    queue_router,
+    object_router,
+    metrics_router
+]
+
+for r in routers:
+    app.include_router(r)
 
 @app.get("/")
 def root():
 
     return {
-        "status": "CYVXAI PRODUCTION ACTIVE"
+        "status": "CYVXAI NEXT GEN ACTIVE",
+        "distributed": True,
+        "observability": True,
+        "queue_engine": True
     }

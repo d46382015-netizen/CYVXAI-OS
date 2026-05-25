@@ -1,0 +1,14 @@
+services:
+
+  - type: web
+    name: cyvxai-os
+
+    env: python
+
+    buildCommand: |
+      cd backend && pip install -r requirements.txt
+
+    startCommand: |
+      cd backend && gunicorn main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
+
+    autoDeploy: true

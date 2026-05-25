@@ -5,8 +5,13 @@ python-jose[cryptography]
 passlib[bcrypt]
 python-dotenv
 sqlalchemy
+psycopg2-binary
+asyncpg
 redis
 httpx
 python-multipart
 email-validator
-psycopg2-binary
+prometheus-client
+alembic
+pydantic
+bcrypt

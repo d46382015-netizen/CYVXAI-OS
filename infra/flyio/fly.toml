@@ -1,0 +1,5 @@
+app = "cyvxai-os"
+
+[http_service]
+  internal_port = 8000
+  force_https = true

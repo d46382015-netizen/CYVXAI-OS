@@ -1,24 +1,20 @@
 import { useEffect, useState } from "react";
+import RealtimePanel from "./widgets/RealtimePanel";
 
 export default function App() {
 
-  const [status, setStatus] = useState({});
-  const [dashboard, setDashboard] = useState({});
-  const [ai, setAi] = useState({});
+  const [analytics, setAnalytics] = useState({});
+  const [autonomous, setAutonomous] = useState({});
 
   useEffect(() => {
 
-    fetch("http://localhost:8000/system/status")
+    fetch("http://localhost:8000/analytics/growth?users=3200&revenue=18000")
       .then(r => r.json())
-      .then(setStatus);
+      .then(setAnalytics);
 
-    fetch("http://localhost:8000/dashboard")
+    fetch("http://localhost:8000/autonomous/decision?load=0.82&threats=0.1")
       .then(r => r.json())
-      .then(setDashboard);
-
-    fetch("http://localhost:8000/ai/predict?load=0.84")
-      .then(r => r.json())
-      .then(setAi);
+      .then(setAutonomous);
 
   }, []);
 
@@ -31,34 +27,27 @@ export default function App() {
       fontFamily:"Arial"
     }}>
 
-      <h1>CYVXAI Enterprise SaaS OS</h1>
+      <h1>CYVXAI HyperScale Control Center</h1>
 
       <div style={{
-        padding:"20px",
         background:"#141b34",
+        padding:"20px",
         marginTop:"20px"
       }}>
-        <h2>System Status</h2>
-        <pre>{JSON.stringify(status,null,2)}</pre>
+        <h2>Growth Analytics</h2>
+        <pre>{JSON.stringify(analytics,null,2)}</pre>
       </div>
 
       <div style={{
-        padding:"20px",
         background:"#141b34",
+        padding:"20px",
         marginTop:"20px"
       }}>
-        <h2>Realtime Dashboard</h2>
-        <pre>{JSON.stringify(dashboard,null,2)}</pre>
+        <h2>Autonomous Cluster Decisions</h2>
+        <pre>{JSON.stringify(autonomous,null,2)}</pre>
       </div>
 
-      <div style={{
-        padding:"20px",
-        background:"#141b34",
-        marginTop:"20px"
-      }}>
-        <h2>AI Prediction Engine</h2>
-        <pre>{JSON.stringify(ai,null,2)}</pre>
-      </div>
+      <RealtimePanel />
 
     </div>
   );

@@ -17,11 +17,11 @@ nohup python -m uvicorn main:app \
 --port 8000 \
 > ../logs/backend.log 2>&1 &
 
-echo ""
-echo "CYVXAI PLATFORM ONLINE"
-echo ""
-
 sleep 5
+
+echo ""
+echo "CYVXAI GLOBAL PLATFORM ONLINE"
+echo ""
 
 curl http://127.0.0.1:8000/health
 

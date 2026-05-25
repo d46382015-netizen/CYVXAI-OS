@@ -11,8 +11,11 @@ passlib[bcrypt]
 python-multipart
 email-validator
 httpx
+websockets
 prometheus-client
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-exporter-otlp
 alembic
 pydantic
 bcrypt
-websockets

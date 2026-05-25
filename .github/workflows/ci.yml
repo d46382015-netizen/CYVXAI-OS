@@ -20,11 +20,11 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install
         run: |
           cd backend
           pip install -r requirements.txt
 
-      - name: Validate FastAPI
+      - name: Validate
         run: |
           python -m py_compile backend/main.py

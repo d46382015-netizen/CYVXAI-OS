@@ -1,17 +1,9 @@
-from fastapi import APIRouter, Request
-import stripe, os
+from fastapi import APIRouter
+from backend.app.webhooks.engine import register
 
 router = APIRouter()
 
-@router.post("/stripe/webhook")
-async def stripe_webhook(req: Request):
-    payload = await req.body()
-    sig = req.headers.get("stripe-signature")
+@router.post("/webhooks/register")
+def webhook(url: str):
 
-    stripe.Webhook.construct_event(
-        payload,
-        sig,
-        os.getenv("STRIPE_WEBHOOK_SECRET")
-    )
-
-    return {"status": "received"}
+    return register(url)

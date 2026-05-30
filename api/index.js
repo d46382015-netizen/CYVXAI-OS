@@ -43,12 +43,16 @@ function createApiServer(controller, options = {}) {
       if (url.pathname === "/status") return json(res, 200, wrap(controller.status()));
       if (url.pathname === "/api/v1/overview") return json(res, 200, wrap(controller.overview()));
       if (url.pathname === "/api/v1/platform") return json(res, 200, wrap(platform.snapshot()));
+      if (url.pathname === "/api/v1/repository-health") return json(res, 200, wrap(platform.repositoryHealth()));
+      if (url.pathname === "/api/v1/proof") return json(res, 200, wrap({ repositoryHealth: platform.repositoryHealth(), proof: platform.proof() }));
       if (url.pathname === "/api/v1/dashboard") return json(res, 200, wrap({
         status: controller.status(),
         overview: controller.overview(),
         health: platform.health(),
         platform: platform.status(),
         executive: platform.executive(),
+        repositoryHealth: platform.repositoryHealth(),
+        proof: platform.proof(),
       }));
       if (url.pathname === "/api/v1/onboard" && req.method === "POST") return json(res, 200, wrap(platform.modelCompany(await readJson(req))));
       if (url.pathname === "/api/v1/observations" && req.method === "GET") return json(res, 200, wrap({ observations: platform.observations() }));

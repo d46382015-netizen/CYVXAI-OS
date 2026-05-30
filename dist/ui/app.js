@@ -27,6 +27,8 @@ const state = {
   searchQuery: "",
   workflowResult: null,
   workflowDomain: "cloud-operations",
+  repositoryHealth: null,
+  proof: null,
 };
 
 const dom = {
@@ -71,6 +73,8 @@ const dom = {
   nextBestActionList: id("nextBestActionList"),
   crossDomainList: id("crossDomainList"),
   workflowOutput: id("workflowOutput"),
+  repositoryHealthOutput: id("repositoryHealthOutput"),
+  proofOutput: id("proofOutput"),
   workflowDomain: id("workflowDomain"),
   searchInput: id("searchInput"),
   clearSearchBtn: id("clearSearchBtn"),
@@ -225,6 +229,8 @@ async function sync() {
       requestJson("/api/v1/assignments"),
       requestJson("/api/v1/approvals"),
       requestJson("/api/v1/queue"),
+      requestJson("/api/v1/repository-health"),
+      requestJson("/api/v1/proof"),
     ]);
     state.status = results[0];
     state.health = results[1];
@@ -244,6 +250,8 @@ async function sync() {
     state.assignments = results[16] && results[16].assignments ? results[16].assignments : [];
     state.approvals = results[17] && results[17].approvals ? results[17].approvals : [];
     state.queue = results[18] && results[18].queue ? results[18].queue : [];
+    state.repositoryHealth = results[19] || (results[20] && results[20].repositoryHealth) || null;
+    state.proof = results[20] ? (results[20].proof || results[20]) : null;
     if (!state.selectedEntityId && state.platform && state.platform.entities && state.platform.entities.length) {
       state.selectedEntityId = state.platform.entities[0].id;
     }
@@ -335,6 +343,8 @@ function renderAll() {
   renderExecutive(state.executive || platform.executive || {}, platform);
   renderEvents(filteredEvents);
   renderDetails(platform);
+  if (dom.repositoryHealthOutput) dom.repositoryHealthOutput.textContent = safeJson(state.repositoryHealth || {});
+  if (dom.proofOutput) dom.proofOutput.textContent = safeJson(state.proof || {});
   if (dom.workflowOutput) dom.workflowOutput.textContent = safeJson(state.workflowResult || {});
   setOutput(state.commandResult || state.workflowResult || platform);
 }
@@ -369,7 +379,7 @@ function renderSummary(entities, relationships, agents, missions, simulations, r
   dom.summaryGrid.innerHTML = items.map(function (item) {
     return '<div class="summary-card"><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong><div class="card-sub">' + escapeHtml(item[2]) + '</div></div>';
   }).join("");
-  dom.summaryNote.textContent = 'Platform posture: ' + (health.label || 'unknown') + '. ' + (state.executive && state.executive.answers ? state.executive.answers.whatShouldWeDo : '') + ' ' + ((state.reality && state.reality.reality) ? ('Drift ' + formatPercent(state.reality.reality.reality_drift || 0)) : '');
+  dom.summaryNote.textContent = 'Platform posture: ' + (health.label || 'unknown') + '. ' + (state.executive && state.executive.answers ? state.executive.answers.whatShouldWeDo : '') + ' ' + ((state.reality && state.reality.reality) ? ('Drift ' + formatPercent(state.reality.reality.reality_drift || 0)) : '') + (state.proof ? (' Proof ' + formatPercent(state.proof.proof_score || 0) + ' | Repo ' + ((state.repositoryHealth && state.repositoryHealth.clean) ? 'clean' : 'dirty')) : '');
 }
 
 function renderOverview(entities, relationships, agents, missions, simulations, reports, commands, goals, initiatives, objectives, constraints, opportunities, trusts, patterns, decisions, outcomes, knowledgeRecords, capabilities, events, health, platform) {

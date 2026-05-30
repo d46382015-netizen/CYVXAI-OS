@@ -16,7 +16,7 @@ const { PlatformKernel } = require("../core/platform");
 
 const COMMANDS = [
   "status", "health", "graph", "agents", "missions", "simulations", "simulate", "command", "report",
-  "events", "observations", "reality", "portfolio", "decisions", "outcomes", "knowledge", "capabilities", "goals", "initiatives", "constraints", "opportunities", "trust", "patterns", "recommendations", "priorities", "intelligence", "dashboard",
+  "events", "observations", "reality", "portfolio", "decisions", "outcomes", "knowledge", "capabilities", "goals", "initiatives", "constraints", "opportunities", "trust", "patterns", "recommendations", "priorities", "intelligence", "dashboard", "repository-health", "repo-health", "proof",
   "criteria", "reality-objects", "significance", "interventions", "evolution", "cir", "kernel",
   "humans", "resources", "assign", "approvals", "queue", "nba", "coordination", "workflow",
   "onboard", "model-company", "leaderboard", "roadmap", "cluster", "workloads", "actions", "metrics", "healthz", "ask", "serve",
@@ -46,6 +46,13 @@ async function main() {
     case "health":
     case "healthz":
       print(kernel.health());
+      return;
+    case "repository-health":
+    case "repo-health":
+      print(kernel.repositoryHealth());
+      return;
+    case "proof":
+      print(kernel.proof());
       return;
     case "graph":
       print({ graph: kernel.graph() });

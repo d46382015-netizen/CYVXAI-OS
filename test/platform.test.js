@@ -246,6 +246,43 @@ test('executive endpoint reflects the constitutional loop', async () => {
 });
 
 
+test('repository health and proof are surfaced', async () => {
+  const kernel = createTempKernel();
+  kernel.modelCompany({ companyName: 'Proof Systems' });
+  const controller = {
+    status: () => ({ powered_by: 'CYVX' }),
+    overview: () => ({ health: { label: 'healthy' } }),
+    insights: () => [],
+    agentsSnapshot: () => [],
+    leaderboard: () => [],
+    roadmap: () => [],
+    snapshot: () => ({ cluster: { workloads: [] } }),
+    history: () => [],
+    statusModel: { snapshot: () => ({ data: {} }) },
+    ask: () => ({}),
+    submitWorkload: () => ({}),
+    executeAction: () => ({}),
+    registerSocket: () => {},
+    actions: [],
+  };
+  const { server } = createApiServer(controller, { platform: kernel });
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const repoHealthResponse = await fetch('http://127.0.0.1:' + address.port + '/api/v1/repository-health');
+  const repoHealthBody = await repoHealthResponse.json();
+  const proofResponse = await fetch('http://127.0.0.1:' + address.port + '/api/v1/proof');
+  const proofBody = await proofResponse.json();
+  await new Promise((resolve) => server.close(resolve));
+
+  assert.ok(repoHealthBody.clean != null);
+  assert.ok(repoHealthBody.head || repoHealthBody.commit || repoHealthBody.error);
+  assert.ok(proofBody.proof);
+  assert.ok(typeof proofBody.proof.proof_score === 'number');
+  assert.ok(proofBody.proof.reality_gap);
+  assert.ok(proofBody.proof.evidence);
+});
+
+
 test('reality and portfolio are surfaced', () => {
   const kernel = createTempKernel();
   kernel.createObservation({ title: 'Drift detected', source: 'monitor', subject_id: 'company', confidence: 0.8 });

@@ -150,3 +150,9 @@ CYVX Intelligence Platform v1 extends the frozen kernel and coordination layer w
 
 ### Purpose
 The intelligence layer strengthens the existing loop by turning outcomes, learning, trust, and CIR history into reusable patterns, explainable recommendations, and priority rankings.
+
+
+## Proof Surfaces
+- API: /api/v1/repository-health
+- API: /api/v1/proof
+- CLI: repository-health, repo-health, proof

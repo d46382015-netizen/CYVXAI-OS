@@ -52,3 +52,9 @@
 - `mine`
 - `node`
 - `doc`
+
+
+## Proof Surfaces
+- API: /api/v1/repository-health
+- API: /api/v1/proof
+- CLI: repository-health, repo-health, proof

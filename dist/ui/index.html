@@ -34,6 +34,7 @@
         <nav class="nav" aria-label="Platform sections">
           <button class="nav-pill active" data-target="overviewPanel">Overview</button>
           <button class="nav-pill" data-target="productPanel">Product v1</button>
+          <button class="nav-pill" data-target="proofPanel">Repository Proof</button>
           <button class="nav-pill" data-target="graphPanel">Reality Graph</button>
           <button class="nav-pill" data-target="agentsPanel">Agent OS</button>
           <button class="nav-pill" data-target="missionsPanel">Mission Control</button>
@@ -126,6 +127,18 @@
           </div>
           <div class="summary-note">The operator workflow uses the frozen coordination path to produce observation, significance, intervention, mission, assignment, outcome, learning, and CIR evidence.</div>
           <pre class="code-box" id="workflowOutput"></pre>
+        </article>
+
+        <article class="panel panel-span-4" id="proofPanel">
+          <div class="panel-head">
+            <div>
+              <h2>Repository Proof</h2>
+              <p>Git state, latest proof report, reality gap, and CIR-linked evidence.</p>
+            </div>
+          </div>
+          <div class="summary-note">This surface ties platform output back to the actual repository and the latest learning record.</div>
+          <pre class="code-box" id="repositoryHealthOutput"></pre>
+          <pre class="code-box" id="proofOutput"></pre>
         </article>
 
         <article class="panel panel-span-8" id="overviewPanel">

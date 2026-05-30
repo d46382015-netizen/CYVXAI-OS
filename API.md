@@ -9,6 +9,14 @@ All JSON responses include:
 ## Status
 - `GET /status`
 
+## Dashboard
+- GET /api/v1/dashboard
+
+## Onboard
+- POST /api/v1/onboard
+- Body: { companyName: Acme Robotics }
+
+
 ## Agents
 - `GET /v1/agents`
 

@@ -16,7 +16,7 @@ const { PlatformKernel } = require("../core/platform");
 
 const COMMANDS = [
   "status", "health", "graph", "agents", "missions", "simulations", "simulate", "command", "report",
-  "events", "observations", "reality", "portfolio", "decisions", "outcomes", "knowledge", "capabilities", "goals", "initiatives", "constraints", "opportunities", "trust", "patterns", "recommendations", "priorities", "intelligence",
+  "events", "observations", "reality", "portfolio", "decisions", "outcomes", "knowledge", "capabilities", "goals", "initiatives", "constraints", "opportunities", "trust", "patterns", "recommendations", "priorities", "intelligence", "dashboard",
   "criteria", "reality-objects", "significance", "interventions", "evolution", "cir", "kernel",
   "humans", "resources", "assign", "approvals", "queue", "nba", "coordination", "workflow",
   "onboard", "model-company", "leaderboard", "roadmap", "cluster", "workloads", "actions", "metrics", "healthz", "ask", "serve",
@@ -232,9 +232,10 @@ function parseModelCompanyArgs(args) {
 }
 
 function routeFor(command, args) {
-  const base = "http://127.0.0.1:3000";
+  const base = "http://127.0.0.1:" + (process.env.CYVX_PORT || 3000);
   switch (command) {
     case "leaderboard": return { method: "GET", path: base + "/v1/leaderboard" };
+    case "dashboard": return { method: "GET", path: base + "/api/v1/dashboard" };
     case "roadmap": return { method: "GET", path: base + "/v1/roadmap" };
     case "cluster": return { method: "GET", path: base + "/api/v1/cluster" };
     case "workloads": return { method: "GET", path: base + "/api/v1/workloads" };

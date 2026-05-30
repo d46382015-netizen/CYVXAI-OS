@@ -16,12 +16,14 @@
 - `actions`
 - `metrics`
 - `healthz`
+- dashboard
 
 ## Ask / Intelligence
 - `ask <task>`
 - `report`
 - `genome`
 - `simulate`
+- onboard
 - `evolve`
 
 ## Planned command surface

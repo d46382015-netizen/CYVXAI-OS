@@ -545,3 +545,38 @@ test("coordination api endpoints return live state", async () => {
   assert.ok(coordination.summary.queueDepth >= 1);
   assert.ok(nba.nextBestActions || nba.nextBestAction);
 });
+
+
+test('product onboard API route works', async () => {
+  const kernel = createTempKernel();
+  const controller = {
+    status: () => kernel.status(),
+    overview: () => ({ health: kernel.health(), summary: { note: 'ready' } }),
+    insights: () => [],
+    agentsSnapshot: () => [],
+    leaderboard: () => [],
+    roadmap: () => [],
+    snapshot: () => ({ cluster: { workloads: [] } }),
+    history: () => [],
+    statusModel: { snapshot: () => ({ data: {} }) },
+    ask: () => ({}),
+    submitWorkload: () => ({}),
+    executeAction: () => ({}),
+    registerSocket: () => {},
+    actions: [],
+  };
+  const { server } = createApiServer(controller, { platform: kernel });
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const response = await fetch('http://127.0.0.1:' + address.port + '/api/v1/onboard', {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ companyName: 'Onboarded Ops', employees: 90, cloudSpend: 42000, systems: 7, teams: 3 }),
+  });
+  const body = await response.json();
+  await new Promise((resolve) => server.close(resolve));
+
+  assert.ok(body.model.company);
+  assert.ok(body.platform.entities.length >= 4);
+  assert.ok(body.executive.constitutionalLoop.learn >= 1);
+});

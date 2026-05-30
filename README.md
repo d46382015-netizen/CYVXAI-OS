@@ -71,6 +71,8 @@ bash ./start.sh
 - Primitive loop: `POST /api/v1/observations`, `POST /api/v1/significance`, `POST /api/v1/interventions`, `POST /api/v1/outcomes`, `POST /api/v1/knowledge`, `POST /api/v1/assignments`, `POST /api/v1/approvals`, `POST /api/v1/queue`
 - Intelligence surfaces: `GET /api/v1/intelligence`, `GET /api/v1/patterns`, `GET /api/v1/recommendations`, `GET /api/v1/priorities`
 - UI: Product v1 onboarding, search/filter, and audit trail
+- API aliases: GET /api/v1/dashboard, POST /api/v1/onboard
+- CLI alias: dashboard
 - CLI aliases: `workflow`, `onboard`, `coordination`
 
 ## CLI

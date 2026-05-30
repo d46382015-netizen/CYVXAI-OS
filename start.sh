@@ -24,6 +24,10 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 
+# Clear any stale CYVX API listener so the fresh launch always serves the
+# current route table from this worktree.
+pkill -f "node .*api/index.js" >/dev/null 2>&1 || true
+
 if command -v go >/dev/null 2>&1 && [ -d "./cyvx-v85" ]; then
   echo "Go control plane detected at ./cyvx-v85"
 fi

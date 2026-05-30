@@ -15,10 +15,12 @@ const { PlatformKernel, buildSeedState, normalizePlatformState } = require("./ke
 const { augmentPlatformKernel } = require("./phase9");
 const { augmentKernelV1 } = require("./kernel_v1");
 const { augmentCoordinationPlatform } = require("./coordination_v1_clean");
+const { augmentIntelligencePlatform } = require("./intelligence_v1");
 
 augmentPlatformKernel(PlatformKernel, models);
 augmentKernelV1(PlatformKernel, models);
 augmentCoordinationPlatform(PlatformKernel, models);
+augmentIntelligencePlatform(PlatformKernel, models);
 
 module.exports = {
   ...models,

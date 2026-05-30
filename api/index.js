@@ -63,7 +63,12 @@ function createApiServer(controller, options = {}) {
       if (url.pathname === "/api/v1/trust" && req.method === "GET") return json(res, 200, wrap({ trusts: platform.trusts() }));
       if (url.pathname === "/api/v1/trust" && req.method === "POST") return json(res, 200, wrap({ trust: platform.createTrust(await readJson(req)) }));
       if (url.pathname === "/api/v1/patterns" && req.method === "GET") return json(res, 200, wrap({ patterns: platform.patterns() }));
-      if (url.pathname === "/api/v1/patterns" && req.method === "POST") return json(res, 200, wrap({ pattern: platform.createPattern(await readJson(req)) }));
+      if (url.pathname === "/api/v1/patterns" && req.method === "POST") return json(res, 200, wrap({ patterns: platform.generatePatterns(await readJson(req)) }));
+      if (url.pathname === "/api/v1/recommendations" && req.method === "GET") return json(res, 200, wrap({ recommendations: platform.recommendations() }));
+      if (url.pathname === "/api/v1/recommendations" && req.method === "POST") return json(res, 200, wrap({ recommendations: platform.generateRecommendations(await readJson(req)) }));
+      if (url.pathname === "/api/v1/priorities" && req.method === "GET") return json(res, 200, wrap({ priorities: platform.priorities() }));
+      if (url.pathname === "/api/v1/priorities" && req.method === "POST") return json(res, 200, wrap({ priorities: platform.calculatePriorities(await readJson(req)) }));
+      if (url.pathname === "/api/v1/intelligence") return json(res, 200, wrap(platform.intelligence()));
       if (url.pathname === "/api/v1/entities" && req.method === "GET") return json(res, 200, wrap({ entities: platform.entities() }));
       if (url.pathname === "/api/v1/entities" && req.method === "POST") return json(res, 200, wrap({ entity: platform.createEntity(await readJson(req)) }));
       if (url.pathname === "/api/v1/relationships" && req.method === "GET") return json(res, 200, wrap({ relationships: platform.relationships() }));

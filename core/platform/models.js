@@ -557,8 +557,48 @@ function createPattern(record = {}) {
     capability_contribution: Number(record.capability_contribution || 0),
     related_entity_ids: Array.isArray(record.related_entity_ids) ? clone(record.related_entity_ids) : [],
     related_mission_ids: Array.isArray(record.related_mission_ids) ? clone(record.related_mission_ids) : [],
+    relatedObjects: Array.isArray(record.relatedObjects) ? clone(record.relatedObjects) : Array.isArray(record.related_objects) ? clone(record.related_objects) : [],
     trust_score: Number(record.trust_score != null ? record.trust_score : 0.5),
     summary: record.summary || '',
+    evidence: Array.isArray(record.evidence) ? clone(record.evidence) : [],
+    createdAt: record.createdAt || iso(record.created_at),
+    updatedAt: record.updatedAt || iso(record.updated_at),
+    constitutional: record.constitutional || { understanding: 0, coordination: 0, capability: 0, resilience: 0, learning: 0, score: 0, trend: 0, risk: 0 },
+  });
+}
+
+function createRecommendation(record = {}) {
+  return withConstitution(record, 'recommendation', {
+    title: record.title || record.name || 'recommendation',
+    recommendation_type: record.recommendation_type || record.kind || 'recommendation',
+    rationale: record.rationale || '',
+    confidence: record.confidence != null ? Number(record.confidence) : 0.5,
+    relatedObjects: Array.isArray(record.relatedObjects) ? clone(record.relatedObjects) : Array.isArray(record.related_objects) ? clone(record.related_objects) : [],
+    related_object_ids: Array.isArray(record.related_object_ids) ? clone(record.related_object_ids) : Array.isArray(record.relatedObjects) ? clone(record.relatedObjects) : Array.isArray(record.related_objects) ? clone(record.related_objects) : [],
+    source_ids: Array.isArray(record.source_ids) ? clone(record.source_ids) : [],
+    expectedImpact: record.expectedImpact != null ? clone(record.expectedImpact) : clone(record.expected_impact || {}),
+    expected_impact: record.expected_impact != null ? clone(record.expected_impact) : clone(record.expectedImpact || {}),
+    status: record.status || 'active',
+    metadata: record.metadata || {},
+    createdAt: record.createdAt || iso(record.created_at),
+    updatedAt: record.updatedAt || iso(record.updated_at),
+    constitutional: record.constitutional || { understanding: 0, coordination: 0, capability: 0, resilience: 0, learning: 0, score: 0, trend: 0, risk: 0 },
+  });
+}
+
+function createPriority(record = {}) {
+  return withConstitution(record, 'priority', {
+    title: record.title || record.name || (record.targetType || record.target_type || 'priority'),
+    targetType: record.targetType || record.target_type || 'unknown',
+    targetId: record.targetId || record.target_id || null,
+    score: Number(record.score != null ? record.score : 0),
+    rationale: record.rationale || '',
+    relatedObjects: Array.isArray(record.relatedObjects) ? clone(record.relatedObjects) : Array.isArray(record.related_objects) ? clone(record.related_objects) : [],
+    source_ids: Array.isArray(record.source_ids) ? clone(record.source_ids) : [],
+    status: record.status || 'active',
+    metadata: record.metadata || {},
+    createdAt: record.createdAt || iso(record.created_at),
+    updatedAt: record.updatedAt || iso(record.updated_at),
     constitutional: record.constitutional || { understanding: 0, coordination: 0, capability: 0, resilience: 0, learning: 0, score: 0, trend: 0, risk: 0 },
   });
 }
@@ -640,6 +680,8 @@ function createPlatformState(input = {}) {
     significanceRecords: Array.isArray(input.significanceRecords) ? input.significanceRecords.map(createSignificanceRecord) : [],
     evolutionRecommendations: Array.isArray(input.evolutionRecommendations) ? input.evolutionRecommendations.map(createEvolutionRecommendation) : [],
     cirMetrics: Array.isArray(input.cirMetrics) ? input.cirMetrics.map(createCIRMetric) : [],
+    recommendations: Array.isArray(input.recommendations) ? input.recommendations.map(createRecommendation) : [],
+    priorities: Array.isArray(input.priorities) ? input.priorities.map(createPriority) : [],
     humans: Array.isArray(input.humans) ? input.humans : [],
     resources: Array.isArray(input.resources) ? input.resources : [],
     assignments: Array.isArray(input.assignments) ? input.assignments : [],
@@ -695,6 +737,8 @@ module.exports = {
   createObservation,
   createOutcome,
   createPattern,
+  createRecommendation,
+  createPriority,
   createRealityObject,
   createSignificanceRecord,
   createCIRMetric,

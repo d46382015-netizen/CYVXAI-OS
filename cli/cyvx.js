@@ -16,7 +16,7 @@ const { PlatformKernel } = require("../core/platform");
 
 const COMMANDS = [
   "status", "health", "graph", "agents", "missions", "simulations", "simulate", "command", "report",
-  "events", "observations", "reality", "portfolio", "decisions", "outcomes", "knowledge", "capabilities", "goals", "initiatives", "constraints", "opportunities", "trust", "patterns",
+  "events", "observations", "reality", "portfolio", "decisions", "outcomes", "knowledge", "capabilities", "goals", "initiatives", "constraints", "opportunities", "trust", "patterns", "recommendations", "priorities", "intelligence",
   "criteria", "reality-objects", "significance", "interventions", "evolution", "cir", "kernel",
   "humans", "resources", "assign", "approvals", "queue", "nba", "coordination",
   "model-company", "leaderboard", "roadmap", "cluster", "workloads", "actions", "metrics", "healthz", "ask", "serve",
@@ -121,6 +121,18 @@ async function main() {
       return;
     case "patterns":
       print({ patterns: kernel.patterns() });
+      return;
+    case "recommendations":
+      kernel.refreshIntelligence(parseQuery(args));
+      print({ recommendations: kernel.recommendations() });
+      return;
+    case "priorities":
+      kernel.refreshIntelligence(parseQuery(args));
+      print({ priorities: kernel.priorities() });
+      return;
+    case "intelligence":
+      kernel.refreshIntelligence(parseQuery(args));
+      print(kernel.intelligence(parseQuery(args)));
       return;
     case "criteria":
       print({ criteria: kernel.criteria() });

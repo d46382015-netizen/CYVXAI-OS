@@ -111,3 +111,27 @@ CYVX Coordination Platform v1 runs on frozen Kernel v1 and extends the same JSON
 
 ### Coordination rule
 Mission execution remains a pattern under the frozen kernel. Coordination decides who acts, when, and with what resources. The legacy controller plane remains compatibility debt.
+
+## Intelligence Platform v1
+
+CYVX Intelligence Platform v1 extends the frozen kernel and coordination layer with explainable pattern, recommendation, and priority intelligence.
+
+### New live surfaces
+- /api/v1/patterns
+- /api/v1/recommendations
+- /api/v1/priorities
+- /api/v1/intelligence
+
+### New CLI commands
+- patterns
+- recommendations
+- priorities
+- intelligence
+
+### Intelligence records
+- Pattern
+- Recommendation
+- Priority
+
+### Purpose
+The intelligence layer strengthens the existing loop by turning outcomes, learning, trust, and CIR history into reusable patterns, explainable recommendations, and priority rankings.

@@ -259,6 +259,88 @@ test('reality and portfolio are surfaced', () => {
   assert.ok(typeof portfolio.strategic_alignment === 'number');
 });
 
+test('pattern, recommendation, and priority intelligence are explainable', () => {
+  const kernel = createTempKernel();
+  kernel.modelCompany({ companyName: 'Intelligence Labs', employees: 120, cloudSpend: 42000, systems: 9, teams: 3 });
+
+  const patterns = kernel.patterns();
+  const recommendations = kernel.recommendations();
+  const priorities = kernel.priorities();
+  const intelligence = kernel.intelligence();
+
+  assert.ok(patterns.length >= 1);
+  assert.ok(recommendations.length >= 1);
+  assert.ok(priorities.length >= 1);
+  assert.ok(patterns[0].evidence.length >= 1);
+  assert.ok(Array.isArray(recommendations[0].source_ids));
+  assert.ok(Array.isArray(priorities[0].source_ids));
+  assert.ok(intelligence.patternCount >= 1);
+  assert.ok(intelligence.recommendationCount >= 1);
+  assert.ok(intelligence.priorityCount >= 1);
+  assert.ok(intelligence.predictedCirImpact >= 0);
+});
+
+test('cross-domain scenarios generate intelligence artifacts', () => {
+  const domains = ['cloud-operations', 'revenue-operations', 'robotics-operations'];
+  for (const domain of domains) {
+    const kernel = createTempKernel();
+    const result = kernel.coordinateScenario({ domain });
+
+    assert.ok(result.intelligence);
+    assert.ok(kernel.patterns().length >= 1);
+    assert.ok(kernel.recommendations().length >= 1);
+    assert.ok(kernel.priorities().length >= 1);
+  }
+});
+
+test('intelligence api and cli expose the same live state', async () => {
+  const kernel = createTempKernel();
+  kernel.modelCompany({ companyName: 'API Intelligence', employees: 140, cloudSpend: 51000, systems: 10, teams: 4 });
+
+  const controller = {
+    status: () => ({ powered_by: 'CYVX' }),
+    overview: () => ({ health: { label: 'healthy' } }),
+    insights: () => [],
+    agentsSnapshot: () => [],
+    leaderboard: () => [],
+    roadmap: () => [],
+    snapshot: () => ({ cluster: { workloads: [] } }),
+    history: () => [],
+    statusModel: { snapshot: () => ({ data: {} }) },
+    ask: () => ({}),
+    submitWorkload: () => ({}),
+    executeAction: () => ({}),
+    registerSocket: () => {},
+    actions: [],
+  };
+  const { server } = createApiServer(controller, { platform: kernel });
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const intelligence = await fetch('http://127.0.0.1:' + address.port + '/api/v1/intelligence').then((response) => response.json());
+  const recommendations = await fetch('http://127.0.0.1:' + address.port + '/api/v1/recommendations').then((response) => response.json());
+  const priorities = await fetch('http://127.0.0.1:' + address.port + '/api/v1/priorities').then((response) => response.json());
+  await new Promise((resolve) => server.close(resolve));
+
+  const cliIntelligence = JSON.parse(execFileSync('node', ['./cli/cyvx.js', 'intelligence'], { cwd: '/root/CYVXAI-OS', encoding: 'utf8' }));
+  const cliRecommendations = JSON.parse(execFileSync('node', ['./cli/cyvx.js', 'recommendations'], { cwd: '/root/CYVXAI-OS', encoding: 'utf8' }));
+  const cliPriorities = JSON.parse(execFileSync('node', ['./cli/cyvx.js', 'priorities'], { cwd: '/root/CYVXAI-OS', encoding: 'utf8' }));
+
+  assert.ok(intelligence.patternCount >= 1);
+  assert.ok(recommendations.recommendations.length >= 1);
+  assert.ok(priorities.priorities.length >= 1);
+  assert.ok(cliIntelligence.patternCount >= 1);
+  assert.ok(cliRecommendations.recommendations.length >= 1);
+  assert.ok(cliPriorities.priorities.length >= 1);
+});
+
+test('dashboard is wired for intelligence panels', () => {
+  const html = fs.readFileSync('/root/CYVXAI-OS/ui/index.html', 'utf8');
+  assert.ok(html.includes('patternIntelligencePanel'));
+  assert.ok(html.includes('recommendationIntelligencePanel'));
+  assert.ok(html.includes('priorityIntelligencePanel'));
+  assert.ok(html.includes('intelligenceSummaryPanel'));
+});
+
 test('executive endpoint surfaces trust and strategy', async () => {
   const kernel = createTempKernel();
   kernel.modelCompany({ companyName: 'Trust Systems' });

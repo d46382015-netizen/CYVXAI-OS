@@ -30,6 +30,8 @@ const {
   createConstraint,
   createOpportunity,
   createPattern,
+  createRecommendation,
+  createPriority,
   createTrust,
   createIntervention,
   createKnowledgeRecord,
@@ -67,6 +69,8 @@ const COLLECTIONS = [
   'capabilities',
   'trusts',
   'patterns',
+  'recommendations',
+  'priorities',
   'observations',
   'humans',
   'resources',
@@ -141,6 +145,8 @@ class PlatformKernel {
       capabilities: state.capabilities.length,
       trusts: state.trusts.length,
       patterns: state.patterns.length,
+      recommendations: state.recommendations.length,
+      priorities: state.priorities.length,
       reports: state.reports.length,
       commands: state.commands.length,
       events: state.events.length,
@@ -1210,9 +1216,11 @@ function buildGraph(state) {
   const constraintNodes = state.constraints.map((constraint) => ({ id: constraint.id, label: constraint.title, kind: 'constraint', state: constraint.state, severity: constraint.severity, constitutional: constraint.constitutional }));
   const opportunityNodes = state.opportunities.map((opportunity) => ({ id: opportunity.id, label: opportunity.title, kind: 'opportunity', state: opportunity.state, opportunity_score: opportunity.opportunity_score, constitutional: opportunity.constitutional }));
   const patternNodes = state.patterns.map((pattern) => ({ id: pattern.id, label: pattern.title, kind: 'pattern', state: pattern.pattern_type, trust_score: pattern.trust_score, constitutional: pattern.constitutional }));
+  const recommendationNodes = state.recommendations.map((recommendation) => ({ id: recommendation.id, label: recommendation.title, kind: 'recommendation', state: recommendation.status || recommendation.state, constitutional: recommendation.constitutional }));
+  const priorityNodes = state.priorities.map((priority) => ({ id: priority.id, label: priority.title || (priority.targetType + ':' + priority.targetId), kind: 'priority', state: priority.status || 'active', constitutional: priority.constitutional }));
   const trustNodes = state.trusts.map((trust) => ({ id: trust.id, label: trust.subject_type + ':' + String(trust.subject_id || 'unknown'), kind: 'trust', state: 'tracked', trust_score: trust.trust_score, constitutional: trust.constitutional }));
   const missionNodes = state.missions.map((mission) => ({ id: mission.id, label: mission.title, kind: 'mission', state: mission.stage, constitutional: mission.constitutional }));
-  nodes.push(...entityNodes, ...goalNodes, ...initiativeNodes, ...objectiveNodes, ...constraintNodes, ...opportunityNodes, ...patternNodes, ...trustNodes, ...missionNodes);
+  nodes.push(...entityNodes, ...goalNodes, ...initiativeNodes, ...objectiveNodes, ...constraintNodes, ...opportunityNodes, ...patternNodes, ...recommendationNodes, ...priorityNodes, ...trustNodes, ...missionNodes);
   const edges = state.relationships.map((relationship) => ({
     id: relationship.id,
     from: relationship.from,
@@ -1254,6 +1262,12 @@ function buildGraph(state) {
     (pattern.related_entity_ids || []).forEach((entityId) => edges.push({ id: pattern.id + '-' + entityId, from: pattern.id, to: entityId, relation: 'recurs', strength: pattern.confidence || 0.5, impact: pattern.capability_contribution || 0.2 }));
     (pattern.related_mission_ids || []).forEach((missionId) => edges.push({ id: pattern.id + '-' + missionId, from: pattern.id, to: missionId, relation: 'learned_from', strength: pattern.confidence || 0.5, impact: pattern.capability_contribution || 0.2 }));
   });
+  state.recommendations.forEach((recommendation) => {
+    (recommendation.source_ids || []).forEach((sourceId) => edges.push({ id: recommendation.id + '-' + sourceId, from: recommendation.id, to: sourceId, relation: 'derived_from', strength: recommendation.confidence || 0.5, impact: recommendation.expectedImpact && Number(recommendation.expectedImpact.value != null ? recommendation.expectedImpact.value : recommendation.expected_impact && recommendation.expected_impact.value != null ? recommendation.expected_impact.value : 0) / 10000 || 0.2 }));
+  });
+  state.priorities.forEach((priority) => {
+    (priority.source_ids || []).forEach((sourceId) => edges.push({ id: priority.id + '-' + sourceId, from: priority.id, to: sourceId, relation: 'ranked_from', strength: priority.score || 0.5, impact: priority.score || 0.5 }));
+  });
   state.missions.forEach((mission) => {
     if (mission.goal_id) edges.push({ id: mission.id + '-' + mission.goal_id, from: mission.id, to: mission.goal_id, relation: 'advances', strength: 0.82, impact: 0.26 });
     if (mission.initiative_id) edges.push({ id: mission.id + '-' + mission.initiative_id, from: mission.id, to: mission.initiative_id, relation: 'implements', strength: 0.82, impact: 0.26 });
@@ -1294,6 +1308,10 @@ function buildExecutive(state) {
   const topOpportunity = state.opportunities[0] || null;
   const topConstraint = state.constraints[0] || null;
   const topTrust = state.trusts[0] || null;
+  const topPattern = state.patterns[0] || null;
+  const topRecommendation = state.recommendations[0] || null;
+  const topPriority = state.priorities[0] || null;
+  const intelligence = buildIntelligenceSummary(state);
   const costs = state.entities.reduce((sum, entity) => sum + Number(entity.economics && entity.economics.cost || 0), 0);
   const savings = state.entities.reduce((sum, entity) => sum + Number(entity.economics && entity.economics.savings || 0), 0);
   const capabilityValue = topCapability ? Number(topCapability.current || 0) : 0;
@@ -1365,6 +1383,13 @@ function buildExecutive(state) {
       likelyOutcome: topSimulation ? topSimulation.expected_outcome || topSimulation.recommendation : 'Increase graph coverage before expansion.',
       calibration: round3(calibrationAccuracy),
     },
+    intelligence: intelligence,
+    topPatterns: intelligence.topPatterns,
+    topRecommendations: intelligence.topRecommendations,
+    highestPriorityInterventions: intelligence.highestPriorityItems.filter((item) => String(item.targetType || '').toLowerCase() === 'intervention'),
+    highestPriorityMissions: intelligence.highestPriorityItems.filter((item) => String(item.targetType || '').toLowerCase() === 'mission'),
+    highestPriorityApprovals: intelligence.highestPriorityItems.filter((item) => String(item.targetType || '').toLowerCase() === 'approval'),
+    predictedCirImpact: intelligence.predictedCirImpact,
     summary: {
       reportCount: state.reports.length,
       eventCount: state.events.length,
@@ -1434,6 +1459,31 @@ function normalizePlatformState(input = {}) {
   state.graph = buildGraph(state);
   state.executive = buildExecutive(state);
   return state;
+}
+
+function recommendationImpactScore(record) {
+  const impact = record.expectedImpact || record.expected_impact || {};
+  return Number(impact.capability || 0) + Number(impact.trust || 0) + Number(impact.roi || 0) / 10;
+}
+
+function buildIntelligenceSummary(state) {
+  const patterns = Array.isArray(state.patterns) ? state.patterns.slice() : [];
+  const recommendations = Array.isArray(state.recommendations) ? state.recommendations.slice() : [];
+  const priorities = Array.isArray(state.priorities) ? state.priorities.slice() : [];
+  const sortedPatterns = patterns.sort((a, b) => Number(b.frequency || 0) + Number(b.confidence || 0) - (Number(a.frequency || 0) + Number(a.confidence || 0))).slice(0, 5);
+  const sortedRecommendations = recommendations.sort((a, b) => (Number(b.confidence || 0) + recommendationImpactScore(b)) - (Number(a.confidence || 0) + recommendationImpactScore(a))).slice(0, 5);
+  const sortedPriorities = priorities.sort((a, b) => Number(b.score || 0) - Number(a.score || 0)).slice(0, 10);
+  const highestPriorityItems = sortedPriorities.slice(0, 5);
+  const predictedCirImpact = round3(highestPriorityItems.reduce((sum, item) => sum + Number(item.score || 0), 0) / Math.max(1, highestPriorityItems.length) * Math.max(0.1, (state.cirMetrics && state.cirMetrics[0] ? Number(state.cirMetrics[0].score || 0.1) : 0.1) * 1.5));
+  return {
+    patternCount: patterns.length,
+    recommendationCount: recommendations.length,
+    priorityCount: priorities.length,
+    topPatterns: sortedPatterns,
+    topRecommendations: sortedRecommendations,
+    highestPriorityItems: highestPriorityItems,
+    predictedCirImpact: predictedCirImpact,
+  };
 }
 
 function buildSeedState(seed = {}) {

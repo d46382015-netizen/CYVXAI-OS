@@ -9,6 +9,9 @@ const state = {
   cir: null,
   coordination: null,
   nextBestAction: null,
+  intelligence: null,
+  recommendations: null,
+  priorities: null,
   humans: null,
   resources: null,
   assignments: null,
@@ -64,6 +67,10 @@ const dom = {
   executionQueueList: id("executionQueueList"),
   nextBestActionList: id("nextBestActionList"),
   crossDomainList: id("crossDomainList"),
+  patternIntelligenceList: id("patternIntelligenceList"),
+  recommendationIntelligenceList: id("recommendationIntelligenceList"),
+  priorityIntelligenceList: id("priorityIntelligenceList"),
+  intelligenceSummaryList: id("intelligenceSummaryList"),
   executiveAnswers: id("executiveAnswers"),
   executiveRecommendations: id("executiveRecommendations"),
   eventsList: id("eventsList"),
@@ -166,6 +173,10 @@ async function sync() {
       requestJson("/api/v1/kernel"),
       requestJson("/api/v1/cir"),
       requestJson("/api/v1/coordination"),
+      requestJson("/api/v1/intelligence"),
+      requestJson("/api/v1/patterns"),
+      requestJson("/api/v1/recommendations"),
+      requestJson("/api/v1/priorities"),
       requestJson("/api/v1/next-best-action"),
       requestJson("/api/v1/humans"),
       requestJson("/api/v1/resources"),
@@ -182,12 +193,15 @@ async function sync() {
     state.kernel = results[6];
     state.cir = results[7];
     state.coordination = results[8];
-    state.nextBestAction = results[9] ? (results[9].nextBestAction || (results[9].nextBestActions && results[9].nextBestActions[0]) || results[9]) : null;
-    state.humans = results[10] && results[10].humans ? results[10].humans : [];
-    state.resources = results[11] && results[11].resources ? results[11].resources : [];
-    state.assignments = results[12] && results[12].assignments ? results[12].assignments : [];
-    state.approvals = results[13] && results[13].approvals ? results[13].approvals : [];
-    state.queue = results[14] && results[14].queue ? results[14].queue : [];
+    state.intelligence = results[9];
+    state.recommendations = results[11] && results[11].recommendations ? results[11].recommendations : [];
+    state.priorities = results[12] && results[12].priorities ? results[12].priorities : [];
+    state.nextBestAction = results[13] ? (results[13].nextBestAction || (results[13].nextBestActions && results[13].nextBestActions[0]) || results[13]) : null;
+    state.humans = results[14] && results[14].humans ? results[14].humans : [];
+    state.resources = results[15] && results[15].resources ? results[15].resources : [];
+    state.assignments = results[16] && results[16].assignments ? results[16].assignments : [];
+    state.approvals = results[17] && results[17].approvals ? results[17].approvals : [];
+    state.queue = results[18] && results[18].queue ? results[18].queue : [];
     if (!state.selectedEntityId && state.platform && state.platform.entities && state.platform.entities.length) {
       state.selectedEntityId = state.platform.entities[0].id;
     }
@@ -221,6 +235,9 @@ function renderAll() {
   const opportunities = Array.isArray(platform.opportunities) ? platform.opportunities : [];
   const trusts = Array.isArray(platform.trusts) ? platform.trusts : [];
   const patterns = Array.isArray(platform.patterns) ? platform.patterns : [];
+  const recommendations = Array.isArray(state.recommendations) ? state.recommendations : Array.isArray(platform.recommendations) ? platform.recommendations : [];
+  const priorities = Array.isArray(state.priorities) ? state.priorities : Array.isArray(platform.priorities) ? platform.priorities : [];
+  const intelligence = state.intelligence || platform.intelligence || {};
   const observations = Array.isArray(state.observations && state.observations.observations ? state.observations.observations : platform.observations) ? (state.observations && state.observations.observations ? state.observations.observations : platform.observations) : [];
   const reality = state.reality && state.reality.reality ? state.reality.reality : state.reality || platform.reality || {};
   const portfolio = state.reality && state.reality.portfolio ? state.reality.portfolio : platform.portfolio || {};
@@ -251,6 +268,7 @@ function renderAll() {
   renderCoordination(state.coordination || {}, state.nextBestAction || {}, platform);
   renderCir(cir);
   renderOpportunities(opportunities, patterns, missions);
+  renderIntelligence(patterns, recommendations, priorities, intelligence);
   renderDecisions(decisions, missions, outcomes);
   renderKnowledge(knowledgeRecords, missions, outcomes);
   renderCapabilities(capabilities, entities, missions);
@@ -548,11 +566,24 @@ function renderExecutive(executive, platform) {
 
   const forecast = executive.forecast || {};
   const recommendations = Array.isArray(executive.recommendations) ? executive.recommendations : [];
-  dom.executiveRecommendations.innerHTML = [
-    '<div class="answer-card"><span class="card-kicker">Forecast</span><strong>' + escapeHtml(forecast.likelyOutcome || 'n/a') + '</strong><small>Confidence ' + escapeHtml(String(forecast.confidence != null ? forecast.confidence : '--')) + ' | Horizon ' + escapeHtml(String(forecast.horizonDays || '--')) + ' days</small></div>'
-  ].concat(recommendations.map(function (item) {
+  const intelligence = executive.intelligence || {};
+  const executiveCards = [
+    '<div class="answer-card"><span class="card-kicker">Forecast</span><strong>' + escapeHtml(forecast.likelyOutcome || 'n/a') + '</strong><small>Confidence ' + escapeHtml(String(forecast.confidence != null ? forecast.confidence : '--')) + ' | Horizon ' + escapeHtml(String(forecast.horizonDays || '--')) + ' days</small></div>',
+    '<div class="answer-card"><span class="card-kicker">Predicted CIR Impact</span><strong>' + escapeHtml(String(intelligence.predictedCirImpact != null ? intelligence.predictedCirImpact : executive.predictedCirImpact != null ? executive.predictedCirImpact : '--')) + '</strong><small>Patterns ' + escapeHtml(String(intelligence.patternCount != null ? intelligence.patternCount : 0)) + ' | Recommendations ' + escapeHtml(String(intelligence.recommendationCount != null ? intelligence.recommendationCount : 0)) + ' | Priorities ' + escapeHtml(String(intelligence.priorityCount != null ? intelligence.priorityCount : 0)) + '</small></div>'
+  ];
+  if (intelligence.topPatterns && intelligence.topPatterns[0]) {
+    executiveCards.push('<div class="answer-card"><span class="card-kicker">Top Pattern</span><strong>' + escapeHtml(intelligence.topPatterns[0].title || intelligence.topPatterns[0].id) + '</strong><small>Confidence ' + formatPercent(intelligence.topPatterns[0].confidence || 0) + ' | Frequency ' + escapeHtml(String(intelligence.topPatterns[0].frequency || 0)) + '</small></div>');
+  }
+  if (intelligence.topRecommendations && intelligence.topRecommendations[0]) {
+    executiveCards.push('<div class="answer-card"><span class="card-kicker">Top Recommendation</span><strong>' + escapeHtml(intelligence.topRecommendations[0].title || intelligence.topRecommendations[0].id) + '</strong><small>Confidence ' + formatPercent(intelligence.topRecommendations[0].confidence || 0) + '</small></div>');
+  }
+  if (intelligence.highestPriorityItems && intelligence.highestPriorityItems[0]) {
+    executiveCards.push('<div class="answer-card"><span class="card-kicker">Highest Priority</span><strong>' + escapeHtml(intelligence.highestPriorityItems[0].title || intelligence.highestPriorityItems[0].targetType || intelligence.highestPriorityItems[0].id) + '</strong><small>Score ' + escapeHtml(String(intelligence.highestPriorityItems[0].score || 0)) + '</small></div>');
+  }
+  executiveCards.push.apply(executiveCards, recommendations.map(function (item) {
     return '<div class="answer-card"><span class="card-kicker">Recommendation</span><strong>' + escapeHtml(item.title) + '</strong><small>Confidence ' + formatPercent(item.confidence || 0) + ' | ROI ' + escapeHtml(String(item.roi || 0)) + '</small></div>';
-  })).join('');
+  }));
+  dom.executiveRecommendations.innerHTML = executiveCards.join('');
 }
 
 function renderEvents(events) {
@@ -621,6 +652,13 @@ function renderOpportunities(opportunities, patterns, missions) {
       '<div class="card-sub">' + escapeHtml(pattern.description || pattern.kind || '') + '</div>' +
     '</div>';
   }).join('');
+}
+
+function renderIntelligence(patterns, recommendations, priorities, intelligence) {
+  setJsonPanel(dom.patternIntelligenceList, patterns.slice(0, 8));
+  setJsonPanel(dom.recommendationIntelligenceList, recommendations.slice(0, 8));
+  setJsonPanel(dom.priorityIntelligenceList, priorities.slice(0, 8));
+  setJsonPanel(dom.intelligenceSummaryList, intelligence || {});
 }
 
 function renderDetails(platform) {

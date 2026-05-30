@@ -205,12 +205,13 @@ function augmentKernelV1(PlatformKernel, models) {
         learning: { outcomes: (state.outcomes || []).length, trust: (state.trusts || []).length, knowledge: (state.knowledgeRecords || []).length },
         evolution: { recommendations: (state.evolutionRecommendations || []).length, open: (state.evolutionRecommendations || []).filter((item) => (item.status || "open") !== "closed").length },
       },
-      counts: { criteria: (state.criteria || []).length, realityObjects: (state.realityObjects || []).length, significanceRecords: (state.significanceRecords || []).length, interventions: (state.interventions || []).length, outcomes: (state.outcomes || []).length, evolutionRecommendations: (state.evolutionRecommendations || []).length, cirMetrics: (state.cirMetrics || []).length },
+      counts: { criteria: (state.criteria || []).length, realityObjects: (state.realityObjects || []).length, significanceRecords: (state.significanceRecords || []).length, interventions: (state.interventions || []).length, outcomes: (state.outcomes || []).length, evolutionRecommendations: (state.evolutionRecommendations || []).length, cirMetrics: (state.cirMetrics || []).length, recommendations: (state.recommendations || []).length, priorities: (state.priorities || []).length },
       cir: cir,
       topSignificanceRecords: topSignificanceRecords,
       topInterventions: topInterventions,
       recentOutcomes: recentOutcomes,
       evolutionRecommendations: evolutionRecommendations,
+      intelligence: typeof this.intelligence === 'function' ? this.intelligence() : null,
       remainingKernelGaps: computeKernelGaps(state),
     };
   };

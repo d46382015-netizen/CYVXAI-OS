@@ -12,6 +12,6 @@
 module.exports = {
   controller: require("./controller"),
   metrics: require("./metrics"),
+  platform: require("./platform"),
   shared: require("./shared/attribution"),
 };
-

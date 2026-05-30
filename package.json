@@ -10,7 +10,8 @@
     "cli": "node ./cli/cyvx.js",
     "build": "node ./scripts/build.js",
     "dev": "node ./api/index.js",
-    "serve": "node ./ui/server.js"
+    "serve": "node ./ui/server.js",
+    "test": "node --test"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",

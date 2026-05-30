@@ -1,712 +1,828 @@
-/**
- * CYVX — Autonomous Infrastructure Intelligence
- * © 2026 Dakota Lee Jonsgaard. All rights reserved.
- * Creator & Architect: Dakota Lee Jonsgaard
- * https://cyvx.ai | dakota@cyvx.ai
- *
- * This software is the exclusive intellectual property
- * of Dakota Lee Jonsgaard. Unauthorized use prohibited.
- */
+"use strict";
 
 const state = {
-  view: "home",
-  overlay: "world",
-  connected: false,
-  agents: [],
-  leaderboard: [],
-  roadmap: null,
-  overview: null,
-  history: [],
-  insights: [],
-  metrics: {
-    confidence: 0.87,
-    uncertainty: 0.13,
-    contradiction: 0.04,
-    volatility: 0.22,
-  },
-  feed: [
-    "Controller booted",
-    "Roadmap synchronized",
-    "Planes online",
-    "Ready for interventions",
-  ],
-  features: [
-    "AI agents and automation",
-    "Decentralized intelligence",
-    "Real-world asset integration",
-    "Cross-chain compatibility",
-    "Quantum-safe security",
-  ],
-  economy: [
-    "Compute exchange",
-    "Futures market",
-    "Carbon intelligence",
-    "Insurance pool",
-  ],
-  governance: [
-    "Constitutional invariants",
-    "Human oversight",
-    "Rollback enforcement",
-    "Audit trails",
-  ],
+  status: null,
+  health: null,
+  platform: null,
+  executive: null,
+  kernel: null,
+  cir: null,
+  coordination: null,
+  nextBestAction: null,
+  humans: null,
+  resources: null,
+  assignments: null,
+  approvals: null,
+  queue: null,
+  commandResult: null,
+  selectedEntityId: "company",
+  selectedMissionId: null,
+  selectedAgentId: null,
+  selectedSimulationId: null,
+  liveFeed: [],
+  graphFilter: "all",
 };
 
-const coinCanvas = document.getElementById("coinCanvas");
-const coinCtx = coinCanvas.getContext("2d");
-const planetCanvas = document.getElementById("planetCanvas");
-const planetCtx = planetCanvas.getContext("2d");
-
-const els = {
-  connectionState: document.getElementById("connectionState"),
-  systemStatus: document.getElementById("systemStatus"),
-  runtimeMode: document.getElementById("runtimeMode"),
-  roadmapState: document.getElementById("roadmapState"),
-  viewMode: document.getElementById("viewMode"),
-  heroSubtitle: document.getElementById("heroSubtitle"),
-  overlayTitle: document.getElementById("overlayTitle"),
-  metricAgents: document.getElementById("metricAgents"),
-  metricEvents: document.getElementById("metricEvents"),
-  metricCycles: document.getElementById("metricCycles"),
-  metricPlanes: document.getElementById("metricPlanes"),
-  metricConfidence: document.getElementById("metricConfidence"),
-  metricUncertainty: document.getElementById("metricUncertainty"),
-  metricContradiction: document.getElementById("metricContradiction"),
-  metricVolatility: document.getElementById("metricVolatility"),
-  reasoningFeed: document.getElementById("reasoningFeed"),
-  agentList: document.getElementById("agentList"),
-  economyList: document.getElementById("economyList"),
-  governanceList: document.getElementById("governanceList"),
-  overviewList: document.getElementById("overviewList"),
-  insightList: document.getElementById("insightList"),
-  historyList: document.getElementById("historyList"),
-  featureList: document.getElementById("featureList"),
-  taskInput: document.getElementById("taskInput"),
-  askOutput: document.getElementById("askOutput"),
+const dom = {
+  connectionState: id("connectionState"),
+  platformHealth: id("platformHealth"),
+  heroMetrics: id("heroMetrics"),
+  summaryGrid: id("summaryGrid"),
+  summaryNote: id("summaryNote"),
+  overviewCards: id("overviewCards"),
+  overviewTags: id("overviewTags"),
+  graphSvg: id("graphSvg"),
+  entityDetail: id("entityDetail"),
+  twinDetail: id("twinDetail"),
+  agentsList: id("agentsList"),
+  missionsList: id("missionsList"),
+  simulationsList: id("simulationsList"),
+  decisionsList: id("decisionsList"),
+  knowledgeList: id("knowledgeList"),
+  capabilitiesList: id("capabilitiesList"),
+  governanceList: id("governanceList"),
+  strategyList: id("strategyList"),
+  trustList: id("trustList"),
+  opportunitiesList: id("opportunitiesList"),
+  patternsList: id("patternsList"),
+  observationsList: id("observationsList"),
+  realityList: id("realityList"),
+  portfolioList: id("portfolioList"),
+  kernelOverviewList: id("kernelOverviewList"),
+  constitutionList: id("constitutionList"),
+  realityObjectsList: id("realityObjectsList"),
+  significanceList: id("significanceList"),
+  interventionQueueList: id("interventionQueueList"),
+  outcomesEvidenceList: id("outcomesEvidenceList"),
+  evolutionList: id("evolutionList"),
+  cirList: id("cirList"),
+  coordinationOverviewList: id("coordinationOverviewList"),
+  humanRolesList: id("humanRolesList"),
+  resourceAllocationList: id("resourceAllocationList"),
+  assignmentQueueList: id("assignmentQueueList"),
+  approvalGatesList: id("approvalGatesList"),
+  executionQueueList: id("executionQueueList"),
+  nextBestActionList: id("nextBestActionList"),
+  crossDomainList: id("crossDomainList"),
+  executiveAnswers: id("executiveAnswers"),
+  executiveRecommendations: id("executiveRecommendations"),
+  eventsList: id("eventsList"),
+  commandInput: id("commandInput"),
+  commandOutput: id("commandOutput"),
+  companyName: id("companyName"),
+  companyEmployees: id("companyEmployees"),
+  companySpend: id("companySpend"),
+  companySystems: id("companySystems"),
+  companyTeams: id("companyTeams"),
+  missionTitle: id("missionTitle"),
+  missionObjective: id("missionObjective"),
+  simulationScenario: id("simulationScenario"),
+  simulationRecommendation: id("simulationRecommendation"),
+  modelCompanyBtn: id("modelCompanyBtn"),
+  refreshBtn: id("refreshBtn"),
+  commandRunBtn: id("commandRunBtn"),
+  missionLaunchBtn: id("missionLaunchBtn"),
+  missionCreateBtn: id("missionCreateBtn"),
+  simulationRunBtn: id("simulationRunBtn"),
 };
 
-let socket = null;
-let lastFrame = 0;
-let dimensions = { coin: 900, planet: 1400 };
-let particles = makeParticles(200);
-
-function setText(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value;
-}
-
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
+function id(name) {
+  return document.getElementById(name);
 }
 
 function formatNumber(value) {
   return Number(value || 0).toLocaleString();
 }
 
-function makeParticles(count) {
-  return Array.from({ length: count }, (_, index) => ({
-    angle: (index / count) * Math.PI * 2,
-    radius: 0.18 + (index % 17) * 0.028,
-    speed: 0.18 + (index % 11) * 0.015,
-    glow: index % 5 === 0 ? 1 : 0.6,
-  }));
+function formatPercent(value) {
+  return (Number(value || 0) * 100).toFixed(0) + "%";
 }
 
-function setView(view) {
-  state.view = view;
-  document.querySelectorAll("[data-view]").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.view === view);
-  });
-  setText("viewMode", view.charAt(0).toUpperCase() + view.slice(1));
-
-  const labels = {
-    home: ["Finance", "AI", "Governance", "Security", "Ecosystem"],
-    agents: ["Exploration", "Optimization", "Defense", "Planning"],
-    economy: ["Price discovery", "Compute exchange", "Futures", "Carbon"],
-    governance: ["Constitution", "Authority", "Escalation", "Audit"],
-  };
-  state.features = labels[view] || state.features;
-  renderFeatureList();
-  drawCoin(performance.now());
-  drawPlanet(performance.now());
-}
-
-function setOverlay(overlay) {
-  state.overlay = overlay;
-  document.querySelectorAll("[data-overlay]").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.overlay === overlay);
-  });
-  const titles = {
-    world: "World Overlay",
-    causal: "Causal Overlay",
-    future: "Future Overlay",
-    economic: "Economic Overlay",
-  };
-  els.overlayTitle.textContent = titles[overlay] || "World Overlay";
-}
-
-function renderFeatureList() {
-  els.featureList.innerHTML = state.features
-    .map((item) => `<div class="feature-item">${item}</div>`)
-    .join("");
-}
-
-function renderChips(target, items) {
-  const el = document.getElementById(target);
-  if (!el) return;
-  el.innerHTML = items.map((item) => `<span class="chip">${item}</span>`).join("");
-}
-
-function renderAgents() {
-  const agents = state.agents.length ? state.agents : [
-    { id: "agent-1", specialization: "planner", credits: 100, wins: 12, losses: 1 },
-    { id: "agent-2", specialization: "guardian", credits: 97, wins: 11, losses: 1 },
-  ];
-
-  els.agentList.innerHTML = agents
-    .map((agent, index) => `
-      <div class="agent-card">
-        <div class="agent-head">
-          <strong>${agent.id}</strong>
-          <span>#${index + 1}</span>
-        </div>
-        <div class="agent-meta">${agent.specialization || agent.role || "agent"}</div>
-        <div class="agent-stats">
-          <span>Credits ${formatNumber(agent.credits || 0)}</span>
-          <span>Wins ${formatNumber(agent.wins || 0)}</span>
-          <span>Losses ${formatNumber(agent.losses || 0)}</span>
-        </div>
-      </div>
-    `)
-    .join("");
-}
-
-function renderOverview() {
-  const overview = state.overview || {};
-  const health = overview.health || {};
-  const cluster = overview.cluster || {};
-  const topAgent = (overview.agents && overview.agents.top) || state.leaderboard[0] || state.agents[0] || {};
-  const workloads = cluster.workloads || [];
-  const node = (cluster.nodes && cluster.nodes[0]) || {};
-  const cards = [
-    { label: 'Health', value: Number(health.score || 0).toFixed(2), sub: health.label || 'unknown' },
-    { label: 'Top Agent', value: topAgent.id || 'n/a', sub: formatNumber(topAgent.credits || 0) + ' credits' },
-    { label: 'Workloads', value: formatNumber(workloads.length), sub: formatNumber(node.cpu_used || 0) + '/' + formatNumber(node.cpu_capacity || 0) + ' CPU' },
-    { label: 'Events', value: formatNumber((overview.activity && overview.activity.events) || 0), sub: formatNumber((overview.activity && overview.activity.evolutionCycles) || 0) + ' cycles' },
-  ];
-
-  els.overviewList.innerHTML = cards.map((card) => '<div class="summary-card"><span>' + card.label + '</span><strong>' + card.value + '</strong><small>' + card.sub + '</small></div>').join('');
-}
-
-function renderInsights() {
-  const insights = state.insights.length ? state.insights : [{
-    severity: 'info',
-    title: 'Waiting for live data',
-    summary: 'The controller will replace this placeholder once the overview endpoint responds.',
-    recommendation: 'Refresh the dashboard or re-run the API.',
-  }];
-
-  els.insightList.innerHTML = insights.map((item) => '<div class="insight-card ' + (item.severity || 'info') + '"><div class="insight-head"><strong>' + item.title + '</strong><span>' + (item.severity || 'info') + '</span></div><p>' + item.summary + '</p><small>' + (item.recommendation || '') + '</small></div>').join('');
-}
-
-function renderHistory() {
-  const history = state.history.length ? state.history : state.feed.map((item, index) => ({
-    type: index === 0 ? 'latest' : 'event',
-    created_at: new Date(Date.now() - index * 60_000).toISOString(),
-    summary: { note: item },
-  }));
-
-  els.historyList.innerHTML = history.slice(0, 10).map((entry) => '<div class="history-item"><div class="history-meta"><strong>' + (entry.type || 'event') + '</strong><span>' + new Date(entry.created_at || Date.now()).toLocaleString() + '</span></div><pre>' + JSON.stringify(entry.summary || entry, null, 2) + '</pre></div>').join('');
-}
-
-function renderFeed() {
-  els.reasoningFeed.innerHTML = state.feed
-    .slice(0, 8)
-    .map((item, index) => `
-      <div class="feed-item">
-        <strong>${index === 0 ? "Now" : `T-${index}`}</strong>
-        <span>${item}</span>
-      </div>
-    `)
-    .join("");
-}
-
-function updateMetrics(status = {}, roadmap = {}) {
-  const agents = Number(status.agents || state.agents.length || 0);
-  const events = Number(status.events || 0);
-  const cycles = Number(status.evolutionCycles || 0);
-  const planeGroups = Number(status.planeGroups || Object.keys(roadmap.planes || {}).length || 0);
-
-  animateNumber(els.metricAgents, agents);
-  animateNumber(els.metricEvents, events);
-  animateNumber(els.metricCycles, cycles);
-  animateNumber(els.metricPlanes, planeGroups);
-
-  const confidence = clamp(0.76 + (agents % 10) * 0.015, 0.1, 0.99);
-  state.metrics = {
-    confidence,
-    uncertainty: 1 - confidence,
-    contradiction: clamp(0.04 + (events % 6) * 0.01, 0, 0.4),
-    volatility: clamp(0.18 + (cycles % 7) * 0.015, 0, 0.6),
-  };
-
-  els.metricConfidence.textContent = state.metrics.confidence.toFixed(2);
-  els.metricUncertainty.textContent = state.metrics.uncertainty.toFixed(2);
-  els.metricContradiction.textContent = state.metrics.contradiction.toFixed(2);
-  els.metricVolatility.textContent = state.metrics.volatility.toFixed(2);
-
-  const statusText = status.startedAt ? "Online" : "Connecting";
-  els.connectionState.textContent = state.connected ? "Live" : "Offline";
-  els.systemStatus.textContent = `${statusText} | ${formatNumber(agents)} agents`;
-  els.runtimeMode.textContent = state.connected ? "Live" : "Offline";
-  els.roadmapState.textContent = roadmap.statusModel?.modules?.length ? "Synchronized" : "Loading";
-  els.heroSubtitle.textContent = `Founder and creator: Dakota Lee Jonsgaard`;
-}
-
-function animateNumber(el, target) {
-  const start = Number(el.textContent.replace(/,/g, "")) || 0;
-  const end = Number(target || 0);
-  const delta = end - start;
-  const duration = 420;
-  const started = performance.now();
-
-  function tick(now) {
-    const progress = clamp((now - started) / duration, 0, 1);
-    const ease = 1 - Math.pow(1 - progress, 3);
-    el.textContent = formatNumber(Math.round(start + delta * ease));
-    if (progress < 1) requestAnimationFrame(tick);
+function formatDate(value) {
+  try {
+    return new Date(value).toLocaleString();
+  } catch (error) {
+    return String(value || "");
   }
+}
 
-  requestAnimationFrame(tick);
+function escapeHtml(value) {
+  return String(value || "").replace(/[&<>"]/g, function (ch) {
+    return ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+    })[ch] || ch;
+  });
+}
+
+function safeJson(value) {
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch (error) {
+    return JSON.stringify({ error: error.message }, null, 2);
+  }
+}
+
+function setOutput(payload) {
+  dom.commandOutput.textContent = safeJson(payload);
+  state.commandResult = payload;
 }
 
 function pushFeed(message) {
   if (!message) return;
-  state.feed.unshift(message);
-  state.feed = state.feed.slice(0, 10);
-  renderFeed();
+  state.liveFeed.unshift({ at: new Date().toISOString(), message: message });
+  state.liveFeed = state.liveFeed.slice(0, 8);
+  renderEvents();
 }
 
-function connectSocket() {
+async function requestJson(url, options) {
+  const response = await fetch(url, options || {});
+  const text = await response.text();
+  let data = {};
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch (error) {
+      data = { raw: text };
+    }
+  }
+  if (!response.ok) {
+    throw new Error(data.error || response.statusText || "Request failed");
+  }
+  return data;
+}
+
+async function sync() {
   try {
-    const proto = location.protocol === "https:" ? "wss:" : "ws:";
-    socket = new WebSocket(`${proto}//${location.host}/ws`);
-    socket.addEventListener("open", () => {
-      state.connected = true;
-      els.connectionState.textContent = "Live";
-      pushFeed("WebSocket connected");
+    const results = await Promise.all([
+      requestJson("/status"),
+      requestJson("/health"),
+      requestJson("/api/v1/platform"),
+      requestJson("/api/v1/executive"),
+      requestJson("/api/v1/reality"),
+      requestJson("/api/v1/observations"),
+      requestJson("/api/v1/kernel"),
+      requestJson("/api/v1/cir"),
+      requestJson("/api/v1/coordination"),
+      requestJson("/api/v1/next-best-action"),
+      requestJson("/api/v1/humans"),
+      requestJson("/api/v1/resources"),
+      requestJson("/api/v1/assignments"),
+      requestJson("/api/v1/approvals"),
+      requestJson("/api/v1/queue"),
+    ]);
+    state.status = results[0];
+    state.health = results[1];
+    state.platform = results[2];
+    state.executive = results[3];
+    state.reality = results[4];
+    state.observations = results[5];
+    state.kernel = results[6];
+    state.cir = results[7];
+    state.coordination = results[8];
+    state.nextBestAction = results[9] ? (results[9].nextBestAction || (results[9].nextBestActions && results[9].nextBestActions[0]) || results[9]) : null;
+    state.humans = results[10] && results[10].humans ? results[10].humans : [];
+    state.resources = results[11] && results[11].resources ? results[11].resources : [];
+    state.assignments = results[12] && results[12].assignments ? results[12].assignments : [];
+    state.approvals = results[13] && results[13].approvals ? results[13].approvals : [];
+    state.queue = results[14] && results[14].queue ? results[14].queue : [];
+    if (!state.selectedEntityId && state.platform && state.platform.entities && state.platform.entities.length) {
+      state.selectedEntityId = state.platform.entities[0].id;
+    }
+    if (!state.selectedMissionId && state.platform && state.platform.missions && state.platform.missions.length) {
+      state.selectedMissionId = state.platform.missions[0].id;
+    }
+    renderAll();
+  } catch (error) {
+    state.connection = false;
+    dom.connectionState.textContent = "Offline";
+    pushFeed("Sync failed: " + error.message);
+    setOutput({ error: error.message });
+  }
+}
+
+function renderAll() {
+  const platform = state.platform || {};
+  const status = state.status || {};
+  const health = state.health || {};
+  const entities = Array.isArray(platform.entities) ? platform.entities : [];
+  const relationships = Array.isArray(platform.relationships) ? platform.relationships : [];
+  const agents = Array.isArray(platform.agents) ? platform.agents : [];
+  const missions = Array.isArray(platform.missions) ? platform.missions : [];
+  const simulations = Array.isArray(platform.simulations) ? platform.simulations : [];
+  const reports = Array.isArray(platform.reports) ? platform.reports : [];
+  const commands = Array.isArray(platform.commands) ? platform.commands : [];
+  const goals = Array.isArray(platform.goals) ? platform.goals : [];
+  const initiatives = Array.isArray(platform.initiatives) ? platform.initiatives : [];
+  const objectives = Array.isArray(platform.objectives) ? platform.objectives : [];
+  const constraints = Array.isArray(platform.constraints) ? platform.constraints : [];
+  const opportunities = Array.isArray(platform.opportunities) ? platform.opportunities : [];
+  const trusts = Array.isArray(platform.trusts) ? platform.trusts : [];
+  const patterns = Array.isArray(platform.patterns) ? platform.patterns : [];
+  const observations = Array.isArray(state.observations && state.observations.observations ? state.observations.observations : platform.observations) ? (state.observations && state.observations.observations ? state.observations.observations : platform.observations) : [];
+  const reality = state.reality && state.reality.reality ? state.reality.reality : state.reality || platform.reality || {};
+  const portfolio = state.reality && state.reality.portfolio ? state.reality.portfolio : platform.portfolio || {};
+  const kernel = state.kernel || {};
+  const cir = state.cir || {};
+  const decisions = Array.isArray(platform.decisions) ? platform.decisions : [];
+  const outcomes = Array.isArray(platform.outcomes) ? platform.outcomes : [];
+  const knowledgeRecords = Array.isArray(platform.knowledgeRecords) ? platform.knowledgeRecords : [];
+  const capabilities = Array.isArray(platform.capabilities) ? platform.capabilities : [];
+  const events = Array.isArray(platform.events) ? platform.events : [];
+
+  dom.connectionState.textContent = status.powered_by ? "Live" : "Connecting";
+  dom.platformHealth.textContent = "Health: " + ((health.label || "unknown").toUpperCase());
+
+  renderHeroMetrics(status, health, platform);
+  renderSummary(entities, relationships, agents, missions, simulations, reports, commands, goals, initiatives, objectives, constraints, opportunities, trusts, patterns, decisions, outcomes, knowledgeRecords, capabilities, events, health, platform);
+  renderOverview(entities, relationships, agents, missions, simulations, reports, commands, goals, initiatives, objectives, constraints, opportunities, trusts, patterns, decisions, outcomes, knowledgeRecords, capabilities, events, health, platform);
+  renderGraph(platform.graph || { nodes: entities, edges: relationships }, entities, relationships);
+  renderAgents(agents, missions);
+  renderMissions(missions, agents);
+  renderSimulations(simulations, missions);
+  renderStrategy(goals, initiatives, objectives, constraints);
+  renderTrust(trusts, simulations, decisions);
+  renderObservations(observations, reality);
+  renderReality(reality, observations);
+  renderPortfolio(portfolio, missions, goals, objectives);
+  renderKernel(kernel, platform);
+  renderCoordination(state.coordination || {}, state.nextBestAction || {}, platform);
+  renderCir(cir);
+  renderOpportunities(opportunities, patterns, missions);
+  renderDecisions(decisions, missions, outcomes);
+  renderKnowledge(knowledgeRecords, missions, outcomes);
+  renderCapabilities(capabilities, entities, missions);
+  renderGovernance(platform);
+  renderExecutive(state.executive || platform.executive || {}, platform);
+  renderEvents(events);
+  renderDetails(platform);
+  setOutput(state.commandResult || platform);
+}
+
+function renderHeroMetrics(status, health, platform) {
+  const metrics = [
+    ["Entities", platform.entities ? platform.entities.length : 0, platform.tenant ? platform.tenant.name : ""],
+    ["Agents", platform.agents ? platform.agents.length : 0, "registry online"],
+    ["Missions", platform.missions ? platform.missions.length : 0, "mission control"],
+    ["Simulations", platform.simulations ? platform.simulations.length : 0, "simulation chamber"],
+    ["Events", platform.events ? platform.events.length : 0, "event stream"],
+    ["Health", health.score != null ? formatPercent(health.score) : "--", health.label || "unknown"],
+  ];
+  dom.heroMetrics.innerHTML = metrics.map(function (metric) {
+    return '<div class="metric-card"><span>' + escapeHtml(metric[0]) + '</span><strong>' + escapeHtml(metric[1]) + '</strong><small>' + escapeHtml(metric[2]) + '</small></div>';
+  }).join("");
+}
+
+function renderSummary(entities, relationships, agents, missions, simulations, reports, commands, goals, initiatives, objectives, constraints, opportunities, trusts, patterns, decisions, outcomes, knowledgeRecords, capabilities, events, health, platform) {
+  const items = [
+    ["Reality Graph", entities.length + " entities", relationships.length + " relationships"],
+    ["Agent OS", agents.length + " agents", "lifecycle ready"],
+    ["Mission Control", missions.length + " missions", "execution flow"],
+    ["Simulation Chamber", simulations.length + " simulations", "outcomes tracked"],
+    ["Strategy", goals.length + " goals", initiatives.length + " initiatives"],
+    ["Decision Center", decisions.length + " decisions", outcomes.length + " outcomes"],
+    ["Trust", trusts.length + " records", patterns.length + " patterns"],
+    ["Knowledge", knowledgeRecords.length + " records", capabilities.length + " capabilities"],
+    ["Constraints", constraints.length + " blocks", opportunities.length + " opportunities"],
+    ["Commands", commands.length + " commands", platform.user ? platform.user.name : ""],
+  ];
+  dom.summaryGrid.innerHTML = items.map(function (item) {
+    return '<div class="summary-card"><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong><div class="card-sub">' + escapeHtml(item[2]) + '</div></div>';
+  }).join("");
+  dom.summaryNote.textContent = 'Platform posture: ' + (health.label || 'unknown') + '. ' + (state.executive && state.executive.answers ? state.executive.answers.whatShouldWeDo : '') + ' ' + ((state.reality && state.reality.reality) ? ('Drift ' + formatPercent(state.reality.reality.reality_drift || 0)) : '');
+}
+
+function renderOverview(entities, relationships, agents, missions, simulations, reports, commands, goals, initiatives, objectives, constraints, opportunities, trusts, patterns, decisions, outcomes, knowledgeRecords, capabilities, events, health, platform) {
+  const topMission = missions[0] || {};
+  const topSimulation = simulations[0] || {};
+  const topDecision = decisions[0] || {};
+  const topGoal = goals[0] || {};
+  const cards = [
+    { label: 'Platform', value: platform.tenant ? platform.tenant.name : 'n/a', sub: platform.user ? platform.user.name : 'owner' },
+    { label: 'Risk', value: health.label || 'unknown', sub: 'score ' + (health.score != null ? health.score.toFixed(2) : '--') },
+    { label: 'Top Goal', value: topGoal.title || 'n/a', sub: formatPercent(topGoal.confidence || 0) + ' confidence' },
+    { label: 'Top Mission', value: topMission.title || 'n/a', sub: formatPercent(topMission.confidence || 0) + ' confidence' },
+    { label: 'Top Simulation', value: topSimulation.title || 'n/a', sub: formatPercent(topSimulation.confidence || 0) + ' confidence' },
+    { label: 'Top Decision', value: topDecision.title || 'n/a', sub: formatPercent(topDecision.confidence || 0) + ' confidence' },
+    { label: 'Trust', value: formatNumber(trusts.length), sub: formatNumber(patterns.length) + ' patterns' },
+    { label: 'Knowledge', value: formatNumber(knowledgeRecords.length), sub: formatNumber(capabilities.length) + ' capabilities' },
+  ];
+  dom.overviewCards.innerHTML = cards.map(function (card) {
+    return '<div class="metric-card"><span>' + escapeHtml(card.label) + '</span><strong>' + escapeHtml(card.value) + '</strong><small>' + escapeHtml(card.sub) + '</small></div>';
+  }).join("");
+  dom.overviewTags.innerHTML = [
+    '<span class="pill good">' + escapeHtml((health.label || 'unknown').toUpperCase()) + '</span>',
+    '<span class="pill">' + escapeHtml(platform.economics ? String(platform.economics.roi || 'ROI ready') : 'ROI ready') + '</span>',
+    '<span class="pill">' + escapeHtml(platform.workflow && platform.workflow.cadence ? platform.workflow.cadence : 'continuous') + '</span>'
+  ].join("");
+}
+
+function renderGraph(graph, entities, relationships) {
+  const nodes = Array.isArray(graph.nodes) && graph.nodes.length ? graph.nodes : entities;
+  const edges = Array.isArray(graph.edges) ? graph.edges : relationships;
+  const positions = {};
+  const centerX = 500;
+  const centerY = 280;
+  const radius = 220;
+  const step = Math.max(1, nodes.length - 1);
+
+  nodes.forEach(function (node, index) {
+    if (node.id === 'company') {
+      positions[node.id] = { x: centerX, y: centerY, r: 58 };
+      return;
+    }
+    const angle = (index / step) * Math.PI * 2 - Math.PI / 2;
+    const distance = radius + (index % 3) * 34;
+    positions[node.id] = {
+      x: centerX + Math.cos(angle) * distance,
+      y: centerY + Math.sin(angle) * distance,
+      r: 36 + (index % 4) * 2,
+    };
+  });
+
+  const svgParts = [];
+  svgParts.push('<defs><linearGradient id="nodeGlow" x1="0%" x2="100%" y1="0%" y2="100%"><stop offset="0%" stop-color="#86f5c5"/><stop offset="100%" stop-color="#7fb3ff"/></linearGradient></defs>');
+  edges.forEach(function (edge) {
+    const from = positions[edge.from];
+    const to = positions[edge.to];
+    if (!from || !to) return;
+    svgParts.push('<line class="graph-edge" x1="' + from.x.toFixed(1) + '" y1="' + from.y.toFixed(1) + '" x2="' + to.x.toFixed(1) + '" y2="' + to.y.toFixed(1) + '" />');
+  });
+  nodes.forEach(function (node) {
+    const pos = positions[node.id];
+    if (!pos) return;
+    svgParts.push(
+      '<g class="graph-node" data-node-id="' + escapeHtml(node.id) + '" data-kind="' + escapeHtml(node.kind || node.label || '') + '" transform="translate(' + pos.x.toFixed(1) + ',' + pos.y.toFixed(1) + ')">' +
+        '<circle r="' + pos.r + '" />' +
+        '<circle r="' + Math.max(10, pos.r - 14) + '" fill="rgba(0,0,0,0.18)" stroke="url(#nodeGlow)" stroke-width="1" />' +
+        '<text y="-2">' + escapeHtml(node.label || node.name || node.id) + '</text>' +
+        '<text y="14" class="card-sub">' + escapeHtml(node.kind || node.type || '') + '</text>' +
+      '</g>'
+    );
+  });
+  dom.graphSvg.innerHTML = svgParts.join('');
+  dom.graphSvg.querySelectorAll('[data-node-id]').forEach(function (nodeEl) {
+    nodeEl.addEventListener('click', function () {
+      selectEntity(nodeEl.dataset.nodeId);
     });
-    socket.addEventListener("message", (event) => {
-      const payload = JSON.parse(event.data);
-      if (payload.type === "hello") {
-        updateMetrics(payload.payload || {}, state.roadmap || {});
-      } else if (payload.type === "overview") {
-        state.overview = payload.payload || null;
-        renderOverview();
-        renderInsights();
-        renderHistory();
-      } else if (payload.type === "event") {
-        pushFeed(`Event: ${payload.payload?.intelligence?.winner?.detail?.algorithm || "update"}`);
-      } else if (payload.type === "dream") {
-        pushFeed("Dream cycle consolidated");
-      } else if (payload.type === "ask") {
-        pushFeed("Intervention processed");
+  });
+}
+
+function renderAgents(agents, missions) {
+  dom.agentsList.innerHTML = agents.map(function (agent) {
+    const mission = missions.find(function (item) { return item.owner_id === agent.id; });
+    return '<div class="agent-card" data-agent-id="' + escapeHtml(agent.id) + '">' +
+      '<div class="card-row"><strong>' + escapeHtml(agent.name || agent.id) + '</strong><span class="pill">' + escapeHtml(agent.role || 'agent') + '</span></div>' +
+      '<div class="card-sub">' + escapeHtml(agent.lifecycle || 'deploy') + ' | ' + escapeHtml(agent.status || 'idle') + '</div>' +
+      '<div class="inline-meta"><span class="pill good">ROI ' + escapeHtml(String(agent.economics && agent.economics.roi != null ? agent.economics.roi : 0)) + '</span><span class="pill">$' + formatNumber(agent.economics && agent.economics.cost_per_hour ? agent.economics.cost_per_hour : 0) + '/hr</span></div>' +
+      '<div class="card-sub">Memory ' + formatNumber(agent.memory && agent.memory.episodes ? agent.memory.episodes : 0) + ' episodes. ' + (mission ? 'Owner: ' + escapeHtml(mission.title) : 'No mission assigned.') + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderMissions(missions, agents) {
+  dom.missionsList.innerHTML = missions.map(function (mission) {
+    const owner = agents.find(function (agent) { return agent.id === mission.owner_id; });
+    const progress = Number(mission.progress || 0);
+    const assigned = owner ? owner.name : 'Unassigned';
+    return '<div class="mission-card" data-mission-id="' + escapeHtml(mission.id) + '">' +
+      '<div class="card-row"><strong>' + escapeHtml(mission.title) + '</strong><span class="pill">' + escapeHtml(mission.stage || 'discover') + '</span></div>' +
+      '<div class="card-sub">' + escapeHtml(mission.objective || mission.summary || '') + '</div>' +
+      '<div class="progress"><span style="width:' + Math.max(6, progress * 100) + '%"></span></div>' +
+      '<div class="inline-meta"><span class="pill good">' + formatPercent(mission.confidence || 0) + ' confidence</span><span class="pill">ROI ' + escapeHtml(String(mission.roi || 0)) + '</span><span class="pill">Owner: ' + escapeHtml(assigned) + '</span></div>' +
+      '<div class="row-actions">' +
+        '<button class="button" data-action="simulate" data-mission-id="' + escapeHtml(mission.id) + '">Simulate</button>' +
+        '<button class="button" data-action="assign" data-mission-id="' + escapeHtml(mission.id) + '">Assign Planner</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  dom.missionsList.querySelectorAll('[data-action="simulate"]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      runSimulationForMission(button.dataset.missionId);
+    });
+  });
+  dom.missionsList.querySelectorAll('[data-action="assign"]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      assignPlannerToMission(button.dataset.missionId);
+    });
+  });
+}
+
+function renderSimulations(simulations, missions) {
+  dom.simulationsList.innerHTML = simulations.map(function (simulation) {
+    const mission = missions.find(function (item) { return item.id === simulation.linked_mission_id; });
+    return '<div class="sim-card" data-simulation-id="' + escapeHtml(simulation.id) + '">' +
+      '<div class="card-row"><strong>' + escapeHtml(simulation.title) + '</strong><span class="pill">' + escapeHtml(simulation.scenario || 'scenario') + '</span></div>' +
+      '<div class="card-sub">' + escapeHtml(simulation.recommendation || '') + '</div>' +
+      '<div class="inline-meta"><span class="pill good">' + formatPercent(simulation.confidence || 0) + '</span><span class="pill">ROI ' + escapeHtml(String(simulation.roi || 0)) + '</span><span class="pill">Mission: ' + escapeHtml(mission ? mission.title : 'none') + '</span></div>' +
+    '</div>';
+  }).join('');
+}
+
+
+function renderObservations(observations, reality) {
+  dom.observationsList.innerHTML = observations.slice(0, 8).map(function (observation) {
+    return '<div class="answer-card">' +
+      '<span class="card-kicker">Observation</span>' +
+      '<strong>' + escapeHtml(observation.title || observation.summary || observation.id) + '</strong>' +
+      '<small>Source ' + escapeHtml(observation.source || 'cyvx') + ' | Confidence ' + formatPercent(observation.confidence || 0) + '</small>' +
+      '<div class="card-sub">' + escapeHtml(JSON.stringify(observation.observed_change || observation.observed_state || {})) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderReality(reality, observations) {
+  const items = [
+    ['Graph freshness', formatPercent(reality.graph_freshness || 0), 'reality calibration'],
+    ['Graph confidence', formatPercent(reality.graph_confidence || 0), 'observation quality'],
+    ['Reality drift', formatPercent(reality.reality_drift || 0), observations.length + ' observations'],
+  ];
+  dom.realityList.innerHTML = items.map(function (item) {
+    return '<div class="metric-card"><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong><small>' + escapeHtml(item[2]) + '</small></div>';
+  }).join('');
+}
+
+function renderKernel(kernel, platform) {
+  const criteria = Array.isArray(platform.criteria) ? platform.criteria : [];
+  const realityObjects = Array.isArray(platform.realityObjects) ? platform.realityObjects : [];
+  const significanceRecords = Array.isArray(platform.significanceRecords) ? platform.significanceRecords : [];
+  const interventions = Array.isArray(platform.interventions) ? platform.interventions : [];
+  const outcomes = Array.isArray(platform.outcomes) ? platform.outcomes : [];
+  const evolutionRecommendations = Array.isArray(platform.evolutionRecommendations) ? platform.evolutionRecommendations : [];
+  dom.kernelOverviewList.textContent = safeJson({ counts: kernel.counts || {}, services: kernel.services || {}, cir: kernel.cir || {} });
+  dom.constitutionList.textContent = safeJson(criteria.slice(0, 6));
+  dom.realityObjectsList.textContent = safeJson(realityObjects.slice(0, 6));
+  dom.significanceList.textContent = safeJson((kernel.topSignificanceRecords || significanceRecords).slice(0, 6));
+  dom.interventionQueueList.textContent = safeJson((kernel.topInterventions || interventions).slice(0, 6));
+  dom.outcomesEvidenceList.textContent = safeJson((kernel.recentOutcomes || outcomes).slice(0, 6));
+  dom.evolutionList.textContent = safeJson((kernel.evolutionRecommendations || evolutionRecommendations).slice(0, 6));
+}
+
+function renderCir(cir) {
+  dom.cirList.textContent = safeJson(cir || {});
+}
+
+function renderPortfolio(portfolio, missions, goals, objectives) {
+  const items = [
+    ['Missions', portfolio.mission_count || missions.length || 0, 'portfolio size'],
+    ['Overlap', formatPercent(portfolio.overlap || 0), 'redundancy'],
+    ['Alignment', formatPercent(portfolio.strategic_alignment || 0), 'capability fit'],
+    ['Objectives', portfolio.objective_span || objectives.length || 0, 'strategic reach'],
+    ['Goals', portfolio.goal_span || goals.length || 0, 'top-level intent'],
+  ];
+  dom.portfolioList.innerHTML = items.map(function (item) {
+    return '<div class="summary-card"><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong><div class="card-sub">' + escapeHtml(item[2]) + '</div></div>';
+  }).join('');
+}
+
+function renderDecisions(decisions, missions, outcomes) {
+  dom.decisionsList.innerHTML = decisions.map(function (decision) {
+    const mission = missions.find(function (item) { return item.id === decision.related_mission_id; });
+    const outcome = outcomes.find(function (item) { return item.decision_id === decision.id; });
+    return '<div class="answer-card">' +
+      '<span class="card-kicker">Decision</span>' +
+      '<strong>' + escapeHtml(decision.title || decision.id) + '</strong>' +
+      '<small>Confidence ' + formatPercent(decision.confidence || 0) + ' | Mission ' + escapeHtml(mission ? mission.title : 'n/a') + '</small>' +
+      '<small>Alternatives ' + escapeHtml(String((decision.alternatives || []).length)) + ' | Outcome ' + escapeHtml(outcome ? outcome.status || 'recorded' : 'pending') + '</small>' +
+      '<div class="card-sub">Expected impact ' + escapeHtml(String(decision.expected_impact && decision.expected_impact.value != null ? decision.expected_impact.value : 0)) + ' | Risks ' + escapeHtml(String((decision.risks || []).length)) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderKnowledge(knowledgeRecords, missions, outcomes) {
+  dom.knowledgeList.innerHTML = knowledgeRecords.map(function (record) {
+    const mission = missions.find(function (item) { return item.id === record.mission_id; });
+    const outcome = outcomes.find(function (item) { return item.id === record.outcome_id; });
+    return '<div class="answer-card">' +
+      '<span class="card-kicker">Knowledge</span>' +
+      '<strong>' + escapeHtml(record.title || record.id) + '</strong>' +
+      '<small>Mission ' + escapeHtml(mission ? mission.title : 'n/a') + ' | Outcome ' + escapeHtml(outcome ? outcome.title : 'n/a') + '</small>' +
+      '<div class="card-sub">' + escapeHtml(record.lesson_learned || record.future_recommendation || '') + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderCapabilities(capabilities, entities, missions) {
+  dom.capabilitiesList.innerHTML = capabilities.map(function (capability) {
+    const linkedEntity = entities.find(function (item) { return (capability.linked_entity_ids || []).includes(item.id); });
+    const mission = missions.find(function (item) { return item.target_entity_ids && linkedEntity && item.target_entity_ids.includes(linkedEntity.id); });
+    return '<div class="answer-card">' +
+      '<span class="card-kicker">Capability</span>' +
+      '<strong>' + escapeHtml(capability.title || capability.name || capability.id) + '</strong>' +
+      '<small>Current ' + escapeHtml(String(capability.current || 0)) + ' | Potential ' + escapeHtml(String(capability.potential || 0)) + '</small>' +
+      '<small>Growth ' + escapeHtml(String(capability.growth_rate || 0)) + ' | Impact ' + escapeHtml(String(capability.impact || 0)) + '</small>' +
+      '<div class="card-sub">' + escapeHtml(linkedEntity ? linkedEntity.label : 'No linked entity') + (mission ? ' | Mission ' + escapeHtml(mission.title) : '') + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderGovernance(platform) {
+  const missions = Array.isArray(platform.missions) ? platform.missions : [];
+  dom.governanceList.innerHTML = missions.slice(0, 5).map(function (mission) {
+    const governance = mission.governance || {};
+    return '<div class="answer-card">' +
+      '<span class="card-kicker">Autonomy ' + escapeHtml(String(mission.autonomy_level != null ? mission.autonomy_level : 1)) + '</span>' +
+      '<strong>' + escapeHtml(mission.title || mission.id) + '</strong>' +
+      '<small>Approval ' + escapeHtml(String(!!governance.approval_required)) + ' | Override ' + escapeHtml(String(!!governance.operator_override)) + '</small>' +
+      '<div class="card-sub">Policy ' + escapeHtml(governance.policy_status || 'unknown') + ' | Reversible ' + escapeHtml(String(governance.reversible !== false)) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderExecutive(executive, platform) {
+  const answers = executive.answers || {};
+  const items = [
+    ['What is happening?', answers.whatIsHappening || ''],
+    ['Why?', answers.why || ''],
+    ['What happens next?', answers.whatNext || ''],
+    ['What should we do?', answers.whatShouldWeDo || ''],
+    ['What can CYVX automate?', answers.whatCanCyvxAutomate || ''],
+    ['What creates the most value?', answers.whatCreatesMostValue || ''],
+  ];
+  dom.executiveAnswers.innerHTML = items.map(function (item) {
+    return '<div class="answer-card"><span class="card-kicker">' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
+  }).join('');
+
+  const forecast = executive.forecast || {};
+  const recommendations = Array.isArray(executive.recommendations) ? executive.recommendations : [];
+  dom.executiveRecommendations.innerHTML = [
+    '<div class="answer-card"><span class="card-kicker">Forecast</span><strong>' + escapeHtml(forecast.likelyOutcome || 'n/a') + '</strong><small>Confidence ' + escapeHtml(String(forecast.confidence != null ? forecast.confidence : '--')) + ' | Horizon ' + escapeHtml(String(forecast.horizonDays || '--')) + ' days</small></div>'
+  ].concat(recommendations.map(function (item) {
+    return '<div class="answer-card"><span class="card-kicker">Recommendation</span><strong>' + escapeHtml(item.title) + '</strong><small>Confidence ' + formatPercent(item.confidence || 0) + ' | ROI ' + escapeHtml(String(item.roi || 0)) + '</small></div>';
+  })).join('');
+}
+
+function renderEvents(events) {
+  const items = state.liveFeed.concat((events || []).slice(0, 10).map(function (event) {
+    return { at: event.at || event.created_at, message: (event.event_type || event.type || 'event') + ': ' + (event.summary || '') };
+  }));
+  dom.eventsList.innerHTML = items.slice(0, 12).map(function (item) {
+    return '<div class="event-card"><div class="card-row"><span class="card-kicker">' + escapeHtml(formatDate(item.at)) + '</span></div><strong>' + escapeHtml(item.message) + '</strong></div>';
+  }).join('');
+}
+
+function renderStrategy(goals, initiatives, objectives, constraints) {
+  dom.strategyList.innerHTML = [
+    ['Goal', goals],
+    ['Initiative', initiatives],
+    ['Objective', objectives],
+  ].map(function (group) {
+    const label = group[0];
+    const items = group[1];
+    const top = items[0] || {};
+    return '<div class="answer-card">' +
+      '<span class="card-kicker">' + escapeHtml(label) + '</span>' +
+      '<strong>' + escapeHtml(top.title || top.name || 'n/a') + '</strong>' +
+      '<small>Count ' + escapeHtml(String(items.length)) + ' | Confidence ' + formatPercent(top.confidence || 0) + '</small>' +
+      '<div class="card-sub">' + escapeHtml(top.description || top.state || '') + '</div>' +
+    '</div>';
+  }).join('');
+  dom.constraintsList.innerHTML = constraints.map(function (constraint) {
+    return '<div class="answer-card">' +
+      '<span class="card-kicker">Constraint</span>' +
+      '<strong>' + escapeHtml(constraint.title || constraint.id) + '</strong>' +
+      '<small>Severity ' + escapeHtml(constraint.severity || 'medium') + ' | Confidence ' + formatPercent(constraint.confidence || 0) + '</small>' +
+      '<div class="card-sub">' + escapeHtml(constraint.blocker || constraint.description || '') + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderTrust(trusts, simulations, decisions) {
+  dom.trustList.innerHTML = trusts.slice(0, 6).map(function (trust) {
+    const simulation = simulations.find(function (item) { return item.id === trust.subject_id; });
+    const decision = decisions.find(function (item) { return item.id === trust.subject_id; });
+    return '<div class="answer-card">' +
+      '<span class="card-kicker">Trust</span>' +
+      '<strong>' + escapeHtml(trust.subject_title || trust.subject_id || 'n/a') + '</strong>' +
+      '<small>Score ' + escapeHtml(String(trust.trust_score != null ? trust.trust_score : trust.score || 0)) + ' | Trend ' + escapeHtml(String(trust.trust_trend != null ? trust.trust_trend : 0)) + '</small>' +
+      '<div class="card-sub">' + escapeHtml((trust.calibration ? 'Calibration ' + String(trust.calibration.error || 0) : '')) + (simulation ? ' | Simulation' : '') + (decision ? ' | Decision' : '') + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderOpportunities(opportunities, patterns, missions) {
+  dom.opportunitiesList.innerHTML = opportunities.slice(0, 6).map(function (opportunity) {
+    const mission = missions.find(function (item) { return item.id === opportunity.mission_id; });
+    return '<div class="answer-card">' +
+      '<span class="card-kicker">Opportunity</span>' +
+      '<strong>' + escapeHtml(opportunity.title || opportunity.id) + '</strong>' +
+      '<small>Value ' + escapeHtml(String(opportunity.expected_value || 0)) + ' | Confidence ' + formatPercent(opportunity.confidence || 0) + '</small>' +
+      '<div class="card-sub">Effort ' + escapeHtml(String(opportunity.effort || 0)) + ' | Risk ' + escapeHtml(String(opportunity.risk || 0)) + (mission ? ' | Mission ' + escapeHtml(mission.title) : '') + '</div>' +
+    '</div>';
+  }).join('');
+  dom.patternsList.innerHTML = patterns.slice(0, 6).map(function (pattern) {
+    return '<div class="answer-card">' +
+      '<span class="card-kicker">Pattern</span>' +
+      '<strong>' + escapeHtml(pattern.title || pattern.id) + '</strong>' +
+      '<small>Frequency ' + escapeHtml(String(pattern.frequency || 0)) + ' | Confidence ' + formatPercent(pattern.confidence || 0) + '</small>' +
+      '<div class="card-sub">' + escapeHtml(pattern.description || pattern.kind || '') + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderDetails(platform) {
+  const entities = Array.isArray(platform.entities) ? platform.entities : [];
+  const missions = Array.isArray(platform.missions) ? platform.missions : [];
+  const entity = entities.find(function (item) { return item.id === state.selectedEntityId; }) || entities[0] || {};
+  const mission = missions.find(function (item) { return item.id === state.selectedMissionId; }) || missions[0] || {};
+  const twin = platform.digitalTwin || {};
+
+  dom.entityDetail.innerHTML = '<span class="card-kicker">Selected Entity</span><strong>' + escapeHtml(entity.label || entity.name || 'n/a') + '</strong><div class="detail-meta">' + escapeHtml(entity.kind || '') + ' | ' + escapeHtml(entity.state || '') + ' | ' + escapeHtml(entity.health || '') + '</div><div class="detail-body">Risk ' + escapeHtml(String(entity.risk && entity.risk.score != null ? entity.risk.score.toFixed(2) : '--')) + '. Ownership ' + escapeHtml(entity.ownership || 'platform') + '. Impact ' + escapeHtml(String(entity.impact != null ? entity.impact : '--')) + '.</div>';
+  dom.twinDetail.innerHTML = '<span class="card-kicker">Digital Twin</span><strong>' + formatNumber(twin.entityCount || entities.length) + ' entities</strong><div class="detail-meta">' + formatNumber(twin.relationshipCount || 0) + ' relationships</div><div class="detail-body">Onboarded at ' + escapeHtml(formatDate(twin.generatedAt || platform.created_at)) + '. Summary: ' + escapeHtml((twin.summary && twin.summary.posture) || 'active') + '.</div><div class="row-actions"><button class="button" id="focusMissionBtn">Focus Mission</button><button class="button" id="focusEntityBtn">Focus Entity</button></div>';
+
+  const focusMissionBtn = id('focusMissionBtn');
+  if (focusMissionBtn) {
+    focusMissionBtn.addEventListener('click', function () {
+      if (mission.id) {
+        state.selectedMissionId = mission.id;
+        renderDetails(platform);
+        renderMissions(missions, platform.agents || []);
       }
     });
-    socket.addEventListener("close", () => {
-      state.connected = false;
-      els.connectionState.textContent = "Offline";
-      setTimeout(connectSocket, 3000);
+  }
+
+  const focusEntityBtn = id('focusEntityBtn');
+  if (focusEntityBtn) {
+    focusEntityBtn.addEventListener('click', function () {
+      if (entity.id) {
+        state.selectedEntityId = entity.id;
+        renderDetails(platform);
+      }
     });
-    socket.addEventListener("error", () => {
-      state.connected = false;
-    });
-  } catch {
-    state.connected = false;
   }
 }
 
-async function loadLiveState() {
-  try {
-    const [statusRes, agentsRes, leaderboardRes, roadmapRes, stateRes, overviewRes, historyRes, insightsRes] = await Promise.all([
-      fetch('/status'),
-      fetch('/v1/agents'),
-      fetch('/v1/leaderboard'),
-      fetch('/v1/roadmap'),
-      fetch('/api/v1/state'),
-      fetch('/api/v1/overview'),
-      fetch('/api/v1/metrics/history'),
-      fetch('/api/v1/insights'),
-    ]);
-
-    const status = await statusRes.json();
-    const agents = await agentsRes.json();
-    const leaderboard = await leaderboardRes.json();
-    const roadmap = await roadmapRes.json();
-    const stateBody = await stateRes.json();
-    const overview = await overviewRes.json();
-    const history = await historyRes.json();
-    const insights = await insightsRes.json();
-
-    state.agents = agents.agents || [];
-    state.leaderboard = leaderboard.leaderboard || [];
-    state.roadmap = roadmap;
-    state.overview = overview;
-    state.history = history.history || [];
-    state.insights = insights.insights || overview.insights || [];
-    state.connected = true;
-
-    updateMetrics(status, roadmap);
-    renderAgents();
-    renderFeed();
-    renderOverview();
-    renderInsights();
-    renderHistory();
-
-    renderChips('economyList', state.economy);
-    renderChips('governanceList', state.governance);
-
-    if (stateBody?.leaderboard?.length) {
-      pushFeed('Top agent: ' + stateBody.leaderboard[0].id);
-    }
-  } catch (error) {
-    state.connected = false;
-    els.connectionState.textContent = 'Offline';
-    pushFeed('Offline mode: ' + error.message);
-    renderAgents();
-    renderFeed();
-    renderOverview();
-    renderInsights();
-    renderHistory();
-  }
+function selectEntity(idValue) {
+  state.selectedEntityId = idValue;
+  renderDetails(state.platform || {});
 }
 
-async function runIntervention() {
-  const task = els.taskInput.value.trim() || "optimize:cluster";
-  els.askOutput.textContent = "Running intervention...";
-  try {
-    const response = await fetch('/api/v1/command', {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ task }),
-    });
-    const json = await response.json();
-    els.askOutput.textContent = JSON.stringify(json, null, 2);
-    pushFeed(`Ask completed: ${task}`);
-    loadLiveState();
-    if (json?.data?.status === "ok") {
-      const confidence = json.data?.confidence || state.metrics.confidence;
-      els.metricConfidence.textContent = confidence.toFixed(2);
-      els.metricUncertainty.textContent = (1 - confidence).toFixed(2);
-    }
-  } catch (error) {
-    els.askOutput.textContent = JSON.stringify({ error: error.message, task }, null, 2);
-    pushFeed(`Ask failed: ${error.message}`);
-  }
-}
-
-function loadRoadmapView() {
-  fetch("/v1/roadmap")
-    .then((res) => res.json())
-    .then((roadmap) => {
-      state.roadmap = roadmap;
-      updateMetrics({ agents: state.agents.length, events: Number(els.metricEvents.textContent.replace(/,/g, "")) || 0, evolutionCycles: Number(els.metricCycles.textContent.replace(/,/g, "")) || 0, planeGroups: Object.keys(roadmap.planes || {}).length }, roadmap);
-      pushFeed("Roadmap refreshed");
-      renderOverview();
-      renderInsights();
-    });
-}
-
-function drawCoin(now) {
-  const w = coinCanvas.width;
-  const h = coinCanvas.height;
-  const cx = w / 2;
-  const cy = h / 2;
-  const radius = Math.min(w, h) * 0.34;
-  const glowRadius = radius * 1.22;
-
-  coinCtx.clearRect(0, 0, w, h);
-
-  const sky = coinCtx.createRadialGradient(cx, cy - 120, 80, cx, cy, h * 0.6);
-  sky.addColorStop(0, "rgba(255, 201, 102, 0.11)");
-  sky.addColorStop(0.4, "rgba(25, 65, 136, 0.42)");
-  sky.addColorStop(1, "rgba(3, 7, 16, 1)");
-  coinCtx.fillStyle = sky;
-  coinCtx.fillRect(0, 0, w, h);
-
-  const halo = coinCtx.createRadialGradient(cx, cy + 180, 0, cx, cy + 180, glowRadius);
-  halo.addColorStop(0, "rgba(55, 171, 255, 0.55)");
-  halo.addColorStop(0.35, "rgba(25, 112, 255, 0.18)");
-  halo.addColorStop(1, "rgba(25, 112, 255, 0)");
-  coinCtx.fillStyle = halo;
-  coinCtx.beginPath();
-  coinCtx.ellipse(cx, cy + 190, glowRadius * 1.05, glowRadius * 0.28, 0, 0, Math.PI * 2);
-  coinCtx.fill();
-
-  const rotation = now * 0.00035;
-  const ringGradient = coinCtx.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + radius);
-  ringGradient.addColorStop(0, "#ffd97a");
-  ringGradient.addColorStop(0.4, "#b87a20");
-  ringGradient.addColorStop(0.8, "#ffdb86");
-  ringGradient.addColorStop(1, "#7a4b06");
-
-  coinCtx.save();
-  coinCtx.translate(cx, cy);
-  coinCtx.rotate(rotation);
-
-  coinCtx.shadowColor = "rgba(255, 204, 102, 0.65)";
-  coinCtx.shadowBlur = 45;
-  coinCtx.fillStyle = ringGradient;
-  coinCtx.beginPath();
-  coinCtx.arc(0, 0, radius * 1.1, 0, Math.PI * 2);
-  coinCtx.fill();
-
-  coinCtx.shadowBlur = 0;
-  coinCtx.fillStyle = "rgba(8, 10, 16, 1)";
-  coinCtx.beginPath();
-  coinCtx.arc(0, 0, radius * 0.93, 0, Math.PI * 2);
-  coinCtx.fill();
-
-  for (let i = 0; i < 96; i++) {
-    const angle = (i / 96) * Math.PI * 2;
-    const inner = radius * 0.56;
-    const outer = radius * (0.76 + (i % 7) * 0.01);
-    coinCtx.strokeStyle = `rgba(100, 170, 255, ${0.12 + (i % 7) * 0.01})`;
-    coinCtx.lineWidth = i % 11 === 0 ? 3 : 1.4;
-    coinCtx.beginPath();
-    coinCtx.moveTo(Math.cos(angle) * inner, Math.sin(angle) * inner);
-    coinCtx.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
-    coinCtx.stroke();
-  }
-
-  coinCtx.strokeStyle = "rgba(255, 215, 130, 0.8)";
-  coinCtx.lineWidth = 16;
-  coinCtx.beginPath();
-  coinCtx.arc(0, 0, radius * 0.97, 0, Math.PI * 2);
-  coinCtx.stroke();
-
-  coinCtx.lineWidth = 2;
-  coinCtx.strokeStyle = "rgba(255, 255, 255, 0.12)";
-  coinCtx.beginPath();
-  coinCtx.arc(0, 0, radius * 0.68, 0, Math.PI * 2);
-  coinCtx.stroke();
-
-  const xGradient = coinCtx.createLinearGradient(-radius, -radius, radius, radius);
-  xGradient.addColorStop(0, "#ffcf60");
-  xGradient.addColorStop(0.5, "#d49b2d");
-  xGradient.addColorStop(1, "#fff0a2");
-
-  coinCtx.shadowColor = "rgba(90, 165, 255, 0.95)";
-  coinCtx.shadowBlur = 30;
-  coinCtx.fillStyle = xGradient;
-  coinCtx.beginPath();
-  coinCtx.moveTo(-radius * 0.46, -radius * 0.46);
-  coinCtx.lineTo(-radius * 0.16, -radius * 0.18);
-  coinCtx.lineTo(radius * 0.46, -radius * 0.46);
-  coinCtx.lineTo(radius * 0.18, -radius * 0.14);
-  coinCtx.lineTo(radius * 0.46, radius * 0.46);
-  coinCtx.lineTo(radius * 0.14, radius * 0.18);
-  coinCtx.lineTo(-radius * 0.46, radius * 0.46);
-  coinCtx.lineTo(-radius * 0.18, radius * 0.14);
-  coinCtx.closePath();
-  coinCtx.fill();
-
-  coinCtx.shadowBlur = 0;
-  coinCtx.fillStyle = "rgba(35, 160, 255, 0.85)";
-  coinCtx.beginPath();
-  coinCtx.arc(0, 0, radius * 0.09, 0, Math.PI * 2);
-  coinCtx.fill();
-
-  for (let i = 0; i < particles.length; i++) {
-    const particle = particles[i];
-    const a = particle.angle + now * 0.00015 * particle.speed;
-    const r = radius * (0.3 + particle.radius);
-    const x = Math.cos(a) * r;
-    const y = Math.sin(a * 1.08) * r * 0.62;
-    coinCtx.fillStyle = particle.glow > 0.9 ? "rgba(255, 220, 128, 0.9)" : "rgba(85, 184, 255, 0.8)";
-    coinCtx.beginPath();
-    coinCtx.arc(x, y, particle.glow > 0.9 ? 4.8 : 2.4, 0, Math.PI * 2);
-    coinCtx.fill();
-  }
-
-  coinCtx.restore();
-
-  coinCtx.fillStyle = "rgba(255,255,255,0.9)";
-  coinCtx.font = "700 58px 'Space Grotesk', sans-serif";
-  coinCtx.textAlign = "center";
-  coinCtx.fillText("CYVXAI", cx, 110);
-  coinCtx.font = "500 22px Inter, sans-serif";
-  coinCtx.fillStyle = "rgba(235, 221, 190, 0.95)";
-  coinCtx.fillText("Quantum-level intelligence for compute civilization", cx, 152);
-}
-
-function drawPlanet(now) {
-  const w = planetCanvas.width;
-  const h = planetCanvas.height;
-  const cx = w / 2;
-  const cy = h / 2 + 24;
-  const radius = Math.min(w, h) * 0.25;
-
-  planetCtx.clearRect(0, 0, w, h);
-
-  const background = planetCtx.createLinearGradient(0, 0, 0, h);
-  background.addColorStop(0, "rgba(6, 10, 18, 1)");
-  background.addColorStop(1, "rgba(2, 5, 10, 1)");
-  planetCtx.fillStyle = background;
-  planetCtx.fillRect(0, 0, w, h);
-
-  const orb = planetCtx.createRadialGradient(cx, cy - 50, 100, cx, cy, radius * 3);
-  orb.addColorStop(0, "rgba(35, 149, 255, 0.12)");
-  orb.addColorStop(0.5, "rgba(15, 45, 98, 0.2)");
-  orb.addColorStop(1, "rgba(2, 5, 10, 1)");
-  planetCtx.fillStyle = orb;
-  planetCtx.fillRect(0, 0, w, h);
-
-  planetCtx.save();
-  planetCtx.translate(cx, cy);
-
-  const overlayColors = {
-    world: ["rgba(255, 211, 128, 0.45)", "rgba(60, 165, 255, 0.45)"],
-    causal: ["rgba(255, 160, 96, 0.5)", "rgba(96, 165, 255, 0.4)"],
-    future: ["rgba(255, 222, 155, 0.42)", "rgba(112, 199, 255, 0.42)"],
-    economic: ["rgba(255, 190, 72, 0.55)", "rgba(92, 182, 255, 0.44)"],
+async function modelCompany() {
+  const payload = {
+    command: 'model my company',
+    companyName: dom.companyName.value.trim() || 'Acme Robotics',
+    employees: Number(dom.companyEmployees.value || 0),
+    cloudSpend: Number(dom.companySpend.value || 0),
+    systems: Number(dom.companySystems.value || 0),
+    teams: Number(dom.companyTeams.value || 0),
   };
-  const [a, b] = overlayColors[state.overlay] || overlayColors.world;
-
-  for (let i = 0; i < 4; i++) {
-    planetCtx.strokeStyle = `rgba(150, 190, 255, ${0.08 + i * 0.03})`;
-    planetCtx.beginPath();
-    planetCtx.ellipse(0, 0, radius * (1.5 + i * 0.2), radius * (0.78 + i * 0.1), -0.2, 0, Math.PI * 2);
-    planetCtx.stroke();
-  }
-
-  planetCtx.strokeStyle = "rgba(255, 205, 107, 0.38)";
-  planetCtx.lineWidth = 3;
-  planetCtx.beginPath();
-  planetCtx.ellipse(0, 0, radius * 1.42, radius * 0.76, -0.18, 0, Math.PI * 2);
-  planetCtx.stroke();
-
-  planetCtx.fillStyle = "rgba(7, 15, 30, 0.92)";
-  planetCtx.beginPath();
-  planetCtx.arc(0, 0, radius, 0, Math.PI * 2);
-  planetCtx.fill();
-
-  const gridLines = 28;
-  for (let i = 0; i < gridLines; i++) {
-    const angle = (i / gridLines) * Math.PI * 2;
-    planetCtx.strokeStyle = i % 3 === 0 ? a : b;
-    planetCtx.globalAlpha = 0.3;
-    planetCtx.beginPath();
-    planetCtx.moveTo(Math.cos(angle) * radius * 0.18, Math.sin(angle) * radius * 0.18);
-    planetCtx.lineTo(Math.cos(angle) * radius * 0.98, Math.sin(angle) * radius * 0.98);
-    planetCtx.stroke();
-  }
-
-  planetCtx.globalAlpha = 1;
-  planetCtx.lineWidth = 1.3;
-  for (let i = 0; i < 10; i++) {
-    const y = -radius * 0.78 + (radius * 1.56 * i) / 9;
-    planetCtx.strokeStyle = i % 2 === 0 ? "rgba(255,255,255,0.06)" : "rgba(255,210,125,0.07)";
-    planetCtx.beginPath();
-    planetCtx.ellipse(0, y, radius * 0.96, radius * (0.18 + i * 0.012), 0, 0, Math.PI * 2);
-    planetCtx.stroke();
-  }
-
-  const nodes = 48;
-  for (let i = 0; i < nodes; i++) {
-    const angle = (i / nodes) * Math.PI * 2 + now * 0.00005;
-    const r = radius * (0.48 + (i % 5) * 0.08);
-    const x = Math.cos(angle) * r;
-    const y = Math.sin(angle * 1.14) * r * 0.52;
-    planetCtx.fillStyle = i % 7 === 0 ? "rgba(255, 220, 133, 0.95)" : "rgba(100, 186, 255, 0.82)";
-    planetCtx.beginPath();
-    planetCtx.arc(x, y, i % 7 === 0 ? 4.4 : 2.2, 0, Math.PI * 2);
-    planetCtx.fill();
-  }
-
-  const ring = planetCtx.createLinearGradient(-radius, -radius, radius, radius);
-  ring.addColorStop(0, "rgba(255, 208, 100, 0.88)");
-  ring.addColorStop(0.5, "rgba(120, 190, 255, 0.92)");
-  ring.addColorStop(1, "rgba(255, 229, 168, 0.88)");
-  planetCtx.shadowColor = "rgba(255, 195, 83, 0.75)";
-  planetCtx.shadowBlur = 22;
-  planetCtx.strokeStyle = ring;
-  planetCtx.lineWidth = 8;
-  planetCtx.beginPath();
-  planetCtx.arc(0, 0, radius * 0.88, 0, Math.PI * 2);
-  planetCtx.stroke();
-
-  planetCtx.restore();
-
-  planetCtx.fillStyle = "rgba(255, 235, 196, 0.95)";
-  planetCtx.font = "700 28px 'Space Grotesk', sans-serif";
-  planetCtx.fillText("Planetary Infrastructure Map", 56, 72);
-  planetCtx.font = "500 16px Inter, sans-serif";
-  planetCtx.fillStyle = "rgba(222, 231, 245, 0.72)";
-  planetCtx.fillText(`Overlay: ${state.overlay}`, 56, 98);
+  const result = await requestJson('/api/v1/commands', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  pushFeed('Modeled company: ' + payload.companyName);
+  setOutput(result);
+  await sync();
 }
 
-function resizeCanvas() {
-  const coinRect = coinCanvas.getBoundingClientRect();
-  const planetRect = planetCanvas.getBoundingClientRect();
-  if (coinRect.width > 0) {
-    dimensions.coin = Math.round(Math.min(coinRect.width, 900));
-  }
-  if (planetRect.width > 0) {
-    dimensions.planet = Math.round(Math.min(planetRect.width, 1400));
-  }
+async function submitCommand() {
+  const payload = {
+    command: dom.commandInput.value.trim() || 'Model my company',
+    companyName: dom.companyName.value.trim() || 'Acme Robotics',
+    employees: Number(dom.companyEmployees.value || 0),
+    cloudSpend: Number(dom.companySpend.value || 0),
+    systems: Number(dom.companySystems.value || 0),
+    teams: Number(dom.companyTeams.value || 0),
+    mission_id: state.selectedMissionId,
+    agent_id: state.selectedAgentId,
+  };
+  const result = await requestJson('/api/v1/commands', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  pushFeed('Command executed');
+  setOutput(result);
+  await sync();
 }
 
-function bindEvents() {
-  document.querySelectorAll("[data-view]").forEach((btn) => {
-    btn.addEventListener("click", () => setView(btn.dataset.view));
+async function createMission() {
+  const payload = {
+    title: dom.missionTitle.value.trim() || 'New mission',
+    objective: dom.missionObjective.value.trim() || '',
+    target_entity_ids: [state.selectedEntityId || 'company'],
+    confidence: 0.82,
+    roi: 2.1,
+    risk: 0.18,
+  };
+  const result = await requestJson('/api/v1/missions', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payload),
   });
-  document.querySelectorAll("[data-overlay]").forEach((btn) => {
-    btn.addEventListener("click", () => setOverlay(btn.dataset.overlay));
+  pushFeed('Mission created: ' + payload.title);
+  setOutput(result);
+  await sync();
+}
+
+async function runSimulation() {
+  const payload = {
+    scenario: dom.simulationScenario.value.trim() || 'outage',
+    recommendation: dom.simulationRecommendation.value.trim() || 'Add verification gates',
+    linked_mission_id: state.selectedMissionId,
+    confidence: 0.88,
+    roi: 3.1,
+  };
+  const result = await requestJson('/api/v1/simulations', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payload),
   });
-  document.getElementById("askBtn").addEventListener("click", runIntervention);
-  document.getElementById("refreshBtn").addEventListener("click", loadLiveState);
-  document.getElementById("loadRoadmapBtn").addEventListener("click", loadRoadmapView);
-  document.querySelectorAll("[data-command]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      els.taskInput.value = btn.dataset.command;
-      runIntervention();
+  pushFeed('Simulation completed: ' + payload.scenario);
+  setOutput(result);
+  await sync();
+}
+
+async function runSimulationForMission(missionId) {
+  state.selectedMissionId = missionId;
+  dom.simulationScenario.value = missionId || 'outage';
+  await runSimulation();
+}
+
+async function assignPlannerToMission(missionId) {
+  const platform = state.platform || {};
+  const agent = (platform.agents || [])[1] || (platform.agents || [])[0];
+  if (!agent) return;
+  const result = await requestJson('/api/v1/commands', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      command: 'assign agent',
+      mission_id: missionId,
+      agent_id: agent.id,
+    }),
+  });
+  pushFeed('Mission assigned: ' + missionId);
+  setOutput(result);
+  await sync();
+}
+
+function setJsonPanel(node, value) {
+  if (!node) return;
+  node.textContent = safeJson(value);
+}
+
+function renderCoordination(coordination, nextBestAction) {
+  setJsonPanel(dom.coordinationOverviewList, coordination);
+  setJsonPanel(dom.humanRolesList, state.humans || coordination.humans || []);
+  setJsonPanel(dom.resourceAllocationList, state.resources || coordination.resources || []);
+  setJsonPanel(dom.assignmentQueueList, state.assignments || coordination.assignments || []);
+  setJsonPanel(dom.approvalGatesList, state.approvals || coordination.approvals || []);
+  setJsonPanel(dom.executionQueueList, state.queue || coordination.queue || []);
+  const resolvedNextBestAction = nextBestAction && nextBestAction.nextBestAction ? nextBestAction.nextBestAction : nextBestAction;
+  setJsonPanel(dom.nextBestActionList, resolvedNextBestAction || coordination.nextBestAction || {});
+  setJsonPanel(dom.crossDomainList, coordination.domains || {});
+}
+
+function bindNavigation() {
+  document.querySelectorAll('[data-target]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      const target = document.getElementById(button.dataset.target);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     });
   });
-  document.getElementById("launchBtn").addEventListener("click", () => {
-    setView("home");
-    pushFeed("App launch sequence acknowledged");
+
+  document.querySelectorAll('[data-graph-filter]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      state.graphFilter = button.dataset.graphFilter;
+      document.querySelectorAll('[data-graph-filter]').forEach(function (chip) {
+        chip.classList.toggle('active', chip === button);
+      });
+      renderAll();
+    });
   });
+}
 
-  window.addEventListener("resize", () => {
-    resizeCanvas();
-    drawCoin(performance.now());
-    drawPlanet(performance.now());
+function bindControls() {
+  dom.modelCompanyBtn.addEventListener('click', modelCompany);
+  dom.refreshBtn.addEventListener('click', sync);
+  dom.commandRunBtn.addEventListener('click', submitCommand);
+  dom.missionLaunchBtn.addEventListener('click', submitCommand);
+  dom.missionCreateBtn.addEventListener('click', createMission);
+  dom.simulationRunBtn.addEventListener('click', runSimulation);
+
+  const graph = dom.graphSvg;
+  graph.addEventListener('click', function (event) {
+    const node = event.target.closest('[data-node-id]');
+    if (node) {
+      selectEntity(node.dataset.nodeId);
+    }
   });
 }
 
-function animate(now) {
-  if (now - lastFrame > 32) {
-    drawCoin(now);
-    drawPlanet(now);
-    lastFrame = now;
-  }
-  requestAnimationFrame(animate);
+function bootstrap() {
+  bindNavigation();
+  bindControls();
+  state.liveFeed.unshift({ at: new Date().toISOString(), message: 'CYVX cockpit initialized' });
+  sync();
+  setInterval(sync, 30000);
 }
 
-function init() {
-  resizeCanvas();
-  renderFeatureList();
-  renderFeed();
-  renderAgents();
-  renderChips("economyList", state.economy);
-  renderChips("governanceList", state.governance);
-  renderOverview();
-  renderInsights();
-  renderHistory();
-  bindEvents();
-  connectSocket();
-  loadLiveState();
-  requestAnimationFrame(animate);
-}
-
-init();
+window.addEventListener('DOMContentLoaded', bootstrap);
+window.__cyvxSelectEntity = selectEntity;

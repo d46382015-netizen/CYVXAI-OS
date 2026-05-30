@@ -12,7 +12,11 @@ echo "╚═══════════════════════�
 cd "$(dirname "$0")"
 
 if [ ! -d node_modules ]; then
-  npm install
+  if [ -f package-lock.json ]; then
+    npm ci --no-audit --no-fund
+  else
+    npm install --no-audit --no-fund
+  fi
 fi
 
 if ! command -v node >/dev/null 2>&1; then

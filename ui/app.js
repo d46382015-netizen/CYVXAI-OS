@@ -24,6 +24,9 @@ const state = {
   selectedSimulationId: null,
   liveFeed: [],
   graphFilter: "all",
+  searchQuery: "",
+  workflowResult: null,
+  workflowDomain: "cloud-operations",
 };
 
 const dom = {
@@ -67,6 +70,11 @@ const dom = {
   executionQueueList: id("executionQueueList"),
   nextBestActionList: id("nextBestActionList"),
   crossDomainList: id("crossDomainList"),
+  workflowOutput: id("workflowOutput"),
+  workflowDomain: id("workflowDomain"),
+  searchInput: id("searchInput"),
+  clearSearchBtn: id("clearSearchBtn"),
+  workflowRunBtn: id("workflowRunBtn"),
   patternIntelligenceList: id("patternIntelligenceList"),
   recommendationIntelligenceList: id("recommendationIntelligenceList"),
   priorityIntelligenceList: id("priorityIntelligenceList"),
@@ -130,6 +138,40 @@ function safeJson(value) {
   } catch (error) {
     return JSON.stringify({ error: error.message }, null, 2);
   }
+}
+
+function matchesSearch(item, query) {
+  if (!query) return true;
+  return safeJson(item).toLowerCase().includes(query);
+}
+
+function filterCollection(items) {
+  const query = String(state.searchQuery || "").trim().toLowerCase();
+  const list = Array.isArray(items) ? items : [];
+  return query ? list.filter(function (item) { return matchesSearch(item, query); }) : list;
+}
+
+function setSearchQuery(value) {
+  state.searchQuery = String(value || "");
+  if (dom.searchInput && dom.searchInput.value !== state.searchQuery) {
+    dom.searchInput.value = state.searchQuery;
+  }
+  renderAll();
+}
+
+async function runOperatorWorkflow() {
+  const domain = (dom.workflowDomain && dom.workflowDomain.value) || state.workflowDomain || "cloud-operations";
+  state.workflowDomain = domain;
+  const result = await requestJson("/api/v1/coordination", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ domain: domain }),
+  });
+  state.workflowResult = result;
+  pushFeed("Operator workflow completed: " + domain);
+  setOutput(result);
+  if (dom.workflowOutput) dom.workflowOutput.textContent = safeJson(result);
+  await sync();
 }
 
 function setOutput(payload) {
@@ -248,6 +290,23 @@ function renderAll() {
   const knowledgeRecords = Array.isArray(platform.knowledgeRecords) ? platform.knowledgeRecords : [];
   const capabilities = Array.isArray(platform.capabilities) ? platform.capabilities : [];
   const events = Array.isArray(platform.events) ? platform.events : [];
+  const query = String(state.searchQuery || "").trim().toLowerCase();
+  const filteredEntities = filterCollection(entities);
+  const filteredRelationships = filterCollection(relationships);
+  const filteredAgents = filterCollection(agents);
+  const filteredMissions = filterCollection(missions);
+  const filteredSimulations = filterCollection(simulations);
+  const filteredDecisions = filterCollection(decisions);
+  const filteredOutcomes = filterCollection(outcomes);
+  const filteredKnowledgeRecords = filterCollection(knowledgeRecords);
+  const filteredCapabilities = filterCollection(capabilities);
+  const filteredEvents = filterCollection(events);
+  const filteredTrusts = filterCollection(trusts);
+  const filteredOpportunities = filterCollection(opportunities);
+  const filteredPatterns = filterCollection(patterns);
+  const filteredObservations = filterCollection(observations);
+  const filteredRecommendations = filterCollection(recommendations);
+  const filteredPriorities = filterCollection(priorities);
 
   dom.connectionState.textContent = status.powered_by ? "Live" : "Connecting";
   dom.platformHealth.textContent = "Health: " + ((health.label || "unknown").toUpperCase());
@@ -255,28 +314,29 @@ function renderAll() {
   renderHeroMetrics(status, health, platform);
   renderSummary(entities, relationships, agents, missions, simulations, reports, commands, goals, initiatives, objectives, constraints, opportunities, trusts, patterns, decisions, outcomes, knowledgeRecords, capabilities, events, health, platform);
   renderOverview(entities, relationships, agents, missions, simulations, reports, commands, goals, initiatives, objectives, constraints, opportunities, trusts, patterns, decisions, outcomes, knowledgeRecords, capabilities, events, health, platform);
-  renderGraph(platform.graph || { nodes: entities, edges: relationships }, entities, relationships);
-  renderAgents(agents, missions);
-  renderMissions(missions, agents);
-  renderSimulations(simulations, missions);
+  renderGraph(platform.graph || { nodes: entities, edges: relationships }, filteredEntities, filteredRelationships);
+  renderAgents(filteredAgents, filteredMissions);
+  renderMissions(filteredMissions, filteredAgents);
+  renderSimulations(filteredSimulations, filteredMissions);
   renderStrategy(goals, initiatives, objectives, constraints);
-  renderTrust(trusts, simulations, decisions);
-  renderObservations(observations, reality);
+  renderTrust(filteredTrusts, filteredSimulations, filteredDecisions);
+  renderObservations(filteredObservations, reality);
   renderReality(reality, observations);
-  renderPortfolio(portfolio, missions, goals, objectives);
+  renderPortfolio(portfolio, filteredMissions, goals, objectives);
   renderKernel(kernel, platform);
   renderCoordination(state.coordination || {}, state.nextBestAction || {}, platform);
   renderCir(cir);
-  renderOpportunities(opportunities, patterns, missions);
-  renderIntelligence(patterns, recommendations, priorities, intelligence);
-  renderDecisions(decisions, missions, outcomes);
-  renderKnowledge(knowledgeRecords, missions, outcomes);
-  renderCapabilities(capabilities, entities, missions);
+  renderOpportunities(filteredOpportunities, filteredPatterns, filteredMissions);
+  renderIntelligence(filteredPatterns, filteredRecommendations, filteredPriorities, intelligence);
+  renderDecisions(filteredDecisions, filteredMissions, filteredOutcomes);
+  renderKnowledge(filteredKnowledgeRecords, filteredMissions, filteredOutcomes);
+  renderCapabilities(filteredCapabilities, filteredEntities, filteredMissions);
   renderGovernance(platform);
   renderExecutive(state.executive || platform.executive || {}, platform);
-  renderEvents(events);
+  renderEvents(filteredEvents);
   renderDetails(platform);
-  setOutput(state.commandResult || platform);
+  if (dom.workflowOutput) dom.workflowOutput.textContent = safeJson(state.workflowResult || {});
+  setOutput(state.commandResult || state.workflowResult || platform);
 }
 
 function renderHeroMetrics(status, health, platform) {
@@ -587,7 +647,7 @@ function renderExecutive(executive, platform) {
 }
 
 function renderEvents(events) {
-  const items = state.liveFeed.concat((events || []).slice(0, 10).map(function (event) {
+  const items = filterCollection(state.liveFeed).concat((events || []).slice(0, 10).map(function (event) {
     return { at: event.at || event.created_at, message: (event.event_type || event.type || 'event') + ': ' + (event.summary || '') };
   }));
   dom.eventsList.innerHTML = items.slice(0, 12).map(function (item) {
@@ -844,6 +904,10 @@ function bindControls() {
   dom.missionLaunchBtn.addEventListener('click', submitCommand);
   dom.missionCreateBtn.addEventListener('click', createMission);
   dom.simulationRunBtn.addEventListener('click', runSimulation);
+  if (dom.workflowRunBtn) dom.workflowRunBtn.addEventListener('click', runOperatorWorkflow);
+  if (dom.workflowDomain) dom.workflowDomain.addEventListener('change', function () { state.workflowDomain = dom.workflowDomain.value; });
+  if (dom.searchInput) dom.searchInput.addEventListener('input', function () { setSearchQuery(dom.searchInput.value); });
+  if (dom.clearSearchBtn) dom.clearSearchBtn.addEventListener('click', function () { setSearchQuery(''); });
 
   const graph = dom.graphSvg;
   graph.addEventListener('click', function (event) {
@@ -857,6 +921,8 @@ function bindControls() {
 function bootstrap() {
   bindNavigation();
   bindControls();
+  if (dom.workflowDomain) dom.workflowDomain.value = state.workflowDomain;
+  if (dom.searchInput) dom.searchInput.value = state.searchQuery;
   state.liveFeed.unshift({ at: new Date().toISOString(), message: 'CYVX cockpit initialized' });
   sync();
   setInterval(sync, 30000);

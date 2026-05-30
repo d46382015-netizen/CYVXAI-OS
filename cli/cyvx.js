@@ -18,8 +18,8 @@ const COMMANDS = [
   "status", "health", "graph", "agents", "missions", "simulations", "simulate", "command", "report",
   "events", "observations", "reality", "portfolio", "decisions", "outcomes", "knowledge", "capabilities", "goals", "initiatives", "constraints", "opportunities", "trust", "patterns", "recommendations", "priorities", "intelligence",
   "criteria", "reality-objects", "significance", "interventions", "evolution", "cir", "kernel",
-  "humans", "resources", "assign", "approvals", "queue", "nba", "coordination",
-  "model-company", "leaderboard", "roadmap", "cluster", "workloads", "actions", "metrics", "healthz", "ask", "serve",
+  "humans", "resources", "assign", "approvals", "queue", "nba", "coordination", "workflow",
+  "onboard", "model-company", "leaderboard", "roadmap", "cluster", "workloads", "actions", "metrics", "healthz", "ask", "serve",
 ];
 
 async function main() {
@@ -101,8 +101,12 @@ async function main() {
     case "nba":
       print({ nextBestAction: kernel.nextBestAction(parseQuery(args)) });
       return;
+    case "workflow":
     case "coordination":
       print(kernel.coordinateScenario(parseQuery(args)));
+      return;
+    case "onboard":
+      print(kernel.modelCompany(parseModelCompanyArgs(args)));
       return;
     case "goals":
       print({ goals: kernel.goals() });

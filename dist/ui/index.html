@@ -33,6 +33,7 @@
 
         <nav class="nav" aria-label="Platform sections">
           <button class="nav-pill active" data-target="overviewPanel">Overview</button>
+          <button class="nav-pill" data-target="productPanel">Product v1</button>
           <button class="nav-pill" data-target="graphPanel">Reality Graph</button>
           <button class="nav-pill" data-target="agentsPanel">Agent OS</button>
           <button class="nav-pill" data-target="missionsPanel">Mission Control</button>
@@ -99,6 +100,34 @@
       </section>
 
       <section class="workspace">
+        <article class="panel panel-span-4" id="productPanel">
+          <div class="panel-head">
+            <div>
+              <h2>Product v1</h2>
+              <p>Onboard, search, and run the full operational loop without leaving the cockpit.</p>
+            </div>
+          </div>
+          <div class="form-grid compact">
+            <label>Workflow Domain
+              <select id="workflowDomain">
+                <option value="cloud-operations">Cloud operations</option>
+                <option value="revenue-operations">Revenue operations</option>
+                <option value="robotics-operations">Robotics operations</option>
+                <option value="coordination">Coordination</option>
+              </select>
+            </label>
+            <label>Search & Filter
+              <input id="searchInput" type="search" placeholder="Search missions, events, knowledge..." />
+            </label>
+          </div>
+          <div class="row-actions">
+            <button class="button primary" id="workflowRunBtn">Run Operator Workflow</button>
+            <button class="button" id="clearSearchBtn">Clear Search</button>
+          </div>
+          <div class="summary-note">The operator workflow uses the frozen coordination path to produce observation, significance, intervention, mission, assignment, outcome, learning, and CIR evidence.</div>
+          <pre class="code-box" id="workflowOutput"></pre>
+        </article>
+
         <article class="panel panel-span-8" id="overviewPanel">
           <div class="panel-head">
             <div>
@@ -321,8 +350,8 @@
         <article class="panel panel-span-6" id="eventsPanel">
           <div class="panel-head">
             <div>
-              <h2>Event Feed</h2>
-              <p>Activity and recent platform events.</p>
+              <h2>Audit Trail</h2>
+              <p>Activity and recent platform events with operator search filtering.</p>
             </div>
           </div>
           <div class="stack-list compact" id="eventsList"></div>

@@ -48,6 +48,12 @@ bash ./start.sh
 - `POST /api/v1/commands`
 - `GET /api/v1/events`
 - `POST /api/v1/events`
+- `GET /api/v1/coordination`
+- `POST /api/v1/coordination`
+- `GET /api/v1/intelligence`
+- `GET /api/v1/patterns`
+- `GET /api/v1/recommendations`
+- `GET /api/v1/priorities`
 - `GET /api/v1/executive`
 - `GET /v1/agents`
 - `GET /v1/leaderboard`
@@ -59,6 +65,13 @@ bash ./start.sh
 - `GET /api/v1/metrics/history`
 - `GET /api/v1/status-model`
 - `GET /metrics`
+
+## Product v1
+- Operator workflow: `POST /api/v1/coordination`
+- Primitive loop: `POST /api/v1/observations`, `POST /api/v1/significance`, `POST /api/v1/interventions`, `POST /api/v1/outcomes`, `POST /api/v1/knowledge`, `POST /api/v1/assignments`, `POST /api/v1/approvals`, `POST /api/v1/queue`
+- Intelligence surfaces: `GET /api/v1/intelligence`, `GET /api/v1/patterns`, `GET /api/v1/recommendations`, `GET /api/v1/priorities`
+- UI: Product v1 onboarding, search/filter, and audit trail
+- CLI aliases: `workflow`, `onboard`, `coordination`
 
 ## CLI
 ```bash

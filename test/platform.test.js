@@ -335,6 +335,12 @@ test('intelligence api and cli expose the same live state', async () => {
 
 test('dashboard is wired for intelligence panels', () => {
   const html = fs.readFileSync('/root/CYVXAI-OS/ui/index.html', 'utf8');
+  assert.ok(html.includes('productPanel'));
+  assert.ok(html.includes('workflowDomain'));
+  assert.ok(html.includes('searchInput'));
+  assert.ok(html.includes('clearSearchBtn'));
+  assert.ok(html.includes('workflowRunBtn'));
+  assert.ok(html.includes('workflowOutput'));
   assert.ok(html.includes('patternIntelligencePanel'));
   assert.ok(html.includes('recommendationIntelligencePanel'));
   assert.ok(html.includes('priorityIntelligencePanel'));
@@ -395,6 +401,25 @@ test('CLI model-company works', () => {
 
   assert.ok(parsed.platform.entities.length >= 4);
   assert.ok(parsed.executive.constitutionalLoop.learn >= 1);
+});
+
+
+test('product workflow CLI aliases work', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cyvx-cli-'));
+  const filePath = path.join(dir, 'state.json');
+  const workflowEnv = { ...process.env, CYVX_PLATFORM_STATE: filePath };
+  const workflow = execFileSync(process.execPath, ['/root/CYVXAI-OS/cli/cyvx.js', 'workflow', 'domain=cloud-operations'], { env: workflowEnv, encoding: 'utf8', maxBuffer: 1024 * 1024 * 20 });
+  const onboardEnv = { ...process.env, CYVX_PLATFORM_STATE: path.join(dir, 'onboard-state.json') };
+  const onboard = execFileSync(process.execPath, ['/root/CYVXAI-OS/cli/cyvx.js', 'onboard', 'Acme Ops', 'employees=120', 'cloudSpend=75000'], { env: onboardEnv, encoding: 'utf8', maxBuffer: 1024 * 1024 * 20 });
+  const parsedWorkflow = JSON.parse(workflow);
+  const parsedOnboard = JSON.parse(onboard);
+
+  assert.ok(parsedWorkflow.observation);
+  assert.ok(parsedWorkflow.mission);
+  assert.ok(parsedWorkflow.outcome);
+  assert.ok(parsedWorkflow.cir);
+  assert.ok(parsedOnboard.platform.entities.length >= 1);
+  assert.ok(parsedOnboard.executive.constitutionalLoop.learn >= 1);
 });
 
 

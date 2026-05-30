@@ -54,6 +54,9 @@ All JSON responses include:
 
 
 ## Proof Surfaces
-- API: /api/v1/repository-health
-- API: /api/v1/proof
-- CLI: repository-health, repo-health, proof
+- API: /api/v1/github/repository?owner=acme&repo=cyvx
+- API: /api/v1/github/health?owner=acme&repo=cyvx
+- API: /api/v1/github/proof?owner=acme&repo=cyvx
+- API: /api/v1/repository-health?owner=acme&repo=cyvx
+- API: /api/v1/proof?owner=acme&repo=cyvx
+- CLI: repository-health, repo-health, proof, github, github-health, github-proof

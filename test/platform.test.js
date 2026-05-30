@@ -17,11 +17,72 @@ const test = require('node:test');
 const { execFileSync } = require('node:child_process');
 const { createApiServer } = require('../api');
 const { PlatformKernel, createAgent, createConstraint, createEntity, createGoal, createInitiative, createMission, createObjective, createOpportunity, createObservation, createPattern, createRelationship, createTrust, createPlatformState, JsonFileStore } = require('../core/platform');
+const { GitHubIntegration } = require('../core/integrations/github');
+const { buildGithubProofCase } = require('../core/integrations/github_proof');
 
 function createTempKernel() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cyvx-platform-'));
   const filePath = path.join(dir, 'state.json');
   return new PlatformKernel({ filePath: filePath, seed: { entities: [], relationships: [], agents: [], goals: [], initiatives: [], missions: [], simulations: [], reports: [], commands: [], events: [], observations: [], objectives: [], constraints: [], opportunities: [], decisions: [], interventions: [], outcomes: [], knowledgeRecords: [], capabilities: [], trusts: [], patterns: [], workflows: [] } });
+}
+
+function createMockGitHub() {
+  const responses = {
+    '/repos/acme/cyvx': {
+      id: 1,
+      node_id: 'repo-1',
+      name: 'cyvx',
+      full_name: 'acme/cyvx',
+      private: false,
+      html_url: 'https://github.com/acme/cyvx',
+      description: 'CYVX test repo',
+      default_branch: 'main',
+      archived: false,
+      fork: false,
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-10T00:00:00Z',
+      pushed_at: '2026-01-12T00:00:00Z',
+      stargazers_count: 3,
+      watchers_count: 2,
+      forks_count: 1,
+      open_issues_count: 2,
+      size: 120,
+      language: 'JavaScript',
+      topics: ['cyvx'],
+      owner: { login: 'acme' },
+    },
+    '/repos/acme/cyvx/commits?per_page=30': [
+      { sha: 'c3', html_url: 'https://github.com/acme/cyvx/commit/c3', commit: { message: 'Fix build', author: { name: 'A', date: '2026-05-29T00:00:00Z' } }, author: { login: 'a' }, parents: [] },
+      { sha: 'c2', html_url: 'https://github.com/acme/cyvx/commit/c2', commit: { message: 'Add proof', author: { name: 'B', date: '2026-05-20T00:00:00Z' } }, author: { login: 'b' }, parents: [] },
+      { sha: 'c1', html_url: 'https://github.com/acme/cyvx/commit/c1', commit: { message: 'Init', author: { name: 'C', date: '2026-05-01T00:00:00Z' } }, author: { login: 'c' }, parents: [] },
+    ],
+    '/repos/acme/cyvx/issues?state=open&per_page=30': [
+      { id: 11, number: 11, title: 'Backlog item', state: 'open', created_at: '2026-05-15T00:00:00Z', updated_at: '2026-05-20T00:00:00Z', closed_at: null, comments: 1, labels: [], user: { login: 'user1' }, html_url: 'https://github.com/acme/cyvx/issues/11' },
+      { id: 12, number: 12, title: 'Another backlog item', state: 'open', created_at: '2026-05-18T00:00:00Z', updated_at: '2026-05-21T00:00:00Z', closed_at: null, comments: 0, labels: [], user: { login: 'user2' }, html_url: 'https://github.com/acme/cyvx/issues/12' },
+    ],
+    '/repos/acme/cyvx/pulls?state=open&per_page=30': [
+      { id: 21, number: 21, title: 'Stale PR', state: 'open', created_at: '2026-05-10T00:00:00Z', updated_at: '2026-05-11T00:00:00Z', merged_at: null, draft: false, html_url: 'https://github.com/acme/cyvx/pull/21', user: { login: 'user3' }, additions: 10, deletions: 2, changed_files: 3 },
+    ],
+    '/repos/acme/cyvx/actions/runs?per_page=30': {
+      workflow_runs: [
+        { id: 31, name: 'build', head_branch: 'main', head_sha: 'c3', status: 'completed', conclusion: 'success', event: 'push', created_at: '2026-05-29T00:00:00Z', updated_at: '2026-05-29T00:00:00Z', run_started_at: '2026-05-29T00:00:00Z', html_url: 'https://github.com/acme/cyvx/actions/runs/31', actor: { login: 'user1' } },
+        { id: 32, name: 'test', head_branch: 'main', head_sha: 'c2', status: 'completed', conclusion: 'failure', event: 'push', created_at: '2026-05-28T00:00:00Z', updated_at: '2026-05-28T00:00:00Z', run_started_at: '2026-05-28T00:00:00Z', html_url: 'https://github.com/acme/cyvx/actions/runs/32', actor: { login: 'user2' } },
+      ],
+    },
+    '/repos/acme/cyvx/contributors?per_page=30': [
+      { login: 'user1', id: 101, html_url: 'https://github.com/user1', contributions: 12 },
+      { login: 'user2', id: 102, html_url: 'https://github.com/user2', contributions: 7 },
+    ],
+  };
+  return new GitHubIntegration({
+    fetch: async (url) => {
+      const pathname = new URL(url).pathname + new URL(url).search;
+      const body = responses[pathname];
+      if (!body) return new Response(JSON.stringify({ message: 'not found' }), { status: 404, headers: { 'content-type': 'application/json' } });
+      return new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json' } });
+    },
+    repoRoot: '/root/CYVXAI-OS',
+  });
 }
 
 test('platform models normalize record metadata', () => {
@@ -246,7 +307,21 @@ test('executive endpoint reflects the constitutional loop', async () => {
 });
 
 
-test('repository health and proof are surfaced', async () => {
+test('GitHub adapter and proof routes surface live repository evidence', async () => {
+  const github = createMockGitHub();
+  const snapshot = await github.repositorySnapshot({ owner: 'acme', repo: 'cyvx' });
+  const health = github.repositoryHealthFromSnapshot(snapshot);
+
+  assert.equal(snapshot.repository.full_name, 'acme/cyvx');
+  assert.equal(snapshot.commits.length, 3);
+  assert.equal(snapshot.issues.length, 2);
+  assert.equal(snapshot.pullRequests.length, 1);
+  assert.equal(snapshot.workflowRuns.length, 2);
+  assert.equal(snapshot.contributors.length, 2);
+  assert.equal(health.build_status, 'passing');
+  assert.equal(health.issue_backlog, 2);
+  assert.ok(health.score > 0);
+
   const kernel = createTempKernel();
   kernel.modelCompany({ companyName: 'Proof Systems' });
   const controller = {
@@ -265,23 +340,48 @@ test('repository health and proof are surfaced', async () => {
     registerSocket: () => {},
     actions: [],
   };
-  const { server } = createApiServer(controller, { platform: kernel });
+  const { server } = createApiServer(controller, { platform: kernel, githubFactory: () => github });
   await new Promise((resolve) => server.listen(0, resolve));
   const address = server.address();
-  const repoHealthResponse = await fetch('http://127.0.0.1:' + address.port + '/api/v1/repository-health');
+  const repoHealthResponse = await fetch('http://127.0.0.1:' + address.port + '/api/v1/repository-health?owner=acme&repo=cyvx');
   const repoHealthBody = await repoHealthResponse.json();
-  const proofResponse = await fetch('http://127.0.0.1:' + address.port + '/api/v1/proof');
+  const proofResponse = await fetch('http://127.0.0.1:' + address.port + '/api/v1/proof?owner=acme&repo=cyvx');
   const proofBody = await proofResponse.json();
   await new Promise((resolve) => server.close(resolve));
 
-  assert.ok(repoHealthBody.clean != null);
-  assert.ok(repoHealthBody.head || repoHealthBody.commit || repoHealthBody.error);
+  assert.equal(repoHealthBody.repository.full_name, 'acme/cyvx');
+  assert.equal(repoHealthBody.build_status, 'passing');
+  assert.ok(typeof repoHealthBody.score === 'number');
+  assert.ok(proofBody.repositoryHealth);
   assert.ok(proofBody.proof);
-  assert.ok(typeof proofBody.proof.proof_score === 'number');
-  assert.ok(proofBody.proof.reality_gap);
-  assert.ok(proofBody.proof.evidence);
+  assert.equal(proofBody.proof.repository.full_name, 'acme/cyvx');
+  assert.ok(proofBody.proof.observation);
+  assert.ok(proofBody.proof.significanceRecord);
+  assert.ok(proofBody.proof.intervention);
+  assert.ok(proofBody.proof.outcome);
+  assert.ok(proofBody.proof.learningRecord);
+  assert.ok(proofBody.proof.cir);
+  assert.ok(proofBody.proof.external_reality_signal);
+  assert.ok(typeof proofBody.proof.prediction_accuracy_baseline === 'number');
 });
 
+test('GitHub proof helper generates outcome, learning, trust, and CIR records', async () => {
+  const kernel = createTempKernel();
+  const proof = await buildGithubProofCase(kernel, { github: createMockGitHub(), owner: 'acme', repo: 'cyvx' });
+
+  assert.equal(proof.repository.full_name, 'acme/cyvx');
+  assert.ok(proof.observation);
+  assert.ok(proof.significanceRecord);
+  assert.ok(proof.intervention);
+  assert.ok(typeof proof.outcome.prediction_error === 'number');
+  assert.ok(proof.learningRecord);
+  assert.ok(proof.trust);
+  assert.ok(proof.report);
+  assert.ok(proof.cir);
+  assert.ok(kernel.outcomes().length >= 1);
+  assert.ok(kernel.knowledgeRecords().length >= 1);
+  assert.ok(kernel.cir().history.length >= 1);
+});
 
 test('reality and portfolio are surfaced', () => {
   const kernel = createTempKernel();

@@ -16,14 +16,38 @@ const { WebSocketServer } = require("ws");
 const { CyvxController } = require("../core/controller");
 const { PlatformKernel, clone, createObservation } = require("../core/platform");
 const { buildMetrics } = require("../core/metrics");
+const { GitHubIntegration } = require("../core/integrations/github");
+const { buildGithubProofCase } = require("../core/integrations/github_proof");
 const { attribution } = require("../core/shared/attribution");
 const UI_ROOT = path.join(__dirname, "..", "ui");
+
+function githubInputFromUrl(url) {
+  const params = Object.fromEntries(url.searchParams.entries());
+  return {
+    owner: params.owner || params.repository_owner || null,
+    repo: params.repo || params.repository || params.repository_name || null,
+    repository: params.full_name || params.repository_full_name || params.repository || null,
+    full_name: params.full_name || params.repository_full_name || params.repository || null,
+    branch: params.branch || params.default_branch || null,
+    state: params.state || 'open',
+    per_page: params.per_page || params.limit || 30,
+  };
+}
+
+async function tryGithubProof(platform, url, github) {
+  try {
+    return await buildGithubProofCase(platform, Object.assign({ github }, githubInputFromUrl(url)));
+  } catch (error) {
+    return null;
+  }
+}
 
 function createApiServer(controller, options = {}) {
   const rateLimits = new Map();
   const apiKey = options.apiKey || process.env.CYVX_API_KEY || "";
   const maxPerMinute = Number(options.maxPerMinute || process.env.CYVX_RATE_LIMIT || 120);
   const platform = options.platform || new PlatformKernel({ filePath: options.platformFile || process.env.CYVX_PLATFORM_STATE });
+  const githubFactory = options.githubFactory || (() => new GitHubIntegration(options.githubOptions || {}));
   const server = http.createServer(async (req, res) => {
     try {
       if (req.method === "OPTIONS") {
@@ -43,17 +67,50 @@ function createApiServer(controller, options = {}) {
       if (url.pathname === "/status") return json(res, 200, wrap(controller.status()));
       if (url.pathname === "/api/v1/overview") return json(res, 200, wrap(controller.overview()));
       if (url.pathname === "/api/v1/platform") return json(res, 200, wrap(platform.snapshot()));
-      if (url.pathname === "/api/v1/repository-health") return json(res, 200, wrap(platform.repositoryHealth()));
-      if (url.pathname === "/api/v1/proof") return json(res, 200, wrap({ repositoryHealth: platform.repositoryHealth(), proof: platform.proof() }));
-      if (url.pathname === "/api/v1/dashboard") return json(res, 200, wrap({
-        status: controller.status(),
-        overview: controller.overview(),
-        health: platform.health(),
-        platform: platform.status(),
-        executive: platform.executive(),
-        repositoryHealth: platform.repositoryHealth(),
-        proof: platform.proof(),
-      }));
+      if (url.pathname === "/api/v1/github/repository" && req.method === "GET") {
+        const github = githubFactory();
+        return json(res, 200, wrap(await github.repositorySnapshot(githubInputFromUrl(url))));
+      }
+      if (url.pathname === "/api/v1/github/health" && req.method === "GET") {
+        const github = githubFactory();
+        const snapshot = await github.repositorySnapshot(githubInputFromUrl(url));
+        return json(res, 200, wrap(github.repositoryHealthFromSnapshot(snapshot)));
+      }
+      if (url.pathname === "/api/v1/github/proof" && req.method === "GET") {
+        return json(res, 200, wrap(await buildGithubProofCase(platform, Object.assign({ github: githubFactory() }, githubInputFromUrl(url)))));
+      }
+      if (url.pathname === "/api/v1/repository-health") {
+        const github = githubFactory();
+        try {
+          const snapshot = await github.repositorySnapshot(githubInputFromUrl(url));
+          return json(res, 200, wrap(github.repositoryHealthFromSnapshot(snapshot)));
+        } catch (error) {
+          return json(res, 200, wrap(platform.repositoryHealth()));
+        }
+      }
+      if (url.pathname === "/api/v1/proof") {
+        const proof = await tryGithubProof(platform, url, githubFactory());
+        return proof ? json(res, 200, wrap({ repositoryHealth: proof.repository_health, proof })) : json(res, 200, wrap({ repositoryHealth: platform.repositoryHealth(), proof: platform.proof() }));
+      }
+      if (url.pathname === "/api/v1/dashboard") {
+        const github = githubFactory();
+        let repositoryHealth = platform.repositoryHealth();
+        try {
+          const snapshot = await github.repositorySnapshot(githubInputFromUrl(url));
+          repositoryHealth = github.repositoryHealthFromSnapshot(snapshot);
+        } catch (error) {
+          repositoryHealth = platform.repositoryHealth();
+        }
+        return json(res, 200, wrap({
+          status: controller.status(),
+          overview: controller.overview(),
+          health: platform.health(),
+          platform: platform.status(),
+          executive: platform.executive(),
+          repositoryHealth,
+          proof: platform.proof(),
+        }));
+      }
       if (url.pathname === "/api/v1/onboard" && req.method === "POST") return json(res, 200, wrap(platform.modelCompany(await readJson(req))));
       if (url.pathname === "/api/v1/observations" && req.method === "GET") return json(res, 200, wrap({ observations: platform.observations() }));
       if (url.pathname === "/api/v1/observations" && req.method === "POST") return json(res, 200, wrap({ observation: platform.createObservation(await readJson(req)) }));

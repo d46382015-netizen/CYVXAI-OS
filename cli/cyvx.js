@@ -13,10 +13,12 @@
 const { createApiServer } = require("../api");
 const { CyvxController } = require("../core/controller");
 const { PlatformKernel } = require("../core/platform");
+const { GitHubIntegration } = require("../core/integrations/github");
+const { buildGithubProofCase } = require("../core/integrations/github_proof");
 
 const COMMANDS = [
   "status", "health", "graph", "agents", "missions", "simulations", "simulate", "command", "report",
-  "events", "observations", "reality", "portfolio", "decisions", "outcomes", "knowledge", "capabilities", "goals", "initiatives", "constraints", "opportunities", "trust", "patterns", "recommendations", "priorities", "intelligence", "dashboard", "repository-health", "repo-health", "proof",
+  "events", "observations", "reality", "portfolio", "decisions", "outcomes", "knowledge", "capabilities", "goals", "initiatives", "constraints", "opportunities", "trust", "patterns", "recommendations", "priorities", "intelligence", "dashboard", "repository-health", "repo-health", "proof", "github", "github-repository", "github-health", "github-proof",
   "criteria", "reality-objects", "significance", "interventions", "evolution", "cir", "kernel",
   "humans", "resources", "assign", "approvals", "queue", "nba", "coordination", "workflow",
   "onboard", "model-company", "leaderboard", "roadmap", "cluster", "workloads", "actions", "metrics", "healthz", "ask", "serve",
@@ -48,12 +50,41 @@ async function main() {
       print(kernel.health());
       return;
     case "repository-health":
-    case "repo-health":
-      print(kernel.repositoryHealth());
+    case "repo-health": {
+      const github = new GitHubIntegration(parseQuery(args));
+      print(await github.repositoryHealth(parseQuery(args)));
       return;
+    }
     case "proof":
-      print(kernel.proof());
+    case "github":
+    case "github-proof": {
+      const query = parseQuery(args);
+      const port = query.port || process.env.CYVX_PORT;
+      if (port) {
+        try {
+          const base = "http://127.0.0.1:" + port;
+          const params = new URLSearchParams(query).toString();
+          const output = await call("GET", base + "/api/v1/proof" + (params ? "?" + params : ""));
+          print(output);
+          return;
+        } catch (error) {
+          // fall back to the local proof builder.
+        }
+      }
+      const proof = await buildGithubProofCase(kernel, query);
+      print(proof);
       return;
+    }
+    case "github-health": {
+      const github = new GitHubIntegration(parseQuery(args));
+      print(await github.repositoryHealth(parseQuery(args)));
+      return;
+    }
+    case "github-repository": {
+      const github = new GitHubIntegration(parseQuery(args));
+      print(await github.repositorySnapshot(parseQuery(args)));
+      return;
+    }
     case "graph":
       print({ graph: kernel.graph() });
       return;
@@ -133,18 +164,21 @@ async function main() {
     case "patterns":
       print({ patterns: kernel.patterns() });
       return;
-    case "recommendations":
-      kernel.refreshIntelligence(parseQuery(args));
+    case "recommendations": {
+      if (!kernel.recommendations().length) kernel.refreshIntelligence(parseQuery(args));
       print({ recommendations: kernel.recommendations() });
       return;
-    case "priorities":
-      kernel.refreshIntelligence(parseQuery(args));
+    }
+    case "priorities": {
+      if (!kernel.priorities().length) kernel.refreshIntelligence(parseQuery(args));
       print({ priorities: kernel.priorities() });
       return;
-    case "intelligence":
-      kernel.refreshIntelligence(parseQuery(args));
+    }
+    case "intelligence": {
+      if (!kernel.recommendations().length || !kernel.priorities().length) kernel.refreshIntelligence(parseQuery(args));
       print(kernel.intelligence(parseQuery(args)));
       return;
+    }
     case "criteria":
       print({ criteria: kernel.criteria() });
       return;
@@ -239,7 +273,8 @@ function parseModelCompanyArgs(args) {
 }
 
 function routeFor(command, args) {
-  const base = "http://127.0.0.1:" + (process.env.CYVX_PORT || 3000);
+  const query = parseQuery(args);
+  const base = "http://127.0.0.1:" + (query.port || process.env.CYVX_PORT || 3000);
   switch (command) {
     case "leaderboard": return { method: "GET", path: base + "/v1/leaderboard" };
     case "dashboard": return { method: "GET", path: base + "/api/v1/dashboard" };

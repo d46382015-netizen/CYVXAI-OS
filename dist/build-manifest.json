@@ -1,7 +1,7 @@
 {
   "name": "cyvx",
   "version": "6.0.0",
-  "builtAt": "2026-05-30T22:08:15.606Z",
+  "builtAt": "2026-06-01T14:43:54.928Z",
   "entrypoints": {
     "api": "api/index.js",
     "ui": "ui/index.html"
@@ -38,6 +38,7 @@
     "/api/v1/recommendations",
     "/api/v1/priorities",
     "/ask",
-    "/metrics"
+    "/metrics",
+    "/api/v1/reality-engine"
   ]
 }

@@ -352,7 +352,8 @@ test('GitHub adapter and proof routes surface live repository evidence', async (
   assert.equal(repoHealthBody.repository.full_name, 'acme/cyvx');
   assert.equal(repoHealthBody.build_status, 'passing');
   assert.ok(typeof repoHealthBody.score === 'number');
-  assert.ok(proofBody.repositoryHealth);
+  const proofHealth = proofBody.repositoryHealth || (proofBody.proof && (proofBody.proof.repository_health || proofBody.proof.repositoryHealth));
+  assert.ok(proofHealth);
   assert.ok(proofBody.proof);
   assert.equal(proofBody.proof.repository.full_name, 'acme/cyvx');
   assert.ok(proofBody.proof.observation);
@@ -716,4 +717,205 @@ test('product onboard API route works', async () => {
   assert.ok(body.model.company);
   assert.ok(body.platform.entities.length >= 4);
   assert.ok(body.executive.constitutionalLoop.learn >= 1);
+});
+
+
+test('thesis engine resolves beliefs and uncertainty', () => {
+  const kernel = createTempKernel();
+  kernel.createObservation({ title: 'Runtime evidence', source: 'probe', confidence: 0.9, observed_state: { uptime: 0.99 } });
+  kernel.recordOutcome({ title: 'Outcome closes loop', predicted_outcome: { roi: 2 }, actual_outcome: { roi: 1.8 }, prediction_error: 0.2, prediction_variance: 0.1, trust_score: 0.8 });
+  kernel.createTrust({ subject_type: 'decision', subject_id: 'thesis-loop-1', trust_score: 0.78, trust_trend: 0.05, calibration: { error: 0.1 } });
+  kernel.recordThesisPrediction({ belief: 'Reality can be programmatically observed', belief_key: 'reality', observation: { source: 'probe' }, expected_outcome: { measurable: true }, confidence: 0.72 });
+  kernel.recordThesisExperiment({ belief: 'Reality can be programmatically observed', belief_key: 'reality', hypothesis: 'Reality can be observed', prediction: { measurable: true }, expected_outcome: { measured: true }, confidence: 0.7, evidence_produced: ['observation'] });
+  kernel.recordThesisLoop({ belief: 'Reality can be programmatically observed', observation: { source: 'probe' }, prediction: { measurable: true }, expected_outcome: { measured: true }, actual_outcome: { measured: true }, error: 0.1, learning: { delta: 0.05 }, calibration: { drift: 0.02 }, trust_update: { delta: 0.04 }, cir_update: { delta: 0.03 }, confidence: 0.76 });
+
+  const report = kernel.thesisReport();
+  const dashboard = kernel.thesisDashboard();
+
+  assert.equal(report.report_type, 'thesis_resolution_report');
+  assert.ok(report.thesis_metrics.length >= 6);
+  assert.ok(report.verdicts);
+  assert.ok(report.evidence_summary.predictions_created >= 1);
+  assert.ok(report.remaining_uncertainty.highest_remaining_uncertainty);
+  assert.ok(dashboard.beliefs.length >= 6);
+});
+
+test('thesis api route returns a resolution report', async () => {
+  const kernel = createTempKernel();
+  const controller = { status: () => ({ powered_by: 'CYVX' }), overview: () => ({ health: { label: 'healthy' } }), snapshot: () => ({ cluster: {} }) };
+  const { server } = createApiServer(controller, { platform: kernel });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const address = server.address();
+  const response = await fetch('http://127.0.0.1:' + address.port + '/api/v1/thesis');
+  const body = await response.json();
+  server.close();
+
+  assert.equal(response.status, 200);
+  assert.ok(body.thesis);
+  assert.ok(body.thesisReport);
+  assert.ok(body.thesisEngine);
+});
+
+test('thesis cli command prints a thesis dashboard', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cyvx-thesis-cli-'));
+  const filePath = path.join(dir, 'state.json');
+  const output = execFileSync(process.execPath, [path.join('/root/CYVXAI-OS', 'cli/cyvx.js'), 'thesis'], { env: { ...process.env, CYVX_PLATFORM_STATE: filePath }, encoding: 'utf8' });
+
+  assert.match(output, /thesis_confidence/i);
+});
+
+
+test('decision intelligence measures improvement and truth model', () => {
+  const kernel = createTempKernel();
+  const observation = kernel.createObservation({
+    title: 'Customer support backlog rising',
+    source: 'ops-probe',
+    confidence: 0.92,
+    observed_state: { backlog: 14 },
+    observed_change: { backlog: 3 },
+  });
+  const decision = kernel.createDecision({
+    title: 'Reduce support backlog',
+    context: { backlog: 14 },
+    observation_references: [observation.id],
+    significance_references: ['significance-1'],
+    thesis_references: ['thesis-1'],
+    recommendation: { title: 'Add triage automation' },
+    alternatives: [{ title: 'Do nothing' }],
+    evidence: [{ id: 'ev-1', type: 'observation' }],
+    confidence: 0.8,
+    selected_action: 'add triage automation',
+    expected_outcome: { backlog: 8, value: 0.78 },
+    baseline_outcome: { backlog: 12, value: 0.55 },
+    recommendation_type: 'automation',
+    domain: 'support',
+  });
+  const outcome = kernel.recordOutcome({
+    title: 'Support backlog outcome',
+    decision_id: decision.id,
+    predicted_outcome: { backlog: 8, value: 0.78 },
+    actual_outcome: { backlog: 6, value: 0.88 },
+    prediction_error: 0.08,
+    prediction_variance: 0.04,
+    trust_score: 0.84,
+    domain: 'support',
+  });
+
+  const intelligence = kernel.decisionIntelligence();
+  const rate = kernel.decisionImprovementRate();
+  const truth = kernel.truthModel();
+  const brief = kernel.dailyDecisionBrief();
+
+  assert.equal(outcome.decision_id, decision.id);
+  assert.ok(kernel.decisionMemories().length >= 1);
+  assert.ok(kernel.decisionQualityRecords().length >= 1);
+  assert.ok(kernel.decisionCalibrationRecords().length >= 1);
+  assert.ok(kernel.truthRecords().length >= 1);
+  assert.ok(intelligence.memory_count >= 1);
+  assert.ok(rate.lifetime >= 0);
+  assert.ok(rate.by_domain.support);
+  assert.ok(rate.by_recommendation_type.automation);
+  assert.ok(truth.observed);
+  assert.ok(truth.predicted);
+  assert.ok(brief.what_matters_most);
+  assert.ok(brief.recommended_action);
+});
+
+test('decision intelligence api route returns daily brief and truth model', async () => {
+  const kernel = createTempKernel();
+  const controller = {
+    status: () => ({ powered_by: 'CYVX' }),
+    overview: () => ({ health: { label: 'healthy' } }),
+    snapshot: () => ({ cluster: {} }),
+    agentsSnapshot: () => [],
+    leaderboard: () => [],
+    roadmap: () => [],
+    history: () => [],
+    statusModel: { snapshot: () => ({ data: {} }) },
+    ask: () => ({}),
+    submitWorkload: () => ({}),
+    executeAction: () => ({}),
+    registerSocket: () => {},
+    actions: [],
+  };
+  const { server } = createApiServer(controller, { platform: kernel });
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const response = await fetch('http://127.0.0.1:' + address.port + '/api/v1/decision-intelligence');
+  const body = await response.json();
+  await new Promise((resolve) => server.close(resolve));
+
+  assert.equal(response.status, 200);
+  assert.ok(body.decisionIntelligence);
+  assert.ok(body.dailyDecisionBrief);
+  assert.ok(body.truthModel);
+});
+
+test('decision intelligence cli commands work', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cyvx-decision-cli-'));
+  const filePath = path.join(dir, 'state.json');
+  const env = { ...process.env, CYVX_PLATFORM_STATE: filePath };
+  const output = execFileSync(process.execPath, [path.join('/root/CYVXAI-OS', 'cli/cyvx.js'), 'decision-intelligence'], { env, encoding: 'utf8' });
+  const brief = execFileSync(process.execPath, [path.join('/root/CYVXAI-OS', 'cli/cyvx.js'), 'daily-decision-brief'], { env, encoding: 'utf8' });
+  assert.match(output, /decision/i);
+  assert.match(brief, /brief/i);
+});
+
+
+test('reality engine compresses the thesis into evidence', async () => {
+  const kernel = createTempKernel();
+  kernel.launchMission({
+    title: 'Reduce evidence gap',
+    objective: 'capture verified outcome data',
+    target_entity_ids: ['company'],
+    autonomy_level: 3,
+  });
+  const report = kernel.realityEngine();
+
+  assert.ok(report.one_sentence_compression.includes('prediction-to-outcome'));
+  assert.ok(report.fact_map.loop_count >= 1);
+  assert.ok(report.highest_leverage_decision);
+  assert.ok(report.fastest_path_to_proof);
+
+  const controller = {
+    status: () => ({ powered_by: 'CYVX' }),
+    overview: () => ({ health: { label: 'healthy' } }),
+    insights: () => [],
+    agentsSnapshot: () => [],
+    leaderboard: () => [],
+    roadmap: () => [],
+    snapshot: () => ({ cluster: { workloads: [] } }),
+    history: () => [],
+    statusModel: { snapshot: () => ({ data: {} }) },
+    ask: () => ({}),
+    submitWorkload: () => ({}),
+    executeAction: () => ({}),
+    registerSocket: () => {},
+    actions: [],
+  };
+  const { server } = createApiServer(controller, { platform: kernel });
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const response = await fetch('http://127.0.0.1:' + address.port + '/api/v1/reality-engine');
+  const body = await response.json();
+  await new Promise((resolve) => server.close(resolve));
+
+  assert.equal(response.status, 200);
+  assert.ok(body.one_sentence_compression);
+  assert.ok(body.fact_map);
+});
+
+
+test('reality engine exposes reality domains and ingestion priority', () => {
+  const kernel = createTempKernel();
+  const report = kernel.realityEngine();
+
+  assert.ok(report.reality_domains);
+  assert.ok(report.reality_domains.geography);
+  assert.ok(Array.isArray(report.reality_domains.geography.sources));
+  assert.equal(report.reality_domains.geography.sources[0], 'U.S. Census');
+  assert.ok(Array.isArray(report.ingestion_priority));
+  assert.equal(report.ingestion_priority[0], 'State GIS');
+  assert.ok(report.knowledge_gap_layer);
+  assert.ok(report.knowledge_gap_layer.unknown_unknown);
 });

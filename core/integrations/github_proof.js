@@ -121,7 +121,7 @@ async function buildGithubProofCase(platform, input = {}) {
     actual_result: health.summary,
     predicted_outcome: health.predicted_outcome,
     actual_outcome: health.actual_outcome,
-    prediction_error: round3(1 - health.confidence),
+    prediction_error: round3(Math.min(1, Math.abs((health.predicted_outcome.repository_health_score || 0) - (health.actual_outcome.repository_health_score || 0)) / 100)),
     prediction_variance: round3(Math.abs((health.predicted_outcome.repository_health_score || 0) - (health.actual_outcome.repository_health_score || 0))),
     lesson: 'Repository telemetry is live and measurable against GitHub state.',
     future_recommendation: health.recommendation,

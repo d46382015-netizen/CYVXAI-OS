@@ -157,6 +157,15 @@ class PlatformKernel {
       evolutionRecommendations: state.evolutionRecommendations.length,
       cirMetrics: state.cirMetrics.length,
       workflows: state.workflows.length,
+      thesisBeliefs: state.thesisBeliefs.length,
+      thesisPredictions: state.thesisPredictions.length,
+      thesisExperiments: state.thesisExperiments.length,
+      thesisLoops: state.thesisLoops.length,
+      decisionMemories: state.decisionMemories.length,
+      decisionQualityRecords: state.decisionQualityRecords.length,
+      decisionCalibrationRecords: state.decisionCalibrationRecords.length,
+      truthRecords: state.truthRecords.length,
+      dailyDecisionBriefs: state.dailyDecisionBriefs.length,
     };
   }
 

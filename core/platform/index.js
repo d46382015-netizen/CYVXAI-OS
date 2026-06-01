@@ -16,11 +16,17 @@ const { augmentPlatformKernel } = require("./phase9");
 const { augmentKernelV1 } = require("./kernel_v1");
 const { augmentCoordinationPlatform } = require("./coordination_v1_clean");
 const { augmentIntelligencePlatform } = require("./intelligence_v1");
+const { augmentThesisPlatform } = require("./thesis_v1");
+const { augmentDecisionIntelligence } = require("./decision_intelligence_v1");
+const { augmentRealityEngine } = require("./reality_engine_v1");
 
 augmentPlatformKernel(PlatformKernel, models);
 augmentKernelV1(PlatformKernel, models);
 augmentCoordinationPlatform(PlatformKernel, models);
 augmentIntelligencePlatform(PlatformKernel, models);
+augmentThesisPlatform(PlatformKernel, models);
+augmentDecisionIntelligence(PlatformKernel, models);
+augmentRealityEngine(PlatformKernel, models);
 
 module.exports = {
   ...models,

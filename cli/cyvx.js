@@ -15,11 +15,13 @@ const { CyvxController } = require("../core/controller");
 const { PlatformKernel } = require("../core/platform");
 const { GitHubIntegration } = require("../core/integrations/github");
 const { buildGithubProofCase } = require("../core/integrations/github_proof");
+const { analyzeProofLedger, loadProofLedger, recordProofRunFromProof } = require("../core/platform/proof_ledger");
 
 const COMMANDS = [
   "status", "health", "graph", "agents", "missions", "simulations", "simulate", "command", "report",
-  "events", "observations", "reality", "portfolio", "decisions", "outcomes", "knowledge", "capabilities", "goals", "initiatives", "constraints", "opportunities", "trust", "patterns", "recommendations", "priorities", "intelligence", "dashboard", "repository-health", "repo-health", "proof", "github", "github-repository", "github-health", "github-proof",
+  "events", "observations", "reality", "reality-engine", "portfolio", "decisions", "outcomes", "knowledge", "capabilities", "goals", "initiatives", "constraints", "opportunities", "trust", "patterns", "recommendations", "priorities", "intelligence", "dashboard", "repository-health", "repo-health", "proof", "thesis", "thesis-report", "thesis-dashboard", "github", "github-repository", "github-health", "github-proof",
   "criteria", "reality-objects", "significance", "interventions", "evolution", "cir", "kernel",
+  "decision-intelligence", "daily-decision-brief", "truth-model", "decision-improvement",
   "humans", "resources", "assign", "approvals", "queue", "nba", "coordination", "workflow",
   "onboard", "model-company", "leaderboard", "roadmap", "cluster", "workloads", "actions", "metrics", "healthz", "ask", "serve",
 ];
@@ -72,6 +74,10 @@ async function main() {
         }
       }
       const proof = await buildGithubProofCase(kernel, query);
+      const recorded = recordProofRunFromProof(proof, { ledgerPath: query.ledgerPath || process.env.CYVX_PROOF_LEDGER_PATH || null });
+      proof.proof_ledger_entry = recorded.entry;
+      proof.proof_ledger = recorded.tribunal;
+      proof.tribunal = recorded.tribunal;
       print(proof);
       return;
     }
@@ -83,6 +89,59 @@ async function main() {
     case "github-repository": {
       const github = new GitHubIntegration(parseQuery(args));
       print(await github.repositorySnapshot(parseQuery(args)));
+      return;
+    }
+    case "proof-ledger":
+    case "tribunal": {
+      const query = parseQuery(args);
+      if (process.env.CYVX_PORT || query.port) {
+        try {
+          const base = "http://127.0.0.1:" + (query.port || process.env.CYVX_PORT);
+          const route = command === "proof-ledger" ? "/api/v1/proof-ledger" : "/api/v1/tribunal";
+          const output = await call("GET", base + route);
+          print(output);
+          return;
+        } catch (error) {}
+      }
+      const ledger = loadProofLedger({ ledgerPath: query.ledgerPath || process.env.CYVX_PROOF_LEDGER_PATH || null });
+      print(analyzeProofLedger(ledger));
+      return;
+    }
+    case "thesis":
+    case "thesis-report":
+    case "thesis-dashboard": {
+      const query = parseQuery(args);
+      if (process.env.CYVX_PORT || query.port) {
+        try {
+          const base = "http://127.0.0.1:" + (query.port || process.env.CYVX_PORT);
+          const route = command === "thesis" ? "/api/v1/thesis" : "/api/v1/thesis-report";
+          const output = await call("GET", base + route);
+          print(output);
+          return;
+        } catch (error) {}
+      }
+      print(command === "thesis" ? kernel.thesisDashboard(query) : kernel.thesisReport(query));
+      return;
+    }
+    case "decision-intelligence":
+    case "daily-decision-brief":
+    case "truth-model":
+    case "decision-improvement": {
+      const query = parseQuery(args);
+      if (process.env.CYVX_PORT || query.port) {
+        try {
+          const base = "http://127.0.0.1:" + (query.port || process.env.CYVX_PORT);
+          const route = command === "decision-intelligence" ? "/api/v1/decision-intelligence" : command === "daily-decision-brief" ? "/api/v1/daily-decision-brief" : command === "truth-model" ? "/api/v1/truth-model" : "/api/v1/decision-intelligence";
+          const output = await call("GET", base + route);
+          print(output);
+          return;
+        } catch (error) {}
+      }
+      if (command === "decision-improvement") {
+        print(kernel.decisionImprovementRate());
+        return;
+      }
+      print(command === "decision-intelligence" ? kernel.decisionIntelligence() : command === "daily-decision-brief" ? kernel.dailyDecisionBrief() : kernel.truthModel());
       return;
     }
     case "graph":
@@ -106,6 +165,19 @@ async function main() {
     case "reality":
       print({ reality: kernel.reality(), observations: kernel.observations() });
       return;
+    case "reality-engine": {
+      const query = parseQuery(args);
+      if (process.env.CYVX_PORT || query.port) {
+        try {
+          const base = "http://127.0.0.1:" + (query.port || process.env.CYVX_PORT);
+          const output = await call("GET", base + "/api/v1/reality-engine");
+          print(output);
+          return;
+        } catch (error) {}
+      }
+      print(kernel.realityEngine(query));
+      return;
+    }
     case "portfolio":
       print({ portfolio: kernel.portfolio(), missions: kernel.missions() });
       return;
@@ -284,6 +356,7 @@ function routeFor(command, args) {
     case "actions": return { method: "GET", path: base + "/api/v1/actions" };
     case "metrics": return { method: "GET", path: base + "/metrics" };
     case "ask": return { method: "POST", path: base + "/ask", body: { task: args.join(" ") || "optimize:cluster" } };
+    case "reality-engine": return { method: "GET", path: base + "/api/v1/reality-engine" };
     default:
       return null;
   }

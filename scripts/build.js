@@ -14,6 +14,9 @@ const CHECK_FILES = [
   "core/platform/models.js",
   "core/platform/file_store.js",
   "core/platform/kernel.js",
+  "core/platform/thesis_v1.js",
+  "core/platform/decision_intelligence_v1.js",
+  "core/platform/reality_engine_v1.js",
   "core/protocols/protobuf.js",
   "test/platform.test.js",
   "ui/app.js",
@@ -90,6 +93,7 @@ function writeManifest() {
       "/api/v1/priorities",
       "/ask",
       "/metrics",
+      "/api/v1/reality-engine",
     ],
   };
   fs.writeFileSync(path.join(DIST, "build-manifest.json"), JSON.stringify(manifest, null, 2));

@@ -12,6 +12,7 @@ CYVXAI-OS is an autonomous infrastructure intelligence platform for reality grap
 - Simulation Chamber: outage, growth, cyber, market, and workflow scenarios
 - Knowledge Galaxy: documents, events, decisions, and lessons learned
 - Executive Intelligence: answers, forecasts, recommendations, and risk assessments
+- Reality Engine: predictions, outcomes, calibration, proof, and baseline comparison
 - Economics: costs, savings, ROI, utilization, and licensing
 - Governance: RBAC, audit logs, approvals, kill switch, and tenant isolation
 - Dashboard: `http://localhost:3000/`
@@ -159,3 +160,13 @@ The intelligence layer strengthens the existing loop by turning outcomes, learni
 - API: /api/v1/repository-health?owner=acme&repo=cyvx
 - API: /api/v1/proof?owner=acme&repo=cyvx
 - CLI: repository-health, repo-health, proof, github, github-health, github-proof
+
+## Reality Engine vΩ
+- API: `GET /api/v1/reality-engine`
+- CLI: `reality-engine`
+- Purpose: compress architecture into verified prediction -> outcome -> error -> learning loops.
+
+## RealityOS vΩ
+- RealityOS layers the repo around observation, modeling, intelligence, compression, operation, learning, and interface.
+- The phone is the final presentation layer of a much larger system.
+- RealityEngine now exposes the layered model through `GET /api/v1/reality-engine`.

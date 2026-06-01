@@ -427,6 +427,67 @@ h1 {
   margin-top: 14px;
 }
 
+.reality-interface-shell {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.reality-interface-rail,
+.reality-interface-stage {
+  display: grid;
+  gap: 12px;
+}
+
+.reality-rail-card,
+.reality-view-card,
+.reality-flow-card {
+  border: 1px solid rgba(140, 181, 255, 0.12);
+  background: rgba(8, 15, 28, 0.72);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.reality-stage-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.reality-view-grid,
+.reality-flow-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.reality-view-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.reality-flow-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.reality-flow-card-wide {
+  grid-column: span 2;
+}
+
+.reality-card-title {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 11px;
+  margin-bottom: 10px;
+}
+
+.reality-stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
 .detail-card strong,
 .answer-card strong,
 .card-title,

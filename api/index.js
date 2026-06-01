@@ -18,6 +18,7 @@ const { PlatformKernel, clone, createObservation } = require("../core/platform")
 const { buildMetrics } = require("../core/metrics");
 const { GitHubIntegration } = require("../core/integrations/github");
 const { buildGithubProofCase } = require("../core/integrations/github_proof");
+const { analyzeProofLedger, loadProofLedger, recordProofRunFromProof } = require("../core/platform/proof_ledger");
 const { attribution } = require("../core/shared/attribution");
 const UI_ROOT = path.join(__dirname, "..", "ui");
 
@@ -77,7 +78,12 @@ function createApiServer(controller, options = {}) {
         return json(res, 200, wrap(github.repositoryHealthFromSnapshot(snapshot)));
       }
       if (url.pathname === "/api/v1/github/proof" && req.method === "GET") {
-        return json(res, 200, wrap(await buildGithubProofCase(platform, Object.assign({ github: githubFactory() }, githubInputFromUrl(url)))));
+        const proof = await buildGithubProofCase(platform, Object.assign({ github: githubFactory() }, githubInputFromUrl(url)));
+        const recorded = recordProofRunFromProof(proof, { ledgerPath: options.proofLedgerPath || process.env.CYVX_PROOF_LEDGER_PATH || null });
+        proof.proof_ledger_entry = recorded.entry;
+        proof.proof_ledger = recorded.tribunal;
+        proof.tribunal = recorded.tribunal;
+        return json(res, 200, wrap({ repositoryHealth: proof.repositoryHealth || proof.repository_health || platform.repositoryHealth(), proof, proofLedger: recorded.tribunal }));
       }
       if (url.pathname === "/api/v1/repository-health") {
         const github = githubFactory();
@@ -90,7 +96,38 @@ function createApiServer(controller, options = {}) {
       }
       if (url.pathname === "/api/v1/proof") {
         const proof = await tryGithubProof(platform, url, githubFactory());
-        return proof ? json(res, 200, wrap({ repositoryHealth: proof.repository_health, proof })) : json(res, 200, wrap({ repositoryHealth: platform.repositoryHealth(), proof: platform.proof() }));
+        if (proof) {
+          const recorded = recordProofRunFromProof(proof, { ledgerPath: options.proofLedgerPath || process.env.CYVX_PROOF_LEDGER_PATH || null });
+          proof.proof_ledger_entry = recorded.entry;
+          proof.proof_ledger = recorded.tribunal;
+          proof.tribunal = recorded.tribunal;
+          return json(res, 200, wrap({ repositoryHealth: proof.repositoryHealth || proof.repository_health || platform.repositoryHealth(), proof, proofLedger: recorded.tribunal }));
+        }
+        return json(res, 200, wrap({ repositoryHealth: platform.repositoryHealth(), proof: platform.proof() }));
+      }
+      if (url.pathname === "/api/v1/reality-engine") {
+        return json(res, 200, wrap(platform.realityEngine ? platform.realityEngine() : {}));
+      }
+      if (url.pathname === "/api/v1/proof-ledger") {
+        return json(res, 200, wrap({ proofLedger: analyzeProofLedger(loadProofLedger({ ledgerPath: options.proofLedgerPath || process.env.CYVX_PROOF_LEDGER_PATH || null })) }));
+      }
+      if (url.pathname === "/api/v1/thesis") {
+        return json(res, 200, wrap({ thesis: platform.thesisDashboard(), thesisReport: platform.thesisReport(), thesisEngine: platform.thesisEngine(), thesisBeliefs: platform.thesisBeliefs(), thesisVerdicts: platform.thesisVerdicts() }));
+      }
+      if (url.pathname === "/api/v1/thesis-report") {
+        return json(res, 200, wrap({ thesisReport: platform.thesisReport(), thesis: platform.thesisDashboard() }));
+      }
+      if (url.pathname === "/api/v1/decision-intelligence") {
+        return json(res, 200, wrap({ decisionIntelligence: platform.decisionIntelligence(), dailyDecisionBrief: platform.dailyDecisionBrief(), truthModel: platform.truthModel(), decisionImprovementRate: platform.decisionImprovementRate(), decisionMemories: platform.decisionMemories(), decisionQualityRecords: platform.decisionQualityRecords(), decisionCalibrationRecords: platform.decisionCalibrationRecords() }));
+      }
+      if (url.pathname === "/api/v1/daily-decision-brief") {
+        return json(res, 200, wrap({ dailyDecisionBrief: platform.dailyDecisionBrief(), decisionIntelligence: platform.decisionIntelligence(), truthModel: platform.truthModel() }));
+      }
+      if (url.pathname === "/api/v1/truth-model") {
+        return json(res, 200, wrap({ truthModel: platform.truthModel(), decisionIntelligence: platform.decisionIntelligence() }));
+      }
+      if (url.pathname === "/api/v1/tribunal") {
+        return json(res, 200, wrap({ tribunal: analyzeProofLedger(loadProofLedger({ ledgerPath: options.proofLedgerPath || process.env.CYVX_PROOF_LEDGER_PATH || null })) }));
       }
       if (url.pathname === "/api/v1/dashboard") {
         const github = githubFactory();
@@ -109,6 +146,10 @@ function createApiServer(controller, options = {}) {
           executive: platform.executive(),
           repositoryHealth,
           proof: platform.proof(),
+          thesis: platform.thesisDashboard(),
+          decisionIntelligence: platform.decisionIntelligence(),
+          dailyDecisionBrief: platform.dailyDecisionBrief(),
+          truthModel: platform.truthModel(),
         }));
       }
       if (url.pathname === "/api/v1/onboard" && req.method === "POST") return json(res, 200, wrap(platform.modelCompany(await readJson(req))));

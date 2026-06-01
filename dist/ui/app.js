@@ -29,6 +29,9 @@ const state = {
   workflowDomain: "cloud-operations",
   repositoryHealth: null,
   proof: null,
+  thesis: null,
+  realityEngine: null,
+  realityLevel: "strategic-view",
 };
 
 const dom = {
@@ -75,6 +78,18 @@ const dom = {
   workflowOutput: id("workflowOutput"),
   repositoryHealthOutput: id("repositoryHealthOutput"),
   proofOutput: id("proofOutput"),
+  realityInterfaceTabs: id("realityInterfaceTabs"),
+  realityMetricsList: id("realityMetricsList"),
+  realityDomainList: id("realityDomainList"),
+  realityLevelTitle: id("realityLevelTitle"),
+  realityLevelDescription: id("realityLevelDescription"),
+  realityLevelChips: id("realityLevelChips"),
+  realityViewport: id("realityViewport"),
+  realityDetailViewport: id("realityDetailViewport"),
+  realityTimelineTags: id("realityTimelineTags"),
+  realityLoopTags: id("realityLoopTags"),
+  truthEngineList: id("truthEngineList"),
+  controlModelList: id("controlModelList"),
   workflowDomain: id("workflowDomain"),
   searchInput: id("searchInput"),
   clearSearchBtn: id("clearSearchBtn"),
@@ -231,6 +246,7 @@ async function sync() {
       requestJson("/api/v1/queue"),
       requestJson("/api/v1/repository-health"),
       requestJson("/api/v1/proof"),
+      requestJson("/api/v1/reality-engine"),
     ]);
     state.status = results[0];
     state.health = results[1];
@@ -252,6 +268,9 @@ async function sync() {
     state.queue = results[18] && results[18].queue ? results[18].queue : [];
     state.repositoryHealth = results[19] || (results[20] && results[20].repositoryHealth) || null;
     state.proof = results[20] ? (results[20].proof || results[20]) : null;
+    state.realityEngine = results[21] || null;
+    if (!state.realityLevel) state.realityLevel = "strategic-view";
+    state.thesis = results[3] ? (results[3].thesis || results[3].thesis_dashboard || null) : null;
     if (!state.selectedEntityId && state.platform && state.platform.entities && state.platform.entities.length) {
       state.selectedEntityId = state.platform.entities[0].id;
     }
@@ -336,6 +355,7 @@ function renderAll() {
   renderCir(cir);
   renderOpportunities(filteredOpportunities, filteredPatterns, filteredMissions);
   renderIntelligence(filteredPatterns, filteredRecommendations, filteredPriorities, intelligence);
+  renderRealityInterface(state.realityEngine, platform, filteredEntities, filteredRelationships);
   renderDecisions(filteredDecisions, filteredMissions, filteredOutcomes);
   renderKnowledge(filteredKnowledgeRecords, filteredMissions, filteredOutcomes);
   renderCapabilities(filteredCapabilities, filteredEntities, filteredMissions);
@@ -379,7 +399,7 @@ function renderSummary(entities, relationships, agents, missions, simulations, r
   dom.summaryGrid.innerHTML = items.map(function (item) {
     return '<div class="summary-card"><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong><div class="card-sub">' + escapeHtml(item[2]) + '</div></div>';
   }).join("");
-  dom.summaryNote.textContent = 'Platform posture: ' + (health.label || 'unknown') + '. ' + (state.executive && state.executive.answers ? state.executive.answers.whatShouldWeDo : '') + ' ' + ((state.reality && state.reality.reality) ? ('Drift ' + formatPercent(state.reality.reality.reality_drift || 0)) : '') + (state.proof ? (' Proof ' + formatPercent(state.proof.proof_score || 0) + ' | Repo ' + ((state.repositoryHealth && state.repositoryHealth.clean) ? 'clean' : 'dirty')) : '');
+  dom.summaryNote.textContent = 'Platform posture: ' + (health.label || 'unknown') + '. ' + (state.executive && state.executive.answers ? state.executive.answers.whatShouldWeDo : '') + ' ' + ((state.reality && state.reality.reality) ? ('Drift ' + formatPercent(state.reality.reality.reality_drift || 0)) : '') + (state.proof ? (' Proof ' + formatPercent(state.proof.proof_score || 0) + ' | Repo ' + ((state.repositoryHealth && state.repositoryHealth.clean) ? 'clean' : 'dirty')) : '') + (state.realityEngine ? (' | ' + state.realityEngine.one_sentence_compression) : '');
 }
 
 function renderOverview(entities, relationships, agents, missions, simulations, reports, commands, goals, initiatives, objectives, constraints, opportunities, trusts, patterns, decisions, outcomes, knowledgeRecords, capabilities, events, health, platform) {
@@ -637,10 +657,32 @@ function renderExecutive(executive, platform) {
   const forecast = executive.forecast || {};
   const recommendations = Array.isArray(executive.recommendations) ? executive.recommendations : [];
   const intelligence = executive.intelligence || {};
+  const thesis = executive.thesis || state.thesis || {};
+  const decision = executive.decision_intelligence || state.decisionIntelligence || {};
+  const brief = executive.daily_decision_brief || state.dailyDecisionBrief || {};
+  const truth = executive.truth_model || state.truthModel || {};
   const executiveCards = [
     '<div class="answer-card"><span class="card-kicker">Forecast</span><strong>' + escapeHtml(forecast.likelyOutcome || 'n/a') + '</strong><small>Confidence ' + escapeHtml(String(forecast.confidence != null ? forecast.confidence : '--')) + ' | Horizon ' + escapeHtml(String(forecast.horizonDays || '--')) + ' days</small></div>',
     '<div class="answer-card"><span class="card-kicker">Predicted CIR Impact</span><strong>' + escapeHtml(String(intelligence.predictedCirImpact != null ? intelligence.predictedCirImpact : executive.predictedCirImpact != null ? executive.predictedCirImpact : '--')) + '</strong><small>Patterns ' + escapeHtml(String(intelligence.patternCount != null ? intelligence.patternCount : 0)) + ' | Recommendations ' + escapeHtml(String(intelligence.recommendationCount != null ? intelligence.recommendationCount : 0)) + ' | Priorities ' + escapeHtml(String(intelligence.priorityCount != null ? intelligence.priorityCount : 0)) + '</small></div>'
   ];
+  executiveCards.unshift(
+    `<div class="answer-card"><span class="card-kicker">Thesis Confidence</span><strong>${escapeHtml(String(thesis.thesis_confidence != null ? thesis.thesis_confidence : thesis.confidence != null ? thesis.confidence : "--"))}</strong><small>Uncertainty ${escapeHtml(String(thesis.uncertainty != null ? thesis.uncertainty : "--"))} | Verdicts S:${escapeHtml(String(thesis.verdicts && thesis.verdicts.supported != null ? thesis.verdicts.supported : 0))} P:${escapeHtml(String(thesis.verdicts && thesis.verdicts.partially_supported != null ? thesis.verdicts.partially_supported : 0))} U:${escapeHtml(String(thesis.verdicts && thesis.verdicts.unknown != null ? thesis.verdicts.unknown : 0))} C:${escapeHtml(String(thesis.verdicts && thesis.verdicts.contradicted != null ? thesis.verdicts.contradicted : 0))}</small></div>`
+  );
+  if (thesis.most_valuable_next_experiment) {
+    executiveCards.unshift(
+      `<div class="answer-card"><span class="card-kicker">Single Highest-Value Next Experiment</span><strong>${escapeHtml(thesis.most_valuable_next_experiment.hypothesis || thesis.most_valuable_next_experiment.recommended_action || "n/a")}</strong><small>Expected gain ${escapeHtml(String(thesis.most_valuable_next_experiment.information_gain_expected != null ? thesis.most_valuable_next_experiment.information_gain_expected : "--"))}</small></div>`
+    );
+  }
+  if (thesis.evidence_summary) {
+    executiveCards.unshift(
+      `<div class="answer-card"><span class="card-kicker">Evidence Summary</span><strong>${escapeHtml(String(thesis.evidence_summary.predictions_created != null ? thesis.evidence_summary.predictions_created : 0))} predictions</strong><small>Loops ${escapeHtml(String(thesis.evidence_summary.historical_loops_reconstructed != null ? thesis.evidence_summary.historical_loops_reconstructed : 0))} | Trust updates ${escapeHtml(String(thesis.evidence_summary.trust_updates_generated != null ? thesis.evidence_summary.trust_updates_generated : 0))}</small></div>`
+    );
+  }
+  executiveCards.unshift(
+    `<div class="answer-card"><span class="card-kicker">Decision Improvement Rate</span><strong>${escapeHtml(String(decision.improvement_rate && decision.improvement_rate.lifetime != null ? decision.improvement_rate.lifetime : decision.lifetime != null ? decision.lifetime : "--"))}</strong><small>30d ${escapeHtml(String(decision.improvement_rate && decision.improvement_rate.last_30_days != null ? decision.improvement_rate.last_30_days : "--"))} | 90d ${escapeHtml(String(decision.improvement_rate && decision.improvement_rate.last_90_days != null ? decision.improvement_rate.last_90_days : "--"))}</small></div>`,
+    `<div class="answer-card"><span class="card-kicker">Daily Decision Brief</span><strong>${escapeHtml(String(brief.what_matters_most || 'n/a'))}</strong><small>Action ${escapeHtml(String(brief.recommended_action || 'n/a'))} | Confidence ${escapeHtml(String(brief.confidence != null ? brief.confidence : decision.decision_quality_score != null ? decision.decision_quality_score : '--'))}</small><div class="card-sub">Why ${escapeHtml(String(brief.why_it_matters || ''))}</div></div>`,
+    `<div class="answer-card"><span class="card-kicker">Truth Model</span><strong>Observed / Inferred / Predicted / Recommended / Validated</strong><small>${escapeHtml(String(truth.observed && truth.observed.summary ? truth.observed.summary : 'n/a'))}</small><div class="card-sub">${escapeHtml(String(truth.inferred && truth.inferred.summary ? truth.inferred.summary : ''))} | ${escapeHtml(String(truth.predicted && truth.predicted.summary ? JSON.stringify(truth.predicted.summary) : ''))}</div></div>`
+  );
   if (intelligence.topPatterns && intelligence.topPatterns[0]) {
     executiveCards.push('<div class="answer-card"><span class="card-kicker">Top Pattern</span><strong>' + escapeHtml(intelligence.topPatterns[0].title || intelligence.topPatterns[0].id) + '</strong><small>Confidence ' + formatPercent(intelligence.topPatterns[0].confidence || 0) + ' | Frequency ' + escapeHtml(String(intelligence.topPatterns[0].frequency || 0)) + '</small></div>');
   }
@@ -654,6 +696,150 @@ function renderExecutive(executive, platform) {
     return '<div class="answer-card"><span class="card-kicker">Recommendation</span><strong>' + escapeHtml(item.title) + '</strong><small>Confidence ' + formatPercent(item.confidence || 0) + ' | ROI ' + escapeHtml(String(item.roi || 0)) + '</small></div>';
   }));
   dom.executiveRecommendations.innerHTML = executiveCards.join('');
+}
+
+function renderRealityInterface(realityEngine, platform, entities, relationships) {
+  const interfaceData = realityEngine && realityEngine.reality_interface ? realityEngine.reality_interface : {};
+  const levels = Array.isArray(interfaceData.zoom_stack) && interfaceData.zoom_stack.length ? interfaceData.zoom_stack : [
+    { level: "Strategic View", focus: "Nation or organization as a living model", metaphor: "Command center", questions: ["What is growing?", "What is strained?", "What is stable?"] },
+    { level: "System View", focus: "A domain as a network of nodes and relationships", metaphor: "Living nervous system", questions: ["What entities exist?", "How are they connected?"] },
+    { level: "Flow View", focus: "Money, information, labor, materials, energy, attention", metaphor: "Animated circulation", questions: ["What is moving?", "Where is it blocked?"] },
+    { level: "Dependency View", focus: "Hard dependencies and critical chains", metaphor: "Operational backbone", questions: ["What breaks if this fails?", "What must be true?"] },
+    { level: "Constraint View", focus: "Capacity, delay, dependency, single point of failure, shortage, congestion", metaphor: "Pressure map", questions: ["What is limiting progress?"] },
+    { level: "Ownership View", focus: "Owner, operator, manager, executive, board, agency, policy, automation", metaphor: "Accountability chain", questions: ["Who can change this?"] },
+    { level: "Priority View", focus: "Rank opportunities, risks, constraints, and decisions", metaphor: "Attention router", questions: ["What matters now?"] },
+  ];
+  const key = String(state.realityLevel || "strategic-view");
+  const selectedLevel = levels.find(function (item) { return item.level.toLowerCase().replace(/\s+/g, "-") === key; }) || levels[0];
+  const metrics = realityEngine && realityEngine.success_metrics ? realityEngine.success_metrics : {};
+  const domains = realityEngine && realityEngine.reality_domains ? realityEngine.reality_domains : {};
+  const loopSequence = (realityEngine && realityEngine.reality_loop && realityEngine.reality_loop.sequence) || [];
+  const timeline = interfaceData.temporal_layer || ["Past", "Present", "Projected"];
+  const interfaceStack = interfaceData.interface_stack || ["Reality", "Reality Model", "Reality Graph", "Reality Engine", "Reality Interface", "Human"];
+  const selectedEntity = entities.find(function (item) { return item.id === state.selectedEntityId; }) || entities[0] || {};
+  const selectedRelationships = relationships.filter(function (item) { return item.from === selectedEntity.id || item.to === selectedEntity.id; }).slice(0, 6);
+  const topDomains = Object.entries(domains).slice(0, 8);
+  const truth = realityEngine && realityEngine.truth_engine ? realityEngine.truth_engine : {};
+  const metaCognition = realityEngine && realityEngine.meta_cognition_engine ? realityEngine.meta_cognition_engine : {};
+  const assumptionGraph = realityEngine && realityEngine.assumption_graph ? realityEngine.assumption_graph : {};
+  const coverageMap = realityEngine && realityEngine.reality_coverage_map ? realityEngine.reality_coverage_map : {};
+  const causalEngine = realityEngine && realityEngine.causal_engine ? realityEngine.causal_engine : {};
+  const frictionEngine = realityEngine && realityEngine.friction_engine ? realityEngine.friction_engine : {};
+  const opportunityEngine = realityEngine && realityEngine.opportunity_discovery_engine ? realityEngine.opportunity_discovery_engine : {};
+  const recursiveLearning = realityEngine && realityEngine.recursive_learning ? realityEngine.recursive_learning : {};
+  const evolutionEngine = realityEngine && realityEngine.evolution_engine ? realityEngine.evolution_engine : {};
+  const realityGenome = realityEngine && realityEngine.reality_genome ? realityEngine.reality_genome : {};
+  const strategicTimeEngine = realityEngine && realityEngine.strategic_time_engine ? realityEngine.strategic_time_engine : {};
+  const executiveCompression = realityEngine && realityEngine.executive_compression ? realityEngine.executive_compression : {};
+  const metaReality = realityEngine && realityEngine.meta_reality ? realityEngine.meta_reality : {};
+  const controlHierarchy = realityEngine && realityEngine.control_hierarchy ? realityEngine.control_hierarchy : {};
+  const systemMappingLayer = realityEngine && realityEngine.system_mapping_layer ? realityEngine.system_mapping_layer : {};
+  const universalSituationReport = realityEngine && realityEngine.universal_situation_report ? realityEngine.universal_situation_report : {};
+
+  if (dom.realityInterfaceTabs) {
+    dom.realityInterfaceTabs.innerHTML = interfaceStack.map(function (item) {
+      return '<span class="pill">' + escapeHtml(item) + '</span>';
+    }).join('');
+  }
+
+  if (dom.realityMetricsList) {
+    dom.realityMetricsList.innerHTML = Object.entries(metrics).map(function (entry) {
+      return '<div class="answer-card"><span class="card-kicker">' + escapeHtml(entry[0].replace(/_/g, ' ')) + '</span><strong>' + escapeHtml(entry[1]) + '</strong></div>';
+    }).join('');
+  }
+
+  if (dom.realityDomainList) {
+    dom.realityDomainList.innerHTML = topDomains.map(function (entry) {
+      const domain = entry[1] || {};
+      return '<div class="answer-card"><span class="card-kicker">' + escapeHtml(entry[0].replace(/_/g, ' ')) + '</span><strong>' + escapeHtml(domain.coverage || 'domain') + '</strong><small>' + escapeHtml((domain.share || '') + ' | ' + ((domain.sources || []).slice(0, 2).join(', '))) + '</small><div class="card-sub">' + escapeHtml((domain.entities || []).slice(0, 4).join(' • ')) + '</div></div>';
+    }).join('');
+  }
+
+  if (dom.realityLevelTitle) dom.realityLevelTitle.textContent = selectedLevel.level;
+  if (dom.realityLevelDescription) dom.realityLevelDescription.textContent = selectedLevel.focus + '. ' + selectedLevel.metaphor + '.';
+  if (dom.realityLevelChips) {
+    dom.realityLevelChips.innerHTML = levels.map(function (item) {
+      const levelKey = item.level.toLowerCase().replace(/\s+/g, '-');
+      return '<button class="chip' + (levelKey === key ? ' active' : '') + '" data-reality-level="' + escapeHtml(levelKey) + '">' + escapeHtml(item.level) + '</button>';
+    }).join('');
+    dom.realityLevelChips.querySelectorAll('[data-reality-level]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        state.realityLevel = button.dataset.realityLevel;
+        renderRealityInterface(realityEngine, platform, entities, relationships);
+      });
+    });
+  }
+
+  const worldCount = formatNumber((platform.entities || []).length);
+  const relationshipCount = formatNumber((platform.relationships || []).length);
+  const systemCount = formatNumber(Object.keys(domains).length);
+  const outcomeCount = formatNumber((platform.outcomes || []).length);
+
+  if (dom.realityViewport) {
+    dom.realityViewport.innerHTML = '<div class="reality-card-title">' + escapeHtml(selectedLevel.level) + '</div><strong>' + escapeHtml(selectedLevel.metaphor) + '</strong><div class="detail-meta">' + escapeHtml(selectedLevel.focus) + '</div><div class="reality-stat-row"><span class="pill good">Entities ' + worldCount + '</span><span class="pill">Relationships ' + relationshipCount + '</span><span class="pill">Domains ' + systemCount + '</span><span class="pill">Outcomes ' + outcomeCount + '</span></div><div class="card-sub">Questions: ' + escapeHtml(selectedLevel.questions.join(' | ')) + '</div><div class="card-sub">Meta-cognition: ' + escapeHtml((metaCognition.questions || []).slice(0, 2).join(' | ')) + '. Coverage: ' + escapeHtml((coverageMap.measures || []).join(' | ')) + '.</div>';
+  }
+
+  if (dom.realityDetailViewport) {
+    dom.realityDetailViewport.innerHTML = '<div class="reality-card-title">Selected Entity</div><strong>' + escapeHtml(selectedEntity.label || selectedEntity.name || 'n/a') + '</strong><div class="detail-meta">' + escapeHtml(selectedEntity.kind || '') + ' | ' + escapeHtml(selectedEntity.state || '') + ' | ' + escapeHtml(selectedEntity.health || '') + '</div><div class="detail-body">Dependencies and influence chains become visible here. Top relations: ' + escapeHtml(selectedRelationships.map(function (item) { return item.label || item.kind || (item.from + '→' + item.to); }).join(' • ') || 'n/a') + '.</div><div class="reality-stat-row"><span class="pill warning">Visibility: ' + escapeHtml((realityEngine && realityEngine.visibility_authority_control && realityEngine.visibility_authority_control.visibility ? realityEngine.visibility_authority_control.visibility[0] : 'Can See')) + '</span><span class="pill">Access: Public → Owner</span><span class="pill danger">Authority: Approvals</span></div><div class="card-sub">Effect chain: ' + escapeHtml((realityEngine && realityEngine.visibility_authority_control && realityEngine.visibility_authority_control.chain ? realityEngine.visibility_authority_control.chain.join(' → ') : 'Visibility → Access → Authority → Control → Action → Effect → Outcome → Learning')) + '.</div>';
+  }
+
+  if (dom.realityTimelineTags) dom.realityTimelineTags.innerHTML = timeline.map(function (item) { return '<span class="pill">' + escapeHtml(item) + '</span>'; }).join('');
+  if (dom.realityLoopTags) dom.realityLoopTags.innerHTML = loopSequence.map(function (item) { return '<span class="pill good">' + escapeHtml(item) + '</span>'; }).join('');
+  if (dom.truthEngineList) {
+    const truthItems = [
+      ['Truth Score', truth.truth_score_formula || 'Source Reliability × Evidence Strength × Freshness × Cross-Source Agreement ÷ Contradictions'],
+      ['Statuses', (truth.verification_statuses || []).join(' • ')],
+      ['Highest Trust', (truth.source_hierarchy && truth.source_hierarchy.highest_trust || []).join(' • ')],
+      ['Medium Trust', (truth.source_hierarchy && truth.source_hierarchy.medium_trust || []).join(' • ')],
+      ['Lower Trust', (truth.source_hierarchy && truth.source_hierarchy.lower_trust || []).join(' • ')],
+      ['Meta-Cognition', (metaCognition.questions || []).join(' • ')],
+      ['Assumption Graph', (assumptionGraph.chain || []).join(' → ')],
+      ['Coverage Map', (coverageMap.states || []).join(' • ') + ' | ' + (coverageMap.measures || []).join(' • ')],
+      ['Causal Engine', (causalEngine.chain || []).join(' → ')],
+      ['Friction Engine', (frictionEngine.delays || []).join(' • ')],
+      ['Opportunity Engine', (opportunityEngine.sources || []).join(' • ')],
+      ['Recursive Learning', (recursiveLearning.ladder || []).join(' → ')],
+      ['Evolution Engine', (evolutionEngine.metrics || []).join(' • ')],
+      ['Reality Genome', (realityGenome.schema || []).join(' • ')],
+      ['Strategic Time', (strategicTimeEngine.horizons || []).join(' • ')],
+      ['Executive Compression', (executiveCompression.top_views || []).join(' • ')],
+      ['Meta-Reality', (metaReality.questions || []).join(' • ')],
+      ['Action Rule', truth.action_rule || 'No action unless verifiable.'],
+      ['Principle', truth.principle || 'If it cannot be verified, it can inform attention, but it cannot drive execution.'],
+    ];
+    dom.truthEngineList.innerHTML = truthItems.map(function (item) {
+      return '<div class="answer-card"><span class="card-kicker">' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
+    }).join('');
+  }
+
+  if (dom.controlModelList) {
+    const hierarchy = (controlHierarchy.layers || []).map(function (item) { return item.layer + ': ' + item.question; });
+    const capabilities = controlHierarchy.capability_model || [];
+    const resources = controlHierarchy.resource_domains || [];
+    const mapping = [
+      ['Observation Systems', ((systemMappingLayer.observation_systems || {}).entities || []).join(' • '), (systemMappingLayer.observation_systems || {}).purpose || ''],
+      ['Communication Systems', ((systemMappingLayer.communication_systems || {}).entities || []).join(' • '), (systemMappingLayer.communication_systems || {}).purpose || ''],
+      ['Mobility Systems', ((systemMappingLayer.mobility_systems || {}).entities || []).join(' • '), (systemMappingLayer.mobility_systems || {}).purpose || ''],
+      ['Infrastructure Systems', ((systemMappingLayer.infrastructure_systems || {}).entities || []).join(' • '), (systemMappingLayer.infrastructure_systems || {}).purpose || ''],
+    ];
+    const report = universalSituationReport.example || {};
+    const reportItems = [
+      ['Universal Situation Report', universalSituationReport.template || ''],
+      ['Control Hierarchy', hierarchy.join(' | ')],
+      ['Control Capabilities', capabilities.join(' • ')],
+      ['Resource Domains', resources.join(' • ')],
+      ['System Mapping', mapping.map(function (item) { return item[0] + ': ' + item[1]; }).join(' | ')],
+      ['City Water Example', 'Constraint ' + (report.top_constraint || '') + ' | Maker ' + (report.top_decision_maker || '') + ' | Owner ' + (report.top_resource_owner || '')],
+      ['Mission', report.top_mission || ''],
+      ['Recommended Action', report.top_recommended_action || ''],
+      ['Expected Impact', report.expected_impact || ''],
+      ['Confidence', report.confidence || ''],
+      ['Principle', controlHierarchy.principle || ''],
+    ];
+    dom.controlModelList.innerHTML = reportItems.map(function (item) {
+      return '<div class="answer-card"><span class="card-kicker">' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
+    }).join('');
+  }
 }
 
 function renderEvents(events) {

@@ -1,0 +1,41 @@
+{
+  "created_at": "2026-06-03T20:33:23.001Z",
+  "level": 5,
+  "xp": 960,
+  "next_level_xp": 6000,
+  "completion_rate": 100,
+  "unlocked_achievements": 6,
+  "total_achievements": 6,
+  "mastery_paths": [
+    {
+      "id": "learn",
+      "name": "Learn",
+      "progress": 55
+    },
+    {
+      "id": "earn",
+      "name": "Earn",
+      "progress": 50
+    },
+    {
+      "id": "build",
+      "name": "Build",
+      "progress": 100
+    },
+    {
+      "id": "improve",
+      "name": "Improve",
+      "progress": 65
+    },
+    {
+      "id": "operate",
+      "name": "Operate",
+      "progress": 50
+    },
+    {
+      "id": "explore",
+      "name": "Explore",
+      "progress": 57
+    }
+  ]
+}

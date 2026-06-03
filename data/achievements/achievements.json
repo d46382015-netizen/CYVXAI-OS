@@ -1,0 +1,38 @@
+[
+  {
+    "id": "first-reality-upload",
+    "name": "Reality Uploaded",
+    "description": "Created the first structured reality input.",
+    "unlocked": true
+  },
+  {
+    "id": "first-mission-generated",
+    "name": "Mission Generated",
+    "description": "Converted reality into a measurable mission.",
+    "unlocked": true
+  },
+  {
+    "id": "first-outcome-recorded",
+    "name": "Outcome Recorded",
+    "description": "Recorded at least one expected-vs-actual result.",
+    "unlocked": true
+  },
+  {
+    "id": "first-lesson-stored",
+    "name": "Lesson Stored",
+    "description": "Converted an outcome into learning.",
+    "unlocked": true
+  },
+  {
+    "id": "agency-above-60",
+    "name": "Agency Rising",
+    "description": "Raised agency score above 60.",
+    "unlocked": true
+  },
+  {
+    "id": "potential-expanded",
+    "name": "Expanded Potential",
+    "description": "Unlocked future possibilities.",
+    "unlocked": true
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "learn",
+    "name": "Learn",
+    "purpose": "Build knowledge and skill faster.",
+    "level": 1,
+    "progress": 55,
+    "unlock": "Skill quests and learning missions"
+  },
+  {
+    "id": "earn",
+    "name": "Earn",
+    "purpose": "Find opportunities and convert capability into income.",
+    "level": 1,
+    "progress": 50,
+    "unlock": "Opportunity missions"
+  },
+  {
+    "id": "build",
+    "name": "Build",
+    "purpose": "Turn ideas into working projects.",
+    "level": 1,
+    "progress": 100,
+    "unlock": "Project missions"
+  },
+  {
+    "id": "improve",
+    "name": "Improve",
+    "purpose": "Strengthen habits, systems, and personal growth.",
+    "level": 1,
+    "progress": 65,
+    "unlock": "Growth missions"
+  },
+  {
+    "id": "operate",
+    "name": "Operate",
+    "purpose": "Coordinate people, work, systems, and outcomes.",
+    "level": 1,
+    "progress": 50,
+    "unlock": "Operations missions"
+  },
+  {
+    "id": "explore",
+    "name": "Explore",
+    "purpose": "Discover opportunities, futures, and paths.",
+    "level": 1,
+    "progress": 57,
+    "unlock": "Potential maps"
+  }
+]

@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-06-03T22:41:30.143Z",
-  "health": "excellent",
+  "updated_at": "2026-06-03T22:42:53.345Z",
+  "health": "active",
   "trust": 92,
   "autonomy": 92,
   "agentsOnline": 24,
@@ -8,97 +8,97 @@
   "outcomesToday": 10,
   "proofCompleted": 10,
   "proofTotal": 10,
-  "topConstraint": "CYVX can now compile and materialize capability artifacts, but needs repeated verified executions to expand safely.",
-  "nextBestAction": "Build or deepen: Outcome History + Trust Calibration",
+  "topConstraint": "CYVX can now route missions, but real-world execution and outcome capture remain the next proof step.",
+  "nextBestAction": "Publish a public demo link and run the first external user through the Value Moment.",
   "signals": [
     {
-      "type": "NEW SIGNAL",
-      "title": "Deployment bottleneck detected",
-      "detail": "Public access is the highest adoption unlock.",
+      "type": "DEPLOYMENT",
+      "title": "Public access needed",
+      "detail": "Local UI works; external users need a hosted demo.",
       "priority": "high"
     },
     {
-      "type": "TRUST UPDATE",
-      "title": "Trust stabilized at 92",
-      "detail": "Real Proof 10 completed and evidence pack generated.",
+      "type": "ADOPTION",
+      "title": "First-user loop ready",
+      "detail": "The Value Moment can now convert messy context into a mission.",
       "priority": "high"
     },
     {
-      "type": "OPPORTUNITY",
-      "title": "Proof pack can become revenue wedge",
-      "detail": "Use proof as the first demo and customer conversation.",
-      "priority": "high"
+      "type": "PROOF",
+      "title": "Proof Pack complete",
+      "detail": "10/10 internal proof records are completed.",
+      "priority": "medium"
     },
     {
-      "type": "SYSTEM",
-      "title": "Portfolio Brain selected next capability",
-      "detail": "Outcome History + Trust Calibration",
+      "type": "PRODUCT",
+      "title": "Dashboard simplified",
+      "detail": "The command center now emphasizes action instead of architecture.",
       "priority": "medium"
     }
   ],
   "opportunities": [
     {
-      "title": "Public Proof Demo",
-      "value": "High",
-      "confidence": 92,
-      "action": "Package proof pack as public landing/demo page."
-    },
-    {
-      "title": "Outcome History UI",
-      "value": "High",
-      "confidence": 90,
-      "action": "Expose trust and learning history in dashboard."
-    },
-    {
-      "title": "Continuous Reality Intake",
+      "title": "Public Demo Launch",
       "value": "Very High",
-      "confidence": 86,
-      "action": "Watch repos/docs/outcomes and generate signals automatically."
+      "confidence": 93,
+      "action": "Deploy CYVX and share one URL."
     },
     {
-      "title": "Revenue Wedge",
+      "title": "First User Test",
+      "value": "Very High",
+      "confidence": 91,
+      "action": "Have one person paste a real problem and judge the mission quality."
+    },
+    {
+      "title": "Proof-to-Revenue Wedge",
+      "value": "High",
+      "confidence": 86,
+      "action": "Use the proof pack as the first customer-facing credibility asset."
+    },
+    {
+      "title": "GitHub Repo Analyzer",
       "value": "High",
       "confidence": 84,
-      "action": "Turn proof pack into first sales/adoption narrative."
+      "action": "Turn repo URLs into structured constraints and missions."
     }
   ],
   "agents": [
     {
       "name": "Reality Engine",
-      "status": "Scanning constraints",
+      "status": "Watching for new uploaded context",
       "progress": 88
     },
     {
-      "name": "Portfolio Brain",
-      "status": "Ranking next capabilities",
-      "progress": 92
+      "name": "Decision Compressor",
+      "status": "Reducing complexity into one next action",
+      "progress": 91
+    },
+    {
+      "name": "Opportunity Radar",
+      "status": "Ranking demo, user, and revenue paths",
+      "progress": 86
     },
     {
       "name": "Verifier",
-      "status": "Checking proof records",
-      "progress": 100
-    },
-    {
-      "name": "Executor",
-      "status": "Awaiting approved mission",
-      "progress": 71
+      "status": "Checking proof and trust signals",
+      "progress": 94
     }
   ],
   "missions": [
     {
-      "title": "Create one measurable proof loop",
-      "status": "ready",
-      "impact": "high"
-    },
-    {
-      "title": "Publish proof demo surface",
+      "title": "Deploy public demo",
       "status": "next",
-      "impact": "high"
+      "impact": "very high"
     },
     {
-      "title": "Wire outcome history UI",
+      "title": "Run first external user test",
+      "status": "ready",
+      "impact": "very high"
+    },
+    {
+      "title": "Turn repo URL into mission automatically",
       "status": "queued",
-      "impact": "medium"
+      "impact": "high"
     }
   ],
   "commands": [
@@ -110,5 +110,15 @@
     "show proof pack",
     "find opportunity",
     "scan agents"
-  ]
+  ],
+  "modelHealth": "mission-router",
+  "nextAction": "Execute routed deployment mission: Deploy CYVX publicly and run one external user test.",
+  "missionRouter": {
+    "status": "active",
+    "latest_mission": "MISSION-1780528076705",
+    "type": "deployment",
+    "executor": "Deployment Executor",
+    "verification": "needs-review",
+    "score": 80
+  }
 }

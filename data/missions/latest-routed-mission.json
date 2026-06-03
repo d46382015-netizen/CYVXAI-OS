@@ -1,0 +1,14 @@
+{
+  "id": "MISSION-1780528076705",
+  "created_at": "2026-06-03T23:07:56.693Z",
+  "mission": "Deploy CYVX publicly and run one external user test.",
+  "type": "deployment",
+  "executor": "Deployment Executor",
+  "status": "queued",
+  "route": {
+    "executor": "Deployment Executor",
+    "action": "Prepare public demo deployment checklist and verification.",
+    "verify": "Confirm server command, public URL requirement, and proof capture plan.",
+    "expected": "A public demo can be launched and tested by one external user."
+  }
+}

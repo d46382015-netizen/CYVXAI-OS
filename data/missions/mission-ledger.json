@@ -1,0 +1,68 @@
+{
+  "created_at": "2026-06-03T23:07:56.693Z",
+  "missions": [
+    {
+      "id": "MISSION-1780528076705",
+      "created_at": "2026-06-03T23:07:56.693Z",
+      "mission": "Deploy CYVX publicly and run one external user test.",
+      "type": "deployment",
+      "executor": "Deployment Executor",
+      "status": "queued",
+      "route": {
+        "executor": "Deployment Executor",
+        "action": "Prepare public demo deployment checklist and verification.",
+        "verify": "Confirm server command, public URL requirement, and proof capture plan.",
+        "expected": "A public demo can be launched and tested by one external user."
+      },
+      "execution": {
+        "id": "EXEC-1780528076709",
+        "mission_id": "MISSION-1780528076705",
+        "created_at": "2026-06-03T23:07:56.693Z",
+        "executor": "Deployment Executor",
+        "status": "executed-local-plan",
+        "steps": [
+          "Classify mission",
+          "Select executor",
+          "Generate execution steps",
+          "Generate verification criteria",
+          "Write mission ledger",
+          "Update runtime state"
+        ],
+        "action": "Prepare public demo deployment checklist and verification.",
+        "expected_outcome": "A public demo can be launched and tested by one external user."
+      },
+      "verification": {
+        "id": "VERIFY-1780528081522",
+        "mission_id": "MISSION-1780528076705",
+        "created_at": "2026-06-03T23:07:56.693Z",
+        "status": "needs-review",
+        "score": 80,
+        "criteria": "Confirm server command, public URL requirement, and proof capture plan.",
+        "checks": [
+          {
+            "name": "mission-classified",
+            "status": "PASS"
+          },
+          {
+            "name": "executor-selected",
+            "status": "PASS"
+          },
+          {
+            "name": "mission-ledger-written",
+            "status": "PASS"
+          },
+          {
+            "name": "execution-written",
+            "status": "PASS"
+          },
+          {
+            "name": "omega100",
+            "status": "FAIL"
+          }
+        ]
+      },
+      "final_status": "needs-review"
+    }
+  ],
+  "updated_at": "2026-06-03T23:07:56.693Z"
+}

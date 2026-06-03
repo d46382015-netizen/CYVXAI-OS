@@ -822,3 +822,118 @@ document.addEventListener("click", (e) => {
     }, 50);
   }
 }, true);
+
+/* CYVX VALUE MOMENT COMPLETE LOOP */
+(function(){
+  function $(id){ return document.getElementById(id); }
+
+  function ensureLoopCard(){
+    const result = document.querySelector(".result-card");
+    if(!result || $("missionLoopCard")) return;
+
+    result.insertAdjacentHTML("afterend", `
+      <div class="mission-loop-card" id="missionLoopCard">
+        <p class="kicker">Mission Loop</p>
+
+        <div class="loop-grid">
+          <div><span>Expected Impact</span><strong id="loopImpact">—</strong></div>
+          <div><span>Proof Plan</span><strong id="loopProof">—</strong></div>
+          <div><span>Dependencies</span><strong id="loopDeps">—</strong></div>
+          <div><span>Status</span><strong id="loopStatus">Ready</strong></div>
+        </div>
+
+        <div class="loop-actions">
+          <button class="primary" id="executeMissionBtn">Execute Mission</button>
+          <button id="captureOutcomeBtn">Capture Outcome</button>
+          <button id="updateTrustBtn">Update Trust</button>
+        </div>
+
+        <textarea id="outcomeText" placeholder="What actually happened? Example: Shared CYVX with 3 people; 1 completed the Value Moment."></textarea>
+
+        <div class="trust-result" id="trustResult">
+          <b>Trust:</b> <span id="trustBefore">88</span> → <span id="trustAfter">—</span>
+          <p id="loopLearning">Learning will appear after outcome capture.</p>
+        </div>
+      </div>
+    `);
+  }
+
+  function deriveLoop(){
+    const constraint = $("instantConstraint")?.textContent || "";
+    const nba = $("instantNBA")?.textContent || "";
+
+    const deployment = /deployment|public|url|external/i.test(constraint + " " + nba);
+    const revenue = /revenue|customer|sales/i.test(constraint + " " + nba);
+    const ui = /ui|interface|value moment/i.test(constraint + " " + nba);
+
+    return {
+      impact: deployment
+        ? "Unlocks first external user, feedback, testimonial, proof, and revenue path."
+        : revenue
+        ? "Turns proof into customer-facing credibility and first offer."
+        : ui
+        ? "Improves activation by making the product understandable in under 60 seconds."
+        : "Creates one measured proof loop that improves trust and future decisions.",
+      proof: deployment
+        ? "Public URL + tester name/feedback + screenshot + captured outcome."
+        : revenue
+        ? "Offer page + target user + response + next step."
+        : ui
+        ? "Before/after screenshot + completed Value Moment result."
+        : "Mission record + actual outcome + trust update.",
+      deps: deployment
+        ? "Hosting, public URL, working UI, one external tester."
+        : revenue
+        ? "Proof pack, simple offer, target customer, follow-up."
+        : ui
+        ? "Working analyzer, clear CTA, functional buttons."
+        : "Mission, outcome, evidence."
+    };
+  }
+
+  function refreshLoop(){
+    ensureLoopCard();
+    const d = deriveLoop();
+    if($("loopImpact")) $("loopImpact").textContent = d.impact;
+    if($("loopProof")) $("loopProof").textContent = d.proof;
+    if($("loopDeps")) $("loopDeps").textContent = d.deps;
+  }
+
+  document.addEventListener("click", function(e){
+    const text = e.target.textContent || "";
+
+    if(/Generate Next Best Action/i.test(text)){
+      setTimeout(refreshLoop, 80);
+    }
+
+    if(e.target.id === "executeMissionBtn"){
+      e.preventDefault();
+      refreshLoop();
+      $("loopStatus").textContent = "Active";
+      $("loopLearning").textContent = "Mission started. Capture the actual result when completed.";
+      if(window.toast) window.toast("Mission started.");
+    }
+
+    if(e.target.id === "captureOutcomeBtn"){
+      e.preventDefault();
+      const outcome = $("outcomeText")?.value || "";
+      $("loopStatus").textContent = outcome.trim() ? "Outcome Captured" : "Waiting for Outcome";
+      $("loopLearning").textContent = outcome.trim()
+        ? "Outcome captured. Ready to update trust and store learning."
+        : "Add what actually happened before updating trust.";
+    }
+
+    if(e.target.id === "updateTrustBtn"){
+      e.preventDefault();
+      const outcome = $("outcomeText")?.value || "";
+      const success = /shared|completed|deployed|launched|tested|user|feedback|success|done|working/i.test(outcome);
+      $("trustAfter").textContent = success ? "91" : "86";
+      $("loopStatus").textContent = success ? "Completed" : "Needs Review";
+      $("loopLearning").textContent = success
+        ? "Learning: this mission created usable reality evidence. Increase confidence in similar missions."
+        : "Learning: mission needs tighter execution proof before trust increases.";
+    }
+  }, true);
+
+  document.addEventListener("DOMContentLoaded", ensureLoopCard);
+})();

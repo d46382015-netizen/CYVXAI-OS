@@ -1,0 +1,9 @@
+{
+  "agency_formula": {
+    "decision_quality": 0.2,
+    "execution_quality": 0.2,
+    "adaptation_rate": 0.2,
+    "coordination_score": 0.2,
+    "resource_access_score": 0.2
+  }
+}

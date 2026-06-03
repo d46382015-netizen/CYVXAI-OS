@@ -166,7 +166,25 @@ The intelligence layer strengthens the existing loop by turning outcomes, learni
 - CLI: `reality-engine`
 - Purpose: compress architecture into verified prediction -> outcome -> error -> learning loops.
 
-## RealityOS vΩ
+## 
+Self-Scan & Proof Loop
+CLI: node ./cli/cyvx.js scan-self
+CLI: node ./cli/cyvx.js self-scan-mission
+API: GET /api/v1/self-scan
+API: GET /api/v1/self-scan-mission
+
+Purpose: CYVX can now analyze its own repository, identify top constraints, generate next-best actions, create missions, expose the result through API/dashboard surfaces, and record proof-ledger improvement over time.
+
+Current Proof State
+- CI passing
+- Terraform workflow manual-only
+- Repository health improved from at-risk to healthy
+- Open issues: 0
+- Open pull requests: 0
+- Self-scan operational
+- Self-scan mission loop operational
+
+RealityOS vΩ
 - RealityOS layers the repo around observation, modeling, intelligence, compression, operation, learning, and interface.
 - The phone is the final presentation layer of a much larger system.
 - RealityEngine now exposes the layered model through `GET /api/v1/reality-engine`.

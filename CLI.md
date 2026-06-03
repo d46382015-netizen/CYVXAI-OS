@@ -61,3 +61,12 @@
 - API: /api/v1/repository-health?owner=acme&repo=cyvx
 - API: /api/v1/proof?owner=acme&repo=cyvx
 - CLI: repository-health, repo-health, proof, github, github-health, github-proof
+
+
+## Self-Scan Commands
+
+### node ./cli/cyvx.js scan-self
+Runs the CYVX self-scan engine.
+
+### node ./cli/cyvx.js self-scan-mission
+Runs self-scan and creates a mission plus next-best-action record from the top detected constraint.

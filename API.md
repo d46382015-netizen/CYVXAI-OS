@@ -60,3 +60,12 @@ All JSON responses include:
 - API: /api/v1/repository-health?owner=acme&repo=cyvx
 - API: /api/v1/proof?owner=acme&repo=cyvx
 - CLI: repository-health, repo-health, proof, github, github-health, github-proof
+
+
+## Self-Scan APIs
+
+### GET /api/v1/self-scan
+Returns the CYVX local repository self-scan, including health, top constraint, observations, next-best actions, mission, and trust score.
+
+### GET /api/v1/self-scan-mission
+Runs the self-scan mission bridge and returns generated mission and next-best-action records.

@@ -1,7 +1,7 @@
 {
   "upload": {
     "id": "demo-reality-001",
-    "created_at": "2026-06-03T20:00:47.969Z",
+    "created_at": "2026-06-03T20:03:42.603Z",
     "title": "Parsed demo reality upload",
     "raw": "Need more paying users\nNeed public demo\nNeed clearer onboarding\nNeed mission outcome proof\nNeed approval gates before automation",
     "items": [
@@ -15,7 +15,7 @@
   "missions": [
     {
       "id": "mission-001",
-      "created_at": "2026-06-03T20:00:47.969Z",
+      "created_at": "2026-06-03T20:03:42.603Z",
       "title": "Need more paying users",
       "type": "growth",
       "constraint": "No active demand proof",
@@ -28,7 +28,7 @@
     },
     {
       "id": "mission-002",
-      "created_at": "2026-06-03T20:00:47.969Z",
+      "created_at": "2026-06-03T20:03:42.603Z",
       "title": "Need public demo",
       "type": "deployment",
       "constraint": "No public entry point",
@@ -41,7 +41,7 @@
     },
     {
       "id": "mission-003",
-      "created_at": "2026-06-03T20:00:47.969Z",
+      "created_at": "2026-06-03T20:03:42.603Z",
       "title": "Need clearer onboarding",
       "type": "adoption",
       "constraint": "Onboarding friction",
@@ -54,7 +54,7 @@
     },
     {
       "id": "mission-004",
-      "created_at": "2026-06-03T20:00:47.969Z",
+      "created_at": "2026-06-03T20:03:42.603Z",
       "title": "Need mission outcome proof",
       "type": "trust",
       "constraint": "No measured outcome proof",
@@ -67,7 +67,7 @@
     },
     {
       "id": "mission-005",
-      "created_at": "2026-06-03T20:00:47.969Z",
+      "created_at": "2026-06-03T20:03:42.603Z",
       "title": "Need approval gates before automation",
       "type": "governance",
       "constraint": "Automation needs trust boundary",
@@ -164,7 +164,7 @@
     }
   ],
   "scorecard": {
-    "created_at": "2026-06-03T20:00:47.969Z",
+    "created_at": "2026-06-03T20:03:42.603Z",
     "reality_health": 67,
     "top_constraint": "No active demand proof",
     "top_mission": "Need more paying users",

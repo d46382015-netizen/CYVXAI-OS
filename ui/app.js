@@ -927,11 +927,11 @@ document.addEventListener("click", (e) => {
       e.preventDefault();
       const outcome = $("outcomeText")?.value || "";
       const success = /shared|completed|deployed|launched|tested|user|feedback|success|done|working/i.test(outcome);
-      $("trustAfter").textContent = success ? "91" : "86";
-      $("loopStatus").textContent = success ? "Completed" : "Needs Review";
+      $("trustAfter").textContent = outcome.trim() ? (success ? "91" : "86") : "—";
+      $("loopStatus").textContent = outcome.trim() ? (success ? "Completed" : "Needs Review") : "Ready";
       $("loopLearning").textContent = success
         ? "Learning: this mission created usable reality evidence. Increase confidence in similar missions."
-        : "Learning: mission needs tighter execution proof before trust increases.";
+        : "Add an actual outcome before trust changes.";
     }
   }, true);
 

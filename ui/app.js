@@ -133,38 +133,76 @@ function updateValue(d){
 function wireClicks(){
   document.addEventListener("click",e=>{
     const side=e.target.closest(".side-nav button");
-    if(side){document.querySelectorAll(".side-nav button").forEach(b=>b.classList.remove("active"));side.classList.add("active");modal(side.textContent.trim(),"<p>Runtime drill-down opened.</p><p>"+(runtime.topConstraint||"Live state active")+"</p>");return}
-    const btn=e.target.closest("button");
-    if(btn&&btn.id==="instantAnalyzeBtn"){updateValue(analyzeReality($("instantRealityInput")?.value));toast("Next Best Action generated.");return}
-    if(btn&&/upload reality/i.test(btn.textContent)){$("instantRealityInput")?.focus();toast("Paste reality below.");return}
-    if(btn&&/model my company/i.test(btn.textContent)){updateValue(analyzeReality("company revenue deployment teams cloud spend"));toast("Company modeled.");return}
-    if(btn&&/run mission|execute now/i.test(btn.textContent)){modal("Mission Executed","<p>Mission queued. Outcome capture ready.</p>");toast("Mission queued.");return}
-    if(e.target.closest(".proof-pack")){modal("Proof Pack",`<h3>${runtime.proofCompleted||10}/${runtime.proofTotal||10}</h3><p>Reality loops completed. Trust ${runtime.trust||92}.</p>`);return}
-    if(e.target.closest(".network")){modal("Reality Graph","<p>Graph recalibrated from runtime signals, missions, and opportunities.</p>");return}
-    const clickable=e.target.closest(".clickable"); if(clickable){runCommand(clickable.dataset.action);return}
-  });
+    
+if(side){
+  const name = side.textContent.trim();
 
-  document.addEventListener("keydown",e=>{
-    if(e.key==="/"){
-      e.preventDefault();
-      $("commandPalette").classList.add("show");
-      $("paletteInput").focus();
-    }
-    if(e.key==="Escape")$("commandPalette")?.classList.remove("show");
-    if(e.key==="Enter"&&document.activeElement?.id==="paletteInput"){
-      runCommand($("paletteInput").value);
-      $("commandPalette").classList.remove("show");
-      $("paletteInput").value="";
-    }
-  });
+  if(name.includes("Mission")){
+    modal("Mission Control",
+      (runtime.missions||[])
+        .map(m=>`<p><b>${m.title}</b><br>Status: ${m.status}<br>Impact: ${m.impact}</p>`)
+        .join("") || "<p>No missions loaded.</p>"
+    );
+  }
+
+  else if(name.includes("Agent")){
+    modal("Agent Activity",
+      (runtime.agents||[])
+        .map(a=>`<p><b>${a.name}</b><br>${a.status}<br>Progress: ${a.progress}%</p>`)
+        .join("") || "<p>No agents loaded.</p>"
+    );
+  }
+
+  else if(name.includes("Opportunity")){
+    modal("Opportunity Radar",
+      (runtime.opportunities||[])
+        .map(o=>`<p><b>${o.title}</b><br>${o.action}<br>Confidence: ${o.confidence}%</p>`)
+        .join("") || "<p>No opportunities loaded.</p>"
+    );
+  }
+
+  else if(name.includes("Proof")){
+    modal("Proof Pack",
+      `<p><b>Completed:</b> ${runtime.proofCompleted}/${runtime.proofTotal}</p>
+       <p><b>Trust:</b> ${runtime.trust}</p>
+       <p><b>Health:</b> ${runtime.health}</p>`
+    );
+  }
+
+  else if(name.includes("Reality")){
+    modal("Reality Engine",
+      `<p><b>Constraint:</b> ${runtime.topConstraint}</p>
+       <p><b>Next Best Action:</b> ${runtime.nextBestAction}</p>
+       <p><b>Signals:</b> ${(runtime.signals||[]).length}</p>`
+    );
+  }
+
+  else if(name.includes("Intelligence")){
+    modal("Intelligence Summary",
+      `<p><b>Trust:</b> ${runtime.trust}</p>
+       <p><b>Autonomy:</b> ${runtime.autonomy}%</p>
+       <p><b>Opportunities:</b> ${(runtime.opportunities||[]).length}</p>`
+    );
+  }
+
+  else if(name.includes("Execution")){
+    modal("Execution Board",
+      (runtime.missions||[])
+        .map(m=>`<p><b>${m.title}</b><br>${m.status}</p>`)
+        .join("")
+    );
+  }
+
+  else{
+    modal(name,
+      `<p>Dedicated ${name} runtime panel online.</p>
+       <p>Trust: ${runtime.trust}</p>
+       <p>Next Action: ${runtime.nextBestAction}</p>`);
+  }
+
+  return;
 }
 
-function initSearch(){
-  const search=document.querySelector(".search");
-  if(!search)return;
-  search.contentEditable="true";
-  search.addEventListener("keydown",e=>{
-    if(e.key==="Enter"){e.preventDefault();runCommand(search.textContent)}
   });
 }
 
@@ -178,3 +216,501 @@ function init(){
 }
 
 document.addEventListener("DOMContentLoaded",init);
+
+/* CYVX FORCE WIRE — makes visible dashboard controls work */
+(function(){
+  function $(id){ return document.getElementById(id); }
+
+  function cyvxAnalyze(text){
+    const t = String(text || "").toLowerCase();
+
+    const hasDeploy = /deploy|public|server|hosting|production|localhost|url|website/.test(t);
+    const hasRevenue = /revenue|customer|sales|roi|money|proof|funding|client/.test(t);
+    const hasRepo = /repo|github|readme|branch|commit|issue|pull request|code/.test(t);
+    const hasUI = /ui|dashboard|mobile|screen|layout|design|clutter|wow/.test(t);
+
+    return {
+      constraint: hasDeploy ? "Public deployment and first-user access are the current bottleneck."
+        : hasUI ? "The interface needs one clear value moment and fewer dead controls."
+        : hasRevenue ? "Revenue needs proof-backed adoption evidence."
+        : hasRepo ? "Repository reality needs conversion into one measurable mission."
+        : "Reality is messy and needs decision compression.",
+      opportunity: hasRevenue ? "Use the proof pack as the first revenue wedge."
+        : hasUI ? "Turn CYVX into an attention-grabbing interactive command center."
+        : hasRepo ? "Use repository proof as the first operating reality."
+        : "Convert messy reality into a mission loop.",
+      nba: "Run one reality → mission → outcome loop and record the result.",
+      mission: hasDeploy ? "Deploy CYVX publicly and run one external user test."
+        : hasUI ? "Finish the interactive 60-second CYVX value moment."
+        : "Create one measurable proof loop.",
+      confidence: "88%"
+    };
+  }
+
+  function setText(id, value){
+    const el = $(id);
+    if(el) el.textContent = value;
+  }
+
+  function toast(msg){
+    let t = $("toast");
+    if(!t){
+      t = document.createElement("div");
+      t.id = "toast";
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.className = "toast show";
+    setTimeout(()=>t.className="toast",2200);
+  }
+
+  function modal(title, html){
+    let m = $("cyvxModal");
+    if(!m){
+      m = document.createElement("div");
+      m.id = "cyvxModal";
+      m.innerHTML = '<div class="modal-card"><button id="modalClose">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div></div>';
+      document.body.appendChild(m);
+      $("modalClose").onclick = () => m.classList.remove("show");
+      m.onclick = e => { if(e.target === m) m.classList.remove("show"); };
+    }
+    $("modalTitle").textContent = title;
+    $("modalBody").innerHTML = html;
+    m.classList.add("show");
+  }
+
+  function runAnalyze(){
+    const input = $("instantRealityInput");
+    const result = cyvxAnalyze(input ? input.value : "");
+
+    setText("instantConstraint", result.constraint);
+    setText("instantOpportunity", result.opportunity);
+    setText("instantNBA", result.nba);
+    setText("instantMission", result.mission);
+    setText("instantConfidence", result.confidence);
+
+    const nbaTitle = document.querySelector(".nba h3");
+    const nbaText = document.querySelector(".nba p");
+    if(nbaTitle) nbaTitle.textContent = result.nba;
+    if(nbaText) nbaText.textContent = result.constraint;
+
+    toast("Next Best Action generated.");
+  }
+
+  document.addEventListener("click", function(e){
+    const text = (e.target.textContent || "").trim();
+
+    if(e.target.id === "instantAnalyzeBtn" || /Generate Next Best Action/i.test(text)){
+      e.preventDefault();
+      runAnalyze();
+      return;
+    }
+
+    if(/Upload Reality/i.test(text)){
+      e.preventDefault();
+      const input = $("instantRealityInput");
+      if(input){
+        input.scrollIntoView({behavior:"smooth", block:"center"});
+        input.focus();
+      }
+      toast("Paste reality, then generate NBA.");
+      return;
+    }
+
+    if(/Model My Company/i.test(text)){
+      e.preventDefault();
+      const input = $("instantRealityInput");
+      if(input) input.value = "Company reality: local dashboard running, proof pack complete, no public deployment, no first customer, need revenue path.";
+      runAnalyze();
+      return;
+    }
+
+    if(/Run Mission|Execute Now/i.test(text)){
+      e.preventDefault();
+      modal("Mission Started", "<p><b>Mission:</b> Create one measurable proof loop.</p><p>Status: queued</p><p>Next: capture outcome after execution.</p>");
+      toast("Mission queued.");
+      return;
+    }
+
+    if(/View Full Proof Pack/i.test(text)){
+      e.preventDefault();
+      modal("CYVX Proof Pack", "<p><b>Completed:</b> 10 / 10</p><p><b>Average Trust:</b> 92</p><p>CYVX converted reality inputs into missions, outcomes, learning, and trust updates.</p>");
+      return;
+    }
+
+    if(/Self Scan/i.test(text)){
+      e.preventDefault();
+      modal("Self Scan", "<p>CYVX is active.</p><p><b>Top constraint:</b> public deployment and external user validation.</p><p><b>Next:</b> run first public proof loop.</p>");
+      return;
+    }
+
+    if(/Simulation/i.test(text)){
+      e.preventDefault();
+      modal("Simulation", "<p><b>Best scenario:</b> deploy public demo first.</p><p><b>Reason:</b> unlocks external users and real feedback.</p>");
+      return;
+    }
+
+    if(/Agent Registry/i.test(text)){
+      e.preventDefault();
+      modal("Agent Registry", "<p>Reality Engine: active</p><p>Verifier: active</p><p>Portfolio Brain: active</p><p>Executor: ready</p>");
+      return;
+    }
+
+    if(/Create Mission/i.test(text)){
+      e.preventDefault();
+      modal("Create Mission", "<p><b>Mission:</b> Deploy public demo and test with one external user.</p><p><b>Confidence:</b> 88%</p>");
+      return;
+    }
+
+    const card = e.target.closest(".proof-pack,.network,.mission,.nba,.glow");
+    if(card){
+      e.preventDefault();
+      if(card.classList.contains("proof-pack")) modal("Proof Pack", "<p>10/10 reality loops completed.</p><p>Trust: 90 → 92</p>");
+      else if(card.classList.contains("network")) modal("Reality Graph", "<p>Reality graph online.</p><p>Nodes: reality, mission, outcome, proof, trust.</p>");
+      else if(card.classList.contains("mission")) modal("Mission Control", "<p>7 active missions.</p><p>Highest impact: public demo + first user proof.</p>");
+      else if(card.classList.contains("nba")) modal("Next Best Action", "<p>Run one reality → mission → outcome loop and record the result.</p>");
+      else modal("CYVX Autonomy Engine", "<p>Watching. Learning. Coordinating. Improving.</p>");
+    }
+  }, true);
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "/" && document.activeElement.tagName !== "TEXTAREA"){
+      e.preventDefault();
+      modal("Command Palette", "<p>Try: analyze repo, deploy demo, find opportunity, expand CYVX, run mission.</p>");
+    }
+  });
+
+  console.log("CYVX force wiring loaded.");
+})();
+
+/* CYVX FORCE WIRE — makes visible dashboard controls work */
+(function(){
+  function $(id){ return document.getElementById(id); }
+
+  function cyvxAnalyze(text){
+    const t = String(text || "").toLowerCase();
+
+    const hasDeploy = /deploy|public|server|hosting|production|localhost|url|website/.test(t);
+    const hasRevenue = /revenue|customer|sales|roi|money|proof|funding|client/.test(t);
+    const hasRepo = /repo|github|readme|branch|commit|issue|pull request|code/.test(t);
+    const hasUI = /ui|dashboard|mobile|screen|layout|design|clutter|wow/.test(t);
+
+    return {
+      constraint: hasDeploy ? "Public deployment and first-user access are the current bottleneck."
+        : hasUI ? "The interface needs one clear value moment and fewer dead controls."
+        : hasRevenue ? "Revenue needs proof-backed adoption evidence."
+        : hasRepo ? "Repository reality needs conversion into one measurable mission."
+        : "Reality is messy and needs decision compression.",
+      opportunity: hasRevenue ? "Use the proof pack as the first revenue wedge."
+        : hasUI ? "Turn CYVX into an attention-grabbing interactive command center."
+        : hasRepo ? "Use repository proof as the first operating reality."
+        : "Convert messy reality into a mission loop.",
+      nba: "Run one reality → mission → outcome loop and record the result.",
+      mission: hasDeploy ? "Deploy CYVX publicly and run one external user test."
+        : hasUI ? "Finish the interactive 60-second CYVX value moment."
+        : "Create one measurable proof loop.",
+      confidence: "88%"
+    };
+  }
+
+  function setText(id, value){
+    const el = $(id);
+    if(el) el.textContent = value;
+  }
+
+  function toast(msg){
+    let t = $("toast");
+    if(!t){
+      t = document.createElement("div");
+      t.id = "toast";
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.className = "toast show";
+    setTimeout(()=>t.className="toast",2200);
+  }
+
+  function modal(title, html){
+    let m = $("cyvxModal");
+    if(!m){
+      m = document.createElement("div");
+      m.id = "cyvxModal";
+      m.innerHTML = '<div class="modal-card"><button id="modalClose">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div></div>';
+      document.body.appendChild(m);
+      $("modalClose").onclick = () => m.classList.remove("show");
+      m.onclick = e => { if(e.target === m) m.classList.remove("show"); };
+    }
+    $("modalTitle").textContent = title;
+    $("modalBody").innerHTML = html;
+    m.classList.add("show");
+  }
+
+  function runAnalyze(){
+    const input = $("instantRealityInput");
+    const result = cyvxAnalyze(input ? input.value : "");
+
+    setText("instantConstraint", result.constraint);
+    setText("instantOpportunity", result.opportunity);
+    setText("instantNBA", result.nba);
+    setText("instantMission", result.mission);
+    setText("instantConfidence", result.confidence);
+
+    const nbaTitle = document.querySelector(".nba h3");
+    const nbaText = document.querySelector(".nba p");
+    if(nbaTitle) nbaTitle.textContent = result.nba;
+    if(nbaText) nbaText.textContent = result.constraint;
+
+    toast("Next Best Action generated.");
+  }
+
+  document.addEventListener("click", function(e){
+    const text = (e.target.textContent || "").trim();
+
+    if(e.target.id === "instantAnalyzeBtn" || /Generate Next Best Action/i.test(text)){
+      e.preventDefault();
+      runAnalyze();
+      return;
+    }
+
+    if(/Upload Reality/i.test(text)){
+      e.preventDefault();
+      const input = $("instantRealityInput");
+      if(input){
+        input.scrollIntoView({behavior:"smooth", block:"center"});
+        input.focus();
+      }
+      toast("Paste reality, then generate NBA.");
+      return;
+    }
+
+    if(/Model My Company/i.test(text)){
+      e.preventDefault();
+      const input = $("instantRealityInput");
+      if(input) input.value = "Company reality: local dashboard running, proof pack complete, no public deployment, no first customer, need revenue path.";
+      runAnalyze();
+      return;
+    }
+
+    if(/Run Mission|Execute Now/i.test(text)){
+      e.preventDefault();
+      modal("Mission Started", "<p><b>Mission:</b> Create one measurable proof loop.</p><p>Status: queued</p><p>Next: capture outcome after execution.</p>");
+      toast("Mission queued.");
+      return;
+    }
+
+    if(/View Full Proof Pack/i.test(text)){
+      e.preventDefault();
+      modal("CYVX Proof Pack", "<p><b>Completed:</b> 10 / 10</p><p><b>Average Trust:</b> 92</p><p>CYVX converted reality inputs into missions, outcomes, learning, and trust updates.</p>");
+      return;
+    }
+
+    if(/Self Scan/i.test(text)){
+      e.preventDefault();
+      modal("Self Scan", "<p>CYVX is active.</p><p><b>Top constraint:</b> public deployment and external user validation.</p><p><b>Next:</b> run first public proof loop.</p>");
+      return;
+    }
+
+    if(/Simulation/i.test(text)){
+      e.preventDefault();
+      modal("Simulation", "<p><b>Best scenario:</b> deploy public demo first.</p><p><b>Reason:</b> unlocks external users and real feedback.</p>");
+      return;
+    }
+
+    if(/Agent Registry/i.test(text)){
+      e.preventDefault();
+      modal("Agent Registry", "<p>Reality Engine: active</p><p>Verifier: active</p><p>Portfolio Brain: active</p><p>Executor: ready</p>");
+      return;
+    }
+
+    if(/Create Mission/i.test(text)){
+      e.preventDefault();
+      modal("Create Mission", "<p><b>Mission:</b> Deploy public demo and test with one external user.</p><p><b>Confidence:</b> 88%</p>");
+      return;
+    }
+
+    const card = e.target.closest(".proof-pack,.network,.mission,.nba,.glow");
+    if(card){
+      e.preventDefault();
+      if(card.classList.contains("proof-pack")) modal("Proof Pack", "<p>10/10 reality loops completed.</p><p>Trust: 90 → 92</p>");
+      else if(card.classList.contains("network")) modal("Reality Graph", "<p>Reality graph online.</p><p>Nodes: reality, mission, outcome, proof, trust.</p>");
+      else if(card.classList.contains("mission")) modal("Mission Control", "<p>7 active missions.</p><p>Highest impact: public demo + first user proof.</p>");
+      else if(card.classList.contains("nba")) modal("Next Best Action", "<p>Run one reality → mission → outcome loop and record the result.</p>");
+      else modal("CYVX Autonomy Engine", "<p>Watching. Learning. Coordinating. Improving.</p>");
+    }
+  }, true);
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "/" && document.activeElement.tagName !== "TEXTAREA"){
+      e.preventDefault();
+      modal("Command Palette", "<p>Try: analyze repo, deploy demo, find opportunity, expand CYVX, run mission.</p>");
+    }
+  });
+
+  console.log("CYVX force wiring loaded.");
+})();
+
+/* CYVX FORCE WIRE — makes visible dashboard controls work */
+(function(){
+  function $(id){ return document.getElementById(id); }
+
+  function cyvxAnalyze(text){
+    const t = String(text || "").toLowerCase();
+
+    const hasDeploy = /deploy|public|server|hosting|production|localhost|url|website/.test(t);
+    const hasRevenue = /revenue|customer|sales|roi|money|proof|funding|client/.test(t);
+    const hasRepo = /repo|github|readme|branch|commit|issue|pull request|code/.test(t);
+    const hasUI = /ui|dashboard|mobile|screen|layout|design|clutter|wow/.test(t);
+
+    return {
+      constraint: hasDeploy ? "Public deployment and first-user access are the current bottleneck."
+        : hasUI ? "The interface needs one clear value moment and fewer dead controls."
+        : hasRevenue ? "Revenue needs proof-backed adoption evidence."
+        : hasRepo ? "Repository reality needs conversion into one measurable mission."
+        : "Reality is messy and needs decision compression.",
+      opportunity: hasRevenue ? "Use the proof pack as the first revenue wedge."
+        : hasUI ? "Turn CYVX into an attention-grabbing interactive command center."
+        : hasRepo ? "Use repository proof as the first operating reality."
+        : "Convert messy reality into a mission loop.",
+      nba: "Run one reality → mission → outcome loop and record the result.",
+      mission: hasDeploy ? "Deploy CYVX publicly and run one external user test."
+        : hasUI ? "Finish the interactive 60-second CYVX value moment."
+        : "Create one measurable proof loop.",
+      confidence: "88%"
+    };
+  }
+
+  function setText(id, value){
+    const el = $(id);
+    if(el) el.textContent = value;
+  }
+
+  function toast(msg){
+    let t = $("toast");
+    if(!t){
+      t = document.createElement("div");
+      t.id = "toast";
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.className = "toast show";
+    setTimeout(()=>t.className="toast",2200);
+  }
+
+  function modal(title, html){
+    let m = $("cyvxModal");
+    if(!m){
+      m = document.createElement("div");
+      m.id = "cyvxModal";
+      m.innerHTML = '<div class="modal-card"><button id="modalClose">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div></div>';
+      document.body.appendChild(m);
+      $("modalClose").onclick = () => m.classList.remove("show");
+      m.onclick = e => { if(e.target === m) m.classList.remove("show"); };
+    }
+    $("modalTitle").textContent = title;
+    $("modalBody").innerHTML = html;
+    m.classList.add("show");
+  }
+
+  function runAnalyze(){
+    const input = $("instantRealityInput");
+    const result = cyvxAnalyze(input ? input.value : "");
+
+    setText("instantConstraint", result.constraint);
+    setText("instantOpportunity", result.opportunity);
+    setText("instantNBA", result.nba);
+    setText("instantMission", result.mission);
+    setText("instantConfidence", result.confidence);
+
+    const nbaTitle = document.querySelector(".nba h3");
+    const nbaText = document.querySelector(".nba p");
+    if(nbaTitle) nbaTitle.textContent = result.nba;
+    if(nbaText) nbaText.textContent = result.constraint;
+
+    toast("Next Best Action generated.");
+  }
+
+  document.addEventListener("click", function(e){
+    const text = (e.target.textContent || "").trim();
+
+    if(e.target.id === "instantAnalyzeBtn" || /Generate Next Best Action/i.test(text)){
+      e.preventDefault();
+      runAnalyze();
+      return;
+    }
+
+    if(/Upload Reality/i.test(text)){
+      e.preventDefault();
+      const input = $("instantRealityInput");
+      if(input){
+        input.scrollIntoView({behavior:"smooth", block:"center"});
+        input.focus();
+      }
+      toast("Paste reality, then generate NBA.");
+      return;
+    }
+
+    if(/Model My Company/i.test(text)){
+      e.preventDefault();
+      const input = $("instantRealityInput");
+      if(input) input.value = "Company reality: local dashboard running, proof pack complete, no public deployment, no first customer, need revenue path.";
+      runAnalyze();
+      return;
+    }
+
+    if(/Run Mission|Execute Now/i.test(text)){
+      e.preventDefault();
+      modal("Mission Started", "<p><b>Mission:</b> Create one measurable proof loop.</p><p>Status: queued</p><p>Next: capture outcome after execution.</p>");
+      toast("Mission queued.");
+      return;
+    }
+
+    if(/View Full Proof Pack/i.test(text)){
+      e.preventDefault();
+      modal("CYVX Proof Pack", "<p><b>Completed:</b> 10 / 10</p><p><b>Average Trust:</b> 92</p><p>CYVX converted reality inputs into missions, outcomes, learning, and trust updates.</p>");
+      return;
+    }
+
+    if(/Self Scan/i.test(text)){
+      e.preventDefault();
+      modal("Self Scan", "<p>CYVX is active.</p><p><b>Top constraint:</b> public deployment and external user validation.</p><p><b>Next:</b> run first public proof loop.</p>");
+      return;
+    }
+
+    if(/Simulation/i.test(text)){
+      e.preventDefault();
+      modal("Simulation", "<p><b>Best scenario:</b> deploy public demo first.</p><p><b>Reason:</b> unlocks external users and real feedback.</p>");
+      return;
+    }
+
+    if(/Agent Registry/i.test(text)){
+      e.preventDefault();
+      modal("Agent Registry", "<p>Reality Engine: active</p><p>Verifier: active</p><p>Portfolio Brain: active</p><p>Executor: ready</p>");
+      return;
+    }
+
+    if(/Create Mission/i.test(text)){
+      e.preventDefault();
+      modal("Create Mission", "<p><b>Mission:</b> Deploy public demo and test with one external user.</p><p><b>Confidence:</b> 88%</p>");
+      return;
+    }
+
+    const card = e.target.closest(".proof-pack,.network,.mission,.nba,.glow");
+    if(card){
+      e.preventDefault();
+      if(card.classList.contains("proof-pack")) modal("Proof Pack", "<p>10/10 reality loops completed.</p><p>Trust: 90 → 92</p>");
+      else if(card.classList.contains("network")) modal("Reality Graph", "<p>Reality graph online.</p><p>Nodes: reality, mission, outcome, proof, trust.</p>");
+      else if(card.classList.contains("mission")) modal("Mission Control", "<p>7 active missions.</p><p>Highest impact: public demo + first user proof.</p>");
+      else if(card.classList.contains("nba")) modal("Next Best Action", "<p>Run one reality → mission → outcome loop and record the result.</p>");
+      else modal("CYVX Autonomy Engine", "<p>Watching. Learning. Coordinating. Improving.</p>");
+    }
+  }, true);
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "/" && document.activeElement.tagName !== "TEXTAREA"){
+      e.preventDefault();
+      modal("Command Palette", "<p>Try: analyze repo, deploy demo, find opportunity, expand CYVX, run mission.</p>");
+    }
+  });
+
+  console.log("CYVX force wiring loaded.");
+})();

@@ -38,3 +38,51 @@ body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle 
 #paletteInput{width:100%;padding:18px;border-radius:18px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);color:#fff;font-size:18px}
 button{cursor:pointer}button:hover{transform:translateY(-1px);filter:brightness(1.12)}
 @media(max-width:900px){.runtime-strip,.value-card{grid-template-columns:1fr}.value-card>button{grid-column:auto}}
+
+#cyvxModal{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:none;
+  place-items:center;
+  background:rgba(0,0,0,.65);
+  backdrop-filter:blur(14px);
+}
+#cyvxModal.show{display:grid}
+.modal-card{
+  width:min(720px,92vw);
+  max-height:82vh;
+  overflow:auto;
+  padding:24px;
+  border-radius:26px;
+  background:linear-gradient(180deg,#101b34,#050914);
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 40px 120px rgba(0,0,0,.55);
+}
+#modalClose{
+  float:right;
+  border:0;
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  border-radius:12px;
+  padding:8px 12px;
+}
+.toast{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:100000;
+  padding:14px 18px;
+  border-radius:18px;
+  background:linear-gradient(135deg,#5fffdc,#8f5cff);
+  color:#04101b;
+  font-weight:900;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+  transform:translateY(20px);
+  opacity:0;
+  transition:.25s ease;
+}
+.toast.show{
+  transform:translateY(0);
+  opacity:1;
+}

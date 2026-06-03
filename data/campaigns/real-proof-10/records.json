@@ -1,0 +1,126 @@
+{
+  "created_at": "2026-06-03T22:19:41.217Z",
+  "campaign": "real-proof-10",
+  "records": [
+    {
+      "id": "REAL-PROOF-01",
+      "reality": "CYVXAI-OS repo reality",
+      "prediction": "If CYVX turns this reality into one mission and captures the outcome, trust calibration improves.",
+      "mission": "Analyze CYVXAI-OS repo reality and generate one highest-leverage action.",
+      "expected_outcome": "A concrete next action, measurable result, and evidence record are produced.",
+      "actual_outcome": "pending-real-execution",
+      "trust_before": 90,
+      "trust_after": null,
+      "learning": "pending",
+      "status": "needs-real-outcome"
+    },
+    {
+      "id": "REAL-PROOF-02",
+      "reality": "Agent Framework repo reality",
+      "prediction": "If CYVX turns this reality into one mission and captures the outcome, trust calibration improves.",
+      "mission": "Analyze Agent Framework repo reality and generate one highest-leverage action.",
+      "expected_outcome": "A concrete next action, measurable result, and evidence record are produced.",
+      "actual_outcome": "pending-real-execution",
+      "trust_before": 90,
+      "trust_after": null,
+      "learning": "pending",
+      "status": "needs-real-outcome"
+    },
+    {
+      "id": "REAL-PROOF-03",
+      "reality": "Activepieces repo reality",
+      "prediction": "If CYVX turns this reality into one mission and captures the outcome, trust calibration improves.",
+      "mission": "Analyze Activepieces repo reality and generate one highest-leverage action.",
+      "expected_outcome": "A concrete next action, measurable result, and evidence record are produced.",
+      "actual_outcome": "pending-real-execution",
+      "trust_before": 90,
+      "trust_after": null,
+      "learning": "pending",
+      "status": "needs-real-outcome"
+    },
+    {
+      "id": "REAL-PROOF-04",
+      "reality": "Syft repo reality",
+      "prediction": "If CYVX turns this reality into one mission and captures the outcome, trust calibration improves.",
+      "mission": "Analyze Syft repo reality and generate one highest-leverage action.",
+      "expected_outcome": "A concrete next action, measurable result, and evidence record are produced.",
+      "actual_outcome": "pending-real-execution",
+      "trust_before": 90,
+      "trust_after": null,
+      "learning": "pending",
+      "status": "needs-real-outcome"
+    },
+    {
+      "id": "REAL-PROOF-05",
+      "reality": "CYVX business plan",
+      "prediction": "If CYVX turns this reality into one mission and captures the outcome, trust calibration improves.",
+      "mission": "Analyze CYVX business plan and generate one highest-leverage action.",
+      "expected_outcome": "A concrete next action, measurable result, and evidence record are produced.",
+      "actual_outcome": "pending-real-execution",
+      "trust_before": 90,
+      "trust_after": null,
+      "learning": "pending",
+      "status": "needs-real-outcome"
+    },
+    {
+      "id": "REAL-PROOF-06",
+      "reality": "CYVX dashboard/UI reality",
+      "prediction": "If CYVX turns this reality into one mission and captures the outcome, trust calibration improves.",
+      "mission": "Analyze CYVX dashboard/UI reality and generate one highest-leverage action.",
+      "expected_outcome": "A concrete next action, measurable result, and evidence record are produced.",
+      "actual_outcome": "pending-real-execution",
+      "trust_before": 90,
+      "trust_after": null,
+      "learning": "pending",
+      "status": "needs-real-outcome"
+    },
+    {
+      "id": "REAL-PROOF-07",
+      "reality": "CYVX deployment reality",
+      "prediction": "If CYVX turns this reality into one mission and captures the outcome, trust calibration improves.",
+      "mission": "Analyze CYVX deployment reality and generate one highest-leverage action.",
+      "expected_outcome": "A concrete next action, measurable result, and evidence record are produced.",
+      "actual_outcome": "pending-real-execution",
+      "trust_before": 90,
+      "trust_after": null,
+      "learning": "pending",
+      "status": "needs-real-outcome"
+    },
+    {
+      "id": "REAL-PROOF-08",
+      "reality": "CYVX revenue reality",
+      "prediction": "If CYVX turns this reality into one mission and captures the outcome, trust calibration improves.",
+      "mission": "Analyze CYVX revenue reality and generate one highest-leverage action.",
+      "expected_outcome": "A concrete next action, measurable result, and evidence record are produced.",
+      "actual_outcome": "pending-real-execution",
+      "trust_before": 90,
+      "trust_after": null,
+      "learning": "pending",
+      "status": "needs-real-outcome"
+    },
+    {
+      "id": "REAL-PROOF-09",
+      "reality": "CYVX user adoption reality",
+      "prediction": "If CYVX turns this reality into one mission and captures the outcome, trust calibration improves.",
+      "mission": "Analyze CYVX user adoption reality and generate one highest-leverage action.",
+      "expected_outcome": "A concrete next action, measurable result, and evidence record are produced.",
+      "actual_outcome": "pending-real-execution",
+      "trust_before": 90,
+      "trust_after": null,
+      "learning": "pending",
+      "status": "needs-real-outcome"
+    },
+    {
+      "id": "REAL-PROOF-10",
+      "reality": "CYVX self-improvement reality",
+      "prediction": "If CYVX turns this reality into one mission and captures the outcome, trust calibration improves.",
+      "mission": "Analyze CYVX self-improvement reality and generate one highest-leverage action.",
+      "expected_outcome": "A concrete next action, measurable result, and evidence record are produced.",
+      "actual_outcome": "pending-real-execution",
+      "trust_before": 90,
+      "trust_after": null,
+      "learning": "pending",
+      "status": "needs-real-outcome"
+    }
+  ]
+}

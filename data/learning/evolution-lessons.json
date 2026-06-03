@@ -1,0 +1,44 @@
+[
+  {
+    "id": "lesson-evolution-outcome-001",
+    "created_at": "2026-06-03T20:30:36.658Z",
+    "outcome_id": "evolution-outcome-001",
+    "mission_id": "evolution-mission-001",
+    "lesson": "This action produced strong progress."
+  },
+  {
+    "id": "lesson-evolution-outcome-002",
+    "created_at": "2026-06-03T20:30:36.658Z",
+    "outcome_id": "evolution-outcome-002",
+    "mission_id": "evolution-mission-002",
+    "lesson": "This mission still needs real-world execution."
+  },
+  {
+    "id": "lesson-evolution-outcome-003",
+    "created_at": "2026-06-03T20:30:36.658Z",
+    "outcome_id": "evolution-outcome-003",
+    "mission_id": "evolution-mission-003",
+    "lesson": "This mission still needs real-world execution."
+  },
+  {
+    "id": "lesson-evolution-outcome-004",
+    "created_at": "2026-06-03T20:30:36.658Z",
+    "outcome_id": "evolution-outcome-004",
+    "mission_id": "evolution-mission-004",
+    "lesson": "This mission still needs real-world execution."
+  },
+  {
+    "id": "lesson-evolution-outcome-005",
+    "created_at": "2026-06-03T20:30:36.658Z",
+    "outcome_id": "evolution-outcome-005",
+    "mission_id": "evolution-mission-005",
+    "lesson": "This mission still needs real-world execution."
+  },
+  {
+    "id": "lesson-evolution-outcome-006",
+    "created_at": "2026-06-03T20:30:36.658Z",
+    "outcome_id": "evolution-outcome-006",
+    "mission_id": "evolution-mission-006",
+    "lesson": "This mission still needs real-world execution."
+  }
+]

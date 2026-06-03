@@ -1,0 +1,56 @@
+[
+  {
+    "id": "evolution-outcome-001",
+    "created_at": "2026-06-03T20:30:36.658Z",
+    "mission_id": "evolution-mission-001",
+    "expected": "At least one external user completes the CYVX loop.",
+    "actual": "Testing with first external user is next.",
+    "score": 100,
+    "status": "success"
+  },
+  {
+    "id": "evolution-outcome-002",
+    "created_at": "2026-06-03T20:30:36.658Z",
+    "mission_id": "evolution-mission-002",
+    "expected": "A public URL is usable by someone outside the local machine.",
+    "actual": null,
+    "score": 0,
+    "status": "not_measured"
+  },
+  {
+    "id": "evolution-outcome-003",
+    "created_at": "2026-06-03T20:30:36.658Z",
+    "mission_id": "evolution-mission-003",
+    "expected": "A new user understands the value in under 60 seconds.",
+    "actual": null,
+    "score": 0,
+    "status": "not_measured"
+  },
+  {
+    "id": "evolution-outcome-004",
+    "created_at": "2026-06-03T20:30:36.658Z",
+    "mission_id": "evolution-mission-004",
+    "expected": "Every mission has a measurable outcome record.",
+    "actual": null,
+    "score": 0,
+    "status": "not_measured"
+  },
+  {
+    "id": "evolution-outcome-005",
+    "created_at": "2026-06-03T20:30:36.658Z",
+    "mission_id": "evolution-mission-005",
+    "expected": "The user gains measurable capability.",
+    "actual": null,
+    "score": 0,
+    "status": "not_measured"
+  },
+  {
+    "id": "evolution-outcome-006",
+    "created_at": "2026-06-03T20:30:36.658Z",
+    "mission_id": "evolution-mission-006",
+    "expected": "No unsafe automation executes without approval.",
+    "actual": null,
+    "score": 0,
+    "status": "not_measured"
+  }
+]

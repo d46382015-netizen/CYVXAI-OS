@@ -1,0 +1,14 @@
+{
+  "purpose": "Convert reality constraints into ranked decisions.",
+  "inputs": [
+    "reality_items",
+    "constraints",
+    "capabilities",
+    "agency_score"
+  ],
+  "outputs": [
+    "recommendation",
+    "confidence",
+    "impact"
+  ]
+}

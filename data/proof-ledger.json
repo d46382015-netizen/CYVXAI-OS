@@ -11991,6 +11991,958 @@
           "risk": 0
         }
       }
+    },
+    {
+      "timestamp": "2026-06-03T18:42:25.551Z",
+      "repository": "d46382015-netizen/CYVXAI-OS",
+      "observations": [
+        "observation-github"
+      ],
+      "health_score": 84.667,
+      "repository_health": {
+        "repository": {
+          "owner": {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "node_id": "U_kgDOEPQ9EQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/284441873?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/d46382015-netizen",
+            "html_url": "https://github.com/d46382015-netizen",
+            "followers_url": "https://api.github.com/users/d46382015-netizen/followers",
+            "following_url": "https://api.github.com/users/d46382015-netizen/following{/other_user}",
+            "gists_url": "https://api.github.com/users/d46382015-netizen/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/d46382015-netizen/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/d46382015-netizen/subscriptions",
+            "organizations_url": "https://api.github.com/users/d46382015-netizen/orgs",
+            "repos_url": "https://api.github.com/users/d46382015-netizen/repos",
+            "events_url": "https://api.github.com/users/d46382015-netizen/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/d46382015-netizen/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "repo": "CYVXAI-OS",
+          "branch": "main",
+          "full_name": "d46382015-netizen/CYVXAI-OS",
+          "id": 1244186041,
+          "node_id": "R_kgDOSijFuQ",
+          "private": false,
+          "html_url": "https://github.com/d46382015-netizen/CYVXAI-OS",
+          "description": "Advanced ai OS",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-05-20T03:26:31Z",
+          "updated_at": "2026-06-03T18:35:31Z",
+          "pushed_at": "2026-06-03T18:35:27Z",
+          "stargazers_count": 1,
+          "watchers_count": 1,
+          "forks_count": 0,
+          "open_issues_count": 0,
+          "size": 99494,
+          "language": "JavaScript",
+          "topics": []
+        },
+        "score": 84.667,
+        "rating": "healthy",
+        "signal": "healthy",
+        "confidence": 1,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 0,
+        "issue_backlog_score": 1,
+        "open_pr_count": 0,
+        "open_pr_age_days": 0,
+        "open_pr_age_score": 1,
+        "workflow_runs": 30,
+        "workflow_failures": 23,
+        "workflow_failure_rate": 0.767,
+        "workflow_failure_score": 0.233,
+        "commits_30d": 30,
+        "commit_velocity_score": 1,
+        "commit_recency_days": 0.006,
+        "contributors": 1,
+        "top_contributors": [
+          {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "html_url": "https://github.com/d46382015-netizen",
+            "contributions": 8
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 1,
+          "pull_request_age": 1,
+          "workflow_failures": 0.233,
+          "commit_velocity": 1
+        },
+        "recommendation": "Preserve the current operating pattern and monitor for drift.",
+        "predicted_outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 22,
+          "commit_velocity_30d": 31
+        },
+        "actual_outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 30
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "d46382015-netizen/CYVXAI-OS is healthy at 84.667/100. | 0 open issues | 0 open pull requests | 30 recent workflow runs | 30 commits in 30 days"
+      },
+      "workflow_failures": 23,
+      "build_status": "passing",
+      "commits_30d": 30,
+      "pr_count": 0,
+      "pr_age_days": 0,
+      "intervention": {
+        "id": "intervention-triage-repository-health-d46382015-netizen-cyvxai-os",
+        "recommended": "Preserve the current operating pattern and monitor for drift.",
+        "observed": "d46382015-netizen/CYVXAI-OS is healthy at 84.667/100. | 0 open issues | 0 open pull requests | 30 recent workflow runs | 30 commits in 30 days",
+        "outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 30
+        },
+        "classification": "Helpful"
+      },
+      "prediction": {
+        "predicted_outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 22,
+          "commit_velocity_30d": 31
+        },
+        "confidence": 1,
+        "actual_outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 30
+        },
+        "variance": 0,
+        "error": 0
+      },
+      "confidence": 1,
+      "actual_outcome": {
+        "repository_health_score": 84.667,
+        "build_status": "passing",
+        "issue_backlog": 0,
+        "open_pr_age_days": 0,
+        "workflow_failures": 23,
+        "commit_velocity_30d": 30
+      },
+      "variance": 0,
+      "learning": {
+        "id": "knowledge_record-repository-health-mission-d46382015-netizen-cyvxai-os-lesson",
+        "lesson": "Repository telemetry is live and measurable against GitHub state.",
+        "cir_impact": 0.003,
+        "trust_impact": 0.5
+      },
+      "cir_impact": 0.003,
+      "before": {
+        "repository": {
+          "owner": {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "node_id": "U_kgDOEPQ9EQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/284441873?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/d46382015-netizen",
+            "html_url": "https://github.com/d46382015-netizen",
+            "followers_url": "https://api.github.com/users/d46382015-netizen/followers",
+            "following_url": "https://api.github.com/users/d46382015-netizen/following{/other_user}",
+            "gists_url": "https://api.github.com/users/d46382015-netizen/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/d46382015-netizen/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/d46382015-netizen/subscriptions",
+            "organizations_url": "https://api.github.com/users/d46382015-netizen/orgs",
+            "repos_url": "https://api.github.com/users/d46382015-netizen/repos",
+            "events_url": "https://api.github.com/users/d46382015-netizen/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/d46382015-netizen/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "repo": "CYVXAI-OS",
+          "branch": "main",
+          "full_name": "d46382015-netizen/CYVXAI-OS",
+          "id": 1244186041,
+          "node_id": "R_kgDOSijFuQ",
+          "private": false,
+          "html_url": "https://github.com/d46382015-netizen/CYVXAI-OS",
+          "description": "Advanced ai OS",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-05-20T03:26:31Z",
+          "updated_at": "2026-06-03T18:30:33Z",
+          "pushed_at": "2026-06-03T18:30:22Z",
+          "stargazers_count": 1,
+          "watchers_count": 1,
+          "forks_count": 0,
+          "open_issues_count": 1,
+          "size": 99494,
+          "language": "JavaScript",
+          "topics": []
+        },
+        "score": 78.434,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 1,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 0,
+        "issue_backlog_score": 1,
+        "open_pr_count": 1,
+        "open_pr_age_days": 11.133,
+        "open_pr_age_score": 0.629,
+        "workflow_runs": 30,
+        "workflow_failures": 24,
+        "workflow_failure_rate": 0.8,
+        "workflow_failure_score": 0.2,
+        "commits_30d": 30,
+        "commit_velocity_score": 1,
+        "commit_recency_days": 0.002,
+        "contributors": 1,
+        "top_contributors": [
+          {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "html_url": "https://github.com/d46382015-netizen",
+            "contributions": 8
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 1,
+          "pull_request_age": 0.629,
+          "workflow_failures": 0.2,
+          "commit_velocity": 1
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 82.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 8.133,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 31
+        },
+        "actual_outcome": {
+          "repository_health_score": 78.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 11.133,
+          "workflow_failures": 24,
+          "commit_velocity_30d": 30
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "d46382015-netizen/CYVXAI-OS is watch at 78.434/100. | 0 open issues | 1 open pull request | 30 recent workflow runs | 30 commits in 30 days"
+      },
+      "after": {
+        "repository": {
+          "owner": {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "node_id": "U_kgDOEPQ9EQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/284441873?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/d46382015-netizen",
+            "html_url": "https://github.com/d46382015-netizen",
+            "followers_url": "https://api.github.com/users/d46382015-netizen/followers",
+            "following_url": "https://api.github.com/users/d46382015-netizen/following{/other_user}",
+            "gists_url": "https://api.github.com/users/d46382015-netizen/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/d46382015-netizen/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/d46382015-netizen/subscriptions",
+            "organizations_url": "https://api.github.com/users/d46382015-netizen/orgs",
+            "repos_url": "https://api.github.com/users/d46382015-netizen/repos",
+            "events_url": "https://api.github.com/users/d46382015-netizen/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/d46382015-netizen/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "repo": "CYVXAI-OS",
+          "branch": "main",
+          "full_name": "d46382015-netizen/CYVXAI-OS",
+          "id": 1244186041,
+          "node_id": "R_kgDOSijFuQ",
+          "private": false,
+          "html_url": "https://github.com/d46382015-netizen/CYVXAI-OS",
+          "description": "Advanced ai OS",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-05-20T03:26:31Z",
+          "updated_at": "2026-06-03T18:35:31Z",
+          "pushed_at": "2026-06-03T18:35:27Z",
+          "stargazers_count": 1,
+          "watchers_count": 1,
+          "forks_count": 0,
+          "open_issues_count": 0,
+          "size": 99494,
+          "language": "JavaScript",
+          "topics": []
+        },
+        "score": 84.667,
+        "rating": "healthy",
+        "signal": "healthy",
+        "confidence": 1,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 0,
+        "issue_backlog_score": 1,
+        "open_pr_count": 0,
+        "open_pr_age_days": 0,
+        "open_pr_age_score": 1,
+        "workflow_runs": 30,
+        "workflow_failures": 23,
+        "workflow_failure_rate": 0.767,
+        "workflow_failure_score": 0.233,
+        "commits_30d": 30,
+        "commit_velocity_score": 1,
+        "commit_recency_days": 0.006,
+        "contributors": 1,
+        "top_contributors": [
+          {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "html_url": "https://github.com/d46382015-netizen",
+            "contributions": 8
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 1,
+          "pull_request_age": 1,
+          "workflow_failures": 0.233,
+          "commit_velocity": 1
+        },
+        "recommendation": "Preserve the current operating pattern and monitor for drift.",
+        "predicted_outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 22,
+          "commit_velocity_30d": 31
+        },
+        "actual_outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 30
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "d46382015-netizen/CYVXAI-OS is healthy at 84.667/100. | 0 open issues | 0 open pull requests | 30 recent workflow runs | 30 commits in 30 days"
+      },
+      "delta": {
+        "health_score_delta": 6.233,
+        "workflow_failure_delta": -1,
+        "build_delta": 0,
+        "pr_age_delta": -11.133,
+        "prediction_error_delta": -0.04,
+        "cir_delta": 0.001
+      },
+      "reality_gap": {
+        "predicted": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 22,
+          "commit_velocity_30d": 31
+        },
+        "actual": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 30
+        },
+        "prediction_error": 0,
+        "prediction_variance": 0
+      },
+      "trust": {
+        "id": "trust-trust",
+        "type": "trust",
+        "created_at": "2026-06-03T18:42:24.149Z",
+        "updated_at": "2026-06-03T18:42:24.149Z",
+        "title": "trust",
+        "name": "trust",
+        "label": "trust",
+        "state": "active",
+        "metadata": {},
+        "relationships": [],
+        "events": [],
+        "evidence": [],
+        "assumptions": [],
+        "confidence": 0.5,
+        "linked_event_ids": [],
+        "subject_type": "repository",
+        "subject_id": "d46382015-netizen/CYVXAI-OS",
+        "trust_score": 1,
+        "trust_trend": 0.347,
+        "trust_confidence": 1,
+        "trust_history": [
+          {
+            "at": "2026-06-03T18:42:24.079Z",
+            "predicted": {
+              "repository_health_score": 84.667,
+              "build_status": "passing",
+              "issue_backlog": 0,
+              "open_pr_age_days": 0,
+              "workflow_failures": 22,
+              "commit_velocity_30d": 31
+            },
+            "actual": {
+              "repository_health_score": 84.667,
+              "build_status": "passing",
+              "issue_backlog": 0,
+              "open_pr_age_days": 0,
+              "workflow_failures": 23,
+              "commit_velocity_30d": 30
+            },
+            "prediction_error": 0,
+            "prediction_variance": 0,
+            "calibration": 1
+          }
+        ],
+        "calibration_count": 0,
+        "last_calibrated_at": null,
+        "confidence_error": 0,
+        "prediction_error": 0,
+        "trust_source": "github",
+        "trust_reasons": [
+          "healthy",
+          "Preserve the current operating pattern and monitor for drift."
+        ],
+        "constitutional": {
+          "understanding": 0,
+          "coordination": 0,
+          "capability": 0,
+          "resilience": 0,
+          "learning": 0,
+          "score": 0,
+          "trend": 0,
+          "risk": 0
+        }
+      }
+    },
+    {
+      "timestamp": "2026-06-03T18:43:26.560Z",
+      "repository": "d46382015-netizen/CYVXAI-OS",
+      "observations": [
+        "observation-github"
+      ],
+      "health_score": 84.667,
+      "repository_health": {
+        "repository": {
+          "owner": {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "node_id": "U_kgDOEPQ9EQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/284441873?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/d46382015-netizen",
+            "html_url": "https://github.com/d46382015-netizen",
+            "followers_url": "https://api.github.com/users/d46382015-netizen/followers",
+            "following_url": "https://api.github.com/users/d46382015-netizen/following{/other_user}",
+            "gists_url": "https://api.github.com/users/d46382015-netizen/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/d46382015-netizen/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/d46382015-netizen/subscriptions",
+            "organizations_url": "https://api.github.com/users/d46382015-netizen/orgs",
+            "repos_url": "https://api.github.com/users/d46382015-netizen/repos",
+            "events_url": "https://api.github.com/users/d46382015-netizen/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/d46382015-netizen/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "repo": "CYVXAI-OS",
+          "branch": "main",
+          "full_name": "d46382015-netizen/CYVXAI-OS",
+          "id": 1244186041,
+          "node_id": "R_kgDOSijFuQ",
+          "private": false,
+          "html_url": "https://github.com/d46382015-netizen/CYVXAI-OS",
+          "description": "Advanced ai OS",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-05-20T03:26:31Z",
+          "updated_at": "2026-06-03T18:35:31Z",
+          "pushed_at": "2026-06-03T18:35:27Z",
+          "stargazers_count": 1,
+          "watchers_count": 1,
+          "forks_count": 0,
+          "open_issues_count": 0,
+          "size": 99494,
+          "language": "JavaScript",
+          "topics": []
+        },
+        "score": 84.667,
+        "rating": "healthy",
+        "signal": "healthy",
+        "confidence": 1,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 0,
+        "issue_backlog_score": 1,
+        "open_pr_count": 0,
+        "open_pr_age_days": 0,
+        "open_pr_age_score": 1,
+        "workflow_runs": 30,
+        "workflow_failures": 23,
+        "workflow_failure_rate": 0.767,
+        "workflow_failure_score": 0.233,
+        "commits_30d": 30,
+        "commit_velocity_score": 1,
+        "commit_recency_days": 0.007,
+        "contributors": 1,
+        "top_contributors": [
+          {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "html_url": "https://github.com/d46382015-netizen",
+            "contributions": 8
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 1,
+          "pull_request_age": 1,
+          "workflow_failures": 0.233,
+          "commit_velocity": 1
+        },
+        "recommendation": "Preserve the current operating pattern and monitor for drift.",
+        "predicted_outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 22,
+          "commit_velocity_30d": 31
+        },
+        "actual_outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 30
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "d46382015-netizen/CYVXAI-OS is healthy at 84.667/100. | 0 open issues | 0 open pull requests | 30 recent workflow runs | 30 commits in 30 days"
+      },
+      "workflow_failures": 23,
+      "build_status": "passing",
+      "commits_30d": 30,
+      "pr_count": 0,
+      "pr_age_days": 0,
+      "intervention": {
+        "id": "intervention-triage-repository-health-d46382015-netizen-cyvxai-os",
+        "recommended": "Preserve the current operating pattern and monitor for drift.",
+        "observed": "d46382015-netizen/CYVXAI-OS is healthy at 84.667/100. | 0 open issues | 0 open pull requests | 30 recent workflow runs | 30 commits in 30 days",
+        "outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 30
+        },
+        "classification": "Neutral"
+      },
+      "prediction": {
+        "predicted_outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 22,
+          "commit_velocity_30d": 31
+        },
+        "confidence": 1,
+        "actual_outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 30
+        },
+        "variance": 0,
+        "error": 0
+      },
+      "confidence": 1,
+      "actual_outcome": {
+        "repository_health_score": 84.667,
+        "build_status": "passing",
+        "issue_backlog": 0,
+        "open_pr_age_days": 0,
+        "workflow_failures": 23,
+        "commit_velocity_30d": 30
+      },
+      "variance": 0,
+      "learning": {
+        "id": "knowledge_record-repository-health-mission-d46382015-netizen-cyvxai-os-lesson",
+        "lesson": "Repository telemetry is live and measurable against GitHub state.",
+        "cir_impact": 0.003,
+        "trust_impact": 0.5
+      },
+      "cir_impact": 0.003,
+      "before": {
+        "repository": {
+          "owner": {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "node_id": "U_kgDOEPQ9EQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/284441873?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/d46382015-netizen",
+            "html_url": "https://github.com/d46382015-netizen",
+            "followers_url": "https://api.github.com/users/d46382015-netizen/followers",
+            "following_url": "https://api.github.com/users/d46382015-netizen/following{/other_user}",
+            "gists_url": "https://api.github.com/users/d46382015-netizen/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/d46382015-netizen/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/d46382015-netizen/subscriptions",
+            "organizations_url": "https://api.github.com/users/d46382015-netizen/orgs",
+            "repos_url": "https://api.github.com/users/d46382015-netizen/repos",
+            "events_url": "https://api.github.com/users/d46382015-netizen/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/d46382015-netizen/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "repo": "CYVXAI-OS",
+          "branch": "main",
+          "full_name": "d46382015-netizen/CYVXAI-OS",
+          "id": 1244186041,
+          "node_id": "R_kgDOSijFuQ",
+          "private": false,
+          "html_url": "https://github.com/d46382015-netizen/CYVXAI-OS",
+          "description": "Advanced ai OS",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-05-20T03:26:31Z",
+          "updated_at": "2026-06-03T18:35:31Z",
+          "pushed_at": "2026-06-03T18:35:27Z",
+          "stargazers_count": 1,
+          "watchers_count": 1,
+          "forks_count": 0,
+          "open_issues_count": 0,
+          "size": 99494,
+          "language": "JavaScript",
+          "topics": []
+        },
+        "score": 84.667,
+        "rating": "healthy",
+        "signal": "healthy",
+        "confidence": 1,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 0,
+        "issue_backlog_score": 1,
+        "open_pr_count": 0,
+        "open_pr_age_days": 0,
+        "open_pr_age_score": 1,
+        "workflow_runs": 30,
+        "workflow_failures": 23,
+        "workflow_failure_rate": 0.767,
+        "workflow_failure_score": 0.233,
+        "commits_30d": 30,
+        "commit_velocity_score": 1,
+        "commit_recency_days": 0.006,
+        "contributors": 1,
+        "top_contributors": [
+          {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "html_url": "https://github.com/d46382015-netizen",
+            "contributions": 8
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 1,
+          "pull_request_age": 1,
+          "workflow_failures": 0.233,
+          "commit_velocity": 1
+        },
+        "recommendation": "Preserve the current operating pattern and monitor for drift.",
+        "predicted_outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 22,
+          "commit_velocity_30d": 31
+        },
+        "actual_outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 30
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "d46382015-netizen/CYVXAI-OS is healthy at 84.667/100. | 0 open issues | 0 open pull requests | 30 recent workflow runs | 30 commits in 30 days"
+      },
+      "after": {
+        "repository": {
+          "owner": {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "node_id": "U_kgDOEPQ9EQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/284441873?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/d46382015-netizen",
+            "html_url": "https://github.com/d46382015-netizen",
+            "followers_url": "https://api.github.com/users/d46382015-netizen/followers",
+            "following_url": "https://api.github.com/users/d46382015-netizen/following{/other_user}",
+            "gists_url": "https://api.github.com/users/d46382015-netizen/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/d46382015-netizen/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/d46382015-netizen/subscriptions",
+            "organizations_url": "https://api.github.com/users/d46382015-netizen/orgs",
+            "repos_url": "https://api.github.com/users/d46382015-netizen/repos",
+            "events_url": "https://api.github.com/users/d46382015-netizen/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/d46382015-netizen/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "repo": "CYVXAI-OS",
+          "branch": "main",
+          "full_name": "d46382015-netizen/CYVXAI-OS",
+          "id": 1244186041,
+          "node_id": "R_kgDOSijFuQ",
+          "private": false,
+          "html_url": "https://github.com/d46382015-netizen/CYVXAI-OS",
+          "description": "Advanced ai OS",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-05-20T03:26:31Z",
+          "updated_at": "2026-06-03T18:35:31Z",
+          "pushed_at": "2026-06-03T18:35:27Z",
+          "stargazers_count": 1,
+          "watchers_count": 1,
+          "forks_count": 0,
+          "open_issues_count": 0,
+          "size": 99494,
+          "language": "JavaScript",
+          "topics": []
+        },
+        "score": 84.667,
+        "rating": "healthy",
+        "signal": "healthy",
+        "confidence": 1,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 0,
+        "issue_backlog_score": 1,
+        "open_pr_count": 0,
+        "open_pr_age_days": 0,
+        "open_pr_age_score": 1,
+        "workflow_runs": 30,
+        "workflow_failures": 23,
+        "workflow_failure_rate": 0.767,
+        "workflow_failure_score": 0.233,
+        "commits_30d": 30,
+        "commit_velocity_score": 1,
+        "commit_recency_days": 0.007,
+        "contributors": 1,
+        "top_contributors": [
+          {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "html_url": "https://github.com/d46382015-netizen",
+            "contributions": 8
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 1,
+          "pull_request_age": 1,
+          "workflow_failures": 0.233,
+          "commit_velocity": 1
+        },
+        "recommendation": "Preserve the current operating pattern and monitor for drift.",
+        "predicted_outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 22,
+          "commit_velocity_30d": 31
+        },
+        "actual_outcome": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 30
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "d46382015-netizen/CYVXAI-OS is healthy at 84.667/100. | 0 open issues | 0 open pull requests | 30 recent workflow runs | 30 commits in 30 days"
+      },
+      "delta": {
+        "health_score_delta": 0,
+        "workflow_failure_delta": 0,
+        "build_delta": 0,
+        "pr_age_delta": 0,
+        "prediction_error_delta": 0,
+        "cir_delta": 0
+      },
+      "reality_gap": {
+        "predicted": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 22,
+          "commit_velocity_30d": 31
+        },
+        "actual": {
+          "repository_health_score": 84.667,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 0,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 30
+        },
+        "prediction_error": 0,
+        "prediction_variance": 0
+      },
+      "trust": {
+        "id": "trust-trust",
+        "type": "trust",
+        "created_at": "2026-06-03T18:43:25.371Z",
+        "updated_at": "2026-06-03T18:43:25.371Z",
+        "title": "trust",
+        "name": "trust",
+        "label": "trust",
+        "state": "active",
+        "metadata": {},
+        "relationships": [],
+        "events": [],
+        "evidence": [],
+        "assumptions": [],
+        "confidence": 0.5,
+        "linked_event_ids": [],
+        "subject_type": "repository",
+        "subject_id": "d46382015-netizen/CYVXAI-OS",
+        "trust_score": 1,
+        "trust_trend": 0.347,
+        "trust_confidence": 1,
+        "trust_history": [
+          {
+            "at": "2026-06-03T18:43:25.286Z",
+            "predicted": {
+              "repository_health_score": 84.667,
+              "build_status": "passing",
+              "issue_backlog": 0,
+              "open_pr_age_days": 0,
+              "workflow_failures": 22,
+              "commit_velocity_30d": 31
+            },
+            "actual": {
+              "repository_health_score": 84.667,
+              "build_status": "passing",
+              "issue_backlog": 0,
+              "open_pr_age_days": 0,
+              "workflow_failures": 23,
+              "commit_velocity_30d": 30
+            },
+            "prediction_error": 0,
+            "prediction_variance": 0,
+            "calibration": 1
+          }
+        ],
+        "calibration_count": 0,
+        "last_calibrated_at": null,
+        "confidence_error": 0,
+        "prediction_error": 0,
+        "trust_source": "github",
+        "trust_reasons": [
+          "healthy",
+          "Preserve the current operating pattern and monitor for drift."
+        ],
+        "constitutional": {
+          "understanding": 0,
+          "coordination": 0,
+          "capability": 0,
+          "resilience": 0,
+          "learning": 0,
+          "score": 0,
+          "trend": 0,
+          "risk": 0
+        }
+      }
     }
   ]
 }

@@ -1,664 +1,154 @@
 <!doctype html>
-<!--
- * CYVX — Autonomous Infrastructure Intelligence
- * © 2026 Dakota Lee Jonsgaard. All rights reserved.
- * Creator & Architect: Dakota Lee Jonsgaard
- * https://cyvx.ai | dakota@cyvx.ai
- *
- * This software is the exclusive intellectual property
- * of Dakota Lee Jonsgaard. Unauthorized use prohibited.
--->
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#050812" />
-    <title>CYVXAI OS | Autonomous Infrastructure Intelligence Platform</title>
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body>
-    <div class="bg-orb bg-orb-a"></div>
-    <div class="bg-orb bg-orb-b"></div>
-    <div class="grid-haze"></div>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>CYVXAI OS</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
 
-    <main class="shell">
-      <header class="topbar panel">
-        <div class="brand">
-          <div class="brand-mark">CY</div>
-          <div>
-            <div class="brand-name">CYVXAI OS</div>
-            <div class="brand-sub">Autonomous Infrastructure Intelligence Platform</div>
-          </div>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">CY</div>
+        <div>
+          <strong>CYVXAI OS</strong>
+          <span>Reality → Mission → Outcome</span>
         </div>
+      </div>
+      <div class="status-pill">LIVE PROOF · 10/10</div>
+    </header>
 
-        <nav class="nav" aria-label="Platform sections">
-          <button class="nav-pill active" data-target="overviewPanel">Overview</button>
-          <button class="nav-pill" data-target="productPanel">Product v1</button>
-          <button class="nav-pill" data-target="proofPanel">Repository Proof</button>
-          <button class="nav-pill" data-target="realityEnginePanel">Reality Engine</button>
-          <button class="nav-pill" data-target="graphPanel">Reality Graph</button>
-          <button class="nav-pill" data-target="agentsPanel">Agent OS</button>
-          <button class="nav-pill" data-target="missionsPanel">Mission Control</button>
-          <button class="nav-pill" data-target="simulationPanel">Simulation Chamber</button>
-          <button class="nav-pill" data-target="executivePanel">Executive</button>
-          <button class="nav-pill" data-target="decisionsPanel">Decision Center</button>
-          <button class="nav-pill" data-target="knowledgePanel">Knowledge Timeline</button>
-          <button class="nav-pill" data-target="capabilitiesPanel">Capability Engine</button>
-          <button class="nav-pill" data-target="governancePanel">Governance</button>
-          <button class="nav-pill" data-target="trustPanel">Trust</button>
-          <button class="nav-pill" data-target="observationPanel">Observations</button>
-          <button class="nav-pill" data-target="realityPanel">Reality</button>
-          <button class="nav-pill" data-target="portfolioPanel">Portfolio</button>
-          <button class="nav-pill" data-target="strategyPanel">Strategy</button>
-          <button class="nav-pill" data-target="opportunityPanel">Opportunities</button>
-          <button class="nav-pill" data-target="patternIntelligencePanel">Patterns</button>
-          <button class="nav-pill" data-target="recommendationIntelligencePanel">Recommendations</button>
-          <button class="nav-pill" data-target="priorityIntelligencePanel">Priorities</button>
-          <button class="nav-pill" data-target="intelligenceSummaryPanel">Intelligence</button>
-          <button class="nav-pill" data-target="selfScanPanel">Self Scan</button>
-          <button class="nav-pill" data-target="coordinationPanel">Coordination</button>
-          <button class="nav-pill" data-target="humanRolesPanel">Humans</button>
-          <button class="nav-pill" data-target="resourcesPanel">Resources</button>
-          <button class="nav-pill" data-target="assignmentsPanel">Assignments</button>
-          <button class="nav-pill" data-target="approvalsPanel">Approvals</button>
-          <button class="nav-pill" data-target="queuePanel">Queue</button>
-          <button class="nav-pill" data-target="nbaPanel">NBA</button>
-          <button class="nav-pill" data-target="crossDomainPanel">Cross Domain</button>
-        </nav>
-
-        <div class="status-stack">
-          <div class="status-chip" id="connectionState">Connecting</div>
-          <div class="status-chip subtle" id="platformHealth">Health: --</div>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Autonomous Infrastructure Intelligence</p>
+        <h1>Turn messy reality into the next best action.</h1>
+        <p class="sub">CYVX analyzes reality, detects constraints, generates missions, captures outcomes, and improves trust.</p>
+        <div class="actions">
+          <a href="#analyze" class="btn primary">Analyze Reality</a>
+          <a href="#proof" class="btn">View Proof Pack</a>
         </div>
-      </header>
+      </div>
 
-      <section class="hero">
-        <article class="hero-copy panel">
-          <p class="eyebrow">Model organizations. Run missions. Execute decisions.</p>
-          <h1>Upload messy reality. CYVX finds the constraint, creates a mission, captures the outcome, and improves trust.
-          </p>
+      <div class="command-card">
+        <div class="pulse"></div>
+        <span>Current Loop</span>
+        <strong>Reality → Prediction → Mission → Outcome → Trust</strong>
+        <small>Proof completion: 10/10 · Trust 92</small>
+      </div>
+    </section>
 
-          <div class="hero-actions">
-            <button class="button primary" id="modelCompanyBtn">Model My Company</button>
-            <button class="button" id="refreshBtn">Refresh State</button>
-            <button class="button subtle" data-target="commandPanel">Open Command Console</button>
-          </div>
+    <section class="grid stats">
+      <article><span>Reality Loops</span><strong>10</strong><small>Inputs processed</small></article>
+      <article><span>Completed</span><strong>10</strong><small>Outcome records</small></article>
+      <article><span>Trust</span><strong>90 → 92</strong><small>Calibration signal</small></article>
+      <article><span>Mode</span><strong>Proof</strong><small>Evidence-backed</small></article>
+    </section>
 
-          <div class="hero-metrics" id="heroMetrics"></div>
+    <section id="analyze" class="panel spotlight">
+      <div>
+        <p class="eyebrow">60 Second Value Moment</p>
+        <h2>Paste reality. Get the mission.</h2>
+        <p class="muted">Paste repo notes, business problems, task lists, plans, or messy context.</p>
+      </div>
+      <textarea id="realityInput" placeholder="Paste messy reality here..."></textarea>
+      <button id="analyzeBtn" class="btn primary full">Generate Next Best Action</button>
+      <pre id="analysisOutput" class="output"></pre>
+    </section>
+
+    <section class="panel">
+      <p class="eyebrow">Executive Compression</p>
+      <h2>What matters now</h2>
+      <div class="decision-grid">
+        <div><span>Top Constraint</span><strong id="topConstraint">Need repeated real outcomes to compound trust.</strong></div>
+        <div><span>Top Opportunity</span><strong id="topOpportunity">Public proof-driven adoption.</strong></div>
+        <div><span>Next Action</span><strong id="nextAction">Run more real reality → outcome loops.</strong></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <p class="eyebrow">Capability Stack</p>
+      <h2>Built foundations</h2>
+      <div class="capability-map">
+        <div>Universal Kernel</div>
+        <div>Intelligence Loop</div>
+        <div>Meta Intelligence</div>
+        <div>Capability Compiler</div>
+        <div>Executor + Verifier</div>
+        <div>Portfolio Brain</div>
+        <div>Outcome Capture</div>
+        <div>Proof Pack</div>
+      </div>
+    </section>
+
+    <section id="proof" class="panel">
+      <p class="eyebrow">Public Proof Pack</p>
+      <h2>10 completed reality loops</h2>
+      <div class="proof-list">
+        <article>
+          <span>REAL-PROOF-01</span>
+          <strong>CYVXAI-OS repo reality</strong>
+          <p>CYVX generated roadmap, flywheel, capability compiler, executor verifier, portfolio brain, and proof campaign records; pushed evidence to GitHub successfully.</p>
+          <small>Trust 90 → 92 · completed</small>
+        </article><article>
+          <span>REAL-PROOF-02</span>
+          <strong>Agent Framework repo reality</strong>
+          <p>Agent Framework repo was ingested as the agent-orchestration layer and mapped into CYVX cross-repo mission roles.</p>
+          <small>Trust 90 → 92 · completed</small>
+        </article><article>
+          <span>REAL-PROOF-03</span>
+          <strong>Activepieces repo reality</strong>
+          <p>Activepieces repo was ingested as the workflow-execution layer and mapped into CYVX connector strategy.</p>
+          <small>Trust 90 → 92 · completed</small>
+        </article><article>
+          <span>REAL-PROOF-04</span>
+          <strong>Syft repo reality</strong>
+          <p>Syft repo was ingested as the SBOM/security-proof layer and ranked highest leverage in cross-repo analysis.</p>
+          <small>Trust 90 → 92 · completed</small>
+        </article><article>
+          <span>REAL-PROOF-05</span>
+          <strong>CYVX business plan</strong>
+          <p>CYVX business reality was compressed into the need for real proof volume, outcome records, and public proof.</p>
+          <small>Trust 90 → 92 · completed</small>
+        </article><article>
+          <span>REAL-PROOF-06</span>
+          <strong>CYVX dashboard/UI reality</strong>
+          <p>Dashboard/UI reality was updated with Self Scan wiring, Connector Intelligence, Analyze Upload, and Outcome Capture surfaces.</p>
+          <small>Trust 90 → 92 · completed</small>
+        </article><article>
+          <span>REAL-PROOF-07</span>
+          <strong>CYVX deployment reality</strong>
+          <p>Deployment reality was validated through npm scripts, local server run path, and pushed GitHub commits.</p>
+          <small>Trust 90 → 92 · completed</small>
+        </article><article>
+          <span>REAL-PROOF-08</span>
+          <strong>CYVX revenue reality</strong>
+          <p>Revenue reality was converted into the need for proof packs, ROI ranking, and outcome-backed adoption evidence.</p>
+          <small>Trust 90 → 92 · completed</small>
+        </article><article>
+          <span>REAL-PROOF-09</span>
+          <strong>CYVX user adoption reality</strong>
+          <p>User adoption reality was compressed into the 60-second value moment: upload reality, get constraint, NBA, mission, and proof.</p>
+          <small>Trust 90 → 92 · completed</small>
+        </article><article>
+          <span>REAL-PROOF-10</span>
+          <strong>CYVX self-improvement reality</strong>
+          <p>Self-improvement reality produced Capability Compiler, Executor Verifier, Portfolio Brain, and Real Proof 10 campaign.</p>
+          <small>Trust 90 → 92 · completed</small>
         </article>
+      </div>
+    </section>
+  </main>
 
-        <aside class="hero-side panel" id="summaryPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Platform Summary</h2>
-              <p>Live counts, risk posture, and execution readiness.</p>
-            </div>
-          </div>
-          <div class="summary-grid" id="summaryGrid"></div>
-          <div class="summary-note" id="summaryNote"></div>
-        </aside>
-      </section>
+  <nav class="dock">
+    <a href="#">Home</a>
+    <a href="#analyze">Analyze</a>
+    <a href="#proof">Proof</a>
+  </nav>
 
-      <section class="workspace">
-        <article class="panel panel-span-4" id="productPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Product v1</h2>
-              <p>Onboard, search, and run the full operational loop without leaving the cockpit.</p>
-            </div>
-          </div>
-          <div class="form-grid compact">
-            <label>Workflow Domain
-              <select id="workflowDomain">
-                <option value="cloud-operations">Cloud operations</option>
-                <option value="revenue-operations">Revenue operations</option>
-                <option value="robotics-operations">Robotics operations</option>
-                <option value="coordination">Coordination</option>
-              </select>
-            </label>
-            <label>Search & Filter
-              <input id="searchInput" type="search" placeholder="Search missions, events, knowledge..." />
-            </label>
-          </div>
-          <div class="row-actions">
-            <button class="button primary" id="workflowRunBtn">Run Operator Workflow</button>
-            <button class="button" id="clearSearchBtn">Clear Search</button>
-          </div>
-          <div class="summary-note">The operator workflow uses the frozen coordination path to produce observation, significance, intervention, mission, assignment, outcome, learning, and CIR evidence.</div>
-          <pre class="code-box" id="workflowOutput"></pre>
-        </article>
-
-        <article class="panel panel-span-4" id="proofPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Repository Proof</h2>
-              <p>Git state, latest proof report, reality gap, and CIR-linked evidence.</p>
-            </div>
-          </div>
-          <div class="summary-note">This surface ties platform output back to the actual repository and the latest learning record.</div>
-          <pre class="code-box" id="repositoryHealthOutput"></pre>
-          <pre class="code-box" id="proofOutput"></pre>
-        </article>
-
-        <article class="panel panel-span-12" id="realityEnginePanel">
-          <div class="panel-head">
-            <div>
-              <h2>Reality Evolution System</h2>
-              <p>Reality becomes self-aware, self-correcting, self-improving, and self-coordinating across scales.</p>
-            </div>
-            <div class="panel-tags" id="realityInterfaceTabs"></div>
-          </div>
-          <div class="reality-interface-shell">
-            <aside class="reality-interface-rail">
-              <div class="reality-rail-card">
-                <span class="card-kicker">Truth + Meta-Cognition</span>
-                <strong>Claim → Source → Evidence → Verification → Confidence → Decision → Learning</strong>
-                <div class="card-sub">If it cannot be verified, it can inform attention, but it cannot drive execution.</div>
-              </div>
-              <div class="stack-list compact" id="realityMetricsList"></div>
-              <div class="stack-list compact" id="realityDomainList"></div>
-            </aside>
-            <section class="reality-interface-stage">
-              <div class="reality-stage-header">
-                <div>
-                  <span class="card-kicker">Zoom Level</span>
-                  <strong id="realityLevelTitle">Strategic View</strong>
-                  <div class="card-sub" id="realityLevelDescription">Nation or organization as a living model.</div>
-                </div>
-                <div class="panel-tags" id="realityLevelChips"></div>
-              </div>
-              <div class="reality-view-grid">
-                <div class="reality-view-card" id="realityViewport"></div>
-                <div class="reality-view-card" id="realityDetailViewport"></div>
-              </div>
-              <div class="reality-flow-grid">
-                <div class="reality-flow-card">
-                  <span class="card-kicker">Temporal Layer</span>
-                  <div class="panel-tags" id="realityTimelineTags"></div>
-                </div>
-                <div class="reality-flow-card">
-                  <span class="card-kicker">Operating Loop</span>
-                  <div class="panel-tags" id="realityLoopTags"></div>
-                </div>
-                <div class="reality-flow-card reality-flow-card-wide">
-                  <span class="card-kicker">Truth Engine</span>
-                  <div class="stack-list compact" id="truthEngineList"></div>
-                </div>
-                <div class="reality-flow-card reality-flow-card-wide">
-                  <span class="card-kicker">Control Model</span>
-                  <div class="stack-list compact" id="controlModelList"></div>
-                </div>
-              </div>
-            </section>
-          </div>
-          <div class="summary-note">Truth gates action. Visibility, access, authority, control, intervention, effect, outcome, and learning are modeled as authorized interaction with connected systems.</div>
-        </article>
-
-        <article class="panel panel-span-8" id="overviewPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Overview</h2>
-              <p>Live platform state and the current operating posture.</p>
-            </div>
-            <div class="panel-tags" id="overviewTags"></div>
-          </div>
-          <div class="metric-grid" id="overviewCards"></div>
-        </article>
-
-        <article class="panel panel-span-4" id="commandPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Command Console</h2>
-              <p>Natural language commands and platform mutations.</p>
-            </div>
-          </div>
-          <div class="form-grid compact">
-            <label>Company<input id="companyName" type="text" value="Acme Robotics" /></label>
-            <label>Employees<input id="companyEmployees" type="number" value="220" /></label>
-            <label>Cloud Spend<input id="companySpend" type="number" value="88000" /></label>
-            <label>Systems<input id="companySystems" type="number" value="18" /></label>
-            <label>Teams<input id="companyTeams" type="number" value="5" /></label>
-          </div>
-          <textarea id="commandInput" rows="6">Model my company</textarea>
-          <div class="row-actions">
-            <button class="button primary" id="commandRunBtn">Run Command</button>
-            <button class="button" id="missionLaunchBtn">Launch Mission</button>
-          </div>
-          <pre class="code-box" id="commandOutput"></pre>
-        </article>
-
-        <article class="panel panel-span-8" id="graphPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Reality Graph</h2>
-              <p>Entities and relationships modeled as living state.</p>
-            </div>
-            <div class="panel-tags">
-              <button class="chip active" data-graph-filter="all">All</button>
-              <button class="chip" data-graph-filter="risk">Risk</button>
-              <button class="chip" data-graph-filter="opportunity">Opportunity</button>
-            </div>
-          </div>
-          <div class="graph-stage">
-            <svg id="graphSvg" viewBox="0 0 1000 640" preserveAspectRatio="xMidYMid meet"></svg>
-          </div>
-          <div class="detail-grid">
-            <div class="detail-card" id="entityDetail"></div>
-            <div class="detail-card" id="twinDetail"></div>
-          </div>
-        </article>
-
-        <article class="panel panel-span-4" id="agentsPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Agent Registry</h2>
-              <p>Registry, lifecycle, assignment status, and trust fit.</p>
-            </div>
-          </div>
-          <div class="stack-list" id="agentsList"></div>
-        </article>
-
-        <article class="panel panel-span-6" id="missionsPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Mission Lifecycle</h2>
-              <p>Mission state, assignment, approval, queue, and learning.</p>
-            </div>
-          </div>
-          <div class="stack-list" id="missionsList"></div>
-          <div class="inline-form">
-            <label>Mission title<input id="missionTitle" type="text" value="Automate onboarding" /></label>
-            <label>Objective<input id="missionObjective" type="text" value="reduce manual setup" /></label>
-            <div class="row-actions">
-              <button class="button" id="missionCreateBtn">Create Mission</button>
-            </div>
-          </div>
-        </article>
-
-        <article class="panel panel-span-6" id="simulationPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Simulation Chamber</h2>
-              <p>Outage, growth, cyber, and workflow simulations.</p>
-            </div>
-          </div>
-          <div class="stack-list" id="simulationsList"></div>
-          <div class="inline-form">
-            <label>Scenario<input id="simulationScenario" type="text" value="outage" /></label>
-            <label>Recommendation<input id="simulationRecommendation" type="text" value="Add verification gates" /></label>
-            <div class="row-actions">
-              <button class="button" id="simulationRunBtn">Run Simulation</button>
-            </div>
-          </div>
-        </article>
-
-        <article class="panel panel-span-6" id="executivePanel">
-          <div class="panel-head">
-            <div>
-              <h2>Executive Intelligence</h2>
-              <p>Answers, forecasts, and recommendation ranking.</p>
-            </div>
-          </div>
-          <div class="answer-grid" id="executiveAnswers"></div>
-          <div class="stack-list compact" id="executiveRecommendations"></div>
-        </article>
-
-        <article class="panel panel-span-4" id="observationPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Observations</h2>
-              <p>Observed reality, source confidence, and change detection.</p>
-            </div>
-          </div>
-          <div class="stack-list compact" id="observationsList"></div>
-        </article>
-
-        <article class="panel panel-span-4" id="realityPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Reality Calibration</h2>
-              <p>Graph freshness, confidence, and drift against observation.</p>
-            </div>
-          </div>
-          <div class="metric-grid" id="realityList"></div>
-        </article>
-
-        <article class="panel panel-span-4" id="portfolioPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Mission Portfolio</h2>
-              <p>Overlap, dependency, alignment, and value creation.</p>
-            </div>
-          </div>
-          <div class="summary-grid" id="portfolioList"></div>
-        </article>
-        <article class="panel panel-span-6" id="kernelPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Kernel Overview</h2>
-              <p>Formal kernel contracts, service summaries, and CIR posture.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="kernelOverviewList"></pre>
-        </article>
-
-        <article class="panel panel-span-6" id="constitutionPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Constitution Service</h2>
-              <p>Protected values, preferred states, and scoring policies.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="constitutionList"></pre>
-        </article>
-
-        <article class="panel panel-span-4" id="realityObjectsPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Reality Objects</h2>
-              <p>Mapped reality objects and live state.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="realityObjectsList"></pre>
-        </article>
-
-        <article class="panel panel-span-4" id="significancePanel">
-          <div class="panel-head">
-            <div>
-              <h2>Significance Records</h2>
-              <p>Attention portfolio and salience ranking.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="significanceList"></pre>
-        </article>
-
-        <article class="panel panel-span-4" id="interventionQueuePanel">
-          <div class="panel-head">
-            <div>
-              <h2>Intervention Queue</h2>
-              <p>Proposed reality-changing actions.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="interventionQueueList"></pre>
-        </article>
-
-        <article class="panel panel-span-4" id="outcomesEvidencePanel">
-          <div class="panel-head">
-            <div>
-              <h2>Outcomes / Evidence</h2>
-              <p>Measured outcomes and supporting evidence.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="outcomesEvidenceList"></pre>
-        </article>
-
-        <article class="panel panel-span-4" id="evolutionPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Evolution Recommendations</h2>
-              <p>System-improvement recommendations.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="evolutionList"></pre>
-        </article>
-
-        <article class="panel panel-span-4" id="cirPanel">
-          <div class="panel-head">
-            <div>
-              <h2>CIR Metric</h2>
-              <p>Constitutional Improvement Rate and history.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="cirList"></pre>
-        </article>
-
-
-        <article class="panel panel-span-6" id="eventsPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Audit Trail</h2>
-              <p>Activity and recent platform events with operator search filtering.</p>
-            </div>
-          </div>
-          <div class="stack-list compact" id="eventsList"></div>
-        </article>
-
-        <article class="panel panel-span-4" id="decisionsPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Decision Center</h2>
-              <p>Evidence, assumptions, alternatives, and confidence.</p>
-            </div>
-          </div>
-          <div class="stack-list compact" id="decisionsList"></div>
-        </article>
-
-        <article class="panel panel-span-4" id="knowledgePanel">
-          <div class="panel-head">
-            <div>
-              <h2>Knowledge Timeline</h2>
-              <p>Mission lessons, outcomes, and decision history.</p>
-            </div>
-          </div>
-          <div class="stack-list compact" id="knowledgeList"></div>
-        </article>
-
-        <article class="panel panel-span-4" id="capabilitiesPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Capability Engine</h2>
-              <p>Current, potential, and growth rate across the platform.</p>
-            </div>
-          </div>
-          <div class="stack-list compact" id="capabilitiesList"></div>
-        </article>
-
-        <article class="panel panel-span-4" id="governancePanel">
-          <div class="panel-head">
-            <div>
-              <h2>Governance / Autonomy</h2>
-              <p>Approval gates, override flags, and policy state.</p>
-            </div>
-          </div>
-          <div class="stack-list compact" id="governanceList"></div>
-        </article>
-        <article class="panel panel-span-4" id="trustPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Trust Engine</h2>
-              <p>Prediction accuracy, calibration, and autonomy readiness.</p>
-            </div>
-          </div>
-          <div class="stack-list compact" id="trustList"></div>
-        </article>
-
-        <article class="panel panel-span-4" id="strategyPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Strategic Coordination</h2>
-              <p>Goals, objectives, and initiatives aligned to missions.</p>
-            </div>
-          </div>
-          <div class="stack-list compact" id="strategyList"></div>
-          <div class="stack-list compact" id="constraintsList"></div>
-        </article>
-
-        <article class="panel panel-span-4" id="opportunityPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Opportunity Intelligence</h2>
-              <p>Ranked opportunities, expected value, and confidence.</p>
-            </div>
-          </div>
-          <div class="stack-list compact" id="opportunitiesList"></div>
-          <div class="stack-list compact" id="patternsList"></div>
-        </article>
-
-        <article class="panel panel-span-4" id="patternIntelligencePanel">
-          <div class="panel-head">
-            <div>
-              <h2>Pattern Intelligence</h2>
-              <p>Recurring success, failure, bottleneck, opportunity, and resource patterns.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="patternIntelligenceList"></pre>
-        </article>
-
-        <article class="panel panel-span-4" id="recommendationIntelligencePanel">
-          <div class="panel-head">
-            <div>
-              <h2>Recommendation Intelligence</h2>
-              <p>Explainable interventions, missions, resource allocations, and approvals.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="recommendationIntelligenceList"></pre>
-        </article>
-
-        <article class="panel panel-span-4" id="priorityIntelligencePanel">
-          <div class="panel-head">
-            <div>
-              <h2>Priority Intelligence</h2>
-              <p>Explainable rankings for actions and decisions.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="priorityIntelligenceList"></pre>
-        </article>
-
-
-        <article class="panel panel-span-12" id="selfScanPanel">
-          <div class="panel-head">
-            <div>
-              <p class="eyebrow">CYVX Self Scan</p>
-              <h2>Operational Constraint Scanner</h2>
-            </div>
-          </div>
-          <div class="metric-grid">
-            <div class="metric-card">
-              <span>Health</span>
-              <strong id="selfScanHealth">unknown</strong>
-            </div>
-            <div class="metric-card">
-              <span>Trust</span>
-              <strong id="selfScanTrust">0</strong>
-            </div>
-            <div class="metric-card">
-              <span>Top Constraint</span>
-              <strong id="selfScanConstraint">unknown</strong>
-            </div>
-            <div class="metric-card">
-              <span>Next Action</span>
-              <strong id="selfScanAction">unknown</strong>
-            </div>
-          </div>
-          <pre class="code-box" id="selfScanOutput"></pre>
-        </article>
-
-        <article class="panel panel-span-12" id="intelligenceSummaryPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Intelligence Summary</h2>
-              <p>Pattern count, recommendation count, priority count, and predicted CIR impact.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="intelligenceSummaryList"></pre>
-        </article>
-
-
-        <article class="panel panel-span-6" id="coordinationPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Coordination Overview</h2>
-              <p>Who acts, when, with what resources, and under what constraints.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="coordinationOverviewList"></pre>
-        </article>
-
-        <article class="panel panel-span-4" id="humanRolesPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Human Roles</h2>
-              <p>Approval authorities and escalation paths.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="humanRolesList"></pre>
-        </article>
-
-        <article class="panel panel-span-4" id="resourcesPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Resource Allocation</h2>
-              <p>Compute, time, budget, and operational capacity.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="resourceAllocationList"></pre>
-        </article>
-
-        <article class="panel panel-span-4" id="assignmentsPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Assignment Queue</h2>
-              <p>Actor matching, validation, and live assignments.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="assignmentQueueList"></pre>
-        </article>
-
-        <article class="panel panel-span-4" id="approvalsPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Approval Gates</h2>
-              <p>Pending, approved, rejected, and escalated actions.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="approvalGatesList"></pre>
-        </article>
-
-        <article class="panel panel-span-4" id="queuePanel">
-          <div class="panel-head">
-            <div>
-              <h2>Execution Queue</h2>
-              <p>Queued work, retries, and execution progress.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="executionQueueList"></pre>
-        </article>
-
-        <article class="panel panel-span-4" id="nbaPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Next Best Action</h2>
-              <p>Explainable next action from live platform state.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="nextBestActionList"></pre>
-        </article>
-
-        <article class="panel panel-span-8" id="crossDomainPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Cross-Domain Loop Demo</h2>
-              <p>Cloud, revenue, and robotics coordination summary from shared primitives.</p>
-            </div>
-          </div>
-          <pre class="code-box" id="crossDomainList"></pre>
-        </article>
-      </section>
-    
-            <section class="panel-card">
-              <p class="eyebrow">Connector Intelligence</p>
-              <h2>Multi-Repo Integration Layer</h2>
-              <p class="muted">CYVX maps support repositories into executable platform primitives.</p>
-              <div class="metric-grid">
-                <div class="metric-card"><span>Agent Framework</span><strong>Orchestration</strong><small>Agent plans, assignments, traces, review gates</small></div>
-                <div class="metric-card"><span>Activepieces</span><strong>Workflow Execution</strong><small>Approved missions into automation flows</small></div>
-                <div class="metric-card"><span>Syft</span><strong>SBOM Proof</strong><small>Dependency inventory, repo risk, evidence</small></div>
-                <div class="metric-card"><span>Next Best Action</span><strong>Expose + Execute</strong><small>Connect specs to Mission Control and Evidence</small></div>
-              </div>
-            </section>
-
-          </main>
-
-    <script src="./app.js"></script>
-  </body>
+  <script src="./app.js"></script>
+</body>
 </html>

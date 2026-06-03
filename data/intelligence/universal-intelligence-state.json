@@ -1,0 +1,333 @@
+{
+  "created_at": "2026-06-03T21:52:19.685Z",
+  "kernel_version": "1.0",
+  "loop": [
+    "observe",
+    "extract_signals",
+    "detect_constraints",
+    "detect_opportunities",
+    "generate_next_best_action",
+    "generate_mission",
+    "allocate_resources",
+    "execute",
+    "measure_outcome",
+    "update_trust",
+    "store_learning",
+    "expand_capability"
+  ],
+  "sources": [
+    {
+      "id": "cyvx-repository",
+      "name": "CYVXAI-OS",
+      "type": "repository",
+      "universal_entity": {
+        "id": "cyvx-repository",
+        "name": "CYVXAI-OS",
+        "type": "repository",
+        "potential": {
+          "known": [
+            "Turn repository structure into a living capability graph.",
+            "Convert business signals into opportunity-ranked missions.",
+            "Use workflow automation to turn approved missions into actions.",
+            "Use evidence records to create compounding trust and learning.",
+            "Use agent orchestration to scale execution capacity.",
+            "Use SBOM/security proof as defensible operational intelligence."
+          ],
+          "latent": [
+            "cross-domain coordination",
+            "capability expansion",
+            "autonomous improvement"
+          ],
+          "growth_rate": 0.82
+        },
+        "agency": {
+          "actors": [
+            "operator",
+            "CYVX",
+            "agents",
+            "workflows"
+          ],
+          "authority": [
+            "human-approved execution",
+            "safe-mode automation"
+          ],
+          "autonomy_level": 0.35
+        },
+        "capability": {
+          "current": [
+            "repo",
+            "revenue",
+            "execution",
+            "proof",
+            "agents",
+            "security",
+            "deployment"
+          ],
+          "missing": [
+            "outcome capture",
+            "trust calibration",
+            "dynamic API analyze endpoint"
+          ],
+          "target": [
+            "self-improving mission loop",
+            "cross-reality coordination"
+          ]
+        },
+        "constraint": {
+          "active": [
+            "Outcome evidence must be captured after execution to calibrate trust.",
+            "Mission recommendations must connect to executable workflows.",
+            "Agent orchestration needs assignment, review, and confidence gates.",
+            "Dependency and SBOM proof should become part of mission readiness.",
+            "Public deployment and runtime reliability are required for real adoption."
+          ],
+          "predicted": [
+            "stale dashboard state",
+            "shallow heuristic scoring",
+            "integration drift"
+          ],
+          "severity": 0.78
+        },
+        "mission": [],
+        "resource": {
+          "time": 1,
+          "capital": 0,
+          "compute": 1,
+          "knowledge": 1
+        },
+        "execution": [],
+        "outcome": [],
+        "learning": [],
+        "trust": {
+          "score": 0.88,
+          "confidence": 0.86
+        },
+        "evolution": {
+          "next_capability": "Outcome Capture + Trust Calibration",
+          "expected_gain": 0.31
+        }
+      },
+      "top_constraint": "Outcome evidence must be captured after execution to calibrate trust.",
+      "top_opportunity": "Turn repository structure into a living capability graph.",
+      "next_best_action": "Create an outcome capture flow so every mission updates evidence, learning, and trust.",
+      "mission": {
+        "title": "Close the Universal Intelligence Loop",
+        "objective": "Turn reality source analysis into mission execution, outcome evidence, trust calibration, and capability expansion.",
+        "expected_outcome": "CYVX becomes a self-improving capability operating system instead of a static dashboard.",
+        "confidence": 0.86
+      }
+    },
+    {
+      "id": "operator-reality",
+      "name": "Operator Reality",
+      "type": "human",
+      "universal_entity": {
+        "id": "operator-reality",
+        "name": "Operator Reality",
+        "type": "human",
+        "potential": {
+          "known": [
+            "Turn repository structure into a living capability graph.",
+            "Convert business signals into opportunity-ranked missions.",
+            "Use workflow automation to turn approved missions into actions.",
+            "Use evidence records to create compounding trust and learning.",
+            "Use agent orchestration to scale execution capacity.",
+            "Use SBOM/security proof as defensible operational intelligence."
+          ],
+          "latent": [
+            "cross-domain coordination",
+            "capability expansion",
+            "autonomous improvement"
+          ],
+          "growth_rate": 0.82
+        },
+        "agency": {
+          "actors": [
+            "operator",
+            "CYVX",
+            "agents",
+            "workflows"
+          ],
+          "authority": [
+            "human-approved execution",
+            "safe-mode automation"
+          ],
+          "autonomy_level": 0.35
+        },
+        "capability": {
+          "current": [
+            "repo",
+            "revenue",
+            "execution",
+            "proof",
+            "agents",
+            "security",
+            "deployment"
+          ],
+          "missing": [
+            "outcome capture",
+            "trust calibration",
+            "dynamic API analyze endpoint"
+          ],
+          "target": [
+            "self-improving mission loop",
+            "cross-reality coordination"
+          ]
+        },
+        "constraint": {
+          "active": [
+            "Outcome evidence must be captured after execution to calibrate trust.",
+            "Mission recommendations must connect to executable workflows.",
+            "Agent orchestration needs assignment, review, and confidence gates.",
+            "Dependency and SBOM proof should become part of mission readiness.",
+            "Public deployment and runtime reliability are required for real adoption."
+          ],
+          "predicted": [
+            "stale dashboard state",
+            "shallow heuristic scoring",
+            "integration drift"
+          ],
+          "severity": 0.78
+        },
+        "mission": [],
+        "resource": {
+          "time": 1,
+          "capital": 0,
+          "compute": 1,
+          "knowledge": 1
+        },
+        "execution": [],
+        "outcome": [],
+        "learning": [],
+        "trust": {
+          "score": 0.88,
+          "confidence": 0.86
+        },
+        "evolution": {
+          "next_capability": "Outcome Capture + Trust Calibration",
+          "expected_gain": 0.31
+        }
+      },
+      "top_constraint": "Outcome evidence must be captured after execution to calibrate trust.",
+      "top_opportunity": "Turn repository structure into a living capability graph.",
+      "next_best_action": "Create an outcome capture flow so every mission updates evidence, learning, and trust.",
+      "mission": {
+        "title": "Close the Universal Intelligence Loop",
+        "objective": "Turn reality source analysis into mission execution, outcome evidence, trust calibration, and capability expansion.",
+        "expected_outcome": "CYVX becomes a self-improving capability operating system instead of a static dashboard.",
+        "confidence": 0.86
+      }
+    },
+    {
+      "id": "cross-repo-system",
+      "name": "Cross-Repo Intelligence System",
+      "type": "digital_twin",
+      "universal_entity": {
+        "id": "cross-repo-system",
+        "name": "Cross-Repo Intelligence System",
+        "type": "digital_twin",
+        "potential": {
+          "known": [
+            "Turn repository structure into a living capability graph.",
+            "Use workflow automation to turn approved missions into actions.",
+            "Use evidence records to create compounding trust and learning.",
+            "Use agent orchestration to scale execution capacity.",
+            "Use SBOM/security proof as defensible operational intelligence."
+          ],
+          "latent": [
+            "cross-domain coordination",
+            "capability expansion",
+            "autonomous improvement"
+          ],
+          "growth_rate": 0.82
+        },
+        "agency": {
+          "actors": [
+            "operator",
+            "CYVX",
+            "agents",
+            "workflows"
+          ],
+          "authority": [
+            "human-approved execution",
+            "safe-mode automation"
+          ],
+          "autonomy_level": 0.35
+        },
+        "capability": {
+          "current": [
+            "repo",
+            "execution",
+            "proof",
+            "agents",
+            "security"
+          ],
+          "missing": [
+            "outcome capture",
+            "trust calibration",
+            "dynamic API analyze endpoint"
+          ],
+          "target": [
+            "self-improving mission loop",
+            "cross-reality coordination"
+          ]
+        },
+        "constraint": {
+          "active": [
+            "Outcome evidence must be captured after execution to calibrate trust.",
+            "Mission recommendations must connect to executable workflows.",
+            "Agent orchestration needs assignment, review, and confidence gates.",
+            "Dependency and SBOM proof should become part of mission readiness."
+          ],
+          "predicted": [
+            "stale dashboard state",
+            "shallow heuristic scoring",
+            "integration drift"
+          ],
+          "severity": 0.78
+        },
+        "mission": [],
+        "resource": {
+          "time": 1,
+          "capital": 0,
+          "compute": 1,
+          "knowledge": 1
+        },
+        "execution": [],
+        "outcome": [],
+        "learning": [],
+        "trust": {
+          "score": 0.88,
+          "confidence": 0.86
+        },
+        "evolution": {
+          "next_capability": "Outcome Capture + Trust Calibration",
+          "expected_gain": 0.31
+        }
+      },
+      "top_constraint": "Outcome evidence must be captured after execution to calibrate trust.",
+      "top_opportunity": "Turn repository structure into a living capability graph.",
+      "next_best_action": "Create an outcome capture flow so every mission updates evidence, learning, and trust.",
+      "mission": {
+        "title": "Close the Universal Intelligence Loop",
+        "objective": "Turn reality source analysis into mission execution, outcome evidence, trust calibration, and capability expansion.",
+        "expected_outcome": "CYVX becomes a self-improving capability operating system instead of a static dashboard.",
+        "confidence": 0.86
+      }
+    }
+  ],
+  "top_constraint": "CYVX must close the mission outcome loop so intelligence compounds from actual results.",
+  "top_opportunity": "Universal Capability Kernel + Universal Intelligence Loop can unify repos, businesses, agents, workflows, products, and markets.",
+  "next_best_action": "Build Outcome Capture + Trust Calibration.",
+  "mega_expansions_covered": [
+    "Universal Reality Sources",
+    "Universal Mission System",
+    "Digital Twins Everywhere",
+    "Cross-Reality Intelligence",
+    "Universal Opportunity Engine",
+    "Capability Graph",
+    "Autonomous Venture Builder",
+    "Civilization-Scale Coordination"
+  ],
+  "status": "active"
+}

@@ -1,31 +1,17 @@
 {
   "health": "active",
-  "modelHealth": "validated",
+  "modelHealth": "universal-intelligence-loop",
   "trust": 88,
-  "topConstraint": "Dashboard surfaces exist, but live uploaded reality must drive Self Scan, NBA, Mission Control, and Evidence.",
-  "nextAction": "Wire runtime upload analysis into Self Scan, Mission Control, NBA, and Evidence surfaces.",
+  "topConstraint": "CYVX must close the mission outcome loop so intelligence compounds from actual results.",
+  "nextAction": "Build Outcome Capture + Trust Calibration.",
   "nextBestAction": {
-    "title": "Activate Reality Upload → NBA → Mission → Outcome Loop",
-    "why": "This completes the core adoption wedge: upload reality, reveal what matters, act, measure, learn.",
-    "confidence": 0.88
+    "title": "Build Outcome Capture + Trust Calibration.",
+    "why": "Universal Capability Kernel + Universal Intelligence Loop can unify repos, businesses, agents, workflows, products, and markets.",
+    "confidence": 0.86
   },
   "mission": {
-    "id": "mission-1780521748808",
-    "title": "Activate Reality Upload → NBA → Mission → Outcome Loop",
-    "objective": "Make CYVX convert uploaded operational reality into a verified next best action, executable mission, expected outcome, and evidence trail.",
-    "top_constraint": "Dashboard surfaces exist, but live uploaded reality must drive Self Scan, NBA, Mission Control, and Evidence.",
-    "next_best_action": "Wire runtime upload analysis into Self Scan, Mission Control, NBA, and Evidence surfaces.",
-    "route": [
-      "Ingest reality upload",
-      "Extract constraints, risks, opportunities, and signals",
-      "Generate ranked Next Best Action",
-      "Create mission with expected outcome and confidence",
-      "Write evidence plan",
-      "Create outcome record template",
-      "Update trust state after outcome is measured"
-    ],
-    "expected_outcome": "A user uploads messy reality and receives a concrete mission with evidence plan in one flow.",
-    "confidence": 0.88,
+    "title": "Close the Universal Intelligence Loop",
+    "objective": "Add outcome capture and trust calibration so missions improve CYVX over time.",
     "status": "ready"
   }
 }

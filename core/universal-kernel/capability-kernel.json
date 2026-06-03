@@ -1,0 +1,74 @@
+{
+  "kernel_version": "1.0",
+  "canonical_flow": [
+    "potential",
+    "agency",
+    "capability",
+    "constraint",
+    "mission",
+    "resource",
+    "execution",
+    "outcome",
+    "learning",
+    "trust",
+    "evolution"
+  ],
+  "universal_entity_schema": {
+    "id": "",
+    "name": "",
+    "type": "",
+    "potential": {
+      "known": [],
+      "latent": [],
+      "growth_rate": 0
+    },
+    "agency": {
+      "actors": [],
+      "authority": [],
+      "autonomy_level": 0
+    },
+    "capability": {
+      "current": [],
+      "missing": [],
+      "target": []
+    },
+    "constraint": {
+      "active": [],
+      "predicted": [],
+      "severity": 0
+    },
+    "mission": [],
+    "resource": {
+      "time": 0,
+      "capital": 0,
+      "compute": 0,
+      "knowledge": 0
+    },
+    "execution": [],
+    "outcome": [],
+    "learning": [],
+    "trust": {
+      "score": 0,
+      "confidence": 0
+    },
+    "evolution": {
+      "next_capability": "",
+      "expected_gain": 0
+    }
+  },
+  "supported_entity_types": [
+    "repository",
+    "company",
+    "project",
+    "workflow",
+    "agent",
+    "human",
+    "market",
+    "product",
+    "document",
+    "database",
+    "api",
+    "network",
+    "digital_twin"
+  ]
+}

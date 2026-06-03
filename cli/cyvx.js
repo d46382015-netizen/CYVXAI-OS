@@ -19,7 +19,7 @@ const { analyzeProofLedger, loadProofLedger, recordProofRunFromProof } = require
 
 const COMMANDS = [
   "status", "health", "graph", "agents", "missions", "simulations", "simulate", "command", "report",
-  "events", "observations", "reality", "reality-engine", "portfolio", "decisions", "outcomes", "knowledge", "capabilities", "goals", "initiatives", "constraints", "opportunities", "trust", "patterns", "recommendations", "priorities", "intelligence", "dashboard", "repository-health", "repo-health", "proof", "thesis", "thesis-report", "thesis-dashboard", "github", "github-repository", "github-health", "github-proof", "scan-self",
+  "events", "observations", "reality", "reality-engine", "portfolio", "decisions", "outcomes", "knowledge", "capabilities", "goals", "initiatives", "constraints", "opportunities", "trust", "patterns", "recommendations", "priorities", "intelligence", "dashboard", "repository-health", "repo-health", "proof", "thesis", "thesis-report", "thesis-dashboard", "github", "github-repository", "github-health", "github-proof", "scan-self", "self-scan-mission",
   "criteria", "reality-objects", "significance", "interventions", "evolution", "cir", "kernel",
   "decision-intelligence", "daily-decision-brief", "truth-model", "decision-improvement",
   "humans", "resources", "assign", "approvals", "queue", "nba", "coordination", "workflow",
@@ -54,6 +54,12 @@ async function main() {
     case "scan-self": {
       const { spawnSync } = require("child_process");
       const result = spawnSync(process.execPath, ["./scripts/cyvx-scan-self.js"], { stdio: "inherit" });
+      process.exit(result.status || 0);
+    }
+
+    case "self-scan-mission": {
+      const { spawnSync } = require("child_process");
+      const result = spawnSync(process.execPath, ["./scripts/cyvx-self-scan-mission.js"], { stdio: "inherit" });
       process.exit(result.status || 0);
     }
 

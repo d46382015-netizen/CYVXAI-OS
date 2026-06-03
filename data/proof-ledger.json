@@ -12943,6 +12943,1344 @@
           "risk": 0
         }
       }
+    },
+    {
+      "timestamp": "2026-06-03T18:47:26.648Z",
+      "repository": "acme/cyvx",
+      "observations": [
+        "observation-github"
+      ],
+      "health_score": 63.108,
+      "repository_health": {
+        "repository": {
+          "owner": {
+            "login": "acme"
+          },
+          "repo": "cyvx",
+          "branch": "main",
+          "full_name": "acme/cyvx",
+          "id": 1,
+          "node_id": "repo-1",
+          "private": false,
+          "html_url": "https://github.com/acme/cyvx",
+          "description": "CYVX test repo",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-01-01T00:00:00Z",
+          "updated_at": "2026-01-10T00:00:00Z",
+          "pushed_at": "2026-01-12T00:00:00Z",
+          "stargazers_count": 3,
+          "watchers_count": 2,
+          "forks_count": 1,
+          "open_issues_count": 2,
+          "size": 120,
+          "language": "JavaScript",
+          "topics": [
+            "cyvx"
+          ]
+        },
+        "score": 63.108,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 0.7,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 2,
+        "issue_backlog_score": 0.9,
+        "open_pr_count": 1,
+        "open_pr_age_days": 24.783,
+        "open_pr_age_score": 0.174,
+        "workflow_runs": 2,
+        "workflow_failures": 1,
+        "workflow_failure_rate": 0.5,
+        "workflow_failure_score": 0.5,
+        "commits_30d": 2,
+        "commit_velocity_score": 0.167,
+        "commit_recency_days": 5.783,
+        "contributors": 2,
+        "top_contributors": [
+          {
+            "login": "user1",
+            "id": 101,
+            "html_url": "https://github.com/user1",
+            "contributions": 12
+          },
+          {
+            "login": "user2",
+            "id": 102,
+            "html_url": "https://github.com/user2",
+            "contributions": 7
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 0.9,
+          "pull_request_age": 0.174,
+          "workflow_failures": 0.5,
+          "commit_velocity": 0.167
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 67.108,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.783,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual_outcome": {
+          "repository_health_score": 63.108,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.783,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "acme/cyvx is watch at 63.108/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days"
+      },
+      "workflow_failures": 1,
+      "build_status": "passing",
+      "commits_30d": 2,
+      "pr_count": 1,
+      "pr_age_days": 24.783,
+      "intervention": {
+        "id": "intervention-triage-repository-health-acme-cyvx",
+        "recommended": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "observed": "acme/cyvx is watch at 63.108/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days",
+        "outcome": {
+          "repository_health_score": 63.108,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.783,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "classification": "Neutral"
+      },
+      "prediction": {
+        "predicted_outcome": {
+          "repository_health_score": 67.108,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.783,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "confidence": 0.7,
+        "actual_outcome": {
+          "repository_health_score": 63.108,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.783,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": 4,
+        "error": 0.04
+      },
+      "confidence": 0.7,
+      "actual_outcome": {
+        "repository_health_score": 63.108,
+        "build_status": "passing",
+        "issue_backlog": 2,
+        "open_pr_age_days": 24.783,
+        "workflow_failures": 1,
+        "commit_velocity_30d": 2
+      },
+      "variance": 4,
+      "learning": {
+        "id": "knowledge_record-repository-health-mission-acme-cyvx-lesson",
+        "lesson": "Repository telemetry is live and measurable against GitHub state.",
+        "cir_impact": 0.002,
+        "trust_impact": 0.2
+      },
+      "cir_impact": 0.002,
+      "before": {
+        "repository": {
+          "owner": {
+            "login": "acme"
+          },
+          "repo": "cyvx",
+          "branch": "main",
+          "full_name": "acme/cyvx",
+          "id": 1,
+          "node_id": "repo-1",
+          "private": false,
+          "html_url": "https://github.com/acme/cyvx",
+          "description": "CYVX test repo",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-01-01T00:00:00Z",
+          "updated_at": "2026-01-10T00:00:00Z",
+          "pushed_at": "2026-01-12T00:00:00Z",
+          "stargazers_count": 3,
+          "watchers_count": 2,
+          "forks_count": 1,
+          "open_issues_count": 2,
+          "size": 120,
+          "language": "JavaScript",
+          "topics": [
+            "cyvx"
+          ]
+        },
+        "score": 63.115,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 0.7,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 2,
+        "issue_backlog_score": 0.9,
+        "open_pr_count": 1,
+        "open_pr_age_days": 24.77,
+        "open_pr_age_score": 0.174,
+        "workflow_runs": 2,
+        "workflow_failures": 1,
+        "workflow_failure_rate": 0.5,
+        "workflow_failure_score": 0.5,
+        "commits_30d": 2,
+        "commit_velocity_score": 0.167,
+        "commit_recency_days": 5.77,
+        "contributors": 2,
+        "top_contributors": [
+          {
+            "login": "user1",
+            "id": 101,
+            "html_url": "https://github.com/user1",
+            "contributions": 12
+          },
+          {
+            "login": "user2",
+            "id": 102,
+            "html_url": "https://github.com/user2",
+            "contributions": 7
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 0.9,
+          "pull_request_age": 0.174,
+          "workflow_failures": 0.5,
+          "commit_velocity": 0.167
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 67.11500000000001,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.77,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual_outcome": {
+          "repository_health_score": 63.115,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.77,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "acme/cyvx is watch at 63.115/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days"
+      },
+      "after": {
+        "repository": {
+          "owner": {
+            "login": "acme"
+          },
+          "repo": "cyvx",
+          "branch": "main",
+          "full_name": "acme/cyvx",
+          "id": 1,
+          "node_id": "repo-1",
+          "private": false,
+          "html_url": "https://github.com/acme/cyvx",
+          "description": "CYVX test repo",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-01-01T00:00:00Z",
+          "updated_at": "2026-01-10T00:00:00Z",
+          "pushed_at": "2026-01-12T00:00:00Z",
+          "stargazers_count": 3,
+          "watchers_count": 2,
+          "forks_count": 1,
+          "open_issues_count": 2,
+          "size": 120,
+          "language": "JavaScript",
+          "topics": [
+            "cyvx"
+          ]
+        },
+        "score": 63.108,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 0.7,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 2,
+        "issue_backlog_score": 0.9,
+        "open_pr_count": 1,
+        "open_pr_age_days": 24.783,
+        "open_pr_age_score": 0.174,
+        "workflow_runs": 2,
+        "workflow_failures": 1,
+        "workflow_failure_rate": 0.5,
+        "workflow_failure_score": 0.5,
+        "commits_30d": 2,
+        "commit_velocity_score": 0.167,
+        "commit_recency_days": 5.783,
+        "contributors": 2,
+        "top_contributors": [
+          {
+            "login": "user1",
+            "id": 101,
+            "html_url": "https://github.com/user1",
+            "contributions": 12
+          },
+          {
+            "login": "user2",
+            "id": 102,
+            "html_url": "https://github.com/user2",
+            "contributions": 7
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 0.9,
+          "pull_request_age": 0.174,
+          "workflow_failures": 0.5,
+          "commit_velocity": 0.167
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 67.108,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.783,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual_outcome": {
+          "repository_health_score": 63.108,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.783,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "acme/cyvx is watch at 63.108/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days"
+      },
+      "delta": {
+        "health_score_delta": -0.007,
+        "workflow_failure_delta": 0,
+        "build_delta": 0,
+        "pr_age_delta": 0.013,
+        "prediction_error_delta": 0,
+        "cir_delta": 0
+      },
+      "reality_gap": {
+        "predicted": {
+          "repository_health_score": 67.108,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.783,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual": {
+          "repository_health_score": 63.108,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.783,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "prediction_error": 0.04,
+        "prediction_variance": 4
+      },
+      "trust": {
+        "id": "trust-trust",
+        "type": "trust",
+        "created_at": "2026-06-03T18:47:25.544Z",
+        "updated_at": "2026-06-03T18:47:25.544Z",
+        "title": "trust",
+        "name": "trust",
+        "label": "trust",
+        "state": "active",
+        "metadata": {},
+        "relationships": [],
+        "events": [],
+        "evidence": [],
+        "assumptions": [],
+        "confidence": 0.5,
+        "linked_event_ids": [],
+        "subject_type": "repository",
+        "subject_id": "acme/cyvx",
+        "trust_score": 0.96,
+        "trust_trend": 0.131,
+        "trust_confidence": 0.7,
+        "trust_history": [
+          {
+            "at": "2026-06-03T18:47:25.510Z",
+            "predicted": {
+              "repository_health_score": 67.108,
+              "build_status": "passing",
+              "issue_backlog": 0,
+              "open_pr_age_days": 21.783,
+              "workflow_failures": 0,
+              "commit_velocity_30d": 3
+            },
+            "actual": {
+              "repository_health_score": 63.108,
+              "build_status": "passing",
+              "issue_backlog": 2,
+              "open_pr_age_days": 24.783,
+              "workflow_failures": 1,
+              "commit_velocity_30d": 2
+            },
+            "prediction_error": 0.04,
+            "prediction_variance": 4,
+            "calibration": 0.96
+          }
+        ],
+        "calibration_count": 0,
+        "last_calibrated_at": null,
+        "confidence_error": 0.04,
+        "prediction_error": 0.04,
+        "trust_source": "github",
+        "trust_reasons": [
+          "watch",
+          "Reduce workflow failures first; failed automation is the clearest external reliability signal."
+        ],
+        "constitutional": {
+          "understanding": 0,
+          "coordination": 0,
+          "capability": 0,
+          "resilience": 0,
+          "learning": 0,
+          "score": 0,
+          "trend": 0,
+          "risk": 0
+        }
+      }
+    },
+    {
+      "timestamp": "2026-06-03T18:50:44.961Z",
+      "repository": "acme/cyvx",
+      "observations": [
+        "observation-github"
+      ],
+      "health_score": 63.107,
+      "repository_health": {
+        "repository": {
+          "owner": {
+            "login": "acme"
+          },
+          "repo": "cyvx",
+          "branch": "main",
+          "full_name": "acme/cyvx",
+          "id": 1,
+          "node_id": "repo-1",
+          "private": false,
+          "html_url": "https://github.com/acme/cyvx",
+          "description": "CYVX test repo",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-01-01T00:00:00Z",
+          "updated_at": "2026-01-10T00:00:00Z",
+          "pushed_at": "2026-01-12T00:00:00Z",
+          "stargazers_count": 3,
+          "watchers_count": 2,
+          "forks_count": 1,
+          "open_issues_count": 2,
+          "size": 120,
+          "language": "JavaScript",
+          "topics": [
+            "cyvx"
+          ]
+        },
+        "score": 63.107,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 0.7,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 2,
+        "issue_backlog_score": 0.9,
+        "open_pr_count": 1,
+        "open_pr_age_days": 24.785,
+        "open_pr_age_score": 0.174,
+        "workflow_runs": 2,
+        "workflow_failures": 1,
+        "workflow_failure_rate": 0.5,
+        "workflow_failure_score": 0.5,
+        "commits_30d": 2,
+        "commit_velocity_score": 0.167,
+        "commit_recency_days": 5.785,
+        "contributors": 2,
+        "top_contributors": [
+          {
+            "login": "user1",
+            "id": 101,
+            "html_url": "https://github.com/user1",
+            "contributions": 12
+          },
+          {
+            "login": "user2",
+            "id": 102,
+            "html_url": "https://github.com/user2",
+            "contributions": 7
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 0.9,
+          "pull_request_age": 0.174,
+          "workflow_failures": 0.5,
+          "commit_velocity": 0.167
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 67.107,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.785,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual_outcome": {
+          "repository_health_score": 63.107,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.785,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "acme/cyvx is watch at 63.107/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days"
+      },
+      "workflow_failures": 1,
+      "build_status": "passing",
+      "commits_30d": 2,
+      "pr_count": 1,
+      "pr_age_days": 24.785,
+      "intervention": {
+        "id": "intervention-triage-repository-health-acme-cyvx",
+        "recommended": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "observed": "acme/cyvx is watch at 63.107/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days",
+        "outcome": {
+          "repository_health_score": 63.107,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.785,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "classification": "Neutral"
+      },
+      "prediction": {
+        "predicted_outcome": {
+          "repository_health_score": 67.107,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.785,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "confidence": 0.7,
+        "actual_outcome": {
+          "repository_health_score": 63.107,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.785,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": 4,
+        "error": 0.04
+      },
+      "confidence": 0.7,
+      "actual_outcome": {
+        "repository_health_score": 63.107,
+        "build_status": "passing",
+        "issue_backlog": 2,
+        "open_pr_age_days": 24.785,
+        "workflow_failures": 1,
+        "commit_velocity_30d": 2
+      },
+      "variance": 4,
+      "learning": {
+        "id": "knowledge_record-repository-health-mission-acme-cyvx-lesson",
+        "lesson": "Repository telemetry is live and measurable against GitHub state.",
+        "cir_impact": 0.002,
+        "trust_impact": 0.2
+      },
+      "cir_impact": 0.002,
+      "before": {
+        "repository": {
+          "owner": {
+            "login": "acme"
+          },
+          "repo": "cyvx",
+          "branch": "main",
+          "full_name": "acme/cyvx",
+          "id": 1,
+          "node_id": "repo-1",
+          "private": false,
+          "html_url": "https://github.com/acme/cyvx",
+          "description": "CYVX test repo",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-01-01T00:00:00Z",
+          "updated_at": "2026-01-10T00:00:00Z",
+          "pushed_at": "2026-01-12T00:00:00Z",
+          "stargazers_count": 3,
+          "watchers_count": 2,
+          "forks_count": 1,
+          "open_issues_count": 2,
+          "size": 120,
+          "language": "JavaScript",
+          "topics": [
+            "cyvx"
+          ]
+        },
+        "score": 63.108,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 0.7,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 2,
+        "issue_backlog_score": 0.9,
+        "open_pr_count": 1,
+        "open_pr_age_days": 24.783,
+        "open_pr_age_score": 0.174,
+        "workflow_runs": 2,
+        "workflow_failures": 1,
+        "workflow_failure_rate": 0.5,
+        "workflow_failure_score": 0.5,
+        "commits_30d": 2,
+        "commit_velocity_score": 0.167,
+        "commit_recency_days": 5.783,
+        "contributors": 2,
+        "top_contributors": [
+          {
+            "login": "user1",
+            "id": 101,
+            "html_url": "https://github.com/user1",
+            "contributions": 12
+          },
+          {
+            "login": "user2",
+            "id": 102,
+            "html_url": "https://github.com/user2",
+            "contributions": 7
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 0.9,
+          "pull_request_age": 0.174,
+          "workflow_failures": 0.5,
+          "commit_velocity": 0.167
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 67.108,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.783,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual_outcome": {
+          "repository_health_score": 63.108,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.783,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "acme/cyvx is watch at 63.108/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days"
+      },
+      "after": {
+        "repository": {
+          "owner": {
+            "login": "acme"
+          },
+          "repo": "cyvx",
+          "branch": "main",
+          "full_name": "acme/cyvx",
+          "id": 1,
+          "node_id": "repo-1",
+          "private": false,
+          "html_url": "https://github.com/acme/cyvx",
+          "description": "CYVX test repo",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-01-01T00:00:00Z",
+          "updated_at": "2026-01-10T00:00:00Z",
+          "pushed_at": "2026-01-12T00:00:00Z",
+          "stargazers_count": 3,
+          "watchers_count": 2,
+          "forks_count": 1,
+          "open_issues_count": 2,
+          "size": 120,
+          "language": "JavaScript",
+          "topics": [
+            "cyvx"
+          ]
+        },
+        "score": 63.107,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 0.7,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 2,
+        "issue_backlog_score": 0.9,
+        "open_pr_count": 1,
+        "open_pr_age_days": 24.785,
+        "open_pr_age_score": 0.174,
+        "workflow_runs": 2,
+        "workflow_failures": 1,
+        "workflow_failure_rate": 0.5,
+        "workflow_failure_score": 0.5,
+        "commits_30d": 2,
+        "commit_velocity_score": 0.167,
+        "commit_recency_days": 5.785,
+        "contributors": 2,
+        "top_contributors": [
+          {
+            "login": "user1",
+            "id": 101,
+            "html_url": "https://github.com/user1",
+            "contributions": 12
+          },
+          {
+            "login": "user2",
+            "id": 102,
+            "html_url": "https://github.com/user2",
+            "contributions": 7
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 0.9,
+          "pull_request_age": 0.174,
+          "workflow_failures": 0.5,
+          "commit_velocity": 0.167
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 67.107,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.785,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual_outcome": {
+          "repository_health_score": 63.107,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.785,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "acme/cyvx is watch at 63.107/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days"
+      },
+      "delta": {
+        "health_score_delta": -0.001,
+        "workflow_failure_delta": 0,
+        "build_delta": 0,
+        "pr_age_delta": 0.002,
+        "prediction_error_delta": 0,
+        "cir_delta": 0
+      },
+      "reality_gap": {
+        "predicted": {
+          "repository_health_score": 67.107,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.785,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual": {
+          "repository_health_score": 63.107,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.785,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "prediction_error": 0.04,
+        "prediction_variance": 4
+      },
+      "trust": {
+        "id": "trust-trust",
+        "type": "trust",
+        "created_at": "2026-06-03T18:50:44.112Z",
+        "updated_at": "2026-06-03T18:50:44.112Z",
+        "title": "trust",
+        "name": "trust",
+        "label": "trust",
+        "state": "active",
+        "metadata": {},
+        "relationships": [],
+        "events": [],
+        "evidence": [],
+        "assumptions": [],
+        "confidence": 0.5,
+        "linked_event_ids": [],
+        "subject_type": "repository",
+        "subject_id": "acme/cyvx",
+        "trust_score": 0.96,
+        "trust_trend": 0.131,
+        "trust_confidence": 0.7,
+        "trust_history": [
+          {
+            "at": "2026-06-03T18:50:44.080Z",
+            "predicted": {
+              "repository_health_score": 67.107,
+              "build_status": "passing",
+              "issue_backlog": 0,
+              "open_pr_age_days": 21.785,
+              "workflow_failures": 0,
+              "commit_velocity_30d": 3
+            },
+            "actual": {
+              "repository_health_score": 63.107,
+              "build_status": "passing",
+              "issue_backlog": 2,
+              "open_pr_age_days": 24.785,
+              "workflow_failures": 1,
+              "commit_velocity_30d": 2
+            },
+            "prediction_error": 0.04,
+            "prediction_variance": 4,
+            "calibration": 0.96
+          }
+        ],
+        "calibration_count": 0,
+        "last_calibrated_at": null,
+        "confidence_error": 0.04,
+        "prediction_error": 0.04,
+        "trust_source": "github",
+        "trust_reasons": [
+          "watch",
+          "Reduce workflow failures first; failed automation is the clearest external reliability signal."
+        ],
+        "constitutional": {
+          "understanding": 0,
+          "coordination": 0,
+          "capability": 0,
+          "resilience": 0,
+          "learning": 0,
+          "score": 0,
+          "trend": 0,
+          "risk": 0
+        }
+      }
+    },
+    {
+      "timestamp": "2026-06-03T18:55:16.668Z",
+      "repository": "acme/cyvx",
+      "observations": [
+        "observation-github"
+      ],
+      "health_score": 63.106,
+      "repository_health": {
+        "repository": {
+          "owner": {
+            "login": "acme"
+          },
+          "repo": "cyvx",
+          "branch": "main",
+          "full_name": "acme/cyvx",
+          "id": 1,
+          "node_id": "repo-1",
+          "private": false,
+          "html_url": "https://github.com/acme/cyvx",
+          "description": "CYVX test repo",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-01-01T00:00:00Z",
+          "updated_at": "2026-01-10T00:00:00Z",
+          "pushed_at": "2026-01-12T00:00:00Z",
+          "stargazers_count": 3,
+          "watchers_count": 2,
+          "forks_count": 1,
+          "open_issues_count": 2,
+          "size": 120,
+          "language": "JavaScript",
+          "topics": [
+            "cyvx"
+          ]
+        },
+        "score": 63.106,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 0.7,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 2,
+        "issue_backlog_score": 0.9,
+        "open_pr_count": 1,
+        "open_pr_age_days": 24.788,
+        "open_pr_age_score": 0.174,
+        "workflow_runs": 2,
+        "workflow_failures": 1,
+        "workflow_failure_rate": 0.5,
+        "workflow_failure_score": 0.5,
+        "commits_30d": 2,
+        "commit_velocity_score": 0.167,
+        "commit_recency_days": 5.788,
+        "contributors": 2,
+        "top_contributors": [
+          {
+            "login": "user1",
+            "id": 101,
+            "html_url": "https://github.com/user1",
+            "contributions": 12
+          },
+          {
+            "login": "user2",
+            "id": 102,
+            "html_url": "https://github.com/user2",
+            "contributions": 7
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 0.9,
+          "pull_request_age": 0.174,
+          "workflow_failures": 0.5,
+          "commit_velocity": 0.167
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 67.106,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.788,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual_outcome": {
+          "repository_health_score": 63.106,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.788,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "acme/cyvx is watch at 63.106/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days"
+      },
+      "workflow_failures": 1,
+      "build_status": "passing",
+      "commits_30d": 2,
+      "pr_count": 1,
+      "pr_age_days": 24.788,
+      "intervention": {
+        "id": "intervention-triage-repository-health-acme-cyvx",
+        "recommended": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "observed": "acme/cyvx is watch at 63.106/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days",
+        "outcome": {
+          "repository_health_score": 63.106,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.788,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "classification": "Neutral"
+      },
+      "prediction": {
+        "predicted_outcome": {
+          "repository_health_score": 67.106,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.788,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "confidence": 0.7,
+        "actual_outcome": {
+          "repository_health_score": 63.106,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.788,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": 4,
+        "error": 0.04
+      },
+      "confidence": 0.7,
+      "actual_outcome": {
+        "repository_health_score": 63.106,
+        "build_status": "passing",
+        "issue_backlog": 2,
+        "open_pr_age_days": 24.788,
+        "workflow_failures": 1,
+        "commit_velocity_30d": 2
+      },
+      "variance": 4,
+      "learning": {
+        "id": "knowledge_record-repository-health-mission-acme-cyvx-lesson",
+        "lesson": "Repository telemetry is live and measurable against GitHub state.",
+        "cir_impact": 0.002,
+        "trust_impact": 0.2
+      },
+      "cir_impact": 0.002,
+      "before": {
+        "repository": {
+          "owner": {
+            "login": "acme"
+          },
+          "repo": "cyvx",
+          "branch": "main",
+          "full_name": "acme/cyvx",
+          "id": 1,
+          "node_id": "repo-1",
+          "private": false,
+          "html_url": "https://github.com/acme/cyvx",
+          "description": "CYVX test repo",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-01-01T00:00:00Z",
+          "updated_at": "2026-01-10T00:00:00Z",
+          "pushed_at": "2026-01-12T00:00:00Z",
+          "stargazers_count": 3,
+          "watchers_count": 2,
+          "forks_count": 1,
+          "open_issues_count": 2,
+          "size": 120,
+          "language": "JavaScript",
+          "topics": [
+            "cyvx"
+          ]
+        },
+        "score": 63.107,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 0.7,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 2,
+        "issue_backlog_score": 0.9,
+        "open_pr_count": 1,
+        "open_pr_age_days": 24.785,
+        "open_pr_age_score": 0.174,
+        "workflow_runs": 2,
+        "workflow_failures": 1,
+        "workflow_failure_rate": 0.5,
+        "workflow_failure_score": 0.5,
+        "commits_30d": 2,
+        "commit_velocity_score": 0.167,
+        "commit_recency_days": 5.785,
+        "contributors": 2,
+        "top_contributors": [
+          {
+            "login": "user1",
+            "id": 101,
+            "html_url": "https://github.com/user1",
+            "contributions": 12
+          },
+          {
+            "login": "user2",
+            "id": 102,
+            "html_url": "https://github.com/user2",
+            "contributions": 7
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 0.9,
+          "pull_request_age": 0.174,
+          "workflow_failures": 0.5,
+          "commit_velocity": 0.167
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 67.107,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.785,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual_outcome": {
+          "repository_health_score": 63.107,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.785,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "acme/cyvx is watch at 63.107/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days"
+      },
+      "after": {
+        "repository": {
+          "owner": {
+            "login": "acme"
+          },
+          "repo": "cyvx",
+          "branch": "main",
+          "full_name": "acme/cyvx",
+          "id": 1,
+          "node_id": "repo-1",
+          "private": false,
+          "html_url": "https://github.com/acme/cyvx",
+          "description": "CYVX test repo",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-01-01T00:00:00Z",
+          "updated_at": "2026-01-10T00:00:00Z",
+          "pushed_at": "2026-01-12T00:00:00Z",
+          "stargazers_count": 3,
+          "watchers_count": 2,
+          "forks_count": 1,
+          "open_issues_count": 2,
+          "size": 120,
+          "language": "JavaScript",
+          "topics": [
+            "cyvx"
+          ]
+        },
+        "score": 63.106,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 0.7,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 2,
+        "issue_backlog_score": 0.9,
+        "open_pr_count": 1,
+        "open_pr_age_days": 24.788,
+        "open_pr_age_score": 0.174,
+        "workflow_runs": 2,
+        "workflow_failures": 1,
+        "workflow_failure_rate": 0.5,
+        "workflow_failure_score": 0.5,
+        "commits_30d": 2,
+        "commit_velocity_score": 0.167,
+        "commit_recency_days": 5.788,
+        "contributors": 2,
+        "top_contributors": [
+          {
+            "login": "user1",
+            "id": 101,
+            "html_url": "https://github.com/user1",
+            "contributions": 12
+          },
+          {
+            "login": "user2",
+            "id": 102,
+            "html_url": "https://github.com/user2",
+            "contributions": 7
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 0.9,
+          "pull_request_age": 0.174,
+          "workflow_failures": 0.5,
+          "commit_velocity": 0.167
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 67.106,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.788,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual_outcome": {
+          "repository_health_score": 63.106,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.788,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "acme/cyvx is watch at 63.106/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days"
+      },
+      "delta": {
+        "health_score_delta": -0.001,
+        "workflow_failure_delta": 0,
+        "build_delta": 0,
+        "pr_age_delta": 0.003,
+        "prediction_error_delta": 0,
+        "cir_delta": 0
+      },
+      "reality_gap": {
+        "predicted": {
+          "repository_health_score": 67.106,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.788,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual": {
+          "repository_health_score": 63.106,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.788,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "prediction_error": 0.04,
+        "prediction_variance": 4
+      },
+      "trust": {
+        "id": "trust-trust",
+        "type": "trust",
+        "created_at": "2026-06-03T18:55:15.994Z",
+        "updated_at": "2026-06-03T18:55:15.994Z",
+        "title": "trust",
+        "name": "trust",
+        "label": "trust",
+        "state": "active",
+        "metadata": {},
+        "relationships": [],
+        "events": [],
+        "evidence": [],
+        "assumptions": [],
+        "confidence": 0.5,
+        "linked_event_ids": [],
+        "subject_type": "repository",
+        "subject_id": "acme/cyvx",
+        "trust_score": 0.96,
+        "trust_trend": 0.131,
+        "trust_confidence": 0.7,
+        "trust_history": [
+          {
+            "at": "2026-06-03T18:55:15.959Z",
+            "predicted": {
+              "repository_health_score": 67.106,
+              "build_status": "passing",
+              "issue_backlog": 0,
+              "open_pr_age_days": 21.788,
+              "workflow_failures": 0,
+              "commit_velocity_30d": 3
+            },
+            "actual": {
+              "repository_health_score": 63.106,
+              "build_status": "passing",
+              "issue_backlog": 2,
+              "open_pr_age_days": 24.788,
+              "workflow_failures": 1,
+              "commit_velocity_30d": 2
+            },
+            "prediction_error": 0.04,
+            "prediction_variance": 4,
+            "calibration": 0.96
+          }
+        ],
+        "calibration_count": 0,
+        "last_calibrated_at": null,
+        "confidence_error": 0.04,
+        "prediction_error": 0.04,
+        "trust_source": "github",
+        "trust_reasons": [
+          "watch",
+          "Reduce workflow failures first; failed automation is the clearest external reliability signal."
+        ],
+        "constitutional": {
+          "understanding": 0,
+          "coordination": 0,
+          "capability": 0,
+          "resilience": 0,
+          "learning": 0,
+          "score": 0,
+          "trend": 0,
+          "risk": 0
+        }
+      }
     }
   ]
 }

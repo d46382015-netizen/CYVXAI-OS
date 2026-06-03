@@ -87,6 +87,14 @@ function createApiServer(controller, options = {}) {
         proof.tribunal = recorded.tribunal;
         return json(res, 200, wrap({ repositoryHealth: proof.repositoryHealth || proof.repository_health || platform.repositoryHealth(), proof, proofLedger: recorded.tribunal }));
       }
+      if (url.pathname === "/api/v1/self-scan-mission") {
+        try {
+          const output = execFileSync(process.execPath, ["./scripts/cyvx-self-scan-mission.js"], { cwd: process.cwd(), encoding: "utf8" });
+          return json(res, 200, wrap(JSON.parse(output)));
+        } catch (error) {
+          return json(res, 500, wrap({ error: "self-scan mission failed", message: error.message }));
+        }
+      }
       if (url.pathname === "/api/v1/self-scan") {
         try {
           const output = execFileSync(process.execPath, ["./scripts/cyvx-scan-self.js"], { cwd: process.cwd(), encoding: "utf8" });

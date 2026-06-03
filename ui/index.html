@@ -1,154 +1,160 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>CYVXAI OS</title>
-  <link rel="stylesheet" href="./styles.css"/>
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <div class="orb orb-a"></div>
-  <div class="orb orb-b"></div>
-
-  <main class="app">
-    <header class="topbar">
+  <div class="app-shell">
+    <aside class="sidebar">
       <div class="brand">
         <div class="logo">CY</div>
         <div>
-          <strong>CYVXAI OS</strong>
-          <span>Reality → Mission → Outcome</span>
-        </div>
-      </div>
-      <div class="status-pill">LIVE PROOF · 10/10</div>
-    </header>
-
-    <section class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">Autonomous Infrastructure Intelligence</p>
-        <h1>Turn messy reality into the next best action.</h1>
-        <p class="sub">CYVX analyzes reality, detects constraints, generates missions, captures outcomes, and improves trust.</p>
-        <div class="actions">
-          <a href="#analyze" class="btn primary">Analyze Reality</a>
-          <a href="#proof" class="btn">View Proof Pack</a>
+          <h1>CYVX</h1>
+          <p>Autonomous Intelligence OS</p>
         </div>
       </div>
 
-      <div class="command-card">
-        <div class="pulse"></div>
-        <span>Current Loop</span>
-        <strong>Reality → Prediction → Mission → Outcome → Trust</strong>
-        <small>Proof completion: 10/10 · Trust 92</small>
+      <nav class="side-nav">
+        <button class="active">Command Center</button>
+        <button>Reality Intake</button>
+        <button>Mission Control</button>
+        <button>Execution Board</button>
+        <button>Intelligence Hub</button>
+        <button>Reality Graph</button>
+        <button>Opportunities</button>
+        <button>Simulations</button>
+        <button>Decision Center</button>
+        <button>Performance</button>
+        <button>Governance</button>
+        <button>Agent OS</button>
+      </nav>
+
+      <div class="status-card">
+        <span>System Status</span>
+        <p>Agents Online <b>24/24</b></p>
+        <p>Missions Active <b>7</b></p>
+        <p>Success Rate <b>98.7%</b></p>
+        <p>Trust Score <b>92</b></p>
       </div>
-    </section>
 
-    <section class="grid stats">
-      <article><span>Reality Loops</span><strong>10</strong><small>Inputs processed</small></article>
-      <article><span>Completed</span><strong>10</strong><small>Outcome records</small></article>
-      <article><span>Trust</span><strong>90 → 92</strong><small>Calibration signal</small></article>
-      <article><span>Mode</span><strong>Proof</strong><small>Evidence-backed</small></article>
-    </section>
-
-    <section id="analyze" class="panel spotlight">
-      <div>
-        <p class="eyebrow">60 Second Value Moment</p>
-        <h2>Paste reality. Get the mission.</h2>
-        <p class="muted">Paste repo notes, business problems, task lists, plans, or messy context.</p>
+      <div class="orb-mini">
+        <div class="orb"></div>
+        <strong>CYVX is awake.</strong>
+        <small>Model. Decide. Execute. Improve.</small>
       </div>
-      <textarea id="realityInput" placeholder="Paste messy reality here..."></textarea>
-      <button id="analyzeBtn" class="btn primary full">Generate Next Best Action</button>
-      <pre id="analysisOutput" class="output"></pre>
-    </section>
+    </aside>
 
-    <section class="panel">
-      <p class="eyebrow">Executive Compression</p>
-      <h2>What matters now</h2>
-      <div class="decision-grid">
-        <div><span>Top Constraint</span><strong id="topConstraint">Need repeated real outcomes to compound trust.</strong></div>
-        <div><span>Top Opportunity</span><strong id="topOpportunity">Public proof-driven adoption.</strong></div>
-        <div><span>Next Action</span><strong id="nextAction">Run more real reality → outcome loops.</strong></div>
-      </div>
-    </section>
+    <main class="main">
+      <header class="topbar">
+        <div class="search">Ask CYVX anything...</div>
+        <div class="top-metric"><span>System Health</span><b>Excellent</b></div>
+        <div class="top-metric"><span>Autonomy</span><b>92%</b></div>
+        <div class="avatar">CY</div>
+      </header>
 
-    <section class="panel">
-      <p class="eyebrow">Capability Stack</p>
-      <h2>Built foundations</h2>
-      <div class="capability-map">
-        <div>Universal Kernel</div>
-        <div>Intelligence Loop</div>
-        <div>Meta Intelligence</div>
-        <div>Capability Compiler</div>
-        <div>Executor + Verifier</div>
-        <div>Portfolio Brain</div>
-        <div>Outcome Capture</div>
-        <div>Proof Pack</div>
-      </div>
-    </section>
+      <section class="hero">
+        <div>
+          <p class="kicker">Welcome back, Operator.</p>
+          <h2>Turn reality into <span>the next best action.</span></h2>
+          <p>Upload reality. CYVX finds the constraint, creates the mission, captures outcomes, and improves trust.</p>
+          <div class="actions">
+            <button class="primary">Upload Reality</button>
+            <button>Model My Company</button>
+            <button>Run Mission</button>
+          </div>
+        </div>
+        <div class="big-orb"></div>
+      </section>
 
-    <section id="proof" class="panel">
-      <p class="eyebrow">Public Proof Pack</p>
-      <h2>10 completed reality loops</h2>
-      <div class="proof-list">
-        <article>
-          <span>REAL-PROOF-01</span>
-          <strong>CYVXAI-OS repo reality</strong>
-          <p>CYVX generated roadmap, flywheel, capability compiler, executor verifier, portfolio brain, and proof campaign records; pushed evidence to GitHub successfully.</p>
-          <small>Trust 90 → 92 · completed</small>
-        </article><article>
-          <span>REAL-PROOF-02</span>
-          <strong>Agent Framework repo reality</strong>
-          <p>Agent Framework repo was ingested as the agent-orchestration layer and mapped into CYVX cross-repo mission roles.</p>
-          <small>Trust 90 → 92 · completed</small>
-        </article><article>
-          <span>REAL-PROOF-03</span>
-          <strong>Activepieces repo reality</strong>
-          <p>Activepieces repo was ingested as the workflow-execution layer and mapped into CYVX connector strategy.</p>
-          <small>Trust 90 → 92 · completed</small>
-        </article><article>
-          <span>REAL-PROOF-04</span>
-          <strong>Syft repo reality</strong>
-          <p>Syft repo was ingested as the SBOM/security-proof layer and ranked highest leverage in cross-repo analysis.</p>
-          <small>Trust 90 → 92 · completed</small>
-        </article><article>
-          <span>REAL-PROOF-05</span>
-          <strong>CYVX business plan</strong>
-          <p>CYVX business reality was compressed into the need for real proof volume, outcome records, and public proof.</p>
-          <small>Trust 90 → 92 · completed</small>
-        </article><article>
-          <span>REAL-PROOF-06</span>
-          <strong>CYVX dashboard/UI reality</strong>
-          <p>Dashboard/UI reality was updated with Self Scan wiring, Connector Intelligence, Analyze Upload, and Outcome Capture surfaces.</p>
-          <small>Trust 90 → 92 · completed</small>
-        </article><article>
-          <span>REAL-PROOF-07</span>
-          <strong>CYVX deployment reality</strong>
-          <p>Deployment reality was validated through npm scripts, local server run path, and pushed GitHub commits.</p>
-          <small>Trust 90 → 92 · completed</small>
-        </article><article>
-          <span>REAL-PROOF-08</span>
-          <strong>CYVX revenue reality</strong>
-          <p>Revenue reality was converted into the need for proof packs, ROI ranking, and outcome-backed adoption evidence.</p>
-          <small>Trust 90 → 92 · completed</small>
-        </article><article>
-          <span>REAL-PROOF-09</span>
-          <strong>CYVX user adoption reality</strong>
-          <p>User adoption reality was compressed into the 60-second value moment: upload reality, get constraint, NBA, mission, and proof.</p>
-          <small>Trust 90 → 92 · completed</small>
-        </article><article>
-          <span>REAL-PROOF-10</span>
-          <strong>CYVX self-improvement reality</strong>
-          <p>Self-improvement reality produced Capability Compiler, Executor Verifier, Portfolio Brain, and Real Proof 10 campaign.</p>
-          <small>Trust 90 → 92 · completed</small>
+      <section class="metrics">
+        <div><span>Trust Score</span><b>92</b><small>↑ 2.3</small></div>
+        <div><span>Missions Active</span><b>7</b><small>↑ 3</small></div>
+        <div><span>Outcomes Today</span><b>23</b><small>↑ 15</small></div>
+        <div><span>Agents Online</span><b>24</b><small>/ 24</small></div>
+        <div><span>Autonomy Level</span><b>92%</b><small>↑ 4%</small></div>
+      </section>
+
+      <section class="proof-pack">
+        <div>
+          <p class="kicker">CYVX Proof Pack</p>
+          <h3>10 / 10</h3>
+          <p>Reality loops completed · Average trust after: <b>92</b></p>
+          <button>View Full Proof Pack</button>
+        </div>
+        <div class="proof-icons">
+          <div><span>✦</span><small>Repo</small></div><div><span>✦</span><small>Agent</small></div><div><span>✦</span><small>Workflow</small></div><div><span>✦</span><small>SBOM</small></div><div><span>✦</span><small>Business</small></div><div><span>✦</span><small>UI</small></div><div><span>✦</span><small>Deploy</small></div><div><span>✦</span><small>Revenue</small></div><div><span>✦</span><small>Users</small></div><div><span>✦</span><small>Self</small></div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="panel mission">
+          <p class="kicker">Mission Control</p>
+          <div class="ring">7<span>active</span></div>
+          <button>Go to Mission Control</button>
         </article>
-      </div>
-    </section>
-  </main>
 
-  <nav class="dock">
-    <a href="#">Home</a>
-    <a href="#analyze">Analyze</a>
-    <a href="#proof">Proof</a>
-  </nav>
+        <article class="panel nba">
+          <p class="kicker">Next Best Action</p>
+          <h3>Add verification gates to all high-risk missions</h3>
+          <p>Reduces rework by 34% and increases outcome reliability.</p>
+          <b>9.4 / 10</b>
+          <button class="primary">Execute Now</button>
+        </article>
 
-  <script src="./app.js"></script>
+        <article class="panel graph">
+          <p class="kicker">Reality Graph</p>
+          <div class="network">
+            <i style="--x:59.43469434582761%;--y:16.939437751432322%"></i><i style="--x:16.154465890119276%;--y:21.129132884433446%"></i><i style="--x:17.897027567244386%;--y:68.55100380013967%"></i><i style="--x:33.43133840979995%;--y:70.90858613778401%"></i><i style="--x:17.058210616668923%;--y:44.23666526243803%"></i><i style="--x:71.11846872815387%;--y:52.16183988228334%"></i><i style="--x:38.5779244512197%;--y:39.20551792209936%"></i><i style="--x:52.23873813620163%;--y:64.31911911718052%"></i><i style="--x:85.56307466593807%;--y:85.39767957291033%"></i><i style="--x:42.70879563252299%;--y:28.96262789742755%"></i><i style="--x:19.096762536034376%;--y:11.908121804875549%"></i><i style="--x:5.87016411266756%;--y:63.612315056047386%"></i><i style="--x:53.57194216394064%;--y:54.947258772288414%"></i><i style="--x:7.904242853241257%;--y:30.1261404134965%"></i><i style="--x:49.49414839958832%;--y:34.32793092704537%"></i><i style="--x:8.687503349704091%;--y:42.24756362226742%"></i><i style="--x:81.59809273708765%;--y:31.460208687403508%"></i><i style="--x:73.24022931065791%;--y:48.69719495586301%"></i><i style="--x:67.88253472952056%;--y:44.94972850656383%"></i><i style="--x:29.870746700898852%;--y:84.47089937138645%"></i><i style="--x:62.20782799925418%;--y:71.81719337232883%"></i><i style="--x:7.445309676858347%;--y:19.7627149559821%"></i>
+          </div>
+        </article>
+
+        <article class="panel">
+          <p class="kicker">Intelligence Summary</p>
+          <ul>
+            <li><b>3</b> Risks Detected</li>
+            <li><b>5</b> Opportunities</li>
+            <li><b>7</b> Recommendations</li>
+            <li><b>2</b> Patterns Found</li>
+          </ul>
+        </article>
+
+        <article class="panel">
+          <p class="kicker">Execution Velocity</p>
+          <h3>87%</h3>
+          <div class="chart"></div>
+        </article>
+
+        <article class="panel">
+          <p class="kicker">Outcomes / Impact</p>
+          <h3>$128K</h3>
+          <p>Value generated · ↑ 23% vs last 7 days</p>
+          <div class="bars"><i style="height:20%"></i><i style="height:55%"></i><i style="height:38%"></i><i style="height:70%"></i><i style="height:45%"></i><i style="height:62%"></i><i style="height:84%"></i></div>
+        </article>
+      </section>
+
+      <section class="bottom-grid">
+        <article class="panel">
+          <p class="kicker">Quick Launch</p>
+          <div class="quick">
+            <button>Self Scan</button><button>Simulation</button><button>Agent Registry</button><button>Create Mission</button>
+          </div>
+        </article>
+        <article class="panel">
+          <p class="kicker">Recent Activity</p>
+          <p>Mission “Automate Onboarding” completed</p>
+          <p>Reality uploaded: Q2 Results</p>
+          <p>Outcome recorded: $45K saved</p>
+        </article>
+        <article class="panel glow">
+          <p class="kicker">CYVX Autonomy Engine</p>
+          <h3>Active</h3>
+          <p>Watching. Learning. Coordinating. Improving.</p>
+        </article>
+      </section>
+    </main>
+  </div>
 </body>
 </html>

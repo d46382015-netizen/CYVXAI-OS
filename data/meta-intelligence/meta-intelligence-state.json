@@ -1,0 +1,129 @@
+{
+  "created_at": "2026-06-03T22:00:57.987Z",
+  "engine": "CYVX Meta Intelligence Engine",
+  "loop": [
+    "observe",
+    "model",
+    "predict",
+    "simulate",
+    "discover",
+    "rank",
+    "compress",
+    "expand",
+    "execute",
+    "measure",
+    "learn",
+    "self_improve"
+  ],
+  "readiness_score": 100,
+  "signals": {
+    "kernel": true,
+    "intelligence": true,
+    "outcome": true,
+    "repo": true,
+    "connectors": true,
+    "validation": true,
+    "revenue": true,
+    "execution": true,
+    "audit": true,
+    "dashboard": true
+  },
+  "prediction": {
+    "title": "Prediction + Calibration",
+    "prediction": "If CYVX closes outcome capture across multiple real missions, trust calibration and NBA quality will improve fastest.",
+    "confidence": 0.86,
+    "calibration_target": "Compare expected mission outcomes against actual outcomes after every execution."
+  },
+  "simulation": {
+    "title": "Simulation Before Execution",
+    "scenario_count": 3,
+    "best_scenario": "Run low-risk upload-to-mission-to-outcome proof loop before automating external actions.",
+    "alternatives": [
+      "Dashboard-only improvement",
+      "Connector execution first",
+      "Outcome loop first"
+    ],
+    "selected_reason": "Outcome loop creates evidence that improves every future engine."
+  },
+  "autonomous_discovery": {
+    "title": "Autonomous Discovery",
+    "discovery_targets": [
+      "stale missions",
+      "missing outcomes",
+      "unmeasured predictions",
+      "cross-repo integration gaps",
+      "dashboard-state drift"
+    ],
+    "next_discovery": "Scan repo/evidence/runtime artifacts daily or per commit."
+  },
+  "capability_expansion": {
+    "title": "Capability Expansion",
+    "current_capabilities": [
+      "reality upload",
+      "constraint detection",
+      "mission generation",
+      "cross-repo analysis",
+      "connector specs",
+      "outcome capture",
+      "trust update"
+    ],
+    "missing_capabilities": [
+      "dynamic /api/analyze persistence",
+      "outcome history UI",
+      "prediction ledger",
+      "simulation ranking",
+      "economic scoring",
+      "self-improvement execution queue"
+    ],
+    "next_capability": "Prediction Ledger + Simulation Ranking"
+  },
+  "agent_evolution": {
+    "title": "Agent Evolution",
+    "model": "Agents should specialize based on mission outcomes, trust, and prediction error.",
+    "first_agents": [
+      "Prediction Agent",
+      "Simulation Agent",
+      "Economic Ranking Agent",
+      "Compression Agent",
+      "Self-Improvement Agent"
+    ],
+    "next_step": "Create agent scorecards from outcomes."
+  },
+  "economic_intelligence": {
+    "title": "Economic Intelligence",
+    "scoring_formula": "expected_value = impact * confidence * urgency - cost - risk",
+    "first_ranked_mission": {
+      "mission": "Close Outcome Capture + Prediction Ledger",
+      "impact": 0.9,
+      "confidence": 0.86,
+      "urgency": 0.92,
+      "cost": 0.15,
+      "risk": 0.12,
+      "expected_value": 0.442
+    }
+  },
+  "reality_compression": {
+    "title": "Reality Graph Compression",
+    "compression_question": "What 5% of entities explain 95% of CYVX progress?",
+    "top_leverage_entities": [
+      "Universal Capability Kernel",
+      "Universal Intelligence Loop",
+      "Outcome Capture",
+      "Trust Calibration",
+      "Reality Upload",
+      "Cross-Repo Intelligence"
+    ],
+    "compression_result": "Most CYVX value now depends on closing the outcome/prediction loop, not adding more surfaces."
+  },
+  "self_improvement": {
+    "title": "Self-Improvement Loop",
+    "detected_bottleneck": "CYVX has many intelligence surfaces, but needs compounding evidence from repeated outcomes.",
+    "self_improvement_mission": "Build Prediction Ledger + Simulation Ranking connected to Outcome Capture.",
+    "expected_gain": 0.34,
+    "confidence": 0.87
+  },
+  "top_constraint": "CYVX must turn generated intelligence into repeated measured outcomes so trust and predictions compound.",
+  "top_opportunity": "The Meta Intelligence Engine unifies prediction, simulation, discovery, economics, compression, expansion, agent evolution, and self-improvement.",
+  "next_best_action": "Build the Prediction Ledger + Simulation Ranking layer on top of Outcome Capture.",
+  "status": "active"
+}

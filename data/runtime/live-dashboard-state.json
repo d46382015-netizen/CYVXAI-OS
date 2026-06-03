@@ -1,9 +1,9 @@
 {
   "health": "active",
-  "modelHealth": "intelligence-flywheel",
+  "modelHealth": "capability-compiler",
   "trust": 92,
   "topConstraint": "Outcome capture exists, but CYVX needs repeated outcome volume to calibrate trust.",
-  "nextAction": "Build Prediction Ledger + Simulation Ranking as the next durable intelligence layer.",
+  "nextAction": "Compile and build: Outcome History + Trust Calibration",
   "nextBestAction": {
     "title": "Build Prediction Ledger + Simulation Ranking as the next durable intelligence layer.",
     "why": "This creates the compounding loop: reality → prediction → mission → outcome → trust → learning.",
@@ -49,5 +49,11 @@
     "next_best_action": "Build Prediction Ledger + Simulation Ranking as the next durable intelligence layer.",
     "confidence": 0.87,
     "status": "ready"
+  },
+  "selectedCapability": "Outcome History + Trust Calibration",
+  "capabilityCompiler": {
+    "status": "active",
+    "latest": "capability-1780524433496",
+    "selected_capability": "Outcome History + Trust Calibration"
   }
 }

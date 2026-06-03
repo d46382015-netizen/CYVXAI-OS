@@ -1,0 +1,111 @@
+{
+  "id": "capability-1780524433496",
+  "created_at": "2026-06-03T22:07:13.498Z",
+  "compiler": "CYVX Capability Compiler",
+  "selected_capability": "Outcome History + Trust Calibration",
+  "source_constraint": "Outcome capture exists, but CYVX needs repeated outcome volume to calibrate trust.",
+  "source_next_action": "Collect and process 10 real realities through the flywheel and capture outcomes.",
+  "purpose": "Turn CYVX intelligence outputs into concrete build plans that expand the platform automatically.",
+  "specification": {
+    "user_story": "As CYVX, I need Outcome History + Trust Calibration so the platform can convert intelligence into compounding execution.",
+    "inputs": [
+      "runtime state",
+      "decision compression",
+      "flywheel state",
+      "outcomes",
+      "evidence",
+      "repo reality"
+    ],
+    "outputs": [
+      "implementation plan",
+      "task backlog",
+      "test plan",
+      "evidence plan",
+      "measurement plan",
+      "dashboard updates"
+    ],
+    "success_metric": "Outcome History + Trust Calibration generates measurable improvement in mission quality, evidence, trust, or execution speed."
+  },
+  "architecture": {
+    "folders": [
+      "core/outcome-history-trust-calibration",
+      "data/outcome-history-trust-calibration",
+      "docs/evidence"
+    ],
+    "modules": [
+      "schema",
+      "engine",
+      "runtime-state",
+      "evidence-report",
+      "dashboard-surface",
+      "tests"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Define capability schema",
+      "priority": "highest",
+      "status": "ready"
+    },
+    {
+      "id": "TASK-002",
+      "title": "Create engine script",
+      "priority": "highest",
+      "status": "ready"
+    },
+    {
+      "id": "TASK-003",
+      "title": "Generate runtime state artifact",
+      "priority": "high",
+      "status": "ready"
+    },
+    {
+      "id": "TASK-004",
+      "title": "Create evidence report",
+      "priority": "high",
+      "status": "ready"
+    },
+    {
+      "id": "TASK-005",
+      "title": "Wire dashboard state",
+      "priority": "medium",
+      "status": "next"
+    },
+    {
+      "id": "TASK-006",
+      "title": "Add validation and test coverage",
+      "priority": "medium",
+      "status": "next"
+    }
+  ],
+  "tests": [
+    "script runs without external services",
+    "runtime artifact is created",
+    "evidence report is created",
+    "dashboard live state updates",
+    "Omega100 still passes",
+    "git status contains only intended changes"
+  ],
+  "evidence_plan": [
+    "Store compiled capability spec",
+    "Store generated tasks",
+    "Store build report",
+    "Record expected outcome",
+    "Capture actual outcome after implementation",
+    "Update trust after result"
+  ],
+  "measurement_plan": {
+    "baseline": "manual feature planning and one-off commands",
+    "target": "capability gap becomes implementation plan in one command",
+    "metrics": [
+      "time_to_plan",
+      "tasks_generated",
+      "evidence_created",
+      "validation_passed",
+      "outcome_recorded"
+    ]
+  },
+  "next_build_command": "Build Outcome History + Trust Calibration from this compiled plan.",
+  "status": "compiled"
+}

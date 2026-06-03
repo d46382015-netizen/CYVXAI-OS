@@ -1,0 +1,22 @@
+{
+  "connectors": [
+    {
+      "name": "github",
+      "status": "planned",
+      "auth": "env",
+      "safe_fallback": true
+    },
+    {
+      "name": "email",
+      "status": "planned",
+      "auth": "env",
+      "safe_fallback": true
+    },
+    {
+      "name": "calendar",
+      "status": "planned",
+      "auth": "env",
+      "safe_fallback": true
+    }
+  ]
+}

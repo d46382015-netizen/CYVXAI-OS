@@ -1,0 +1,582 @@
+{
+  "campaign": "CYVX Validation Matrix Omega100",
+  "created_at": "2026-06-03T19:44:37.545Z",
+  "score": 100,
+  "passed": 95,
+  "failed": 0,
+  "total": 95,
+  "readiness": "adoption-ready",
+  "failed_gates": [],
+  "results": [
+    {
+      "id": 1,
+      "name": "repo.package",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 2,
+      "name": "repo.readme",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 3,
+      "name": "repo.git",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 4,
+      "name": "repo.scripts",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 5,
+      "name": "repo.license-or-ownership",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 6,
+      "name": "runtime.node",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 7,
+      "name": "runtime.npm",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 8,
+      "name": "runtime.install-lock",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 9,
+      "name": "runtime.entrypoint",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 10,
+      "name": "runtime.env-template",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 11,
+      "name": "api.server",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 12,
+      "name": "api.health",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 13,
+      "name": "api.entities",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 14,
+      "name": "api.missions",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 15,
+      "name": "api.agents",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 16,
+      "name": "data.folder",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 17,
+      "name": "data.memory",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 18,
+      "name": "data.missions",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 19,
+      "name": "data.validation",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 20,
+      "name": "data.persistence",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 21,
+      "name": "primitive.node",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 22,
+      "name": "primitive.edge",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 23,
+      "name": "primitive.event",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 24,
+      "name": "primitive.truth",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 25,
+      "name": "primitive.outcome",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 26,
+      "name": "agent.commander",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 27,
+      "name": "agent.architect",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 28,
+      "name": "agent.developer",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 29,
+      "name": "agent.qa",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 30,
+      "name": "agent.governance",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 31,
+      "name": "mission.observe",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 32,
+      "name": "mission.verify",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 33,
+      "name": "mission.constraint",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 34,
+      "name": "mission.execute",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 35,
+      "name": "mission.learn",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 36,
+      "name": "connectors.folder",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 37,
+      "name": "connectors.schema",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 38,
+      "name": "connectors.github",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 39,
+      "name": "connectors.email-or-calendar",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 40,
+      "name": "connectors.safe-fallback",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 41,
+      "name": "ui.app",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 42,
+      "name": "ui.dashboard",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 43,
+      "name": "ui.kpis",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 44,
+      "name": "ui.mission-control",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 45,
+      "name": "ui.export",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 46,
+      "name": "security.permissions",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 47,
+      "name": "security.audit",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 48,
+      "name": "security.no-hardcoded-secret",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 49,
+      "name": "security.safe-mode",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 50,
+      "name": "security.validation-gates",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 51,
+      "name": "tests.folder",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 52,
+      "name": "tests.script",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 53,
+      "name": "tests.validation-script",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 54,
+      "name": "tests.evidence-output",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 55,
+      "name": "tests.repeatable",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 56,
+      "name": "deployment.port",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 57,
+      "name": "deployment.start-script",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 58,
+      "name": "deployment.docker-or-host",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 59,
+      "name": "deployment.docs",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 60,
+      "name": "deployment.production-mode",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 61,
+      "name": "evidence.report",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 62,
+      "name": "evidence.proof",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 63,
+      "name": "evidence.metrics",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 64,
+      "name": "evidence.audit-trail",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 65,
+      "name": "evidence.snapshot",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 66,
+      "name": "adoption.onboarding",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 67,
+      "name": "adoption.demo",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 68,
+      "name": "adoption.value-prop",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 69,
+      "name": "adoption.exportable",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 70,
+      "name": "adoption.user-ready-doc",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 71,
+      "name": "business.revenue",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 72,
+      "name": "business.customer",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 73,
+      "name": "business.pipeline",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 74,
+      "name": "business.grants-or-bounty",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 75,
+      "name": "business.roi",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 76,
+      "name": "intelligence.nba",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 77,
+      "name": "intelligence.priority",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 78,
+      "name": "intelligence.confidence",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 79,
+      "name": "intelligence.simulation",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 80,
+      "name": "intelligence.optimization",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 81,
+      "name": "ops.logs",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 82,
+      "name": "ops.status",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 83,
+      "name": "ops.failure-handling",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 84,
+      "name": "ops.retry",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 85,
+      "name": "ops.rollback",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 86,
+      "name": "docs.architecture",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 87,
+      "name": "docs.operations",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 88,
+      "name": "docs.api",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 89,
+      "name": "docs.security",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 90,
+      "name": "docs.roadmap",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 91,
+      "name": "quality.no-empty-core",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 92,
+      "name": "quality.meaningful-size",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 93,
+      "name": "quality.no-node-modules-counted",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 94,
+      "name": "quality.multi-layer",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "id": 95,
+      "name": "quality.omega100-real-matrix",
+      "status": "PASS",
+      "error": null
+    }
+  ]
+}

@@ -10593,6 +10593,1404 @@
           "risk": 0
         }
       }
+    },
+    {
+      "timestamp": "2026-06-03T18:28:23.800Z",
+      "repository": "acme/cyvx",
+      "observations": [
+        "observation-github"
+      ],
+      "health_score": 63.115,
+      "repository_health": {
+        "repository": {
+          "owner": {
+            "login": "acme"
+          },
+          "repo": "cyvx",
+          "branch": "main",
+          "full_name": "acme/cyvx",
+          "id": 1,
+          "node_id": "repo-1",
+          "private": false,
+          "html_url": "https://github.com/acme/cyvx",
+          "description": "CYVX test repo",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-01-01T00:00:00Z",
+          "updated_at": "2026-01-10T00:00:00Z",
+          "pushed_at": "2026-01-12T00:00:00Z",
+          "stargazers_count": 3,
+          "watchers_count": 2,
+          "forks_count": 1,
+          "open_issues_count": 2,
+          "size": 120,
+          "language": "JavaScript",
+          "topics": [
+            "cyvx"
+          ]
+        },
+        "score": 63.115,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 0.7,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 2,
+        "issue_backlog_score": 0.9,
+        "open_pr_count": 1,
+        "open_pr_age_days": 24.77,
+        "open_pr_age_score": 0.174,
+        "workflow_runs": 2,
+        "workflow_failures": 1,
+        "workflow_failure_rate": 0.5,
+        "workflow_failure_score": 0.5,
+        "commits_30d": 2,
+        "commit_velocity_score": 0.167,
+        "commit_recency_days": 5.77,
+        "contributors": 2,
+        "top_contributors": [
+          {
+            "login": "user1",
+            "id": 101,
+            "html_url": "https://github.com/user1",
+            "contributions": 12
+          },
+          {
+            "login": "user2",
+            "id": 102,
+            "html_url": "https://github.com/user2",
+            "contributions": 7
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 0.9,
+          "pull_request_age": 0.174,
+          "workflow_failures": 0.5,
+          "commit_velocity": 0.167
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 67.11500000000001,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.77,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual_outcome": {
+          "repository_health_score": 63.115,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.77,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "acme/cyvx is watch at 63.115/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days"
+      },
+      "workflow_failures": 1,
+      "build_status": "passing",
+      "commits_30d": 2,
+      "pr_count": 1,
+      "pr_age_days": 24.77,
+      "intervention": {
+        "id": "intervention-triage-repository-health-acme-cyvx",
+        "recommended": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "observed": "acme/cyvx is watch at 63.115/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days",
+        "outcome": {
+          "repository_health_score": 63.115,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.77,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "classification": "Neutral"
+      },
+      "prediction": {
+        "predicted_outcome": {
+          "repository_health_score": 67.11500000000001,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.77,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "confidence": 0.7,
+        "actual_outcome": {
+          "repository_health_score": 63.115,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.77,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": 4,
+        "error": 0.04
+      },
+      "confidence": 0.7,
+      "actual_outcome": {
+        "repository_health_score": 63.115,
+        "build_status": "passing",
+        "issue_backlog": 2,
+        "open_pr_age_days": 24.77,
+        "workflow_failures": 1,
+        "commit_velocity_30d": 2
+      },
+      "variance": 4,
+      "learning": {
+        "id": "knowledge_record-repository-health-mission-acme-cyvx-lesson",
+        "lesson": "Repository telemetry is live and measurable against GitHub state.",
+        "cir_impact": 0.002,
+        "trust_impact": 0.2
+      },
+      "cir_impact": 0.002,
+      "before": {
+        "repository": {
+          "owner": {
+            "login": "acme"
+          },
+          "repo": "cyvx",
+          "branch": "main",
+          "full_name": "acme/cyvx",
+          "id": 1,
+          "node_id": "repo-1",
+          "private": false,
+          "html_url": "https://github.com/acme/cyvx",
+          "description": "CYVX test repo",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-01-01T00:00:00Z",
+          "updated_at": "2026-01-10T00:00:00Z",
+          "pushed_at": "2026-01-12T00:00:00Z",
+          "stargazers_count": 3,
+          "watchers_count": 2,
+          "forks_count": 1,
+          "open_issues_count": 2,
+          "size": 120,
+          "language": "JavaScript",
+          "topics": [
+            "cyvx"
+          ]
+        },
+        "score": 63.119,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 0.7,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 2,
+        "issue_backlog_score": 0.9,
+        "open_pr_count": 1,
+        "open_pr_age_days": 24.761,
+        "open_pr_age_score": 0.175,
+        "workflow_runs": 2,
+        "workflow_failures": 1,
+        "workflow_failure_rate": 0.5,
+        "workflow_failure_score": 0.5,
+        "commits_30d": 2,
+        "commit_velocity_score": 0.167,
+        "commit_recency_days": 5.761,
+        "contributors": 2,
+        "top_contributors": [
+          {
+            "login": "user1",
+            "id": 101,
+            "html_url": "https://github.com/user1",
+            "contributions": 12
+          },
+          {
+            "login": "user2",
+            "id": 102,
+            "html_url": "https://github.com/user2",
+            "contributions": 7
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 0.9,
+          "pull_request_age": 0.175,
+          "workflow_failures": 0.5,
+          "commit_velocity": 0.167
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 67.119,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.761,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual_outcome": {
+          "repository_health_score": 63.119,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.761,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "acme/cyvx is watch at 63.119/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days"
+      },
+      "after": {
+        "repository": {
+          "owner": {
+            "login": "acme"
+          },
+          "repo": "cyvx",
+          "branch": "main",
+          "full_name": "acme/cyvx",
+          "id": 1,
+          "node_id": "repo-1",
+          "private": false,
+          "html_url": "https://github.com/acme/cyvx",
+          "description": "CYVX test repo",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-01-01T00:00:00Z",
+          "updated_at": "2026-01-10T00:00:00Z",
+          "pushed_at": "2026-01-12T00:00:00Z",
+          "stargazers_count": 3,
+          "watchers_count": 2,
+          "forks_count": 1,
+          "open_issues_count": 2,
+          "size": 120,
+          "language": "JavaScript",
+          "topics": [
+            "cyvx"
+          ]
+        },
+        "score": 63.115,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 0.7,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 2,
+        "issue_backlog_score": 0.9,
+        "open_pr_count": 1,
+        "open_pr_age_days": 24.77,
+        "open_pr_age_score": 0.174,
+        "workflow_runs": 2,
+        "workflow_failures": 1,
+        "workflow_failure_rate": 0.5,
+        "workflow_failure_score": 0.5,
+        "commits_30d": 2,
+        "commit_velocity_score": 0.167,
+        "commit_recency_days": 5.77,
+        "contributors": 2,
+        "top_contributors": [
+          {
+            "login": "user1",
+            "id": 101,
+            "html_url": "https://github.com/user1",
+            "contributions": 12
+          },
+          {
+            "login": "user2",
+            "id": 102,
+            "html_url": "https://github.com/user2",
+            "contributions": 7
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 0.9,
+          "pull_request_age": 0.174,
+          "workflow_failures": 0.5,
+          "commit_velocity": 0.167
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 67.11500000000001,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.77,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual_outcome": {
+          "repository_health_score": 63.115,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.77,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "acme/cyvx is watch at 63.115/100. | 2 open issues | 1 open pull request | 2 recent workflow runs | 2 commits in 30 days"
+      },
+      "delta": {
+        "health_score_delta": -0.004,
+        "workflow_failure_delta": 0,
+        "build_delta": 0,
+        "pr_age_delta": 0.009,
+        "prediction_error_delta": 0,
+        "cir_delta": 0
+      },
+      "reality_gap": {
+        "predicted": {
+          "repository_health_score": 67.11500000000001,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 21.77,
+          "workflow_failures": 0,
+          "commit_velocity_30d": 3
+        },
+        "actual": {
+          "repository_health_score": 63.115,
+          "build_status": "passing",
+          "issue_backlog": 2,
+          "open_pr_age_days": 24.77,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 2
+        },
+        "prediction_error": 0.04,
+        "prediction_variance": 4
+      },
+      "trust": {
+        "id": "trust-trust",
+        "type": "trust",
+        "created_at": "2026-06-03T18:28:22.632Z",
+        "updated_at": "2026-06-03T18:28:22.632Z",
+        "title": "trust",
+        "name": "trust",
+        "label": "trust",
+        "state": "active",
+        "metadata": {},
+        "relationships": [],
+        "events": [],
+        "evidence": [],
+        "assumptions": [],
+        "confidence": 0.5,
+        "linked_event_ids": [],
+        "subject_type": "repository",
+        "subject_id": "acme/cyvx",
+        "trust_score": 0.96,
+        "trust_trend": 0.131,
+        "trust_confidence": 0.7,
+        "trust_history": [
+          {
+            "at": "2026-06-03T18:28:22.600Z",
+            "predicted": {
+              "repository_health_score": 67.11500000000001,
+              "build_status": "passing",
+              "issue_backlog": 0,
+              "open_pr_age_days": 21.77,
+              "workflow_failures": 0,
+              "commit_velocity_30d": 3
+            },
+            "actual": {
+              "repository_health_score": 63.115,
+              "build_status": "passing",
+              "issue_backlog": 2,
+              "open_pr_age_days": 24.77,
+              "workflow_failures": 1,
+              "commit_velocity_30d": 2
+            },
+            "prediction_error": 0.04,
+            "prediction_variance": 4,
+            "calibration": 0.96
+          }
+        ],
+        "calibration_count": 0,
+        "last_calibrated_at": null,
+        "confidence_error": 0.04,
+        "prediction_error": 0.04,
+        "trust_source": "github",
+        "trust_reasons": [
+          "watch",
+          "Reduce workflow failures first; failed automation is the clearest external reliability signal."
+        ],
+        "constitutional": {
+          "understanding": 0,
+          "coordination": 0,
+          "capability": 0,
+          "resilience": 0,
+          "learning": 0,
+          "score": 0,
+          "trend": 0,
+          "risk": 0
+        }
+      }
+    },
+    {
+      "timestamp": "2026-06-03T18:31:07.402Z",
+      "repository": "d46382015-netizen/CYVXAI-OS",
+      "observations": [
+        "observation-github"
+      ],
+      "health_score": 78.434,
+      "repository_health": {
+        "repository": {
+          "owner": {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "node_id": "U_kgDOEPQ9EQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/284441873?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/d46382015-netizen",
+            "html_url": "https://github.com/d46382015-netizen",
+            "followers_url": "https://api.github.com/users/d46382015-netizen/followers",
+            "following_url": "https://api.github.com/users/d46382015-netizen/following{/other_user}",
+            "gists_url": "https://api.github.com/users/d46382015-netizen/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/d46382015-netizen/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/d46382015-netizen/subscriptions",
+            "organizations_url": "https://api.github.com/users/d46382015-netizen/orgs",
+            "repos_url": "https://api.github.com/users/d46382015-netizen/repos",
+            "events_url": "https://api.github.com/users/d46382015-netizen/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/d46382015-netizen/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "repo": "CYVXAI-OS",
+          "branch": "main",
+          "full_name": "d46382015-netizen/CYVXAI-OS",
+          "id": 1244186041,
+          "node_id": "R_kgDOSijFuQ",
+          "private": false,
+          "html_url": "https://github.com/d46382015-netizen/CYVXAI-OS",
+          "description": "Advanced ai OS",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-05-20T03:26:31Z",
+          "updated_at": "2026-06-03T18:30:33Z",
+          "pushed_at": "2026-06-03T18:30:22Z",
+          "stargazers_count": 1,
+          "watchers_count": 1,
+          "forks_count": 0,
+          "open_issues_count": 1,
+          "size": 99494,
+          "language": "JavaScript",
+          "topics": []
+        },
+        "score": 78.434,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 1,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 0,
+        "issue_backlog_score": 1,
+        "open_pr_count": 1,
+        "open_pr_age_days": 11.132,
+        "open_pr_age_score": 0.629,
+        "workflow_runs": 30,
+        "workflow_failures": 24,
+        "workflow_failure_rate": 0.8,
+        "workflow_failure_score": 0.2,
+        "commits_30d": 30,
+        "commit_velocity_score": 1,
+        "commit_recency_days": 0.001,
+        "contributors": 1,
+        "top_contributors": [
+          {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "html_url": "https://github.com/d46382015-netizen",
+            "contributions": 8
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 1,
+          "pull_request_age": 0.629,
+          "workflow_failures": 0.2,
+          "commit_velocity": 1
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 82.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 8.132,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 31
+        },
+        "actual_outcome": {
+          "repository_health_score": 78.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 11.132,
+          "workflow_failures": 24,
+          "commit_velocity_30d": 30
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "d46382015-netizen/CYVXAI-OS is watch at 78.434/100. | 0 open issues | 1 open pull request | 30 recent workflow runs | 30 commits in 30 days"
+      },
+      "workflow_failures": 24,
+      "build_status": "passing",
+      "commits_30d": 30,
+      "pr_count": 1,
+      "pr_age_days": 11.132,
+      "intervention": {
+        "id": "intervention-triage-repository-health-d46382015-netizen-cyvxai-os",
+        "recommended": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "observed": "d46382015-netizen/CYVXAI-OS is watch at 78.434/100. | 0 open issues | 1 open pull request | 30 recent workflow runs | 30 commits in 30 days",
+        "outcome": {
+          "repository_health_score": 78.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 11.132,
+          "workflow_failures": 24,
+          "commit_velocity_30d": 30
+        },
+        "classification": "Helpful"
+      },
+      "prediction": {
+        "predicted_outcome": {
+          "repository_health_score": 82.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 8.132,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 31
+        },
+        "confidence": 1,
+        "actual_outcome": {
+          "repository_health_score": 78.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 11.132,
+          "workflow_failures": 24,
+          "commit_velocity_30d": 30
+        },
+        "variance": 4,
+        "error": 0.04
+      },
+      "confidence": 1,
+      "actual_outcome": {
+        "repository_health_score": 78.434,
+        "build_status": "passing",
+        "issue_backlog": 0,
+        "open_pr_age_days": 11.132,
+        "workflow_failures": 24,
+        "commit_velocity_30d": 30
+      },
+      "variance": 4,
+      "learning": {
+        "id": "knowledge_record-repository-health-mission-d46382015-netizen-cyvxai-os-lesson",
+        "lesson": "Repository telemetry is live and measurable against GitHub state.",
+        "cir_impact": 0.002,
+        "trust_impact": 0.5
+      },
+      "cir_impact": 0.002,
+      "before": {
+        "repository": {
+          "owner": {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "node_id": "U_kgDOEPQ9EQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/284441873?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/d46382015-netizen",
+            "html_url": "https://github.com/d46382015-netizen",
+            "followers_url": "https://api.github.com/users/d46382015-netizen/followers",
+            "following_url": "https://api.github.com/users/d46382015-netizen/following{/other_user}",
+            "gists_url": "https://api.github.com/users/d46382015-netizen/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/d46382015-netizen/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/d46382015-netizen/subscriptions",
+            "organizations_url": "https://api.github.com/users/d46382015-netizen/orgs",
+            "repos_url": "https://api.github.com/users/d46382015-netizen/repos",
+            "events_url": "https://api.github.com/users/d46382015-netizen/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/d46382015-netizen/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "repo": "CYVXAI-OS",
+          "branch": "main",
+          "full_name": "d46382015-netizen/CYVXAI-OS",
+          "id": 1244186041,
+          "node_id": "R_kgDOSijFuQ",
+          "private": false,
+          "html_url": "https://github.com/d46382015-netizen/CYVXAI-OS",
+          "description": "Advanced ai OS",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-05-20T03:26:31Z",
+          "updated_at": "2026-06-01T15:32:48Z",
+          "pushed_at": "2026-06-01T14:50:17Z",
+          "stargazers_count": 1,
+          "watchers_count": 1,
+          "forks_count": 0,
+          "open_issues_count": 1,
+          "size": 99494,
+          "language": "JavaScript",
+          "topics": []
+        },
+        "score": 48.44,
+        "rating": "at-risk",
+        "signal": "at-risk",
+        "confidence": 1,
+        "build_status": "failing",
+        "build_score": 0,
+        "issue_backlog": 0,
+        "issue_backlog_score": 1,
+        "open_pr_count": 1,
+        "open_pr_age_days": 11.121,
+        "open_pr_age_score": 0.629,
+        "workflow_runs": 30,
+        "workflow_failures": 24,
+        "workflow_failure_rate": 0.8,
+        "workflow_failure_score": 0.2,
+        "commits_30d": 30,
+        "commit_velocity_score": 1,
+        "commit_recency_days": 2.143,
+        "contributors": 1,
+        "top_contributors": [
+          {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "html_url": "https://github.com/d46382015-netizen",
+            "contributions": 8
+          }
+        ],
+        "components": {
+          "build": 0,
+          "issue_backlog": 1,
+          "pull_request_age": 0.629,
+          "workflow_failures": 0.2,
+          "commit_velocity": 1
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 56.44,
+          "build_status": "improve build reliability",
+          "issue_backlog": 0,
+          "open_pr_age_days": 8.121,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 31
+        },
+        "actual_outcome": {
+          "repository_health_score": 48.44,
+          "build_status": "failing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 11.121,
+          "workflow_failures": 24,
+          "commit_velocity_30d": 30
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 1,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "d46382015-netizen/CYVXAI-OS is at-risk at 48.44/100. | 0 open issues | 1 open pull request | 30 recent workflow runs | 30 commits in 30 days"
+      },
+      "after": {
+        "repository": {
+          "owner": {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "node_id": "U_kgDOEPQ9EQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/284441873?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/d46382015-netizen",
+            "html_url": "https://github.com/d46382015-netizen",
+            "followers_url": "https://api.github.com/users/d46382015-netizen/followers",
+            "following_url": "https://api.github.com/users/d46382015-netizen/following{/other_user}",
+            "gists_url": "https://api.github.com/users/d46382015-netizen/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/d46382015-netizen/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/d46382015-netizen/subscriptions",
+            "organizations_url": "https://api.github.com/users/d46382015-netizen/orgs",
+            "repos_url": "https://api.github.com/users/d46382015-netizen/repos",
+            "events_url": "https://api.github.com/users/d46382015-netizen/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/d46382015-netizen/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "repo": "CYVXAI-OS",
+          "branch": "main",
+          "full_name": "d46382015-netizen/CYVXAI-OS",
+          "id": 1244186041,
+          "node_id": "R_kgDOSijFuQ",
+          "private": false,
+          "html_url": "https://github.com/d46382015-netizen/CYVXAI-OS",
+          "description": "Advanced ai OS",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-05-20T03:26:31Z",
+          "updated_at": "2026-06-03T18:30:33Z",
+          "pushed_at": "2026-06-03T18:30:22Z",
+          "stargazers_count": 1,
+          "watchers_count": 1,
+          "forks_count": 0,
+          "open_issues_count": 1,
+          "size": 99494,
+          "language": "JavaScript",
+          "topics": []
+        },
+        "score": 78.434,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 1,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 0,
+        "issue_backlog_score": 1,
+        "open_pr_count": 1,
+        "open_pr_age_days": 11.132,
+        "open_pr_age_score": 0.629,
+        "workflow_runs": 30,
+        "workflow_failures": 24,
+        "workflow_failure_rate": 0.8,
+        "workflow_failure_score": 0.2,
+        "commits_30d": 30,
+        "commit_velocity_score": 1,
+        "commit_recency_days": 0.001,
+        "contributors": 1,
+        "top_contributors": [
+          {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "html_url": "https://github.com/d46382015-netizen",
+            "contributions": 8
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 1,
+          "pull_request_age": 0.629,
+          "workflow_failures": 0.2,
+          "commit_velocity": 1
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 82.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 8.132,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 31
+        },
+        "actual_outcome": {
+          "repository_health_score": 78.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 11.132,
+          "workflow_failures": 24,
+          "commit_velocity_30d": 30
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "d46382015-netizen/CYVXAI-OS is watch at 78.434/100. | 0 open issues | 1 open pull request | 30 recent workflow runs | 30 commits in 30 days"
+      },
+      "delta": {
+        "health_score_delta": 29.994,
+        "workflow_failure_delta": 0,
+        "build_delta": 1,
+        "pr_age_delta": 0.011,
+        "prediction_error_delta": -0.04,
+        "cir_delta": 0
+      },
+      "reality_gap": {
+        "predicted": {
+          "repository_health_score": 82.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 8.132,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 31
+        },
+        "actual": {
+          "repository_health_score": 78.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 11.132,
+          "workflow_failures": 24,
+          "commit_velocity_30d": 30
+        },
+        "prediction_error": 0.04,
+        "prediction_variance": 4
+      },
+      "trust": {
+        "id": "trust-trust",
+        "type": "trust",
+        "created_at": "2026-06-03T18:31:06.523Z",
+        "updated_at": "2026-06-03T18:31:06.523Z",
+        "title": "trust",
+        "name": "trust",
+        "label": "trust",
+        "state": "active",
+        "metadata": {},
+        "relationships": [],
+        "events": [],
+        "evidence": [],
+        "assumptions": [],
+        "confidence": 0.5,
+        "linked_event_ids": [],
+        "subject_type": "repository",
+        "subject_id": "d46382015-netizen/CYVXAI-OS",
+        "trust_score": 0.96,
+        "trust_trend": 0.284,
+        "trust_confidence": 1,
+        "trust_history": [
+          {
+            "at": "2026-06-03T18:31:06.478Z",
+            "predicted": {
+              "repository_health_score": 82.434,
+              "build_status": "passing",
+              "issue_backlog": 0,
+              "open_pr_age_days": 8.132,
+              "workflow_failures": 23,
+              "commit_velocity_30d": 31
+            },
+            "actual": {
+              "repository_health_score": 78.434,
+              "build_status": "passing",
+              "issue_backlog": 0,
+              "open_pr_age_days": 11.132,
+              "workflow_failures": 24,
+              "commit_velocity_30d": 30
+            },
+            "prediction_error": 0.04,
+            "prediction_variance": 4,
+            "calibration": 0.96
+          }
+        ],
+        "calibration_count": 0,
+        "last_calibrated_at": null,
+        "confidence_error": 0.04,
+        "prediction_error": 0.04,
+        "trust_source": "github",
+        "trust_reasons": [
+          "watch",
+          "Reduce workflow failures first; failed automation is the clearest external reliability signal."
+        ],
+        "constitutional": {
+          "understanding": 0,
+          "coordination": 0,
+          "capability": 0,
+          "resilience": 0,
+          "learning": 0,
+          "score": 0,
+          "trend": 0,
+          "risk": 0
+        }
+      }
+    },
+    {
+      "timestamp": "2026-06-03T18:32:50.617Z",
+      "repository": "d46382015-netizen/CYVXAI-OS",
+      "observations": [
+        "observation-github"
+      ],
+      "health_score": 78.434,
+      "repository_health": {
+        "repository": {
+          "owner": {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "node_id": "U_kgDOEPQ9EQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/284441873?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/d46382015-netizen",
+            "html_url": "https://github.com/d46382015-netizen",
+            "followers_url": "https://api.github.com/users/d46382015-netizen/followers",
+            "following_url": "https://api.github.com/users/d46382015-netizen/following{/other_user}",
+            "gists_url": "https://api.github.com/users/d46382015-netizen/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/d46382015-netizen/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/d46382015-netizen/subscriptions",
+            "organizations_url": "https://api.github.com/users/d46382015-netizen/orgs",
+            "repos_url": "https://api.github.com/users/d46382015-netizen/repos",
+            "events_url": "https://api.github.com/users/d46382015-netizen/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/d46382015-netizen/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "repo": "CYVXAI-OS",
+          "branch": "main",
+          "full_name": "d46382015-netizen/CYVXAI-OS",
+          "id": 1244186041,
+          "node_id": "R_kgDOSijFuQ",
+          "private": false,
+          "html_url": "https://github.com/d46382015-netizen/CYVXAI-OS",
+          "description": "Advanced ai OS",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-05-20T03:26:31Z",
+          "updated_at": "2026-06-03T18:30:33Z",
+          "pushed_at": "2026-06-03T18:30:22Z",
+          "stargazers_count": 1,
+          "watchers_count": 1,
+          "forks_count": 0,
+          "open_issues_count": 1,
+          "size": 99494,
+          "language": "JavaScript",
+          "topics": []
+        },
+        "score": 78.434,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 1,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 0,
+        "issue_backlog_score": 1,
+        "open_pr_count": 1,
+        "open_pr_age_days": 11.133,
+        "open_pr_age_score": 0.629,
+        "workflow_runs": 30,
+        "workflow_failures": 24,
+        "workflow_failure_rate": 0.8,
+        "workflow_failure_score": 0.2,
+        "commits_30d": 30,
+        "commit_velocity_score": 1,
+        "commit_recency_days": 0.002,
+        "contributors": 1,
+        "top_contributors": [
+          {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "html_url": "https://github.com/d46382015-netizen",
+            "contributions": 8
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 1,
+          "pull_request_age": 0.629,
+          "workflow_failures": 0.2,
+          "commit_velocity": 1
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 82.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 8.133,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 31
+        },
+        "actual_outcome": {
+          "repository_health_score": 78.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 11.133,
+          "workflow_failures": 24,
+          "commit_velocity_30d": 30
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "d46382015-netizen/CYVXAI-OS is watch at 78.434/100. | 0 open issues | 1 open pull request | 30 recent workflow runs | 30 commits in 30 days"
+      },
+      "workflow_failures": 24,
+      "build_status": "passing",
+      "commits_30d": 30,
+      "pr_count": 1,
+      "pr_age_days": 11.133,
+      "intervention": {
+        "id": "intervention-triage-repository-health-d46382015-netizen-cyvxai-os",
+        "recommended": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "observed": "d46382015-netizen/CYVXAI-OS is watch at 78.434/100. | 0 open issues | 1 open pull request | 30 recent workflow runs | 30 commits in 30 days",
+        "outcome": {
+          "repository_health_score": 78.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 11.133,
+          "workflow_failures": 24,
+          "commit_velocity_30d": 30
+        },
+        "classification": "Neutral"
+      },
+      "prediction": {
+        "predicted_outcome": {
+          "repository_health_score": 82.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 8.133,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 31
+        },
+        "confidence": 1,
+        "actual_outcome": {
+          "repository_health_score": 78.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 11.133,
+          "workflow_failures": 24,
+          "commit_velocity_30d": 30
+        },
+        "variance": 4,
+        "error": 0.04
+      },
+      "confidence": 1,
+      "actual_outcome": {
+        "repository_health_score": 78.434,
+        "build_status": "passing",
+        "issue_backlog": 0,
+        "open_pr_age_days": 11.133,
+        "workflow_failures": 24,
+        "commit_velocity_30d": 30
+      },
+      "variance": 4,
+      "learning": {
+        "id": "knowledge_record-repository-health-mission-d46382015-netizen-cyvxai-os-lesson",
+        "lesson": "Repository telemetry is live and measurable against GitHub state.",
+        "cir_impact": 0.002,
+        "trust_impact": 0.5
+      },
+      "cir_impact": 0.002,
+      "before": {
+        "repository": {
+          "owner": {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "node_id": "U_kgDOEPQ9EQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/284441873?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/d46382015-netizen",
+            "html_url": "https://github.com/d46382015-netizen",
+            "followers_url": "https://api.github.com/users/d46382015-netizen/followers",
+            "following_url": "https://api.github.com/users/d46382015-netizen/following{/other_user}",
+            "gists_url": "https://api.github.com/users/d46382015-netizen/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/d46382015-netizen/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/d46382015-netizen/subscriptions",
+            "organizations_url": "https://api.github.com/users/d46382015-netizen/orgs",
+            "repos_url": "https://api.github.com/users/d46382015-netizen/repos",
+            "events_url": "https://api.github.com/users/d46382015-netizen/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/d46382015-netizen/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "repo": "CYVXAI-OS",
+          "branch": "main",
+          "full_name": "d46382015-netizen/CYVXAI-OS",
+          "id": 1244186041,
+          "node_id": "R_kgDOSijFuQ",
+          "private": false,
+          "html_url": "https://github.com/d46382015-netizen/CYVXAI-OS",
+          "description": "Advanced ai OS",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-05-20T03:26:31Z",
+          "updated_at": "2026-06-03T18:30:33Z",
+          "pushed_at": "2026-06-03T18:30:22Z",
+          "stargazers_count": 1,
+          "watchers_count": 1,
+          "forks_count": 0,
+          "open_issues_count": 1,
+          "size": 99494,
+          "language": "JavaScript",
+          "topics": []
+        },
+        "score": 78.434,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 1,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 0,
+        "issue_backlog_score": 1,
+        "open_pr_count": 1,
+        "open_pr_age_days": 11.132,
+        "open_pr_age_score": 0.629,
+        "workflow_runs": 30,
+        "workflow_failures": 24,
+        "workflow_failure_rate": 0.8,
+        "workflow_failure_score": 0.2,
+        "commits_30d": 30,
+        "commit_velocity_score": 1,
+        "commit_recency_days": 0.001,
+        "contributors": 1,
+        "top_contributors": [
+          {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "html_url": "https://github.com/d46382015-netizen",
+            "contributions": 8
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 1,
+          "pull_request_age": 0.629,
+          "workflow_failures": 0.2,
+          "commit_velocity": 1
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 82.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 8.132,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 31
+        },
+        "actual_outcome": {
+          "repository_health_score": 78.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 11.132,
+          "workflow_failures": 24,
+          "commit_velocity_30d": 30
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "d46382015-netizen/CYVXAI-OS is watch at 78.434/100. | 0 open issues | 1 open pull request | 30 recent workflow runs | 30 commits in 30 days"
+      },
+      "after": {
+        "repository": {
+          "owner": {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "node_id": "U_kgDOEPQ9EQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/284441873?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/d46382015-netizen",
+            "html_url": "https://github.com/d46382015-netizen",
+            "followers_url": "https://api.github.com/users/d46382015-netizen/followers",
+            "following_url": "https://api.github.com/users/d46382015-netizen/following{/other_user}",
+            "gists_url": "https://api.github.com/users/d46382015-netizen/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/d46382015-netizen/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/d46382015-netizen/subscriptions",
+            "organizations_url": "https://api.github.com/users/d46382015-netizen/orgs",
+            "repos_url": "https://api.github.com/users/d46382015-netizen/repos",
+            "events_url": "https://api.github.com/users/d46382015-netizen/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/d46382015-netizen/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "repo": "CYVXAI-OS",
+          "branch": "main",
+          "full_name": "d46382015-netizen/CYVXAI-OS",
+          "id": 1244186041,
+          "node_id": "R_kgDOSijFuQ",
+          "private": false,
+          "html_url": "https://github.com/d46382015-netizen/CYVXAI-OS",
+          "description": "Advanced ai OS",
+          "default_branch": "main",
+          "archived": false,
+          "fork": false,
+          "created_at": "2026-05-20T03:26:31Z",
+          "updated_at": "2026-06-03T18:30:33Z",
+          "pushed_at": "2026-06-03T18:30:22Z",
+          "stargazers_count": 1,
+          "watchers_count": 1,
+          "forks_count": 0,
+          "open_issues_count": 1,
+          "size": 99494,
+          "language": "JavaScript",
+          "topics": []
+        },
+        "score": 78.434,
+        "rating": "watch",
+        "signal": "watch",
+        "confidence": 1,
+        "build_status": "passing",
+        "build_score": 1,
+        "issue_backlog": 0,
+        "issue_backlog_score": 1,
+        "open_pr_count": 1,
+        "open_pr_age_days": 11.133,
+        "open_pr_age_score": 0.629,
+        "workflow_runs": 30,
+        "workflow_failures": 24,
+        "workflow_failure_rate": 0.8,
+        "workflow_failure_score": 0.2,
+        "commits_30d": 30,
+        "commit_velocity_score": 1,
+        "commit_recency_days": 0.002,
+        "contributors": 1,
+        "top_contributors": [
+          {
+            "login": "d46382015-netizen",
+            "id": 284441873,
+            "html_url": "https://github.com/d46382015-netizen",
+            "contributions": 8
+          }
+        ],
+        "components": {
+          "build": 1,
+          "issue_backlog": 1,
+          "pull_request_age": 0.629,
+          "workflow_failures": 0.2,
+          "commit_velocity": 1
+        },
+        "recommendation": "Reduce workflow failures first; failed automation is the clearest external reliability signal.",
+        "predicted_outcome": {
+          "repository_health_score": 82.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 8.133,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 31
+        },
+        "actual_outcome": {
+          "repository_health_score": 78.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 11.133,
+          "workflow_failures": 24,
+          "commit_velocity_30d": 30
+        },
+        "variance": {
+          "repository_health_score": 8,
+          "build_status": 0,
+          "issue_backlog": 2,
+          "open_pr_age_days": 3,
+          "workflow_failures": 1,
+          "commit_velocity_30d": 1
+        },
+        "summary": "d46382015-netizen/CYVXAI-OS is watch at 78.434/100. | 0 open issues | 1 open pull request | 30 recent workflow runs | 30 commits in 30 days"
+      },
+      "delta": {
+        "health_score_delta": 0,
+        "workflow_failure_delta": 0,
+        "build_delta": 0,
+        "pr_age_delta": 0.001,
+        "prediction_error_delta": 0,
+        "cir_delta": 0
+      },
+      "reality_gap": {
+        "predicted": {
+          "repository_health_score": 82.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 8.133,
+          "workflow_failures": 23,
+          "commit_velocity_30d": 31
+        },
+        "actual": {
+          "repository_health_score": 78.434,
+          "build_status": "passing",
+          "issue_backlog": 0,
+          "open_pr_age_days": 11.133,
+          "workflow_failures": 24,
+          "commit_velocity_30d": 30
+        },
+        "prediction_error": 0.04,
+        "prediction_variance": 4
+      },
+      "trust": {
+        "id": "trust-trust",
+        "type": "trust",
+        "created_at": "2026-06-03T18:32:49.321Z",
+        "updated_at": "2026-06-03T18:32:49.321Z",
+        "title": "trust",
+        "name": "trust",
+        "label": "trust",
+        "state": "active",
+        "metadata": {},
+        "relationships": [],
+        "events": [],
+        "evidence": [],
+        "assumptions": [],
+        "confidence": 0.5,
+        "linked_event_ids": [],
+        "subject_type": "repository",
+        "subject_id": "d46382015-netizen/CYVXAI-OS",
+        "trust_score": 0.96,
+        "trust_trend": 0.284,
+        "trust_confidence": 1,
+        "trust_history": [
+          {
+            "at": "2026-06-03T18:32:49.263Z",
+            "predicted": {
+              "repository_health_score": 82.434,
+              "build_status": "passing",
+              "issue_backlog": 0,
+              "open_pr_age_days": 8.133,
+              "workflow_failures": 23,
+              "commit_velocity_30d": 31
+            },
+            "actual": {
+              "repository_health_score": 78.434,
+              "build_status": "passing",
+              "issue_backlog": 0,
+              "open_pr_age_days": 11.133,
+              "workflow_failures": 24,
+              "commit_velocity_30d": 30
+            },
+            "prediction_error": 0.04,
+            "prediction_variance": 4,
+            "calibration": 0.96
+          }
+        ],
+        "calibration_count": 0,
+        "last_calibrated_at": null,
+        "confidence_error": 0.04,
+        "prediction_error": 0.04,
+        "trust_source": "github",
+        "trust_reasons": [
+          "watch",
+          "Reduce workflow failures first; failed automation is the clearest external reliability signal."
+        ],
+        "constitutional": {
+          "understanding": 0,
+          "coordination": 0,
+          "capability": 0,
+          "resilience": 0,
+          "learning": 0,
+          "score": 0,
+          "trend": 0,
+          "risk": 0
+        }
+      }
     }
   ]
 }

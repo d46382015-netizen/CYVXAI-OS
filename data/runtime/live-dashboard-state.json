@@ -1,13 +1,13 @@
 {
   "health": "active",
-  "modelHealth": "capability-compiler",
+  "modelHealth": "executor-verifier-portfolio-brain",
   "trust": 92,
-  "topConstraint": "Outcome capture exists, but CYVX needs repeated outcome volume to calibrate trust.",
-  "nextAction": "Compile and build: Outcome History + Trust Calibration",
+  "topConstraint": "CYVX can now compile and materialize capability artifacts, but needs repeated verified executions to expand safely.",
+  "nextAction": "Build or deepen: Outcome History + Trust Calibration",
   "nextBestAction": {
-    "title": "Build Prediction Ledger + Simulation Ranking as the next durable intelligence layer.",
-    "why": "This creates the compounding loop: reality → prediction → mission → outcome → trust → learning.",
-    "confidence": 0.87
+    "title": "Build or deepen: Outcome History + Trust Calibration",
+    "why": "Portfolio Brain selected the capability with the highest future-capability leverage.",
+    "confidence": 1
   },
   "mission": {
     "title": "Close the Universal Intelligence Loop",
@@ -55,5 +55,15 @@
     "status": "active",
     "latest": "capability-1780524433496",
     "selected_capability": "Outcome History + Trust Calibration"
+  },
+  "executorVerifier": {
+    "status": "verified",
+    "score": 100,
+    "latest_execution": "exec-1780524552052"
+  },
+  "portfolioBrain": {
+    "status": "active",
+    "selected_next_capability": "Outcome History + Trust Calibration",
+    "score": 0.56
   }
 }

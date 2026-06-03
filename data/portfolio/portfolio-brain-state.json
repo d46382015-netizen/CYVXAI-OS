@@ -1,0 +1,82 @@
+{
+  "created_at": "2026-06-03T22:09:12.022Z",
+  "system": "CYVX Portfolio Brain",
+  "question": "What single capability creates the most future capability?",
+  "current_platform_position": {
+    "foundation": "complete",
+    "intelligence": "functional",
+    "execution": "emerging",
+    "verification": "verified",
+    "adoption": "needs real proof volume"
+  },
+  "candidates": [
+    {
+      "capability": "Outcome History + Trust Calibration",
+      "source": "latest compiler output",
+      "impact": 0.92,
+      "confidence": 1,
+      "unlocks": 0.88,
+      "cost": 0.15,
+      "risk": 0.1,
+      "portfolio_score": 0.56
+    },
+    {
+      "capability": "Prediction Ledger + Simulation Ranking",
+      "source": "flywheel",
+      "impact": 0.94,
+      "confidence": 0.87,
+      "unlocks": 0.91,
+      "cost": 0.18,
+      "risk": 0.14,
+      "portfolio_score": 0.424
+    },
+    {
+      "capability": "Outcome History + Trust Trends",
+      "source": "learning loop",
+      "impact": 0.86,
+      "confidence": 0.88,
+      "unlocks": 0.84,
+      "cost": 0.14,
+      "risk": 0.1,
+      "portfolio_score": 0.396
+    },
+    {
+      "capability": "Public Proof Surface",
+      "source": "adoption",
+      "impact": 0.88,
+      "confidence": 0.84,
+      "unlocks": 0.8,
+      "cost": 0.18,
+      "risk": 0.12,
+      "portfolio_score": 0.291
+    },
+    {
+      "capability": "Continuous Reality Ingestion",
+      "source": "future platform",
+      "impact": 0.9,
+      "confidence": 0.82,
+      "unlocks": 0.86,
+      "cost": 0.22,
+      "risk": 0.18,
+      "portfolio_score": 0.235
+    }
+  ],
+  "selected_next_capability": {
+    "capability": "Outcome History + Trust Calibration",
+    "source": "latest compiler output",
+    "impact": 0.92,
+    "confidence": 1,
+    "unlocks": 0.88,
+    "cost": 0.15,
+    "risk": 0.1,
+    "portfolio_score": 0.56
+  },
+  "portfolio_strategy": [
+    "Prefer capabilities that create more capabilities.",
+    "Prefer proof-generating systems over dashboard-only systems.",
+    "Prefer measurable loops over static reports.",
+    "Prefer low-risk deterministic execution before autonomous external execution."
+  ],
+  "next_best_action": "Build or deepen: Outcome History + Trust Calibration",
+  "status": "active"
+}

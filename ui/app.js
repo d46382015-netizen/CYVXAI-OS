@@ -29,6 +29,7 @@ const state = {
   workflowDomain: "cloud-operations",
   repositoryHealth: null,
   selfScan: null,
+  selfScanMission: null,
   proof: null,
   thesis: null,
   realityEngine: null,
@@ -275,6 +276,7 @@ async function sync() {
     state.repositoryHealth = results[19] || (results[20] && results[20].repositoryHealth) || null;
     state.selfScan = results.find && results.find((r) => r && (r.selfScan || r.system === 'CYVX Self Scan'));
     state.selfScan = state.selfScan ? (state.selfScan.selfScan || state.selfScan) : null;
+    state.selfScanMission = results.find && results.find((r) => r && (r.system === 'CYVX Self Scan Mission Wire' || r.mission));
     state.proof = results[20] ? (results[20].proof || results[20]) : null;
     state.realityEngine = results[21] || null;
     if (!state.realityLevel) state.realityLevel = "strategic-view";
@@ -381,7 +383,7 @@ function renderAll() {
     dom.selfScanTrust.textContent = String(scan.trust_score || 0);
     dom.selfScanConstraint.textContent = top.title || "none";
     dom.selfScanAction.textContent = action.title || "none";
-    dom.selfScanOutput.textContent = safeJson(scan);
+    dom.selfScanOutput.textContent = safeJson({ scan, generatedMission: state.selfScanMission || null });
   }
 
   if (dom.proofOutput) dom.proofOutput.textContent = safeJson(state.proof || {});

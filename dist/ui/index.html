@@ -55,6 +55,7 @@
           <button class="nav-pill" data-target="recommendationIntelligencePanel">Recommendations</button>
           <button class="nav-pill" data-target="priorityIntelligencePanel">Priorities</button>
           <button class="nav-pill" data-target="intelligenceSummaryPanel">Intelligence</button>
+          <button class="nav-pill" data-target="selfScanPanel">Self Scan</button>
           <button class="nav-pill" data-target="coordinationPanel">Coordination</button>
           <button class="nav-pill" data-target="humanRolesPanel">Humans</button>
           <button class="nav-pill" data-target="resourcesPanel">Resources</button>
@@ -524,6 +525,35 @@
             </div>
           </div>
           <pre class="code-box" id="priorityIntelligenceList"></pre>
+        </article>
+
+
+        <article class="panel panel-span-12" id="selfScanPanel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">CYVX Self Scan</p>
+              <h2>Operational Constraint Scanner</h2>
+            </div>
+          </div>
+          <div class="metric-grid">
+            <div class="metric-card">
+              <span>Health</span>
+              <strong id="selfScanHealth">unknown</strong>
+            </div>
+            <div class="metric-card">
+              <span>Trust</span>
+              <strong id="selfScanTrust">0</strong>
+            </div>
+            <div class="metric-card">
+              <span>Top Constraint</span>
+              <strong id="selfScanConstraint">unknown</strong>
+            </div>
+            <div class="metric-card">
+              <span>Next Action</span>
+              <strong id="selfScanAction">unknown</strong>
+            </div>
+          </div>
+          <pre class="code-box" id="selfScanOutput"></pre>
         </article>
 
         <article class="panel panel-span-12" id="intelligenceSummaryPanel">

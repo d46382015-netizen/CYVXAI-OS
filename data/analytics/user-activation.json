@@ -1,0 +1,10 @@
+{
+  "created_at": "2026-06-03T20:03:34.583Z",
+  "uploads": 1,
+  "missions": 1,
+  "approvals": 1,
+  "outcomes": 2,
+  "lessons": 1,
+  "activation_loop": "upload -> mission -> approval -> outcome -> lesson",
+  "beta_readiness": "ready-for-first-users"
+}

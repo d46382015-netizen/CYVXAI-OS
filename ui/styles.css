@@ -15,3 +15,26 @@ body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle 
 .grid{display:grid;grid-template-columns:1fr 1fr 1.35fr;gap:16px}.panel{padding:22px;min-height:220px}.panel h3{font-size:28px;margin:10px 0}.ring{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;margin:15px auto;background:radial-gradient(circle,#10182d 45%,transparent 46%),conic-gradient(#31ffe0,#8b5cff,#31ffe0);font-size:44px}.ring span{display:block;font-size:12px;text-transform:uppercase;color:#aab6cf}.network{position:relative;height:230px}.network i{position:absolute;left:var(--x);top:var(--y);width:12px;height:12px;border-radius:50%;background:#53ffe4;box-shadow:0 0 18px #53ffe4}.chart{height:110px;background:linear-gradient(135deg,transparent 48%,rgba(67,255,220,.35) 49%,transparent 51%),radial-gradient(circle at 70% 40%,rgba(64,255,209,.3),transparent 40%);border-radius:16px}.bars{display:flex;align-items:end;gap:9px;height:120px}.bars i{flex:1;border-radius:8px;background:linear-gradient(180deg,#54ffe1,#7b55ff)}.bottom-grid{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:16px;margin-top:16px}.quick{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.glow{box-shadow:0 0 60px rgba(129,79,255,.28)}
 @keyframes pulse{50%{transform:scale(1.04);filter:hue-rotate(30deg)}}
 @media(max-width:900px){.app-shell{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.topbar,.hero,.proof-pack,.grid,.bottom-grid,.metrics{grid-template-columns:1fr}.proof-icons{grid-template-columns:repeat(5,1fr)}.main{padding:16px}.side-nav{grid-template-columns:repeat(2,1fr)}}
+
+.runtime-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:22px 0}
+.runtime-panel,.value-card{padding:22px;border-radius:24px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,rgba(14,25,49,.82),rgba(5,10,24,.86));box-shadow:0 22px 70px rgba(0,0,0,.3)}
+.runtime-list{display:grid;gap:10px;margin-top:14px}
+.runtime-item{padding:13px;border-radius:16px;background:rgba(0,0,0,.26);border:1px solid rgba(255,255,255,.08)}
+.runtime-item span{display:block;color:#62ffd4;font-size:11px;text-transform:uppercase;letter-spacing:.1em}
+.runtime-item b{display:block;margin:4px 0}
+.runtime-item small{color:#aab6cf}
+.clickable{cursor:pointer}
+.value-card{display:grid;grid-template-columns:1fr 1.2fr;gap:16px;align-items:start;margin:22px 0;background:linear-gradient(135deg,rgba(95,255,220,.12),rgba(141,92,255,.14))}
+.value-card h2{font-size:clamp(30px,5vw,56px);line-height:.95;margin:8px 0 12px;letter-spacing:-.05em}
+.value-card textarea{min-height:180px;border-radius:20px;padding:16px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);color:#f5f7ff;outline:none;resize:vertical}
+.value-card>button{grid-column:2;text-align:center}
+.result-card{grid-column:1/-1;padding:18px;border-radius:20px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.1)}
+.result-card b{color:#62ffd4}
+.toast{position:fixed;right:18px;bottom:18px;z-index:9999;padding:14px 18px;border-radius:18px;background:linear-gradient(135deg,#5fffdc,#8f5cff);color:#04101b;font-weight:900;box-shadow:0 20px 60px rgba(0,0,0,.4);transform:translateY(20px);opacity:0;transition:.25s ease}.toast.show{transform:translateY(0);opacity:1}
+#cyvxModal,#commandPalette{position:fixed;inset:0;background:rgba(0,0,0,.64);backdrop-filter:blur(16px);display:none;place-items:center;z-index:9998}
+#cyvxModal.show,#commandPalette.show{display:grid}
+.modal-card,.palette-card{width:min(720px,92vw);max-height:82vh;overflow:auto;padding:24px;border-radius:26px;background:linear-gradient(180deg,#101b34,#050914);border:1px solid rgba(255,255,255,.14);box-shadow:0 40px 120px rgba(0,0,0,.55)}
+#modalClose{float:right;border:0;background:rgba(255,255,255,.08);color:#fff;border-radius:12px;padding:8px 12px}
+#paletteInput{width:100%;padding:18px;border-radius:18px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);color:#fff;font-size:18px}
+button{cursor:pointer}button:hover{transform:translateY(-1px);filter:brightness(1.12)}
+@media(max-width:900px){.runtime-strip,.value-card{grid-template-columns:1fr}.value-card>button{grid-column:auto}}

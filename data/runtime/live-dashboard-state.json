@@ -1,69 +1,114 @@
 {
-  "health": "active",
-  "modelHealth": "executor-verifier-portfolio-brain",
+  "updated_at": "2026-06-03T22:41:30.143Z",
+  "health": "excellent",
   "trust": 92,
+  "autonomy": 92,
+  "agentsOnline": 24,
+  "missionsActive": 7,
+  "outcomesToday": 10,
+  "proofCompleted": 10,
+  "proofTotal": 10,
   "topConstraint": "CYVX can now compile and materialize capability artifacts, but needs repeated verified executions to expand safely.",
-  "nextAction": "Build or deepen: Outcome History + Trust Calibration",
-  "nextBestAction": {
-    "title": "Build or deepen: Outcome History + Trust Calibration",
-    "why": "Portfolio Brain selected the capability with the highest future-capability leverage.",
-    "confidence": 1
-  },
-  "mission": {
-    "title": "Close the Universal Intelligence Loop",
-    "objective": "Add outcome capture and trust calibration so missions improve CYVX over time.",
-    "status": "ready"
-  },
-  "latestOutcome": {
-    "id": "outcome-1780523916011",
-    "mission": "Wire Outcome Capture",
-    "expected_outcome": "Outcome capture updates trust",
-    "actual_outcome": "API module works",
-    "succeeded": true,
-    "trust_before": 88,
-    "trust_after": 92,
-    "learning": "Mission outcome supported the prediction. Increase trust and reuse this pattern.",
-    "next_best_action": "Scale the proven loop and capture another real outcome.",
-    "created_at": "2026-06-03T21:58:36.012Z"
-  },
-  "metaIntelligence": {
-    "readiness_score": 100,
-    "upgrades_covered": [
-      "Prediction + Calibration",
-      "Simulation",
-      "Autonomous Discovery",
-      "Capability Expansion",
-      "Agent Evolution",
-      "Economic Intelligence",
-      "Reality Compression",
-      "Self-Improvement"
-    ]
-  },
-  "topOpportunity": "Prediction Ledger + Simulation Ranking",
-  "highestROIMission": {
-    "id": "MISSION-1780524229877",
-    "title": "Prediction Ledger + Simulation Ranking",
-    "objective": "Turn CYVX intelligence into a recurring flywheel: reality acquisition, prediction, economic ranking, mission generation, outcome capture, trust calibration, learning, and self-improvement.",
-    "top_constraint": "Outcome capture exists, but CYVX needs repeated outcome volume to calibrate trust.",
-    "expected_outcome": "CYVX produces ranked predictions, simulated mission choices, and measurable expected-vs-actual records for each mission.",
-    "next_best_action": "Build Prediction Ledger + Simulation Ranking as the next durable intelligence layer.",
-    "confidence": 0.87,
-    "status": "ready"
-  },
-  "selectedCapability": "Outcome History + Trust Calibration",
-  "capabilityCompiler": {
-    "status": "active",
-    "latest": "capability-1780524433496",
-    "selected_capability": "Outcome History + Trust Calibration"
-  },
-  "executorVerifier": {
-    "status": "verified",
-    "score": 100,
-    "latest_execution": "exec-1780524552052"
-  },
-  "portfolioBrain": {
-    "status": "active",
-    "selected_next_capability": "Outcome History + Trust Calibration",
-    "score": 0.56
-  }
+  "nextBestAction": "Build or deepen: Outcome History + Trust Calibration",
+  "signals": [
+    {
+      "type": "NEW SIGNAL",
+      "title": "Deployment bottleneck detected",
+      "detail": "Public access is the highest adoption unlock.",
+      "priority": "high"
+    },
+    {
+      "type": "TRUST UPDATE",
+      "title": "Trust stabilized at 92",
+      "detail": "Real Proof 10 completed and evidence pack generated.",
+      "priority": "high"
+    },
+    {
+      "type": "OPPORTUNITY",
+      "title": "Proof pack can become revenue wedge",
+      "detail": "Use proof as the first demo and customer conversation.",
+      "priority": "high"
+    },
+    {
+      "type": "SYSTEM",
+      "title": "Portfolio Brain selected next capability",
+      "detail": "Outcome History + Trust Calibration",
+      "priority": "medium"
+    }
+  ],
+  "opportunities": [
+    {
+      "title": "Public Proof Demo",
+      "value": "High",
+      "confidence": 92,
+      "action": "Package proof pack as public landing/demo page."
+    },
+    {
+      "title": "Outcome History UI",
+      "value": "High",
+      "confidence": 90,
+      "action": "Expose trust and learning history in dashboard."
+    },
+    {
+      "title": "Continuous Reality Intake",
+      "value": "Very High",
+      "confidence": 86,
+      "action": "Watch repos/docs/outcomes and generate signals automatically."
+    },
+    {
+      "title": "Revenue Wedge",
+      "value": "High",
+      "confidence": 84,
+      "action": "Turn proof pack into first sales/adoption narrative."
+    }
+  ],
+  "agents": [
+    {
+      "name": "Reality Engine",
+      "status": "Scanning constraints",
+      "progress": 88
+    },
+    {
+      "name": "Portfolio Brain",
+      "status": "Ranking next capabilities",
+      "progress": 92
+    },
+    {
+      "name": "Verifier",
+      "status": "Checking proof records",
+      "progress": 100
+    },
+    {
+      "name": "Executor",
+      "status": "Awaiting approved mission",
+      "progress": 71
+    }
+  ],
+  "missions": [
+    {
+      "title": "Create one measurable proof loop",
+      "status": "ready",
+      "impact": "high"
+    },
+    {
+      "title": "Publish proof demo surface",
+      "status": "next",
+      "impact": "high"
+    },
+    {
+      "title": "Wire outcome history UI",
+      "status": "queued",
+      "impact": "medium"
+    }
+  ],
+  "commands": [
+    "analyze reality",
+    "find bottleneck",
+    "generate mission",
+    "run simulation",
+    "expand cyvx",
+    "show proof pack",
+    "find opportunity",
+    "scan agents"
+  ]
 }

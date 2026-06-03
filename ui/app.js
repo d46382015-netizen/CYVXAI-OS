@@ -28,6 +28,7 @@ const state = {
   workflowResult: null,
   workflowDomain: "cloud-operations",
   repositoryHealth: null,
+  selfScan: null,
   proof: null,
   thesis: null,
   realityEngine: null,
@@ -77,6 +78,11 @@ const dom = {
   crossDomainList: id("crossDomainList"),
   workflowOutput: id("workflowOutput"),
   repositoryHealthOutput: id("repositoryHealthOutput"),
+  selfScanHealth: id("selfScanHealth"),
+  selfScanTrust: id("selfScanTrust"),
+  selfScanConstraint: id("selfScanConstraint"),
+  selfScanAction: id("selfScanAction"),
+  selfScanOutput: id("selfScanOutput"),
   proofOutput: id("proofOutput"),
   realityInterfaceTabs: id("realityInterfaceTabs"),
   realityMetricsList: id("realityMetricsList"),
@@ -267,6 +273,8 @@ async function sync() {
     state.approvals = results[17] && results[17].approvals ? results[17].approvals : [];
     state.queue = results[18] && results[18].queue ? results[18].queue : [];
     state.repositoryHealth = results[19] || (results[20] && results[20].repositoryHealth) || null;
+    state.selfScan = results.find && results.find((r) => r && (r.selfScan || r.system === 'CYVX Self Scan'));
+    state.selfScan = state.selfScan ? (state.selfScan.selfScan || state.selfScan) : null;
     state.proof = results[20] ? (results[20].proof || results[20]) : null;
     state.realityEngine = results[21] || null;
     if (!state.realityLevel) state.realityLevel = "strategic-view";
@@ -364,6 +372,18 @@ function renderAll() {
   renderEvents(filteredEvents);
   renderDetails(platform);
   if (dom.repositoryHealthOutput) dom.repositoryHealthOutput.textContent = safeJson(state.repositoryHealth || {});
+
+  if (dom.selfScanOutput) {
+    const scan = state.selfScan || {};
+    const top = scan.top_constraint || {};
+    const action = (scan.next_best_actions && scan.next_best_actions[0]) || {};
+    dom.selfScanHealth.textContent = scan.health || "unknown";
+    dom.selfScanTrust.textContent = String(scan.trust_score || 0);
+    dom.selfScanConstraint.textContent = top.title || "none";
+    dom.selfScanAction.textContent = action.title || "none";
+    dom.selfScanOutput.textContent = safeJson(scan);
+  }
+
   if (dom.proofOutput) dom.proofOutput.textContent = safeJson(state.proof || {});
   if (dom.workflowOutput) dom.workflowOutput.textContent = safeJson(state.workflowResult || {});
   setOutput(state.commandResult || state.workflowResult || platform);

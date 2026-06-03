@@ -3,7 +3,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const FILE = path.join("/root/CYVXAI-OS", "test/platform.test.js");
+const FILE = path.join(process.cwd(), "test/platform.test.js");
 let s = fs.readFileSync(FILE, "utf8");
 
 if (!s.includes("reality engine exposes reality domains and ingestion priority")) {

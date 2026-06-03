@@ -3,7 +3,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const FILE = path.join("/root/CYVXAI-OS", "core/platform/reality_engine_v1.js");
+const FILE = path.join(" + process.cwd() + "", "core/platform/reality_engine_v1.js");
 let s = fs.readFileSync(FILE, "utf8");
 
 const anchor = "    const realityOsModel = {";

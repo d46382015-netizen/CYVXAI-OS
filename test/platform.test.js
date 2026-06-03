@@ -81,7 +81,7 @@ function createMockGitHub() {
       if (!body) return new Response(JSON.stringify({ message: 'not found' }), { status: 404, headers: { 'content-type': 'application/json' } });
       return new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json' } });
     },
-    repoRoot: '/root/CYVXAI-OS',
+    repoRoot: process.cwd(),
   });
 }
 
@@ -459,9 +459,9 @@ test('intelligence api and cli expose the same live state', async () => {
   const priorities = await fetch('http://127.0.0.1:' + address.port + '/api/v1/priorities').then((response) => response.json());
   await new Promise((resolve) => server.close(resolve));
 
-  const cliIntelligence = JSON.parse(execFileSync('node', ['./cli/cyvx.js', 'intelligence'], { cwd: '/root/CYVXAI-OS', encoding: 'utf8' }));
-  const cliRecommendations = JSON.parse(execFileSync('node', ['./cli/cyvx.js', 'recommendations'], { cwd: '/root/CYVXAI-OS', encoding: 'utf8' }));
-  const cliPriorities = JSON.parse(execFileSync('node', ['./cli/cyvx.js', 'priorities'], { cwd: '/root/CYVXAI-OS', encoding: 'utf8' }));
+  const cliIntelligence = JSON.parse(execFileSync(process.execPath, ['./cli/cyvx.js', 'intelligence'], { cwd: process.cwd(), encoding: 'utf8' }));
+  const cliRecommendations = JSON.parse(execFileSync(process.execPath, ['./cli/cyvx.js', 'recommendations'], { cwd: process.cwd(), encoding: 'utf8' }));
+  const cliPriorities = JSON.parse(execFileSync(process.execPath, ['./cli/cyvx.js', 'priorities'], { cwd: process.cwd(), encoding: 'utf8' }));
 
   assert.ok(intelligence.patternCount >= 1);
   assert.ok(recommendations.recommendations.length >= 1);
@@ -472,7 +472,7 @@ test('intelligence api and cli expose the same live state', async () => {
 });
 
 test('dashboard is wired for intelligence panels', () => {
-  const html = fs.readFileSync('/root/CYVXAI-OS/ui/index.html', 'utf8');
+  const html = fs.readFileSync(path.join(process.cwd(), 'ui/index.html'), 'utf8');
   assert.ok(html.includes('productPanel'));
   assert.ok(html.includes('workflowDomain'));
   assert.ok(html.includes('searchInput'));
@@ -520,8 +520,8 @@ test('CLI trust and strategy commands work', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cyvx-cli-'));
   const filePath = path.join(dir, 'state.json');
   const env = { ...process.env, CYVX_PLATFORM_STATE: filePath };
-  const goals = execFileSync(process.execPath, ['/root/CYVXAI-OS/cli/cyvx.js', 'goals'], { env, encoding: 'utf8' });
-  const trust = execFileSync(process.execPath, ['/root/CYVXAI-OS/cli/cyvx.js', 'trust'], { env, encoding: 'utf8' });
+  const goals = execFileSync(process.execPath, [path.join(process.cwd(), 'cli/cyvx.js'), 'goals'], { env, encoding: 'utf8' });
+  const trust = execFileSync(process.execPath, [path.join(process.cwd(), 'cli/cyvx.js'), 'trust'], { env, encoding: 'utf8' });
   const parsedGoals = JSON.parse(goals);
   const parsedTrust = JSON.parse(trust);
 
@@ -531,7 +531,7 @@ test('CLI trust and strategy commands work', () => {
 test('CLI model-company works', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cyvx-cli-'));
   const filePath = path.join(dir, 'state.json');
-  const output = execFileSync(process.execPath, ['/root/CYVXAI-OS/cli/cyvx.js', 'model-company'], {
+  const output = execFileSync(process.execPath, [path.join(process.cwd(), 'cli/cyvx.js'), 'model-company'], {
     env: { ...process.env, CYVX_PLATFORM_STATE: filePath },
     encoding: 'utf8',
   });
@@ -546,9 +546,9 @@ test('product workflow CLI aliases work', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cyvx-cli-'));
   const filePath = path.join(dir, 'state.json');
   const workflowEnv = { ...process.env, CYVX_PLATFORM_STATE: filePath };
-  const workflow = execFileSync(process.execPath, ['/root/CYVXAI-OS/cli/cyvx.js', 'workflow', 'domain=cloud-operations'], { env: workflowEnv, encoding: 'utf8', maxBuffer: 1024 * 1024 * 20 });
+  const workflow = execFileSync(process.execPath, [path.join(process.cwd(), 'cli/cyvx.js'), 'workflow', 'domain=cloud-operations'], { env: workflowEnv, encoding: 'utf8', maxBuffer: 1024 * 1024 * 20 });
   const onboardEnv = { ...process.env, CYVX_PLATFORM_STATE: path.join(dir, 'onboard-state.json') };
-  const onboard = execFileSync(process.execPath, ['/root/CYVXAI-OS/cli/cyvx.js', 'onboard', 'Acme Ops', 'employees=120', 'cloudSpend=75000'], { env: onboardEnv, encoding: 'utf8', maxBuffer: 1024 * 1024 * 20 });
+  const onboard = execFileSync(process.execPath, [path.join(process.cwd(), 'cli/cyvx.js'), 'onboard', 'Acme Ops', 'employees=120', 'cloudSpend=75000'], { env: onboardEnv, encoding: 'utf8', maxBuffer: 1024 * 1024 * 20 });
   const parsedWorkflow = JSON.parse(workflow);
   const parsedOnboard = JSON.parse(onboard);
 
@@ -759,7 +759,7 @@ test('thesis api route returns a resolution report', async () => {
 test('thesis cli command prints a thesis dashboard', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cyvx-thesis-cli-'));
   const filePath = path.join(dir, 'state.json');
-  const output = execFileSync(process.execPath, [path.join('/root/CYVXAI-OS', 'cli/cyvx.js'), 'thesis'], { env: { ...process.env, CYVX_PLATFORM_STATE: filePath }, encoding: 'utf8' });
+  const output = execFileSync(process.execPath, [path.join(process.cwd(), 'cli/cyvx.js'), 'thesis'], { env: { ...process.env, CYVX_PLATFORM_STATE: filePath }, encoding: 'utf8' });
 
   assert.match(output, /thesis_confidence/i);
 });
@@ -855,8 +855,8 @@ test('decision intelligence cli commands work', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cyvx-decision-cli-'));
   const filePath = path.join(dir, 'state.json');
   const env = { ...process.env, CYVX_PLATFORM_STATE: filePath };
-  const output = execFileSync(process.execPath, [path.join('/root/CYVXAI-OS', 'cli/cyvx.js'), 'decision-intelligence'], { env, encoding: 'utf8' });
-  const brief = execFileSync(process.execPath, [path.join('/root/CYVXAI-OS', 'cli/cyvx.js'), 'daily-decision-brief'], { env, encoding: 'utf8' });
+  const output = execFileSync(process.execPath, [path.join(process.cwd(), 'cli/cyvx.js'), 'decision-intelligence'], { env, encoding: 'utf8' });
+  const brief = execFileSync(process.execPath, [path.join(process.cwd(), 'cli/cyvx.js'), 'daily-decision-brief'], { env, encoding: 'utf8' });
   assert.match(output, /decision/i);
   assert.match(brief, /brief/i);
 });

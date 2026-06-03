@@ -1,0 +1,15 @@
+{
+  "mission_id": "mission-1780521748808",
+  "expected_outcome": "A user uploads messy reality and receives a concrete mission with evidence plan in one flow.",
+  "actual_outcome": null,
+  "success_metric": "User receives useful constraint, NBA, mission, and evidence plan from uploaded reality.",
+  "evidence_required": [
+    "input upload path",
+    "generated top constraint",
+    "generated mission",
+    "dashboard screenshot or report",
+    "actual result after execution"
+  ],
+  "trust_update_pending": true,
+  "created_at": "2026-06-03T21:22:28.809Z"
+}

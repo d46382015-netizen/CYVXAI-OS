@@ -1,0 +1,31 @@
+{
+  "health": "active",
+  "modelHealth": "validated",
+  "trust": 88,
+  "topConstraint": "Dashboard surfaces exist, but live uploaded reality must drive Self Scan, NBA, Mission Control, and Evidence.",
+  "nextAction": "Wire runtime upload analysis into Self Scan, Mission Control, NBA, and Evidence surfaces.",
+  "nextBestAction": {
+    "title": "Activate Reality Upload → NBA → Mission → Outcome Loop",
+    "why": "This completes the core adoption wedge: upload reality, reveal what matters, act, measure, learn.",
+    "confidence": 0.88
+  },
+  "mission": {
+    "id": "mission-1780521748808",
+    "title": "Activate Reality Upload → NBA → Mission → Outcome Loop",
+    "objective": "Make CYVX convert uploaded operational reality into a verified next best action, executable mission, expected outcome, and evidence trail.",
+    "top_constraint": "Dashboard surfaces exist, but live uploaded reality must drive Self Scan, NBA, Mission Control, and Evidence.",
+    "next_best_action": "Wire runtime upload analysis into Self Scan, Mission Control, NBA, and Evidence surfaces.",
+    "route": [
+      "Ingest reality upload",
+      "Extract constraints, risks, opportunities, and signals",
+      "Generate ranked Next Best Action",
+      "Create mission with expected outcome and confidence",
+      "Write evidence plan",
+      "Create outcome record template",
+      "Update trust state after outcome is measured"
+    ],
+    "expected_outcome": "A user uploads messy reality and receives a concrete mission with evidence plan in one flow.",
+    "confidence": 0.88,
+    "status": "ready"
+  }
+}

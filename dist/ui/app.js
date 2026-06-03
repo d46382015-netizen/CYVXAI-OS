@@ -379,8 +379,8 @@ function renderAll() {
     const scan = state.selfScan || {};
     const top = scan.top_constraint || {};
     const action = (scan.next_best_actions && scan.next_best_actions[0]) || {};
-    dom.selfScanHealth.textContent = scan.health || "unknown";
-    dom.selfScanTrust.textContent = String(scan.trust_score || 0);
+    dom.selfScanHealth.textContent = (state.liveDashboard && state.liveDashboard.health) || scan.health || "unknown";
+    dom.selfScanTrust.textContent = String((state.liveDashboard && state.liveDashboard.trust) || scan.trust_score || 0);
     dom.selfScanConstraint.textContent = top.title || "none";
     dom.selfScanAction.textContent = action.title || "none";
     dom.selfScanOutput.textContent = safeJson({ scan, generatedMission: state.selfScanMission || null });

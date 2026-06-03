@@ -316,7 +316,7 @@ function cyvxDeepAnalyze(text){
   return {
     topConstraint: top.constraint,
     topOpportunity: top.opportunity,
-    nextBestAction: top.nba,
+    nextBestAction: top.key === "deployment" ? "Publish CYVX to a public URL and send it to one external tester." : top.nba,
     mission: top.mission,
     expectedImpact: top.impact,
     proofPlan: top.proof,
@@ -487,7 +487,7 @@ function cyvxAnalyze(text){ const r = cyvxDeepAnalyze(text); return {constraint:
         : hasUI ? "Turn CYVX into an attention-grabbing interactive command center."
         : hasRepo ? "Use repository proof as the first operating reality."
         : "Convert messy reality into a mission loop.",
-      nba: "Run one reality → mission → outcome loop and record the result.",
+      nba: hasDeploy ? "Publish CYVX to a public URL and send it to one external tester." : "Run one reality → mission → outcome loop and record the result.",
       mission: hasDeploy ? "Deploy CYVX publicly and run one external user test."
         : hasUI ? "Finish the interactive 60-second CYVX value moment."
         : "Create one measurable proof loop.",
@@ -653,7 +653,7 @@ function cyvxAnalyze(text){ const r = cyvxDeepAnalyze(text); return {constraint:
         : hasUI ? "Turn CYVX into an attention-grabbing interactive command center."
         : hasRepo ? "Use repository proof as the first operating reality."
         : "Convert messy reality into a mission loop.",
-      nba: "Run one reality → mission → outcome loop and record the result.",
+      nba: hasDeploy ? "Publish CYVX to a public URL and send it to one external tester." : "Run one reality → mission → outcome loop and record the result.",
       mission: hasDeploy ? "Deploy CYVX publicly and run one external user test."
         : hasUI ? "Finish the interactive 60-second CYVX value moment."
         : "Create one measurable proof loop.",

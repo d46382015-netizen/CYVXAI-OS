@@ -1,0 +1,30 @@
+{
+  "created_at": "2026-06-03",
+  "mission": "Integrate Multi-Repo Intelligence Into CYVX",
+  "backlog": [
+    {
+      "id": "INT-001",
+      "title": "Add Agent Framework connector spec",
+      "priority": "high",
+      "status": "ready"
+    },
+    {
+      "id": "INT-002",
+      "title": "Add Activepieces workflow connector spec",
+      "priority": "high",
+      "status": "ready"
+    },
+    {
+      "id": "INT-003",
+      "title": "Add Syft SBOM proof connector spec",
+      "priority": "high",
+      "status": "ready"
+    },
+    {
+      "id": "INT-004",
+      "title": "Expose connector specs in CYVX dashboard",
+      "priority": "high",
+      "status": "next"
+    }
+  ]
+}

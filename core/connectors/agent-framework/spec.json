@@ -1,0 +1,8 @@
+{
+  "name": "agent-framework",
+  "role": "agent-orchestration",
+  "purpose": "Map CYVX missions into agent roles, tasks, lifecycle states, confidence, and review gates.",
+  "inputs": ["mission", "constraints", "priority", "approval_policy"],
+  "outputs": ["agent_plan", "assignment_map", "execution_trace", "review_result"],
+  "safe_mode": true
+}

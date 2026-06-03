@@ -1,0 +1,8 @@
+{
+  "name": "syft",
+  "role": "security-sbom-proof",
+  "purpose": "Generate dependency inventory, SBOM evidence, and repository risk posture.",
+  "inputs": ["repository_path", "scan_policy"],
+  "outputs": ["sbom", "dependency_inventory", "risk_summary", "evidence_record"],
+  "safe_mode": true
+}

@@ -1,0 +1,8 @@
+{
+  "name": "activepieces",
+  "role": "workflow-execution",
+  "purpose": "Translate approved CYVX missions into executable workflow automation steps.",
+  "inputs": ["approved_mission", "trigger", "resources", "credentials_reference"],
+  "outputs": ["workflow_plan", "execution_status", "logs", "outcome_signal"],
+  "safe_mode": true
+}

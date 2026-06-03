@@ -45,7 +45,7 @@ function analyzeReality(text){
   const hasRepo=/repo|github|readme|branch|commit|issue|pull request|code/.test(t);
   const hasUI=/ui|dashboard|mobile|screen|layout|design|clutter|wow/.test(t);
   const constraint=hasDeploy?"Deployment/public access is the current bottleneck.":hasUI?"The UI must compress complexity into one clear value moment.":hasRevenue?"Revenue needs proof-backed adoption evidence.":hasRepo?"Repository reality needs conversion into one measurable mission.":"Reality is messy and needs decision compression.";
-  const opportunity=hasRevenue?"Use proof pack as the revenue wedge.":hasUI?"Turn the dashboard into an attention-grabbing product demo.":hasRepo?"Use repository proof as the first operating reality.":"Convert reality into a mission loop.";
+  const opportunity=hasDeploy?"Public demo unlocks first users, feedback, testimonials, and revenue conversations.":hasRevenue?"Use proof pack as the revenue wedge.":hasUI?"Turn the dashboard into an attention-grabbing product demo.":hasRepo?"Use repository proof as the first operating reality.":"Convert reality into a mission loop.";
   return {constraint,opportunity,nba:"Run one reality → mission → outcome loop and record the result.",mission:hasUI?"Create the 60-second CYVX value moment":"Create one measurable proof loop",confidence:"88%"};
 }
 
@@ -483,7 +483,7 @@ function cyvxAnalyze(text){ const r = cyvxDeepAnalyze(text); return {constraint:
         : hasRevenue ? "Revenue needs proof-backed adoption evidence."
         : hasRepo ? "Repository reality needs conversion into one measurable mission."
         : "Reality is messy and needs decision compression.",
-      opportunity: hasRevenue ? "Use the proof pack as the first revenue wedge."
+      opportunity: hasDeploy ? "Public demo unlocks first users, feedback, testimonials, and revenue conversations." : hasRevenue ? "Use the proof pack as the first revenue wedge."
         : hasUI ? "Turn CYVX into an attention-grabbing interactive command center."
         : hasRepo ? "Use repository proof as the first operating reality."
         : "Convert messy reality into a mission loop.",
@@ -649,7 +649,7 @@ function cyvxAnalyze(text){ const r = cyvxDeepAnalyze(text); return {constraint:
         : hasRevenue ? "Revenue needs proof-backed adoption evidence."
         : hasRepo ? "Repository reality needs conversion into one measurable mission."
         : "Reality is messy and needs decision compression.",
-      opportunity: hasRevenue ? "Use the proof pack as the first revenue wedge."
+      opportunity: hasDeploy ? "Public demo unlocks first users, feedback, testimonials, and revenue conversations." : hasRevenue ? "Use the proof pack as the first revenue wedge."
         : hasUI ? "Turn CYVX into an attention-grabbing interactive command center."
         : hasRepo ? "Use repository proof as the first operating reality."
         : "Convert messy reality into a mission loop.",

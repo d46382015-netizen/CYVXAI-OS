@@ -1,0 +1,12 @@
+{
+  "id": "outcome-1780523916011",
+  "mission": "Wire Outcome Capture",
+  "expected_outcome": "Outcome capture updates trust",
+  "actual_outcome": "API module works",
+  "succeeded": true,
+  "trust_before": 88,
+  "trust_after": 92,
+  "learning": "Mission outcome supported the prediction. Increase trust and reuse this pattern.",
+  "next_best_action": "Scale the proven loop and capture another real outcome.",
+  "created_at": "2026-06-03T21:58:36.012Z"
+}

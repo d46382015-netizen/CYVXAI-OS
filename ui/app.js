@@ -1214,3 +1214,47 @@ document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("analyzeRealityBtn");
   if (btn) btn.addEventListener("click", analyzeRealityUpload);
 });
+
+
+async function captureMissionOutcome() {
+  const mission = document.getElementById("outcomeMission")?.value || "Current CYVX Mission";
+  const expectedOutcome = document.getElementById("outcomeExpected")?.value || "";
+  const actualOutcome = document.getElementById("outcomeActual")?.value || "";
+  const status = document.getElementById("outcomeStatus")?.value || "success";
+  const output = document.getElementById("outcomeCaptureOutput");
+
+  const payload = { mission, expectedOutcome, actualOutcome, status };
+
+  try {
+    const res = await fetch("/api/outcome", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    if (data && data.outcome) {
+      const o = data.outcome;
+      state.liveDashboard = state.liveDashboard || {};
+      state.liveDashboard.trust = o.trust_after;
+      state.liveDashboard.topConstraint = o.succeeded
+        ? "CYVX now has outcome evidence; next constraint is repeatability across more realities."
+        : "CYVX needs tighter assumptions before increasing autonomy.";
+      state.liveDashboard.nextAction = o.next_best_action;
+
+      if (dom.selfScanHealth) dom.selfScanHealth.textContent = "active";
+      if (dom.selfScanTrust) dom.selfScanTrust.textContent = String(o.trust_after);
+      if (dom.selfScanConstraint) dom.selfScanConstraint.textContent = state.liveDashboard.topConstraint;
+      if (dom.selfScanAction) dom.selfScanAction.textContent = o.next_best_action;
+    }
+
+    if (output) output.textContent = JSON.stringify(data, null, 2);
+  } catch (e) {
+    if (output) output.textContent = "Outcome capture failed: " + String(e.message || e);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("captureOutcomeBtn");
+  if (btn) btn.addEventListener("click", captureMissionOutcome);
+});

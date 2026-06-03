@@ -8,6 +8,7 @@
  * of Dakota Lee Jonsgaard. Unauthorized use prohibited.
  */
 "use strict";
+const { captureOutcome } = require("./outcome");
 
 const { execFileSync } = require("child_process");
 
@@ -312,7 +313,25 @@ async function parseAsk(req, controller) {
 
 async function handleWorkloads(req, controller) {
   if (req.method === "GET") return { workloads: controller.snapshot().cluster.workloads };
-  if (req.method === "POST") {
+  
+  if (req.method === "POST" && url.pathname === "/api/outcome") {
+    let body = "";
+    req.on("data", chunk => body += chunk);
+    req.on("end", () => {
+      try {
+        const payload = JSON.parse(body || "{}");
+        const outcome = captureOutcome(payload);
+        res.writeHead(200, {"content-type":"application/json"});
+        res.end(JSON.stringify({ ok:true, outcome }));
+      } catch (e) {
+        res.writeHead(500, {"content-type":"application/json"});
+        res.end(JSON.stringify({ ok:false, error:String(e.message || e) }));
+      }
+    });
+    return;
+  }
+
+if (req.method === "POST") {
     const body = await readJson(req);
     return controller.submitWorkload(body);
   }

@@ -1,9 +1,9 @@
 {
   "health": "active",
   "modelHealth": "universal-intelligence-loop",
-  "trust": 88,
-  "topConstraint": "CYVX must close the mission outcome loop so intelligence compounds from actual results.",
-  "nextAction": "Build Outcome Capture + Trust Calibration.",
+  "trust": 92,
+  "topConstraint": "CYVX now has outcome evidence; next constraint is repeatability across more realities.",
+  "nextAction": "Scale the proven loop and capture another real outcome.",
   "nextBestAction": {
     "title": "Build Outcome Capture + Trust Calibration.",
     "why": "Universal Capability Kernel + Universal Intelligence Loop can unify repos, businesses, agents, workflows, products, and markets.",
@@ -13,5 +13,17 @@
     "title": "Close the Universal Intelligence Loop",
     "objective": "Add outcome capture and trust calibration so missions improve CYVX over time.",
     "status": "ready"
+  },
+  "latestOutcome": {
+    "id": "outcome-1780523916011",
+    "mission": "Wire Outcome Capture",
+    "expected_outcome": "Outcome capture updates trust",
+    "actual_outcome": "API module works",
+    "succeeded": true,
+    "trust_before": 88,
+    "trust_after": 92,
+    "learning": "Mission outcome supported the prediction. Increase trust and reuse this pattern.",
+    "next_best_action": "Scale the proven loop and capture another real outcome.",
+    "created_at": "2026-06-03T21:58:36.012Z"
   }
 }

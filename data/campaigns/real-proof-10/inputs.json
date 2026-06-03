@@ -1,0 +1,17 @@
+{
+  "campaign": "real-proof-10",
+  "goal": "Collect 10 real CYVX intelligence loops: reality, prediction, mission, outcome, trust update.",
+  "inputs_needed": [
+    "CYVXAI-OS repo reality",
+    "Agent Framework repo reality",
+    "Activepieces repo reality",
+    "Syft repo reality",
+    "CYVX business plan",
+    "CYVX dashboard/UI reality",
+    "CYVX deployment reality",
+    "CYVX revenue reality",
+    "CYVX user adoption reality",
+    "CYVX self-improvement reality"
+  ],
+  "status": "ready-for-real-data"
+}

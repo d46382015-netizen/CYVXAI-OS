@@ -1,0 +1,63 @@
+{
+  "created_at": "2026-06-03T21:34:57.124Z",
+  "repo_count": 4,
+  "repositories": [
+    {
+      "name": "repo4-syft",
+      "path": "data/repos/repo4-syft",
+      "role": "security-sbom-proof",
+      "files": 498,
+      "commits": 3345,
+      "readme": true,
+      "package_json": false,
+      "workflows": true,
+      "tests": 174,
+      "leverage_score": 105
+    },
+    {
+      "name": "repo3-activepieces",
+      "path": "data/repos/repo3-activepieces",
+      "role": "workflow-execution",
+      "files": 304,
+      "commits": 59732,
+      "readme": true,
+      "package_json": true,
+      "workflows": true,
+      "tests": 23,
+      "leverage_score": 67
+    },
+    {
+      "name": "repo1-CYVXAI-OS",
+      "path": "data/repos/repo1-CYVXAI-OS",
+      "role": "primary-platform",
+      "files": 435,
+      "commits": 70,
+      "readme": true,
+      "package_json": true,
+      "workflows": true,
+      "tests": 6,
+      "leverage_score": 65
+    },
+    {
+      "name": "repo2-agent-framework",
+      "path": "data/repos/repo2-agent-framework",
+      "role": "agent-orchestration",
+      "files": 181,
+      "commits": 2221,
+      "readme": true,
+      "package_json": false,
+      "workflows": true,
+      "tests": 15,
+      "leverage_score": 47
+    }
+  ],
+  "top_constraint": "CYVX needs to convert multi-repo intelligence into one execution mission instead of passive comparison.",
+  "top_opportunity": "Use CYVXAI-OS as command layer, Agent Framework for orchestration, Activepieces for workflow execution, and Syft for SBOM/security proof.",
+  "next_best_action": "Build connector specs for agent orchestration, workflow execution, and SBOM proof.",
+  "highest_leverage_mission": {
+    "title": "Create CYVX Cross-Repo Intelligence Layer",
+    "objective": "Rank repositories, detect gaps, generate integration route, and create proof-backed missions across all repos.",
+    "expected_outcome": "CYVX can reason across multiple repositories and recommend the highest-impact build route.",
+    "confidence": 0.86
+  }
+}

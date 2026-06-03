@@ -1,0 +1,45 @@
+{
+  "generated_at": "2026-06-03T22:05:22.957Z",
+  "executive_view": {
+    "top_constraint": "Outcome capture exists, but CYVX needs repeated outcome volume to calibrate trust.",
+    "top_opportunity": "Prediction Ledger + Simulation Ranking",
+    "highest_roi_mission": "Prediction Ledger + Simulation Ranking",
+    "biggest_risk": "Architecture growth outpacing real-world outcome volume.",
+    "single_next_action": "Collect and process 10 real realities through the flywheel and capture outcomes."
+  },
+  "strategic_horizons": {
+    "now": [
+      "Run 10 real reality analyses",
+      "Generate predictions for each",
+      "Capture outcomes"
+    ],
+    "days_30": [
+      "Build outcome history",
+      "Build prediction accuracy tracking",
+      "Reach 50+ outcome records"
+    ],
+    "days_90": [
+      "Launch public intelligence layer",
+      "Create proof library",
+      "Enable continuous reality ingestion"
+    ]
+  },
+  "leverage_map": [
+    {
+      "rank": 1,
+      "leverage_point": "Outcome Volume",
+      "reason": "Every outcome improves trust, prediction accuracy, and learning."
+    },
+    {
+      "rank": 2,
+      "leverage_point": "Prediction Ledger",
+      "reason": "Creates measurable intelligence instead of static analysis."
+    },
+    {
+      "rank": 3,
+      "leverage_point": "Continuous Reality Ingestion",
+      "reason": "Keeps CYVX learning without manual uploads."
+    }
+  ],
+  "status": "executive-ready"
+}

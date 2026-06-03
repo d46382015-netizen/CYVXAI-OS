@@ -9,6 +9,8 @@
  */
 "use strict";
 
+const { execFileSync } = require("child_process");
+
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -84,6 +86,14 @@ function createApiServer(controller, options = {}) {
         proof.proof_ledger = recorded.tribunal;
         proof.tribunal = recorded.tribunal;
         return json(res, 200, wrap({ repositoryHealth: proof.repositoryHealth || proof.repository_health || platform.repositoryHealth(), proof, proofLedger: recorded.tribunal }));
+      }
+      if (url.pathname === "/api/v1/self-scan") {
+        try {
+          const output = execFileSync(process.execPath, ["./scripts/cyvx-scan-self.js"], { cwd: process.cwd(), encoding: "utf8" });
+          return json(res, 200, wrap({ selfScan: JSON.parse(output) }));
+        } catch (error) {
+          return json(res, 500, wrap({ error: "self-scan failed", message: error.message }));
+        }
       }
       if (url.pathname === "/api/v1/repository-health") {
         const github = githubFactory();

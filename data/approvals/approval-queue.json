@@ -1,0 +1,37 @@
+[
+  {
+    "id": "approval-mission-1",
+    "mission_id": "mission-1",
+    "status": "pending",
+    "requires_human": true,
+    "action": "Create one-sentence value prop and CTA"
+  },
+  {
+    "id": "approval-mission-2",
+    "mission_id": "mission-2",
+    "status": "pending",
+    "requires_human": true,
+    "action": "Publish demo runtime"
+  },
+  {
+    "id": "approval-mission-3",
+    "mission_id": "mission-3",
+    "status": "pending",
+    "requires_human": true,
+    "action": "Compress onboarding to one upload step"
+  },
+  {
+    "id": "approval-mission-4",
+    "mission_id": "mission-4",
+    "status": "pending",
+    "requires_human": true,
+    "action": "Track expected vs actual outcome"
+  },
+  {
+    "id": "approval-mission-5",
+    "mission_id": "mission-5",
+    "status": "pending",
+    "requires_human": true,
+    "action": "Require approval before execution"
+  }
+]

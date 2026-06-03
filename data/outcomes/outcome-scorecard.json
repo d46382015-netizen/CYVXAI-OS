@@ -1,0 +1,42 @@
+[
+  {
+    "id": "outcome-mission-1",
+    "mission_id": "mission-1",
+    "expected": "Increase user adoption",
+    "actual": null,
+    "score": null,
+    "status": "not_measured"
+  },
+  {
+    "id": "outcome-mission-2",
+    "mission_id": "mission-2",
+    "expected": "Reduce adoption friction",
+    "actual": null,
+    "score": null,
+    "status": "not_measured"
+  },
+  {
+    "id": "outcome-mission-3",
+    "mission_id": "mission-3",
+    "expected": "Reduce adoption friction",
+    "actual": null,
+    "score": null,
+    "status": "not_measured"
+  },
+  {
+    "id": "outcome-mission-4",
+    "mission_id": "mission-4",
+    "expected": "Reduce adoption friction",
+    "actual": null,
+    "score": null,
+    "status": "not_measured"
+  },
+  {
+    "id": "outcome-mission-5",
+    "mission_id": "mission-5",
+    "expected": "Reduce adoption friction",
+    "actual": null,
+    "score": null,
+    "status": "not_measured"
+  }
+]

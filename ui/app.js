@@ -315,7 +315,7 @@ function cyvxDeepAnalyze(text){
 
   return {
     topConstraint: top.constraint,
-    topOpportunity: top.opportunity,
+    topOpportunity: top.key === "deployment" ? "Public demo unlocks first users, feedback, testimonials, and revenue conversations." : top.opportunity,
     nextBestAction: top.key === "deployment" ? "Publish CYVX to a public URL and send it to one external tester." : top.nba,
     mission: top.mission,
     expectedImpact: top.impact,

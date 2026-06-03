@@ -1258,3 +1258,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("captureOutcomeBtn");
   if (btn) btn.addEventListener("click", captureMissionOutcome);
 });
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".nav-jump");
+  if (!btn) return;
+  const target = btn.getAttribute("data-target");
+  if (!target) return;
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  const panel = document.getElementById(target);
+  if (panel) panel.classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});

@@ -390,8 +390,8 @@ function renderAll() {
     const action = (scan.next_best_actions && scan.next_best_actions[0]) || {};
     dom.selfScanHealth.textContent = (state.liveDashboard && state.liveDashboard.health) || state.liveDashboard.health || scan.health || "unknown";
     dom.selfScanTrust.textContent = String((state.liveDashboard && state.liveDashboard.trust) || scan.trust_score || 0);
-    dom.selfScanConstraint.textContent = top.title || "none";
-    dom.selfScanAction.textContent = action.title || "none";
+    dom.selfScanConstraint.textContent = (state.liveDashboard && state.liveDashboard.topConstraint) || top.title || scan.top_constraint || "unknown";
+    dom.selfScanAction.textContent = (state.liveDashboard && state.liveDashboard.nextAction) || action.title || scan.next_action || "unknown";
     dom.selfScanOutput.textContent = safeJson({ scan, generatedMission: state.selfScanMission || null });
   }
 

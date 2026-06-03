@@ -1157,3 +1157,60 @@ function bootstrap() {
 
 window.addEventListener('DOMContentLoaded', bootstrap);
 window.__cyvxSelectEntity = selectEntity;
+
+
+function analyzeRealityUpload() {
+  const input = document.getElementById("realityUploadInput");
+  const output = document.getElementById("realityUploadOutput");
+  if (!input) return;
+
+  const text = input.value || "";
+  const lower = text.toLowerCase();
+
+  const hasRepo = /repo|github|commit|readme|package|branch/.test(lower);
+  const hasRevenue = /revenue|customer|client|sales|roi|grant|bounty/.test(lower);
+  const hasDeploy = /deploy|hosting|public|server|build|start/.test(lower);
+  const hasProof = /proof|evidence|validation|omega100|outcome|test/.test(lower);
+
+  const constraint =
+    hasProof && !/user|customer|client/.test(lower)
+      ? "Proof exists, but real user outcome evidence is still the highest leverage gap."
+      : hasDeploy
+      ? "Deployment and public access are the current execution bottleneck."
+      : hasRevenue
+      ? "Revenue path needs a repeatable upload-to-value proof loop."
+      : hasRepo
+      ? "Repository reality needs conversion into prioritized missions."
+      : "Reality is unstructured; CYVX needs to convert it into constraint, mission, and evidence.";
+
+  const action =
+    "Generate one mission from this upload, execute it, then record outcome evidence.";
+
+  state.liveDashboard = state.liveDashboard || {};
+  state.liveDashboard.health = "active";
+  state.liveDashboard.trust = 88;
+  state.liveDashboard.topConstraint = constraint;
+  state.liveDashboard.nextAction = action;
+
+  if (dom.selfScanHealth) dom.selfScanHealth.textContent = "active";
+  if (dom.selfScanTrust) dom.selfScanTrust.textContent = "88";
+  if (dom.selfScanConstraint) dom.selfScanConstraint.textContent = constraint;
+  if (dom.selfScanAction) dom.selfScanAction.textContent = action;
+
+  const result = {
+    health: "active",
+    trust: 88,
+    topConstraint: constraint,
+    nextAction: action,
+    mission: "Reality Upload → Constraint → NBA → Mission → Evidence",
+    confidence: 0.88
+  };
+
+  if (output) output.textContent = JSON.stringify(result, null, 2);
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("analyzeRealityBtn");
+  if (btn) btn.addEventListener("click", analyzeRealityUpload);
+});

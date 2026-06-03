@@ -1,0 +1,10 @@
+{
+  "id": "outcome-1780516988153",
+  "created_at": "2026-06-03T20:03:08.153Z",
+  "mission_id": "mission-demo-001",
+  "expected": "User receives one useful mission.",
+  "actual": "Demo launched and generated a mission.",
+  "score": 100,
+  "lesson": "Reality uploads need parser, scoring, approval, and outcome proof.",
+  "status": "success"
+}

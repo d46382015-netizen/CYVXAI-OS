@@ -1,40 +1,40 @@
 [
   {
-    "id": "outcome-mission-1",
-    "mission_id": "mission-1",
-    "expected": "Increase user adoption",
+    "id": "outcome-mission-001",
+    "mission_id": "mission-001",
+    "expected": "At least one external user tries CYVX.",
     "actual": null,
     "score": null,
     "status": "not_measured"
   },
   {
-    "id": "outcome-mission-2",
-    "mission_id": "mission-2",
-    "expected": "Reduce adoption friction",
+    "id": "outcome-mission-002",
+    "mission_id": "mission-002",
+    "expected": "A public demo can be opened by anyone with the link.",
     "actual": null,
     "score": null,
     "status": "not_measured"
   },
   {
-    "id": "outcome-mission-3",
-    "mission_id": "mission-3",
-    "expected": "Reduce adoption friction",
+    "id": "outcome-mission-003",
+    "mission_id": "mission-003",
+    "expected": "A new user understands CYVX in under 60 seconds.",
     "actual": null,
     "score": null,
     "status": "not_measured"
   },
   {
-    "id": "outcome-mission-4",
-    "mission_id": "mission-4",
-    "expected": "Reduce adoption friction",
+    "id": "outcome-mission-004",
+    "mission_id": "mission-004",
+    "expected": "Every mission has expected vs actual measurement.",
     "actual": null,
     "score": null,
     "status": "not_measured"
   },
   {
-    "id": "outcome-mission-5",
-    "mission_id": "mission-5",
-    "expected": "Reduce adoption friction",
+    "id": "outcome-mission-005",
+    "mission_id": "mission-005",
+    "expected": "No risky automation runs without approval.",
     "actual": null,
     "score": null,
     "status": "not_measured"

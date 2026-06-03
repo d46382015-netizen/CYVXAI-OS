@@ -1,37 +1,42 @@
 [
   {
-    "id": "approval-mission-1",
-    "mission_id": "mission-1",
+    "id": "approval-mission-001",
+    "mission_id": "mission-001",
     "status": "pending",
     "requires_human": true,
-    "action": "Create one-sentence value prop and CTA"
+    "action": "Create first-user CTA, demo promise, and invite 3 target users to upload reality.",
+    "risk": "low"
   },
   {
-    "id": "approval-mission-2",
-    "mission_id": "mission-2",
+    "id": "approval-mission-002",
+    "mission_id": "mission-002",
     "status": "pending",
     "requires_human": true,
-    "action": "Publish demo runtime"
+    "action": "Publish the public demo page and make it reachable from the README.",
+    "risk": "low"
   },
   {
-    "id": "approval-mission-3",
-    "mission_id": "mission-3",
+    "id": "approval-mission-003",
+    "mission_id": "mission-003",
     "status": "pending",
     "requires_human": true,
-    "action": "Compress onboarding to one upload step"
+    "action": "Compress onboarding to one textarea, one button, one recommended mission.",
+    "risk": "low"
   },
   {
-    "id": "approval-mission-4",
-    "mission_id": "mission-4",
+    "id": "approval-mission-004",
+    "mission_id": "mission-004",
     "status": "pending",
     "requires_human": true,
-    "action": "Track expected vs actual outcome"
+    "action": "Add expected vs actual result fields and score every mission outcome.",
+    "risk": "low"
   },
   {
-    "id": "approval-mission-5",
-    "mission_id": "mission-5",
+    "id": "approval-mission-005",
+    "mission_id": "mission-005",
     "status": "pending",
     "requires_human": true,
-    "action": "Require approval before execution"
+    "action": "Keep all execution behind human approval gates until trust score improves.",
+    "risk": "low"
   }
 ]

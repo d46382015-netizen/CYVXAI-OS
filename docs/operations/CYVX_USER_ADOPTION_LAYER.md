@@ -1,14 +1,16 @@
 # CYVX User Adoption Layer
 
-Generated: 2026-06-03T19:54:39.354Z
+Generated: 2026-06-03T20:00:47.969Z
 
 Built:
-- User onboarding
-- Reality upload
-- Mission generation
+- Reality parser
+- Constraint detection
+- Priority scoring
+- Ranked mission generation
+- Top recommendation
 - Approval queue
 - Outcome scorecard
-- Public demo mode
+- Trust score demo
 
 Next bottleneck:
-Public runtime + first measured real user outcome.
+Public deployment + first real user outcome.

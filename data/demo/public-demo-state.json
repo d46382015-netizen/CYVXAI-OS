@@ -1,20 +1,10 @@
 {
-  "onboarding": {
-    "headline": "Upload your reality. CYVX finds your highest-leverage mission.",
-    "target": "Generate one useful mission in under 60 seconds.",
-    "steps": [
-      "Upload reality",
-      "Generate missions",
-      "Approve action",
-      "Measure outcome",
-      "Store learning"
-    ]
-  },
   "upload": {
     "id": "demo-reality-001",
-    "created_at": "2026-06-03T19:54:39.354Z",
-    "title": "Demo reality upload",
-    "inputs": [
+    "created_at": "2026-06-03T20:00:47.969Z",
+    "title": "Parsed demo reality upload",
+    "raw": "Need more paying users\nNeed public demo\nNeed clearer onboarding\nNeed mission outcome proof\nNeed approval gates before automation",
+    "items": [
       "Need more paying users",
       "Need public demo",
       "Need clearer onboarding",
@@ -24,140 +14,164 @@
   },
   "missions": [
     {
-      "id": "mission-1",
-      "created_at": "2026-06-03T19:54:39.354Z",
+      "id": "mission-001",
+      "created_at": "2026-06-03T20:00:47.969Z",
       "title": "Need more paying users",
+      "type": "growth",
+      "constraint": "No active demand proof",
       "priority": "critical",
+      "impact_score": 98,
+      "confidence": 95,
       "status": "waiting_approval",
-      "expected_outcome": "Increase user adoption",
-      "confidence": 92,
-      "next_action": "Create one-sentence value prop and CTA"
+      "next_action": "Create first-user CTA, demo promise, and invite 3 target users to upload reality.",
+      "expected_outcome": "At least one external user tries CYVX."
     },
     {
-      "id": "mission-2",
-      "created_at": "2026-06-03T19:54:39.354Z",
+      "id": "mission-002",
+      "created_at": "2026-06-03T20:00:47.969Z",
       "title": "Need public demo",
-      "priority": "high",
+      "type": "deployment",
+      "constraint": "No public entry point",
+      "priority": "critical",
+      "impact_score": 92,
+      "confidence": 89,
       "status": "waiting_approval",
-      "expected_outcome": "Reduce adoption friction",
-      "confidence": 85,
-      "next_action": "Publish demo runtime"
+      "next_action": "Publish the public demo page and make it reachable from the README.",
+      "expected_outcome": "A public demo can be opened by anyone with the link."
     },
     {
-      "id": "mission-3",
-      "created_at": "2026-06-03T19:54:39.354Z",
+      "id": "mission-003",
+      "created_at": "2026-06-03T20:00:47.969Z",
       "title": "Need clearer onboarding",
+      "type": "adoption",
+      "constraint": "Onboarding friction",
       "priority": "high",
+      "impact_score": 88,
+      "confidence": 85,
       "status": "waiting_approval",
-      "expected_outcome": "Reduce adoption friction",
-      "confidence": 78,
-      "next_action": "Compress onboarding to one upload step"
+      "next_action": "Compress onboarding to one textarea, one button, one recommended mission.",
+      "expected_outcome": "A new user understands CYVX in under 60 seconds."
     },
     {
-      "id": "mission-4",
-      "created_at": "2026-06-03T19:54:39.354Z",
+      "id": "mission-004",
+      "created_at": "2026-06-03T20:00:47.969Z",
       "title": "Need mission outcome proof",
-      "priority": "medium",
+      "type": "trust",
+      "constraint": "No measured outcome proof",
+      "priority": "high",
+      "impact_score": 84,
+      "confidence": 81,
       "status": "waiting_approval",
-      "expected_outcome": "Reduce adoption friction",
-      "confidence": 71,
-      "next_action": "Track expected vs actual outcome"
+      "next_action": "Add expected vs actual result fields and score every mission outcome.",
+      "expected_outcome": "Every mission has expected vs actual measurement."
     },
     {
-      "id": "mission-5",
-      "created_at": "2026-06-03T19:54:39.354Z",
+      "id": "mission-005",
+      "created_at": "2026-06-03T20:00:47.969Z",
       "title": "Need approval gates before automation",
+      "type": "governance",
+      "constraint": "Automation needs trust boundary",
       "priority": "medium",
+      "impact_score": 78,
+      "confidence": 75,
       "status": "waiting_approval",
-      "expected_outcome": "Reduce adoption friction",
-      "confidence": 64,
-      "next_action": "Require approval before execution"
+      "next_action": "Keep all execution behind human approval gates until trust score improves.",
+      "expected_outcome": "No risky automation runs without approval."
     }
   ],
   "approvals": [
     {
-      "id": "approval-mission-1",
-      "mission_id": "mission-1",
+      "id": "approval-mission-001",
+      "mission_id": "mission-001",
       "status": "pending",
       "requires_human": true,
-      "action": "Create one-sentence value prop and CTA"
+      "action": "Create first-user CTA, demo promise, and invite 3 target users to upload reality.",
+      "risk": "low"
     },
     {
-      "id": "approval-mission-2",
-      "mission_id": "mission-2",
+      "id": "approval-mission-002",
+      "mission_id": "mission-002",
       "status": "pending",
       "requires_human": true,
-      "action": "Publish demo runtime"
+      "action": "Publish the public demo page and make it reachable from the README.",
+      "risk": "low"
     },
     {
-      "id": "approval-mission-3",
-      "mission_id": "mission-3",
+      "id": "approval-mission-003",
+      "mission_id": "mission-003",
       "status": "pending",
       "requires_human": true,
-      "action": "Compress onboarding to one upload step"
+      "action": "Compress onboarding to one textarea, one button, one recommended mission.",
+      "risk": "low"
     },
     {
-      "id": "approval-mission-4",
-      "mission_id": "mission-4",
+      "id": "approval-mission-004",
+      "mission_id": "mission-004",
       "status": "pending",
       "requires_human": true,
-      "action": "Track expected vs actual outcome"
+      "action": "Add expected vs actual result fields and score every mission outcome.",
+      "risk": "low"
     },
     {
-      "id": "approval-mission-5",
-      "mission_id": "mission-5",
+      "id": "approval-mission-005",
+      "mission_id": "mission-005",
       "status": "pending",
       "requires_human": true,
-      "action": "Require approval before execution"
+      "action": "Keep all execution behind human approval gates until trust score improves.",
+      "risk": "low"
     }
   ],
   "outcomes": [
     {
-      "id": "outcome-mission-1",
-      "mission_id": "mission-1",
-      "expected": "Increase user adoption",
+      "id": "outcome-mission-001",
+      "mission_id": "mission-001",
+      "expected": "At least one external user tries CYVX.",
       "actual": null,
       "score": null,
       "status": "not_measured"
     },
     {
-      "id": "outcome-mission-2",
-      "mission_id": "mission-2",
-      "expected": "Reduce adoption friction",
+      "id": "outcome-mission-002",
+      "mission_id": "mission-002",
+      "expected": "A public demo can be opened by anyone with the link.",
       "actual": null,
       "score": null,
       "status": "not_measured"
     },
     {
-      "id": "outcome-mission-3",
-      "mission_id": "mission-3",
-      "expected": "Reduce adoption friction",
+      "id": "outcome-mission-003",
+      "mission_id": "mission-003",
+      "expected": "A new user understands CYVX in under 60 seconds.",
       "actual": null,
       "score": null,
       "status": "not_measured"
     },
     {
-      "id": "outcome-mission-4",
-      "mission_id": "mission-4",
-      "expected": "Reduce adoption friction",
+      "id": "outcome-mission-004",
+      "mission_id": "mission-004",
+      "expected": "Every mission has expected vs actual measurement.",
       "actual": null,
       "score": null,
       "status": "not_measured"
     },
     {
-      "id": "outcome-mission-5",
-      "mission_id": "mission-5",
-      "expected": "Reduce adoption friction",
+      "id": "outcome-mission-005",
+      "mission_id": "mission-005",
+      "expected": "No risky automation runs without approval.",
       "actual": null,
       "score": null,
       "status": "not_measured"
     }
   ],
   "scorecard": {
-    "created_at": "2026-06-03T19:54:39.354Z",
+    "created_at": "2026-06-03T20:00:47.969Z",
+    "reality_health": 67,
+    "top_constraint": "No active demand proof",
+    "top_mission": "Need more paying users",
     "missions_total": 5,
     "pending_approvals": 5,
     "measured_outcomes": 0,
-    "status": "public-demo-ready"
+    "trust_score": 0,
+    "status": "parser-priority-demo-ready"
   }
 }

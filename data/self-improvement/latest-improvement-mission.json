@@ -1,0 +1,10 @@
+{
+  "id": "SELF-1780524229877",
+  "created_at": "2026-06-03T22:03:49.812Z",
+  "detected_bottleneck": "Outcome capture exists, but CYVX needs repeated outcome volume to calibrate trust.",
+  "improvement_mission": "Prediction Ledger + Simulation Ranking",
+  "why_now": "CYVX already has enough architecture; compounding predictions and outcomes now create the biggest intelligence gain.",
+  "expected_gain": 0.34,
+  "priority": "highest",
+  "status": "ready"
+}

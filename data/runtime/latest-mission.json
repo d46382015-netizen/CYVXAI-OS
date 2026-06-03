@@ -1,19 +1,10 @@
 {
-  "id": "mission-1780521748808",
-  "title": "Activate Reality Upload → NBA → Mission → Outcome Loop",
-  "objective": "Make CYVX convert uploaded operational reality into a verified next best action, executable mission, expected outcome, and evidence trail.",
-  "top_constraint": "Dashboard surfaces exist, but live uploaded reality must drive Self Scan, NBA, Mission Control, and Evidence.",
-  "next_best_action": "Wire runtime upload analysis into Self Scan, Mission Control, NBA, and Evidence surfaces.",
-  "route": [
-    "Ingest reality upload",
-    "Extract constraints, risks, opportunities, and signals",
-    "Generate ranked Next Best Action",
-    "Create mission with expected outcome and confidence",
-    "Write evidence plan",
-    "Create outcome record template",
-    "Update trust state after outcome is measured"
-  ],
-  "expected_outcome": "A user uploads messy reality and receives a concrete mission with evidence plan in one flow.",
-  "confidence": 0.88,
+  "id": "MISSION-1780524229877",
+  "title": "Prediction Ledger + Simulation Ranking",
+  "objective": "Turn CYVX intelligence into a recurring flywheel: reality acquisition, prediction, economic ranking, mission generation, outcome capture, trust calibration, learning, and self-improvement.",
+  "top_constraint": "Outcome capture exists, but CYVX needs repeated outcome volume to calibrate trust.",
+  "expected_outcome": "CYVX produces ranked predictions, simulated mission choices, and measurable expected-vs-actual records for each mission.",
+  "next_best_action": "Build Prediction Ledger + Simulation Ranking as the next durable intelligence layer.",
+  "confidence": 0.87,
   "status": "ready"
 }

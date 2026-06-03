@@ -1,0 +1,55 @@
+{
+  "created_at": "2026-06-03T22:03:49.812Z",
+  "opportunities": [
+    {
+      "id": "OPP-001",
+      "title": "Prediction Ledger + Simulation Ranking",
+      "impact": 0.94,
+      "confidence": 0.87,
+      "urgency": 0.92,
+      "cost": 0.16,
+      "risk": 0.14,
+      "economic_score": 0.452
+    },
+    {
+      "id": "OPP-004",
+      "title": "Economic Mission Ranking",
+      "impact": 0.86,
+      "confidence": 0.85,
+      "urgency": 0.82,
+      "cost": 0.12,
+      "risk": 0.11,
+      "economic_score": 0.369
+    },
+    {
+      "id": "OPP-002",
+      "title": "Public Proof Surface",
+      "impact": 0.88,
+      "confidence": 0.84,
+      "urgency": 0.9,
+      "cost": 0.18,
+      "risk": 0.12,
+      "economic_score": 0.365
+    },
+    {
+      "id": "OPP-003",
+      "title": "Continuous Reality Ingestion",
+      "impact": 0.9,
+      "confidence": 0.82,
+      "urgency": 0.86,
+      "cost": 0.22,
+      "risk": 0.18,
+      "economic_score": 0.235
+    },
+    {
+      "id": "OPP-005",
+      "title": "Self-Improvement Execution Queue",
+      "impact": 0.91,
+      "confidence": 0.8,
+      "urgency": 0.84,
+      "cost": 0.2,
+      "risk": 0.2,
+      "economic_score": 0.212
+    }
+  ]
+}

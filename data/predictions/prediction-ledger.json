@@ -1,0 +1,15 @@
+{
+  "created_at": "2026-06-03T22:03:49.812Z",
+  "predictions": [
+    {
+      "id": "PRED-1780524229876",
+      "created_at": "2026-06-03T22:03:49.812Z",
+      "prediction": "If CYVX builds a recurring prediction ledger and simulation ranking layer next, mission quality and trust calibration will improve faster than adding more UI panels.",
+      "confidence": 0.87,
+      "expected_outcome": "CYVX produces ranked predictions, simulated mission choices, and measurable expected-vs-actual records for each mission.",
+      "success_metric": "At least one prediction, one ranked opportunity, one economic score, one self-improvement mission, and one proof report generated per flywheel run.",
+      "linked_opportunity": "OPP-001",
+      "status": "open"
+    }
+  ]
+}

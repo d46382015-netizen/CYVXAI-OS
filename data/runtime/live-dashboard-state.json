@@ -1,12 +1,12 @@
 {
   "health": "active",
-  "modelHealth": "meta-intelligence-engine",
+  "modelHealth": "intelligence-flywheel",
   "trust": 92,
-  "topConstraint": "CYVX must turn generated intelligence into repeated measured outcomes so trust and predictions compound.",
-  "nextAction": "Build the Prediction Ledger + Simulation Ranking layer on top of Outcome Capture.",
+  "topConstraint": "Outcome capture exists, but CYVX needs repeated outcome volume to calibrate trust.",
+  "nextAction": "Build Prediction Ledger + Simulation Ranking as the next durable intelligence layer.",
   "nextBestAction": {
-    "title": "Build the Prediction Ledger + Simulation Ranking layer on top of Outcome Capture.",
-    "why": "The Meta Intelligence Engine unifies prediction, simulation, discovery, economics, compression, expansion, agent evolution, and self-improvement.",
+    "title": "Build Prediction Ledger + Simulation Ranking as the next durable intelligence layer.",
+    "why": "This creates the compounding loop: reality → prediction → mission → outcome → trust → learning.",
     "confidence": 0.87
   },
   "mission": {
@@ -38,5 +38,16 @@
       "Reality Compression",
       "Self-Improvement"
     ]
+  },
+  "topOpportunity": "Prediction Ledger + Simulation Ranking",
+  "highestROIMission": {
+    "id": "MISSION-1780524229877",
+    "title": "Prediction Ledger + Simulation Ranking",
+    "objective": "Turn CYVX intelligence into a recurring flywheel: reality acquisition, prediction, economic ranking, mission generation, outcome capture, trust calibration, learning, and self-improvement.",
+    "top_constraint": "Outcome capture exists, but CYVX needs repeated outcome volume to calibrate trust.",
+    "expected_outcome": "CYVX produces ranked predictions, simulated mission choices, and measurable expected-vs-actual records for each mission.",
+    "next_best_action": "Build Prediction Ledger + Simulation Ranking as the next durable intelligence layer.",
+    "confidence": 0.87,
+    "status": "ready"
   }
 }

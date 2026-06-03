@@ -1,0 +1,74 @@
+{
+  "created_at": "2026-06-03T22:03:49.812Z",
+  "status": "active",
+  "loop": [
+    "reality_acquisition",
+    "constraint_detection",
+    "opportunity_ranking",
+    "prediction_ledger",
+    "mission_generation",
+    "execution_tracking",
+    "outcome_capture",
+    "trust_calibration",
+    "learning",
+    "self_improvement",
+    "public_proof"
+  ],
+  "signals": {
+    "reality": true,
+    "repo": true,
+    "mission": true,
+    "outcome": true,
+    "trust": true,
+    "revenue": true,
+    "workflow": true,
+    "agent": true,
+    "security": true,
+    "deployment": true,
+    "audit": true,
+    "meta": true
+  },
+  "top_constraint": "Outcome capture exists, but CYVX needs repeated outcome volume to calibrate trust.",
+  "top_opportunity": {
+    "id": "OPP-001",
+    "title": "Prediction Ledger + Simulation Ranking",
+    "impact": 0.94,
+    "confidence": 0.87,
+    "urgency": 0.92,
+    "cost": 0.16,
+    "risk": 0.14,
+    "economic_score": 0.452
+  },
+  "next_best_action": "Build Prediction Ledger + Simulation Ranking as the next durable intelligence layer.",
+  "prediction": {
+    "id": "PRED-1780524229876",
+    "created_at": "2026-06-03T22:03:49.812Z",
+    "prediction": "If CYVX builds a recurring prediction ledger and simulation ranking layer next, mission quality and trust calibration will improve faster than adding more UI panels.",
+    "confidence": 0.87,
+    "expected_outcome": "CYVX produces ranked predictions, simulated mission choices, and measurable expected-vs-actual records for each mission.",
+    "success_metric": "At least one prediction, one ranked opportunity, one economic score, one self-improvement mission, and one proof report generated per flywheel run.",
+    "linked_opportunity": "OPP-001",
+    "status": "open"
+  },
+  "mission": {
+    "id": "MISSION-1780524229877",
+    "title": "Prediction Ledger + Simulation Ranking",
+    "objective": "Turn CYVX intelligence into a recurring flywheel: reality acquisition, prediction, economic ranking, mission generation, outcome capture, trust calibration, learning, and self-improvement.",
+    "top_constraint": "Outcome capture exists, but CYVX needs repeated outcome volume to calibrate trust.",
+    "expected_outcome": "CYVX produces ranked predictions, simulated mission choices, and measurable expected-vs-actual records for each mission.",
+    "next_best_action": "Build Prediction Ledger + Simulation Ranking as the next durable intelligence layer.",
+    "confidence": 0.87,
+    "status": "ready"
+  },
+  "self_improvement": {
+    "id": "SELF-1780524229877",
+    "created_at": "2026-06-03T22:03:49.812Z",
+    "detected_bottleneck": "Outcome capture exists, but CYVX needs repeated outcome volume to calibrate trust.",
+    "improvement_mission": "Prediction Ledger + Simulation Ranking",
+    "why_now": "CYVX already has enough architecture; compounding predictions and outcomes now create the biggest intelligence gain.",
+    "expected_gain": 0.34,
+    "priority": "highest",
+    "status": "ready"
+  },
+  "readiness_score": 100
+}

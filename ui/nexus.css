@@ -22,3 +22,75 @@
 .nx-solar{height:250px;border-radius:50%;border:1px solid rgba(255,255,255,.12);position:relative;background:radial-gradient(circle,rgba(255,255,255,.06),transparent 55%)}
 .nx-solar i{position:absolute;width:14px;height:14px;border-radius:50%;left:50%;top:50%}.green{background:#20ff9a;transform:translate(65px,-40px)}.purple{background:#9b35ff;transform:translate(-80px,20px)}.orange{background:#ffb020;transform:translate(20px,80px)}.red{background:#ff4a6a;transform:translate(-30px,-85px)}.nx-solar b{position:absolute;left:30px;bottom:24px}
 @media(max-width:900px){#cyvxNexus{grid-template-columns:1fr}.nx-rail{height:auto;position:relative}.nx-awareness,.nx-map,.nx-lower{grid-template-columns:1fr}.nx-universe{height:330px}}
+
+/* CYVX Nexus scale correction */
+.main{
+  padding:14px!important;
+}
+#cyvxNexus{
+  grid-template-columns:190px minmax(0,1fr);
+  gap:14px;
+  max-width:1600px;
+  margin:0 auto;
+}
+.nx-rail{
+  height:auto;
+  min-height:calc(100vh - 110px);
+  padding:14px;
+}
+.nx-rail button{
+  padding:10px 11px;
+  margin:7px 0;
+  font-size:12px;
+}
+.nx-reality{
+  padding:22px;
+}
+.nx-reality h1{
+  font-size:clamp(32px,5vw,64px);
+  margin-bottom:18px;
+}
+.nx-awareness{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.nx-awareness article{
+  padding:14px;
+}
+.nx-awareness b{
+  font-size:clamp(20px,2.8vw,34px);
+}
+.nx-map{
+  grid-template-columns:minmax(0,1fr) 280px;
+  gap:14px;
+  padding:14px;
+}
+.nx-universe{
+  height:330px;
+}
+.nx-twin{
+  padding:18px;
+}
+.nx-twin h2{
+  font-size:26px;
+}
+.nx-lower{
+  grid-template-columns:1fr 1.1fr 1fr;
+  gap:14px;
+}
+.nx-stream,.nx-agents,.nx-opps{
+  padding:18px;
+}
+.nx-solar{
+  width:190px;
+  height:190px;
+  margin:auto;
+}
+@media(max-width:900px){
+  .main{padding:10px!important}
+  #cyvxNexus{grid-template-columns:1fr}
+  .nx-awareness{grid-template-columns:1fr 1fr}
+  .nx-map{grid-template-columns:1fr}
+  .nx-lower{grid-template-columns:1fr}
+  .nx-universe{height:280px}
+}

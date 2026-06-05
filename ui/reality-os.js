@@ -139,3 +139,86 @@ async function renderRealityOS(){
 }
 
 window.addEventListener("DOMContentLoaded",renderRealityOS);
+
+async function enhanceRealityOSV2(){
+  const root=document.getElementById("realityOS");
+  if(!root)return;
+  const raw=await roJson("/api/v1/reality-os");
+  const os=raw.realityOS||raw.data?.realityOS||{};
+  if(!os.digital_twin)return;
+
+  const drift=os.reality_drift||{};
+  const a=os.agency_decomposition||{};
+  const lm=os.leverage_multiplier||{};
+  const dna=os.mission_dna||{};
+  const ns=os.nervous_system||{};
+  const decay=os.opportunity_decay||{};
+  const unknown=os.unknown_detector||{};
+
+  const panel=document.createElement("section");
+  panel.className="ro-v2";
+  panel.innerHTML=`
+    <article class="ro-v2-card drift">
+      <p>Reality Drift</p>
+      <h2>${drift.drift_percent}%</h2>
+      <span>Desired ${drift.desired_reality} → Current ${drift.current_reality}</span>
+      <b>${drift.closing_action}</b>
+    </article>
+
+    <article class="ro-v2-card agency">
+      <p>Agency Decomposition</p>
+      ${Object.entries(a).map(([k,v])=>`
+        <label><span>${k}</span><b>${v}</b><i><em style="width:${v}%"></em></i></label>
+      `).join("")}
+    </article>
+
+    <article class="ro-v2-card leverage">
+      <p>Leverage Multiplier</p>
+      <h2>${lm.input}</h2>
+      <div><span>Revenue ×${lm.revenue}</span><span>Agency ×${lm.agency}</span><span>Trust ×${lm.trust}</span><span>Learning ×${lm.learning}</span></div>
+    </article>
+
+    <article class="ro-v2-card dna">
+      <p>Mission DNA</p>
+      <h2>${dna.id}</h2>
+      <span>Revenue ${dna.revenue_potential}</span>
+      <span>Difficulty ${dna.difficulty}</span>
+      <span>Risk ${dna.risk}</span>
+      <span>Strategic ${dna.strategic_value}</span>
+    </article>
+
+    <article class="ro-v2-card nervous">
+      <p>Organizational Nervous System</p>
+      <h2>Stress ${ns.stress}</h2>
+      <span>Execution latency ${ns.execution_latency}</span>
+      <span>Attention fragmentation ${ns.attention_fragmentation}</span>
+      <span>Trust ${ns.trust}</span>
+    </article>
+
+    <article class="ro-v2-card decay">
+      <p>Opportunity Decay</p>
+      <h2>$${Number(decay.value||0).toLocaleString()}</h2>
+      <span>Decay ${decay.decay_per_day} per day</span>
+      <b>${decay.time_remaining_days} days remaining</b>
+    </article>
+
+    <article class="ro-v2-card unknowns">
+      <p>Unknown Detector</p>
+      <h2>${unknown.unknown_unknown}%</h2>
+      <span>Unknown unknowns</span>
+      <small>Known known ${unknown.known_known}% · Known unknown ${unknown.known_unknown}%</small>
+    </article>
+  `;
+  root.appendChild(panel);
+
+  const thoughts=document.querySelector(".ro-thoughts");
+  if(thoughts){
+    thoughts.insertAdjacentHTML("beforeend",`
+      <div class="ro-evolution">
+        <h3>Self-Modification Queue</h3>
+        ${(os.self_modification_queue||[]).map(u=>`<span>${u.upgrade} · ${u.expected_impact} · ${u.confidence}%</span>`).join("")}
+      </div>
+    `);
+  }
+}
+window.addEventListener("DOMContentLoaded",()=>setTimeout(enhanceRealityOSV2,500));

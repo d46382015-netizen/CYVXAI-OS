@@ -1,13 +1,13 @@
 [
   {
-    "id": "opportunitie-1780675251823-nf00j",
-    "type": "opportunitie",
+    "id": "opportunity-1780675321090-ng13b",
+    "type": "opportunity",
     "title": "Revenue pilot",
     "status": "active",
     "priority": 3,
     "confidence": 0.84,
-    "createdAt": "2026-06-05T16:00:51.823Z",
-    "updatedAt": "2026-06-05T16:00:51.823Z",
+    "createdAt": "2026-06-05T16:02:01.090Z",
+    "updatedAt": "2026-06-05T16:02:01.090Z",
     "value": 12000,
     "roi": 3.5
   }

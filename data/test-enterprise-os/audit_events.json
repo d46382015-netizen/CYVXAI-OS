@@ -1,18 +1,18 @@
 [
   {
-    "id": "audit_event-1780675251820-mj00s",
+    "id": "audit_event-1780675321087-52a87",
     "type": "audit_event",
     "title": "Agency audit event",
     "status": "active",
     "priority": 3,
     "confidence": 0.78,
-    "createdAt": "2026-06-05T16:00:51.820Z",
-    "updatedAt": "2026-06-05T16:00:51.820Z",
+    "createdAt": "2026-06-05T16:02:01.087Z",
+    "updatedAt": "2026-06-05T16:02:01.087Z",
     "actor": "Ω Executive",
     "action": "agency.cycle",
-    "object": "mission-1780675251818-tdfrw",
+    "object": "mission-1780675321086-q7oa2",
     "result": "approved",
-    "timestamp": "2026-06-05T16:00:51.820Z",
+    "timestamp": "2026-06-05T16:02:01.087Z",
     "details": {
       "goal": "Launch one measurable enterprise mission",
       "bottlenecks": [

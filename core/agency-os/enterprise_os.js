@@ -85,7 +85,11 @@ function listEnterpriseRecords(baseDir, collectionName) {
 }
 
 function createEnterpriseRecord(baseDir, collectionName, input = {}) {
-  const typeName = collectionName.replace(/_/g, "").replace(/s$/, "");
+  const typeName = collectionName
+    .replace(/_/g, "")
+    .replace(/ies$/, "y")
+    .replace(/sses$/, "ss")
+    .replace(/s$/, "");
   const payload = normalizeRecord(typeName, input);
   const records = listEnterpriseRecords(baseDir, collectionName);
   records.unshift(payload);

@@ -5,7 +5,7 @@
   },
   "goals": [
     {
-      "id": "goal-1780675251821",
+      "id": "goal-1780675321087",
       "title": "Launch one measurable enterprise mission",
       "confidence": 0.78
     }
@@ -24,14 +24,14 @@
   ],
   "missions": [
     {
-      "id": "mission-1780675251818-tdfrw",
+      "id": "mission-1780675321086-q7oa2",
       "type": "mission",
       "title": "Enterprise mission loop",
       "status": "queued",
       "priority": 1,
       "confidence": 0.82,
-      "createdAt": "2026-06-05T16:00:51.818Z",
-      "updatedAt": "2026-06-05T16:00:51.818Z",
+      "createdAt": "2026-06-05T16:02:01.086Z",
+      "updatedAt": "2026-06-05T16:02:01.086Z",
       "objective": "Launch one measurable enterprise mission",
       "stage": "creation",
       "roi": 2.2,
@@ -40,14 +40,14 @@
   ],
   "decisions": [
     {
-      "id": "decision-1780675251819-ttb5t",
+      "id": "decision-1780675321086-7w5s1",
       "type": "decision",
       "title": "Next autonomous action",
       "status": "active",
       "priority": 3,
       "confidence": 0.78,
-      "createdAt": "2026-06-05T16:00:51.819Z",
-      "updatedAt": "2026-06-05T16:00:51.819Z",
+      "createdAt": "2026-06-05T16:02:01.086Z",
+      "updatedAt": "2026-06-05T16:02:01.086Z",
       "rationale": "Recommended priority: Resolve mission execution velocity with one verifiable mission",
       "evidence": [
         "Mission execution velocity"
@@ -63,46 +63,46 @@
   "outcomes": [],
   "learning": [
     {
-      "id": "learning-1780675251820-jedbz",
+      "id": "learning-1780675321087-fbvp7",
       "type": "learning",
       "title": "Agency cycle learning",
       "status": "active",
       "priority": 3,
       "confidence": 0.78,
-      "createdAt": "2026-06-05T16:00:51.820Z",
-      "updatedAt": "2026-06-05T16:00:51.820Z",
+      "createdAt": "2026-06-05T16:02:01.087Z",
+      "updatedAt": "2026-06-05T16:02:01.087Z",
       "lesson": "The highest-value path is Resolve mission execution velocity with one verifiable mission"
     }
   ],
   "approvals": [
     {
-      "id": "approval-1780675251819-vtw55",
+      "id": "approval-1780675321087-uwj4h",
       "type": "approval",
       "title": "Approve autonomous mission",
       "status": "approved",
       "priority": 3,
       "confidence": 0.78,
-      "createdAt": "2026-06-05T16:00:51.819Z",
-      "updatedAt": "2026-06-05T16:00:51.819Z",
-      "decisionId": "decision-1780675251819-ttb5t",
-      "missionId": "mission-1780675251818-tdfrw"
+      "createdAt": "2026-06-05T16:02:01.087Z",
+      "updatedAt": "2026-06-05T16:02:01.087Z",
+      "decisionId": "decision-1780675321086-7w5s1",
+      "missionId": "mission-1780675321086-q7oa2"
     }
   ],
   "auditEvents": [
     {
-      "id": "audit_event-1780675251820-mj00s",
+      "id": "audit_event-1780675321087-52a87",
       "type": "audit_event",
       "title": "Agency audit event",
       "status": "active",
       "priority": 3,
       "confidence": 0.78,
-      "createdAt": "2026-06-05T16:00:51.820Z",
-      "updatedAt": "2026-06-05T16:00:51.820Z",
+      "createdAt": "2026-06-05T16:02:01.087Z",
+      "updatedAt": "2026-06-05T16:02:01.087Z",
       "actor": "Ω Executive",
       "action": "agency.cycle",
-      "object": "mission-1780675251818-tdfrw",
+      "object": "mission-1780675321086-q7oa2",
       "result": "approved",
-      "timestamp": "2026-06-05T16:00:51.820Z",
+      "timestamp": "2026-06-05T16:02:01.087Z",
       "details": {
         "goal": "Launch one measurable enterprise mission",
         "bottlenecks": [
@@ -114,9 +114,9 @@
   ],
   "agencyMemory": [
     {
-      "id": "memory-1780675251821",
+      "id": "memory-1780675321087",
       "summary": "Autonomous next best action",
-      "createdAt": "2026-06-05T16:00:51.821Z"
+      "createdAt": "2026-06-05T16:02:01.087Z"
     }
   ],
   "revenueEvents": [],
@@ -126,5 +126,5 @@
     "revenue": 9000,
     "confidence": 0.78
   },
-  "updatedAt": "2026-06-05T16:00:51.821Z"
+  "updatedAt": "2026-06-05T16:02:01.088Z"
 }

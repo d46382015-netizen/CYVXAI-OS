@@ -1,13 +1,13 @@
 [
   {
-    "id": "decision-1780675251819-ttb5t",
+    "id": "decision-1780675321086-7w5s1",
     "type": "decision",
     "title": "Next autonomous action",
     "status": "active",
     "priority": 3,
     "confidence": 0.78,
-    "createdAt": "2026-06-05T16:00:51.819Z",
-    "updatedAt": "2026-06-05T16:00:51.819Z",
+    "createdAt": "2026-06-05T16:02:01.086Z",
+    "updatedAt": "2026-06-05T16:02:01.086Z",
     "rationale": "Recommended priority: Resolve mission execution velocity with one verifiable mission",
     "evidence": [
       "Mission execution velocity"

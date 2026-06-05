@@ -11,7 +11,8 @@
     "build": "node ./scripts/build.js",
     "dev": "node ./api/index.js",
     "serve": "node ./ui/server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "partner": "node ./scripts/cyvx-partner-cli.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",

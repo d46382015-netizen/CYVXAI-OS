@@ -1,0 +1,11 @@
+{
+  "id": "mission-1780648746837",
+  "title": "Create one measurable agency loop",
+  "goal": "Build CYVX Partner Alpha into one measurable agency loop",
+  "top_constraint": "must move fast",
+  "opportunity": "Create one complete goal → mission → outcome loop.",
+  "next_best_action": "Complete one visible mission, record the outcome, and update the agency score.",
+  "status": "active",
+  "created_at": "2026-06-05T08:39:06.831Z",
+  "success_metric": "A user can see memory, next best action, mission, outcome, and agency score in one flow."
+}

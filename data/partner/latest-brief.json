@@ -1,0 +1,35 @@
+{
+  "powered_by": "CYVX",
+  "creator": "Dakota Lee Jonsgaard",
+  "version": "partner-alpha-1",
+  "created_at": "2026-06-05T08:39:06.831Z",
+  "primitive": "Agency",
+  "agency_score": 100,
+  "goal": "Build CYVX Partner Alpha into one measurable agency loop",
+  "memory_summary": {
+    "goals": 4,
+    "resources": 8,
+    "constraints": 4,
+    "missions": 4,
+    "outcomes": 4
+  },
+  "top_constraint": "must move fast",
+  "opportunity": "Create one complete goal → mission → outcome loop.",
+  "mission": {
+    "id": "mission-1780648746837",
+    "title": "Create one measurable agency loop",
+    "goal": "Build CYVX Partner Alpha into one measurable agency loop",
+    "top_constraint": "must move fast",
+    "opportunity": "Create one complete goal → mission → outcome loop.",
+    "next_best_action": "Complete one visible mission, record the outcome, and update the agency score.",
+    "status": "active",
+    "created_at": "2026-06-05T08:39:06.831Z",
+    "success_metric": "A user can see memory, next best action, mission, outcome, and agency score in one flow."
+  },
+  "daily_agency_brief": {
+    "completed": 4,
+    "found": 1,
+    "blocked_by": "must move fast",
+    "recommended": "Complete one visible mission, record the outcome, and update the agency score."
+  }
+}

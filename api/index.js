@@ -69,6 +69,7 @@ function createApiServer(controller, options = {}) {
       }
       const url = new URL(req.url, "http://localhost");
       if (url.pathname === "/healthz" || url.pathname === "/health") return json(res, 200, wrap({ status: "ok" }));
+      if (url.pathname === "/api/v1/outcome" && req.method === "POST") return json(res, 200, wrap({ outcome: captureOutcome(await readJson(req)) }));
       if (url.pathname === "/status") return json(res, 200, wrap(controller.status()));
       if (url.pathname === "/api/v1/overview") return json(res, 200, wrap(controller.overview()));
       if (url.pathname === "/api/v1/platform") return json(res, 200, wrap(platform.snapshot()));

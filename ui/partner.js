@@ -47,3 +47,42 @@
     el("partnerRun")?.addEventListener("click", runPartner);
   });
 })();
+
+(function(){
+  async function capturePartnerOutcome(){
+    const mission = document.getElementById("partnerMission")?.textContent || "CYVX Partner Mission";
+    const actual = prompt("What actually happened?");
+    if(!actual) return;
+
+    const res = await fetch("/api/v1/outcome", {
+      method:"POST",
+      headers:{ "content-type":"application/json" },
+      body:JSON.stringify({
+        mission,
+        expectedOutcome:"Partner mission should increase agency.",
+        actualOutcome:actual,
+        success:"complete"
+      })
+    });
+
+    await fetch("/api/v1/partner/brief", {
+      method:"POST",
+      headers:{ "content-type":"application/json" },
+      body:JSON.stringify({
+        goal:document.getElementById("partnerGoal")?.value || "Continue CYVX Partner mission."
+      })
+    });
+
+    location.reload();
+  }
+
+  window.addEventListener("DOMContentLoaded", ()=>{
+    const box=document.getElementById("cyvxPartnerAlpha");
+    if(box && !document.getElementById("partnerOutcomeBtn")){
+      box.querySelector(".result-card")?.insertAdjacentHTML("beforeend", `
+        <button class="primary" id="partnerOutcomeBtn">Capture Outcome + Update Agency</button>
+      `);
+      document.getElementById("partnerOutcomeBtn")?.addEventListener("click", capturePartnerOutcome);
+    }
+  });
+})();

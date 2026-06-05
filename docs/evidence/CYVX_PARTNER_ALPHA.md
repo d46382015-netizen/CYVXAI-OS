@@ -1,6 +1,6 @@
 # CYVX Partner Alpha
 
-Generated: 2026-06-05T08:54:38.915Z
+Generated: 2026-06-05T15:41:31.513Z
 
 ## Primitive
 Agency
@@ -9,19 +9,19 @@ Agency
 Build CYVX Partner Alpha into one measurable agency loop
 
 ## Agency Score
-78
+23
 
 ## Top Constraint
 must move fast
 
 ## Opportunity
-Create one complete goal → mission → outcome loop.
+Create one clear mission from the goal and capture the result.
 
 ## Mission
-Create one measurable agency loop
+Complete one agency loop
 
 ## Next Best Action
-Complete one visible mission, record the outcome, and update the agency score.
+Define the goal, choose the smallest measurable action, execute it, and record the outcome.
 
 ## Success Metric
-A user can see memory, next best action, mission, outcome, and agency score in one flow.
+A specific action is completed and recorded as evidence, not just planned.

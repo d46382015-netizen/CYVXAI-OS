@@ -937,3 +937,74 @@ document.addEventListener("click", (e) => {
 
   document.addEventListener("DOMContentLoaded", ensureLoopCard);
 })();
+
+
+function renderCyvxWorkspace(name){
+  const map={
+    "Command Center":["Agency Score","Top Constraint","Current Mission","Next Best Action"],
+    "Reality Intake":["Paste Reality","Detected Constraints","Signals","Proof Inputs"],
+    "Mission Control":["Active Missions","Success Metrics","Dependencies","Owners"],
+    "Execution Board":["Queued Actions","In Progress","Completed","Blocked"],
+    "Intelligence Hub":["Patterns","Recommendations","Priorities","Truth Model"],
+    "Reality Graph":["Entities","Edges","Constraints","Flow Map"],
+    "Opportunities":["Opportunity Radar","Confidence","Expected Value","Entry Vector"],
+    "Simulations":["Scenario","Risk","Upside","Decision"],
+    "Decision Center":["Decision Brief","Tradeoffs","Confidence","Outcome History"],
+    "Performance":["Agency Score","Missions Completed","Outcomes Captured","Learning Rate"],
+    "Governance":["Trust Score","Approvals","Policy","Audit Log"],
+    "Agent OS":["Commander","Architect","Executor","Auditor"]
+  };
+
+  const main=document.querySelector(".main") || document.querySelector("main") || document.body;
+  let root=document.getElementById("cyvxWorkspace");
+  if(!root){
+    root=document.createElement("section");
+    root.id="cyvxWorkspace";
+    root.className="workspace-shell";
+    main.prepend(root);
+  }
+
+  [...main.children].forEach(el=>{
+    if(el.id !== "cyvxWorkspace") el.style.display = name === "Command Center" ? "" : "none";
+  });
+
+  if(name === "Command Center"){
+    root.innerHTML="";
+    root.style.display="none";
+  }else{
+    root.style.display="block";
+    const items=map[name] || map["Command Center"];
+    root.innerHTML=`
+      <div class="workspace-title-row">
+        <div>
+          <p class="kicker">CYVX Workspace</p>
+          <h1>${name}</h1>
+          <p>${name} replaces the center content while preserving your existing CYVX shell.</p>
+        </div>
+        <button class="primary" id="workspaceCommandCenter">Command Center</button>
+      </div>
+      <div class="workspace-grid">
+        ${items.map(x=>`
+          <article class="runtime-panel workspace-card">
+            <p class="kicker">${name}</p>
+            <h3>${x}</h3>
+            <p>Live ${x.toLowerCase()} workspace.</p>
+          </article>
+        `).join("")}
+      </div>
+    `;
+    document.getElementById("workspaceCommandCenter")?.addEventListener("click",()=>renderCyvxWorkspace("Command Center"));
+  }
+
+  document.querySelectorAll(".side-nav button").forEach(b=>b.classList.toggle("active",b.textContent.trim()===name));
+  window.scrollTo(0,0);
+}
+
+document.addEventListener("click",function(e){
+  const btn=e.target.closest(".side-nav button");
+  if(!btn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+  renderCyvxWorkspace(btn.textContent.trim());
+},true);

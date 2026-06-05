@@ -1,7 +1,7 @@
 {
   "name": "cyvx",
   "version": "6.0.0",
-  "builtAt": "2026-06-05T15:57:23.303Z",
+  "builtAt": "2026-06-05T16:04:26.802Z",
   "entrypoints": {
     "api": "api/index.js",
     "ui": "ui/index.html"

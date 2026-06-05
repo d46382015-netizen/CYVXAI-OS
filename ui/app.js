@@ -1008,3 +1008,97 @@ document.addEventListener("click",function(e){
   e.stopImmediatePropagation();
   renderCyvxWorkspace(btn.textContent.trim());
 },true);
+
+async function cyvxFetchJson(url){
+  try{
+    const r=await fetch(url+"?ts="+Date.now());
+    if(!r.ok) return null;
+    return await r.json();
+  }catch(e){ return null; }
+}
+
+function cyvxList(items, fallback){
+  if(!items || !items.length) return `<p>${fallback}</p>`;
+  return items.slice(0,8).map(x=>`
+    <div class="runtime-item">
+      <span>${x.status || x.type || x.kind || x.confidence || "live"}</span>
+      <b>${x.title || x.name || x.goal || x.id || "CYVX record"}</b>
+      <small>${x.next_best_action || x.action || x.description || x.success_metric || x.detail || "runtime evidence available"}</small>
+    </div>
+  `).join("");
+}
+
+async function hydrateCyvxWorkspace(name){
+  const root=document.getElementById("cyvxWorkspace");
+  if(!root || root.style.display==="none") return;
+
+  const dashboard=await cyvxFetchJson("/api/v1/dashboard");
+  const partner=await cyvxFetchJson("/api/v1/partner/brief");
+  const goals=await cyvxFetchJson("/api/v1/goals");
+  const opportunities=await cyvxFetchJson("/api/v1/opportunities");
+  const initiatives=await cyvxFetchJson("/api/v1/initiatives");
+  const intelligence=await cyvxFetchJson("/api/v1/intelligence");
+
+  const p=partner?.partner || partner?.data?.partner || {};
+  const d=dashboard || {};
+  const cards={
+    "Mission Control":[
+      ["Active Missions", cyvxList(initiatives?.initiatives || [], "No live missions yet.")],
+      ["Current Mission", `<p>${p.mission?.title || "No partner mission loaded."}</p><p>${p.mission?.next_best_action || ""}</p>`],
+      ["Success Metric", `<p>${p.mission?.success_metric || "No success metric loaded."}</p>`],
+      ["Next Best Action", `<p>${p.mission?.next_best_action || d.nextBestAction || "No next action loaded."}</p>`]
+    ],
+    "Opportunities":[
+      ["Opportunity Radar", cyvxList(opportunities?.opportunities || [], "No opportunities loaded.")],
+      ["Top Opportunity", `<p>${p.opportunity || "No partner opportunity loaded."}</p>`],
+      ["Constraint", `<p>${p.top_constraint || d.topConstraint || "No constraint loaded."}</p>`],
+      ["Agency Score", `<p class="mega-number">${p.agency_score ?? d.agencyScore ?? "—"}</p><p>${p.proof_level || "proof forming"}</p>`]
+    ],
+    "Agent OS":[
+      ["Commander", `<p>Mission: ${p.mission?.title || "Awaiting mission"}</p><p>Status: coordinating</p>`],
+      ["Architect", `<p>Workspace: ${name}</p><p>Status: structuring system</p>`],
+      ["Executor", `<p>Next: ${p.mission?.next_best_action || "Awaiting action"}</p><p>Status: ready</p>`],
+      ["Auditor", `<p>Proof: ${p.proof_level || "early"}</p><p>Agency Score: ${p.agency_score ?? "—"}</p>`]
+    ],
+    "Performance":[
+      ["Agency Score", `<p class="mega-number">${p.agency_score ?? "—"}</p>`],
+      ["Proof Level", `<p>${p.proof_level || "early"}</p>`],
+      ["Memory", `<p>Goals: ${p.memory_summary?.goals ?? 0}</p><p>Missions: ${p.memory_summary?.missions ?? 0}</p>`],
+      ["Outcomes", `<p>Completed: ${p.daily_agency_brief?.completed ?? 0}</p>`]
+    ],
+    "Command Center":[
+      ["Agency Score", `<p class="mega-number">${p.agency_score ?? "—"}</p>`],
+      ["Top Constraint", `<p>${p.top_constraint || "No constraint loaded."}</p>`],
+      ["Current Mission", `<p>${p.mission?.title || "No mission loaded."}</p>`],
+      ["Next Best Action", `<p>${p.mission?.next_best_action || "No action loaded."}</p>`]
+    ],
+    "Intelligence Hub":[
+      ["Patterns", cyvxList(intelligence?.patterns || [], "Pattern intelligence ready.")],
+      ["Recommendations", cyvxList(intelligence?.recommendations || [], "Recommendations ready.")],
+      ["Priorities", cyvxList(intelligence?.priorities || [], "Priorities ready.")],
+      ["Truth Model", `<p>${JSON.stringify(intelligence?.truthModel || {}).slice(0,260) || "Truth model ready."}</p>`]
+    ]
+  };
+
+  const selected=cards[name] || cards["Command Center"];
+  const grid=root.querySelector(".workspace-grid");
+  if(grid){
+    grid.innerHTML=selected.map(([title,body])=>`
+      <article class="runtime-panel workspace-card">
+        <p class="kicker">${name}</p>
+        <h3>${title}</h3>
+        ${body}
+      </article>
+    `).join("");
+  }
+}
+
+document.addEventListener("click",e=>{
+  const btn=e.target.closest(".side-nav button");
+  if(!btn) return;
+  setTimeout(()=>hydrateCyvxWorkspace(btn.textContent.trim()),120);
+},true);
+
+window.addEventListener("DOMContentLoaded",()=>{
+  setTimeout(()=>hydrateCyvxWorkspace("Command Center"),500);
+});

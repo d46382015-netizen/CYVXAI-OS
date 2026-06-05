@@ -265,3 +265,13 @@ button{cursor:pointer}button:hover{transform:translateY(-1px);filter:brightness(
   .workspace-title-row{flex-direction:column}
   .workspace-grid{grid-template-columns:1fr}
 }
+
+.mega-number{
+  font-size:clamp(42px,7vw,82px);
+  line-height:.85;
+  font-weight:900;
+  margin:8px 0;
+  background:linear-gradient(90deg,#4fffe0,#5288ff,#b845ff);
+  -webkit-background-clip:text;
+  color:transparent;
+}

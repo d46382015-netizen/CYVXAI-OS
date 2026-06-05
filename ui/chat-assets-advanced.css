@@ -1,0 +1,73 @@
+.final-layer{
+  display:grid;
+  gap:18px;
+  margin-top:18px;
+}
+
+.chat-box{
+  display:grid;
+  grid-template-columns:1fr 170px;
+  gap:12px;
+}
+
+.chat-box input{
+  background:#081428;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  padding:16px;
+  font:inherit;
+}
+
+.chat-box button{
+  border:0;
+  border-radius:16px;
+  background:linear-gradient(135deg,#7b2cff,#168bff);
+  color:#fff;
+  font-weight:900;
+}
+
+.chat-result{
+  margin-top:14px;
+  padding:18px;
+  border-radius:16px;
+  background:rgba(123,44,255,.08);
+}
+
+.chat-result p{
+  color:#c8d2ef;
+}
+
+.asset-grid,.advanced-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.asset-grid article,.advanced-grid article{
+  background:#081428;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  padding:18px;
+}
+
+.asset-grid small{
+  display:block;
+  color:#9aa7c7;
+  margin-top:6px;
+}
+
+.advanced-grid article{
+  color:#bda6ff;
+  font-weight:800;
+}
+
+@media(max-width:900px){
+  .chat-box{
+    grid-template-columns:1fr;
+  }
+
+  .asset-grid,.advanced-grid{
+    grid-template-columns:1fr 1fr;
+  }
+}

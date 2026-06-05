@@ -1,10 +1,10 @@
 {
   "status": "running",
-  "last_tick_at": "2026-06-05T16:03:05.182Z",
-  "ticks": 8,
-  "latest_session_id": "council-session-1780675385179",
+  "last_tick_at": "2026-06-05T16:08:35.797Z",
+  "ticks": 9,
+  "latest_session_id": "council-session-1780675715794",
   "latest_mission": {
-    "id": "agency-mission-1780675385179",
+    "id": "agency-mission-1780675715794",
     "title": "Run one autonomous agency loop",
     "goal": "Improve CYVX autonomous agency runtime",
     "constraint": "Distribution bottleneck",
@@ -13,10 +13,10 @@
     "owner": "AEON Ω",
     "status": "queued",
     "success_metric": "A real outcome is captured and converted into a lesson, asset, or next mission.",
-    "created_at": "2026-06-05T16:03:05.177Z"
+    "created_at": "2026-06-05T16:08:35.666Z"
   },
   "latest_decision": {
-    "id": "decision-1780675385179",
+    "id": "decision-1780675715794",
     "question": "What should CYVX do next?",
     "synthesis": "AEON Ω selected the path with the clearest reality signal, smallest execution surface, and highest compounding upside.",
     "selected_path": "Execute the smallest measurable mission, capture the result, and let AEON update the model.",
@@ -31,7 +31,7 @@
       }
     ],
     "confidence": 91,
-    "created_at": "2026-06-05T16:03:05.177Z"
+    "created_at": "2026-06-05T16:08:35.666Z"
   },
   "runtime": {
     "powered_by": "CYVX Ω",
@@ -101,7 +101,7 @@
       }
     ],
     "latest_session": {
-      "id": "council-session-1780675385179",
+      "id": "council-session-1780675715794",
       "kernel": "AEON Ω",
       "goal": "Improve CYVX autonomous agency runtime",
       "scores": {
@@ -127,7 +127,7 @@
           "current_focus": "Reality signal is incomplete; more evidence is needed.",
           "recommendation": "Verify the constraint with one measurable external signal.",
           "confidence": 72,
-          "observed_at": "2026-06-05T16:03:05.177Z"
+          "observed_at": "2026-06-05T16:08:35.666Z"
         },
         {
           "id": "odyssey",
@@ -144,7 +144,7 @@
           "current_focus": "The highest upside future comes from converting the goal into a visible outcome loop.",
           "recommendation": "Generate three future paths and choose the fastest validated path.",
           "confidence": 72,
-          "observed_at": "2026-06-05T16:03:05.177Z"
+          "observed_at": "2026-06-05T16:08:35.666Z"
         },
         {
           "id": "prometheus",
@@ -161,7 +161,7 @@
           "current_focus": "The next asset must directly support execution.",
           "recommendation": "Create one reusable asset that turns attention into action.",
           "confidence": 72,
-          "observed_at": "2026-06-05T16:03:05.177Z"
+          "observed_at": "2026-06-05T16:08:35.666Z"
         },
         {
           "id": "solon",
@@ -178,7 +178,7 @@
           "current_focus": "The strongest path is narrow execution.",
           "recommendation": "Choose the smallest action with the clearest feedback loop.",
           "confidence": 72,
-          "observed_at": "2026-06-05T16:03:05.177Z"
+          "observed_at": "2026-06-05T16:08:35.666Z"
         },
         {
           "id": "aurora",
@@ -195,11 +195,11 @@
           "current_focus": "Learning loops must compound before scale.",
           "recommendation": "Prioritize actions that create reusable distribution, trust, or revenue.",
           "confidence": 72,
-          "observed_at": "2026-06-05T16:03:05.177Z"
+          "observed_at": "2026-06-05T16:08:35.666Z"
         }
       ],
       "mission": {
-        "id": "agency-mission-1780675385179",
+        "id": "agency-mission-1780675715794",
         "title": "Run one autonomous agency loop",
         "goal": "Improve CYVX autonomous agency runtime",
         "constraint": "Distribution bottleneck",
@@ -208,10 +208,10 @@
         "owner": "AEON Ω",
         "status": "queued",
         "success_metric": "A real outcome is captured and converted into a lesson, asset, or next mission.",
-        "created_at": "2026-06-05T16:03:05.177Z"
+        "created_at": "2026-06-05T16:08:35.666Z"
       },
       "decision": {
-        "id": "decision-1780675385179",
+        "id": "decision-1780675715794",
         "question": "What should CYVX do next?",
         "synthesis": "AEON Ω selected the path with the clearest reality signal, smallest execution surface, and highest compounding upside.",
         "selected_path": "Execute the smallest measurable mission, capture the result, and let AEON update the model.",
@@ -226,24 +226,24 @@
           }
         ],
         "confidence": 91,
-        "created_at": "2026-06-05T16:03:05.177Z"
+        "created_at": "2026-06-05T16:08:35.666Z"
       },
       "asset": {
-        "id": "asset-1780675385179",
+        "id": "asset-1780675715794",
         "title": "Autonomous Agency Loop",
         "type": "runtime primitive",
         "purpose": "Convert reality into council deliberation, mission creation, decision memory, and learning.",
         "status": "active",
-        "created_at": "2026-06-05T16:03:05.177Z"
+        "created_at": "2026-06-05T16:08:35.666Z"
       },
       "autonomous": true,
-      "created_at": "2026-06-05T16:03:05.177Z"
+      "created_at": "2026-06-05T16:08:35.666Z"
     },
     "memory_summary": {
-      "sessions": 13,
-      "missions": 13,
-      "decisions": 13,
-      "assets": 13,
+      "sessions": 15,
+      "missions": 15,
+      "decisions": 15,
+      "assets": 15,
       "lessons": 0
     },
     "next_action": "Execute the smallest measurable mission, capture the result, and let AEON update the model."

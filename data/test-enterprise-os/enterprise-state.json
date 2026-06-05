@@ -5,13 +5,32 @@
   },
   "goals": [
     {
-      "id": "goal-1780675385479",
+      "id": "goal-seed",
+      "title": "Convert one person into an autonomous enterprise",
+      "confidence": 0.88
+    },
+    {
+      "id": "goal-1780675716061",
       "title": "Launch one measurable enterprise mission",
       "confidence": 0.78
     }
   ],
-  "constraints": [],
+  "constraints": [
+    {
+      "id": "constraint-seed",
+      "title": "Execution bandwidth",
+      "confidence": 0.72
+    }
+  ],
   "opportunities": [
+    {
+      "id": "opportunity-seed",
+      "title": "Revenue pilot",
+      "value": 18000,
+      "roi": 3.4,
+      "confidence": 0.86,
+      "nextAction": "Launch proof-backed mission"
+    },
     {
       "title": "Mission execution velocity opportunity",
       "value": 9000,
@@ -24,14 +43,23 @@
   ],
   "missions": [
     {
-      "id": "mission-1780675385476-t54kf",
+      "id": "mission-seed",
+      "title": "Launch proof loop",
+      "status": "active",
+      "stage": "execution",
+      "confidence": 0.82,
+      "roi": 2.9,
+      "risk": 0.24
+    },
+    {
+      "id": "mission-1780675716060-gnpc2",
       "type": "mission",
       "title": "Enterprise mission loop",
       "status": "queued",
       "priority": 1,
       "confidence": 0.82,
-      "createdAt": "2026-06-05T16:03:05.476Z",
-      "updatedAt": "2026-06-05T16:03:05.476Z",
+      "createdAt": "2026-06-05T16:08:36.060Z",
+      "updatedAt": "2026-06-05T16:08:36.060Z",
       "objective": "Launch one measurable enterprise mission",
       "stage": "creation",
       "roi": 2.2,
@@ -40,14 +68,19 @@
   ],
   "decisions": [
     {
-      "id": "decision-1780675385477-8tvg3",
+      "id": "decision-seed",
+      "title": "Prioritize proof loop",
+      "confidence": 0.84
+    },
+    {
+      "id": "decision-1780675716060-q1wka",
       "type": "decision",
       "title": "Next autonomous action",
       "status": "active",
       "priority": 3,
       "confidence": 0.78,
-      "createdAt": "2026-06-05T16:03:05.477Z",
-      "updatedAt": "2026-06-05T16:03:05.477Z",
+      "createdAt": "2026-06-05T16:08:36.060Z",
+      "updatedAt": "2026-06-05T16:08:36.060Z",
       "rationale": "Recommended priority: Resolve mission execution velocity with one verifiable mission",
       "evidence": [
         "Mission execution velocity"
@@ -58,51 +91,91 @@
       }
     }
   ],
-  "assets": [],
-  "predictions": [],
-  "outcomes": [],
+  "assets": [
+    {
+      "id": "asset-seed",
+      "title": "Autonomous agency runtime",
+      "type": "automation",
+      "status": "active"
+    }
+  ],
+  "predictions": [
+    {
+      "id": "prediction-seed",
+      "title": "Revenue forecast",
+      "confidence": 0.79
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "outcome-seed",
+      "title": "First measurable outcome",
+      "status": "measured",
+      "value": 12000
+    }
+  ],
   "learning": [
     {
-      "id": "learning-1780675385479-7kf68",
+      "id": "learning-seed",
+      "title": "Fastest path to value",
+      "lesson": "Small proof loops compound faster than large plans.",
+      "confidence": 0.83
+    },
+    {
+      "id": "learning-1780675716061-5sodn",
       "type": "learning",
       "title": "Agency cycle learning",
       "status": "active",
       "priority": 3,
       "confidence": 0.78,
-      "createdAt": "2026-06-05T16:03:05.479Z",
-      "updatedAt": "2026-06-05T16:03:05.479Z",
+      "createdAt": "2026-06-05T16:08:36.061Z",
+      "updatedAt": "2026-06-05T16:08:36.061Z",
       "lesson": "The highest-value path is Resolve mission execution velocity with one verifiable mission"
     }
   ],
   "approvals": [
     {
-      "id": "approval-1780675385478-2437t",
+      "id": "approval-seed",
+      "title": "Approve proof loop",
+      "status": "approved",
+      "confidence": 0.82
+    },
+    {
+      "id": "approval-1780675716060-zhzt4",
       "type": "approval",
       "title": "Approve autonomous mission",
       "status": "approved",
       "priority": 3,
       "confidence": 0.78,
-      "createdAt": "2026-06-05T16:03:05.478Z",
-      "updatedAt": "2026-06-05T16:03:05.478Z",
-      "decisionId": "decision-1780675385477-8tvg3",
-      "missionId": "mission-1780675385476-t54kf"
+      "createdAt": "2026-06-05T16:08:36.060Z",
+      "updatedAt": "2026-06-05T16:08:36.060Z",
+      "decisionId": "decision-1780675716060-q1wka",
+      "missionId": "mission-1780675716060-gnpc2"
     }
   ],
   "auditEvents": [
     {
-      "id": "audit_event-1780675385478-2h00i",
+      "id": "audit-seed",
+      "title": "Cycle initialized",
+      "actor": "Ω Executive",
+      "action": "agency.cycle",
+      "result": "ok",
+      "confidence": 0.88
+    },
+    {
+      "id": "audit_event-1780675716061-xtnqm",
       "type": "audit_event",
       "title": "Agency audit event",
       "status": "active",
       "priority": 3,
       "confidence": 0.78,
-      "createdAt": "2026-06-05T16:03:05.478Z",
-      "updatedAt": "2026-06-05T16:03:05.478Z",
+      "createdAt": "2026-06-05T16:08:36.061Z",
+      "updatedAt": "2026-06-05T16:08:36.061Z",
       "actor": "Ω Executive",
       "action": "agency.cycle",
-      "object": "mission-1780675385476-t54kf",
+      "object": "mission-1780675716060-gnpc2",
       "result": "approved",
-      "timestamp": "2026-06-05T16:03:05.478Z",
+      "timestamp": "2026-06-05T16:08:36.061Z",
       "details": {
         "goal": "Launch one measurable enterprise mission",
         "bottlenecks": [
@@ -114,17 +187,29 @@
   ],
   "agencyMemory": [
     {
-      "id": "memory-1780675385479",
+      "id": "memory-seed",
+      "summary": "Seeded enterprise memory for the operating OS.",
+      "createdAt": "2026-06-05T16:08:36.059Z"
+    },
+    {
+      "id": "memory-1780675716061",
       "summary": "Autonomous next best action",
-      "createdAt": "2026-06-05T16:03:05.479Z"
+      "createdAt": "2026-06-05T16:08:36.061Z"
     }
   ],
-  "revenueEvents": [],
+  "revenueEvents": [
+    {
+      "id": "revenue-seed",
+      "title": "Pilot revenue",
+      "value": 12000,
+      "confidence": 0.8
+    }
+  ],
   "metrics": {
-    "missions": 1,
+    "missions": 2,
     "opportunities": 1,
     "revenue": 9000,
     "confidence": 0.78
   },
-  "updatedAt": "2026-06-05T16:03:05.480Z"
+  "updatedAt": "2026-06-05T16:08:36.061Z"
 }

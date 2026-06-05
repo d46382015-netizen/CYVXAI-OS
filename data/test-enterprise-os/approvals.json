@@ -1,0 +1,14 @@
+[
+  {
+    "id": "approval-1780675251819-vtw55",
+    "type": "approval",
+    "title": "Approve autonomous mission",
+    "status": "approved",
+    "priority": 3,
+    "confidence": 0.78,
+    "createdAt": "2026-06-05T16:00:51.819Z",
+    "updatedAt": "2026-06-05T16:00:51.819Z",
+    "decisionId": "decision-1780675251819-ttb5t",
+    "missionId": "mission-1780675251818-tdfrw"
+  }
+]

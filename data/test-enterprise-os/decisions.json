@@ -1,0 +1,20 @@
+[
+  {
+    "id": "decision-1780675251819-ttb5t",
+    "type": "decision",
+    "title": "Next autonomous action",
+    "status": "active",
+    "priority": 3,
+    "confidence": 0.78,
+    "createdAt": "2026-06-05T16:00:51.819Z",
+    "updatedAt": "2026-06-05T16:00:51.819Z",
+    "rationale": "Recommended priority: Resolve mission execution velocity with one verifiable mission",
+    "evidence": [
+      "Mission execution velocity"
+    ],
+    "expectedImpact": {
+      "value": 9000,
+      "risk": 0.25
+    }
+  }
+]

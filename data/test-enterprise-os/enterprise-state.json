@@ -1,0 +1,130 @@
+{
+  "agency": {
+    "name": "CYVX Enterprise OS",
+    "mode": "autonomous"
+  },
+  "goals": [
+    {
+      "id": "goal-1780675251821",
+      "title": "Launch one measurable enterprise mission",
+      "confidence": 0.78
+    }
+  ],
+  "constraints": [],
+  "opportunities": [
+    {
+      "title": "Mission execution velocity opportunity",
+      "value": 9000,
+      "roi": 2.2,
+      "risk": 0.25,
+      "confidence": 0.78,
+      "nextAction": "Resolve mission execution velocity with one verifiable mission",
+      "goal": "Launch one measurable enterprise mission"
+    }
+  ],
+  "missions": [
+    {
+      "id": "mission-1780675251818-tdfrw",
+      "type": "mission",
+      "title": "Enterprise mission loop",
+      "status": "queued",
+      "priority": 1,
+      "confidence": 0.82,
+      "createdAt": "2026-06-05T16:00:51.818Z",
+      "updatedAt": "2026-06-05T16:00:51.818Z",
+      "objective": "Launch one measurable enterprise mission",
+      "stage": "creation",
+      "roi": 2.2,
+      "risk": 0.25
+    }
+  ],
+  "decisions": [
+    {
+      "id": "decision-1780675251819-ttb5t",
+      "type": "decision",
+      "title": "Next autonomous action",
+      "status": "active",
+      "priority": 3,
+      "confidence": 0.78,
+      "createdAt": "2026-06-05T16:00:51.819Z",
+      "updatedAt": "2026-06-05T16:00:51.819Z",
+      "rationale": "Recommended priority: Resolve mission execution velocity with one verifiable mission",
+      "evidence": [
+        "Mission execution velocity"
+      ],
+      "expectedImpact": {
+        "value": 9000,
+        "risk": 0.25
+      }
+    }
+  ],
+  "assets": [],
+  "predictions": [],
+  "outcomes": [],
+  "learning": [
+    {
+      "id": "learning-1780675251820-jedbz",
+      "type": "learning",
+      "title": "Agency cycle learning",
+      "status": "active",
+      "priority": 3,
+      "confidence": 0.78,
+      "createdAt": "2026-06-05T16:00:51.820Z",
+      "updatedAt": "2026-06-05T16:00:51.820Z",
+      "lesson": "The highest-value path is Resolve mission execution velocity with one verifiable mission"
+    }
+  ],
+  "approvals": [
+    {
+      "id": "approval-1780675251819-vtw55",
+      "type": "approval",
+      "title": "Approve autonomous mission",
+      "status": "approved",
+      "priority": 3,
+      "confidence": 0.78,
+      "createdAt": "2026-06-05T16:00:51.819Z",
+      "updatedAt": "2026-06-05T16:00:51.819Z",
+      "decisionId": "decision-1780675251819-ttb5t",
+      "missionId": "mission-1780675251818-tdfrw"
+    }
+  ],
+  "auditEvents": [
+    {
+      "id": "audit_event-1780675251820-mj00s",
+      "type": "audit_event",
+      "title": "Agency audit event",
+      "status": "active",
+      "priority": 3,
+      "confidence": 0.78,
+      "createdAt": "2026-06-05T16:00:51.820Z",
+      "updatedAt": "2026-06-05T16:00:51.820Z",
+      "actor": "Ω Executive",
+      "action": "agency.cycle",
+      "object": "mission-1780675251818-tdfrw",
+      "result": "approved",
+      "timestamp": "2026-06-05T16:00:51.820Z",
+      "details": {
+        "goal": "Launch one measurable enterprise mission",
+        "bottlenecks": [
+          "Mission execution velocity"
+        ],
+        "recommendation": "Resolve mission execution velocity with one verifiable mission"
+      }
+    }
+  ],
+  "agencyMemory": [
+    {
+      "id": "memory-1780675251821",
+      "summary": "Autonomous next best action",
+      "createdAt": "2026-06-05T16:00:51.821Z"
+    }
+  ],
+  "revenueEvents": [],
+  "metrics": {
+    "missions": 1,
+    "opportunities": 1,
+    "revenue": 9000,
+    "confidence": 0.78
+  },
+  "updatedAt": "2026-06-05T16:00:51.821Z"
+}

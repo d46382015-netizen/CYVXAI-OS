@@ -1,0 +1,16 @@
+[
+  {
+    "id": "mission-1780675251818-tdfrw",
+    "type": "mission",
+    "title": "Enterprise mission loop",
+    "status": "queued",
+    "priority": 1,
+    "confidence": 0.82,
+    "createdAt": "2026-06-05T16:00:51.818Z",
+    "updatedAt": "2026-06-05T16:00:51.818Z",
+    "objective": "Launch one measurable enterprise mission",
+    "stage": "creation",
+    "roi": 2.2,
+    "risk": 0.25
+  }
+]

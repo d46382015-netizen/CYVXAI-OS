@@ -12,6 +12,7 @@
     "dev": "node ./api/index.js",
     "serve": "node ./ui/server.js",
     "test": "node --test",
+    "verify": "npm test && npm run build",
     "partner": "node ./scripts/cyvx-partner-cli.js",
     "strategy": "node scripts/cyvx-operating-loop.js",
     "cyvx": "node scripts/cyvx-operating-loop.js",

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CYVX Enterprise OS</title>
+  <style>
+    :root { color-scheme: dark; --bg:#04070d; --panel:rgba(10,18,32,.92); --line:rgba(115,160,255,.18); --blue:#4cc9ff; --gold:#ffcf70; }
+    * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+    body { margin:0; background: radial-gradient(circle at top, #08203c 0%, var(--bg) 52%); color:#eff6ff; }
+    .shell { max-width: 1400px; margin: 0 auto; padding: 18px; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
+    .chip { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); background:var(--panel); padding:8px 10px; border-radius:999px; color:#cfe4ff; }
+    nav { display:flex; gap:8px; flex-wrap:wrap; }
+    button { background:var(--panel); color:#fff; border:1px solid var(--line); border-radius:12px; padding:10px 12px; cursor:pointer; }
+    button.primary { background:linear-gradient(135deg,#11335d,#1b5aa5); box-shadow:0 0 0 1px rgba(76,201,255,.15), 0 12px 30px rgba(76,201,255,.12); }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:14px; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:14px; box-shadow: 0 18px 40px rgba(0,0,0,.35); }
+    .metric { font-size: 1.9rem; font-weight: 700; color: var(--blue); }
+    .muted { color:#b7c7e4; font-size:.95rem; }
+    .list { display:grid; gap:10px; }
+    .item { border:1px solid var(--line); border-radius:14px; padding:10px; background: rgba(8,14,24,.65); }
+    .pill { display:inline-block; border-radius:999px; padding:4px 8px; background: rgba(255,207,112,.12); color:var(--gold); font-size:.78rem; }
+    .two { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+    @media (max-width: 900px){ .two { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="pill">Autonomous enterprise OS</div>
+        <h1 style="margin:6px 0 4px; font-size:clamp(1.8rem, 6vw, 2.5rem);">CYVX Enterprise OS</h1>
+        <p class="muted">Observe → Recommend → Prepare → Approve → Execute → Verify → Learn → Improve.</p>
+      </div>
+      <div class="chip">Deep black • electric blue • gold accents</div>
+    </header>
+    <nav>
+      <button class="primary" id="runCycleBtn">Run agency cycle</button>
+      <button data-page="overview">Overview</button>
+      <button data-page="missions">Missions</button>
+      <button data-page="opportunities">Opportunities</button>
+      <button data-page="revenue">Revenue</button>
+      <button data-page="memory">Memory</button>
+      <button data-page="decisions">Decisions</button>
+      <button data-page="approvals">Approvals</button>
+      <button data-page="audit">Audit Log</button>
+    </nav>
+    <section id="pageRoot" class="grid"></section>
+  </main>
+  <script src="./enterprise-os.js"></script>
+</body>
+</html>

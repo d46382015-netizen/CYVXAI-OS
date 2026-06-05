@@ -10,6 +10,7 @@
 "use strict";
 const { captureOutcome } = require("./outcome");
 const { createPartnerBrief } = require("../core/partner/partner");
+const { agentOsSnapshot } = require("../core/agent-os/agent_runtime");
 
 const { execFileSync } = require("child_process");
 
@@ -201,6 +202,7 @@ function createApiServer(controller, options = {}) {
       if (url.pathname === "/api/v1/priorities" && req.method === "POST") return json(res, 200, wrap({ priorities: platform.calculatePriorities(await readJson(req)) }));
       if (url.pathname === "/api/v1/partner/brief" && req.method === "GET") return json(res, 200, wrap({ partner: createPartnerBrief({ goal: "Show me my next best agency mission." }) }));
       if (url.pathname === "/api/v1/partner/brief" && req.method === "POST") return json(res, 200, wrap({ partner: createPartnerBrief(await readJson(req)) }));
+      if (url.pathname === "/api/v1/agent-os" && req.method === "GET") return json(res, 200, wrap({ agentOS: agentOsSnapshot() }));
       if (url.pathname === "/api/v1/intelligence") return json(res, 200, wrap(platform.intelligence()));
       if (url.pathname === "/api/v1/entities" && req.method === "GET") return json(res, 200, wrap({ entities: platform.entities() }));
       if (url.pathname === "/api/v1/entities" && req.method === "POST") return json(res, 200, wrap({ entity: platform.createEntity(await readJson(req)) }));

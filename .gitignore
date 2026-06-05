@@ -1,6 +1,11 @@
-node_modules/
+*.log
+.DS_Store
 .env
 .env.*
-*.log
+data/memory/partner-memory.json
+data/missions/latest-partner-mission.json
+data/partner/latest-brief.json
+data/proof-ledger.json
+data/runtime/live-dashboard-state.json
 dist/
-.DS_Store
+node_modules/

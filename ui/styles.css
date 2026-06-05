@@ -157,3 +157,9 @@ button{cursor:pointer}button:hover{transform:translateY(-1px);filter:brightness(
 @media(max-width:900px){
   .loop-grid{grid-template-columns:1fr}
 }
+
+.cyvx-page-root{margin-bottom:18px}
+.cyvx-page-root h2{font-size:clamp(34px,7vw,74px);line-height:.9;margin:8px 0 12px}
+.page-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:18px}
+.side-nav button.active{background:linear-gradient(90deg,#38d5ff,#a855f7)!important;color:#fff!important}
+@media(max-width:900px){.page-grid{grid-template-columns:1fr}.cyvx-page-root h2{font-size:38px}}

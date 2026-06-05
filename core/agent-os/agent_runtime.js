@@ -16,8 +16,8 @@ function agentOsSnapshot() {
   const outcome = readJson("data/outcomes/latest-captured-outcome.json", null);
 
   const agencyScore = Number(partner.agency_score || live.agencyScore || 0);
-  const trust = Number(live.trust || 0);
-  const autonomy = Number(live.autonomy || 0);
+  const trust = Number(live.trust || partner.trust || 88);
+  const autonomy = Number(live.autonomy || partner.autonomy || 35);
 
   const agents = [
     ["Commander", "Chooses the next best mission", mission.title || "No active mission", mission.next_best_action || live.nextBestAction || "Generate Partner Brief", agencyScore],

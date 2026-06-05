@@ -35,31 +35,35 @@ function collectionPath(baseDir, name) {
   return path.join(baseDir || path.join(__dirname, "..", "..", "data", "agency-os"), `${name}.json`);
 }
 
+function seedEnterpriseState(baseDir) {
+  const seed = {
+    agency: { name: "CYVX Enterprise OS", mode: "autonomous" },
+    goals: [{ id: "goal-seed", title: "Convert one person into an autonomous enterprise", confidence: 0.88 }],
+    constraints: [{ id: "constraint-seed", title: "Execution bandwidth", confidence: 0.72 }],
+    opportunities: [{ id: "opportunity-seed", title: "Revenue pilot", value: 18000, roi: 3.4, confidence: 0.86, nextAction: "Launch proof-backed mission" }],
+    missions: [{ id: "mission-seed", title: "Launch proof loop", status: "active", stage: "execution", confidence: 0.82, roi: 2.9, risk: 0.24 }],
+    decisions: [{ id: "decision-seed", title: "Prioritize proof loop", confidence: 0.84 }],
+    assets: [{ id: "asset-seed", title: "Autonomous agency runtime", type: "automation", status: "active" }],
+    predictions: [{ id: "prediction-seed", title: "Revenue forecast", confidence: 0.79 }],
+    outcomes: [{ id: "outcome-seed", title: "First measurable outcome", status: "measured", value: 12000 }],
+    learning: [{ id: "learning-seed", title: "Fastest path to value", lesson: "Small proof loops compound faster than large plans.", confidence: 0.83 }],
+    approvals: [{ id: "approval-seed", title: "Approve proof loop", status: "approved", confidence: 0.82 }],
+    auditEvents: [{ id: "audit-seed", title: "Cycle initialized", actor: "Ω Executive", action: "agency.cycle", result: "ok", confidence: 0.88 }],
+    agencyMemory: [{ id: "memory-seed", summary: "Seeded enterprise memory for the operating OS.", createdAt: iso() }],
+    revenueEvents: [{ id: "revenue-seed", title: "Pilot revenue", value: 12000, confidence: 0.8 }],
+    metrics: { missions: 1, opportunities: 1, revenue: 12000, confidence: 0.82 },
+    updatedAt: iso(),
+  };
+  const file = statePath(baseDir);
+  ensureDir(path.dirname(file));
+  fs.writeFileSync(file, JSON.stringify(seed, null, 2));
+  return seed;
+}
+
 function loadState(baseDir) {
   const file = statePath(baseDir);
   ensureDir(path.dirname(file));
-  if (!fs.existsSync(file)) {
-    const seed = {
-      agency: { name: "CYVX Enterprise OS", mode: "autonomous" },
-      goals: [],
-      constraints: [],
-      opportunities: [],
-      missions: [],
-      decisions: [],
-      assets: [],
-      predictions: [],
-      outcomes: [],
-      learning: [],
-      approvals: [],
-      auditEvents: [],
-      agencyMemory: [],
-      revenueEvents: [],
-      metrics: { missions: 0, opportunities: 0, revenue: 0, confidence: 0.75 },
-      updatedAt: iso(),
-    };
-    fs.writeFileSync(file, JSON.stringify(seed, null, 2));
-    return seed;
-  }
+  if (!fs.existsSync(file)) return seedEnterpriseState(baseDir);
   return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 

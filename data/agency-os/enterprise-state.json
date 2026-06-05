@@ -1,0 +1,26 @@
+{
+  "agency": {
+    "name": "CYVX Enterprise OS",
+    "mode": "autonomous"
+  },
+  "goals": [],
+  "constraints": [],
+  "opportunities": [],
+  "missions": [],
+  "decisions": [],
+  "assets": [],
+  "predictions": [],
+  "outcomes": [],
+  "learning": [],
+  "approvals": [],
+  "auditEvents": [],
+  "agencyMemory": [],
+  "revenueEvents": [],
+  "metrics": {
+    "missions": 0,
+    "opportunities": 0,
+    "revenue": 0,
+    "confidence": 0.75
+  },
+  "updatedAt": "2026-06-05T16:05:12.097Z"
+}

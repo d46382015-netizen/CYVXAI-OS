@@ -1,71 +1,114 @@
 "use strict";
 
-function getWorkspaceRoot(){
-  let root=document.getElementById("workspace-root");
-  if(root) return root;
+const WORKSPACES = {
+  "Command Center":["Agency Score","Top Constraint","Current Mission","Next Best Action"],
+  "Reality Intake":["Paste Reality","Detected Constraints","Signals","Proof Inputs"],
+  "Mission Control":["Active Missions","Success Metrics","Dependencies","Owners"],
+  "Execution Board":["Queued Actions","In Progress","Completed","Blocked"],
+  "Intelligence Hub":["Patterns","Recommendations","Priorities","Truth Model"],
+  "Reality Graph":["Entities","Edges","Constraints","Flow Map"],
+  "Opportunities":["Opportunity Radar","Confidence","Expected Value","Entry Vector"],
+  "Simulations":["Scenario","Risk","Upside","Decision"],
+  "Decision Center":["Decision Brief","Tradeoffs","Confidence","Outcome History"],
+  "Performance":["Agency Score","Missions Completed","Outcomes Captured","Learning Rate"],
+  "Governance":["Trust Score","Approvals","Policy","Audit Log"],
+  "Agent OS":["Commander","Architect","Executor","Auditor"]
+};
 
-  const hero=document.querySelector(".hero");
-  root=document.createElement("div");
-  root.id="workspace-root";
+function main(){
+  return document.querySelector("main") || document.querySelector(".main") || document.body;
+}
 
-  if(hero){
-    hero.parentNode.insertBefore(root,hero);
-    hero.style.display="";
-  }else{
-    document.body.prepend(root);
+function installWorkspaceRoot(){
+  const m = main();
+  if(document.getElementById("workspace-root")) return;
+
+  const root = document.createElement("section");
+  root.id = "workspace-root";
+  root.className = "workspace-root";
+
+  const children = [...m.children];
+  for(const child of children){
+    if(child.id === "workspace-root") continue;
+    child.classList.add("workspace-original");
+    child.dataset.workspaceOriginal = "1";
   }
 
-  return root;
+  m.prepend(root);
 }
 
-function renderWorkspace(title){
-  const root=getWorkspaceRoot();
+function showOriginalDashboard(){
+  const root = document.getElementById("workspace-root");
+  if(root) root.innerHTML = "";
+  document.querySelectorAll("[data-workspace-original='1']").forEach(el=>{
+    el.style.display = "";
+  });
+}
 
-  root.innerHTML=`
-  <section class="workspace-view">
-    <div class="workspace-header">
-      <p class="kicker">CYVX Workspace</p>
-      <h1>${title}</h1>
-    </div>
+function hideOriginalDashboard(){
+  document.querySelectorAll("[data-workspace-original='1']").forEach(el=>{
+    el.style.display = "none";
+  });
+}
 
-    <div class="workspace-grid">
-      <article class="runtime-panel">
-        <h3>Overview</h3>
-        <p>${title} workspace active.</p>
-      </article>
+function renderWorkspace(name){
+  installWorkspaceRoot();
+  const root = document.getElementById("workspace-root");
+  const items = WORKSPACES[name] || WORKSPACES["Command Center"];
 
-      <article class="runtime-panel">
-        <h3>Actions</h3>
-        <p>Connected runtime actions appear here.</p>
-      </article>
+  hideOriginalDashboard();
 
-      <article class="runtime-panel">
-        <h3>Data</h3>
-        <p>Live API data appears here.</p>
-      </article>
+  root.innerHTML = `
+    <section class="workspace-shell">
+      <div class="workspace-title-row">
+        <div>
+          <p class="kicker">CYVX Workspace</p>
+          <h1>${name}</h1>
+          <p>${name} replaces the center dashboard workspace.</p>
+        </div>
+        <button class="secondary" id="workspaceBack">Command Center</button>
+      </div>
 
-      <article class="runtime-panel">
-        <h3>Outcomes</h3>
-        <p>Execution evidence appears here.</p>
-      </article>
-    </div>
-  </section>
+      <div class="workspace-grid">
+        ${items.map(x=>`
+          <article class="runtime-panel workspace-card">
+            <p class="kicker">${name}</p>
+            <h3>${x}</h3>
+            <p>Live ${x.toLowerCase()} module ready.</p>
+          </article>
+        `).join("")}
+      </div>
+    </section>
   `;
+
+  document.getElementById("workspaceBack")?.addEventListener("click", ()=>{
+    showOriginalDashboard();
+    document.querySelectorAll(".side-nav button").forEach(b=>b.classList.remove("active"));
+  });
+
+  document.querySelectorAll(".side-nav button").forEach(b=>{
+    b.classList.toggle("active", b.textContent.trim() === name);
+  });
+
+  window.scrollTo(0,0);
 }
 
-document.addEventListener("click",(e)=>{
-  const btn=e.target.closest(".side-nav button");
+document.addEventListener("click", function(e){
+  const btn = e.target.closest(".side-nav button");
   if(!btn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
 
-  const name=btn.textContent.trim();
-
-  const hero=document.querySelector(".hero");
-  const metrics=document.querySelector(".metrics");
-  const nba=document.querySelector(".nba");
-
-  if(hero) hero.style.display="none";
-  if(metrics) metrics.style.display="none";
-  if(nba) nba.style.display="none";
+  const name = btn.textContent.trim();
+  if(name === "Command Center"){
+    installWorkspaceRoot();
+    showOriginalDashboard();
+    document.querySelectorAll(".side-nav button").forEach(b=>b.classList.toggle("active", b.textContent.trim() === name));
+    return;
+  }
 
   renderWorkspace(name);
-},true);
+}, true);
+
+window.addEventListener("DOMContentLoaded", installWorkspaceRoot);

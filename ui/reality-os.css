@@ -233,3 +233,240 @@
     grid-template-columns:1fr;
   }
 }
+
+/* CYVX Ω refinement pass */
+body{
+  background:
+    radial-gradient(circle at 18% 12%,rgba(123,44,255,.22),transparent 28%),
+    radial-gradient(circle at 88% 18%,rgba(22,139,255,.18),transparent 30%),
+    #020511!important;
+}
+#realityOS{
+  max-width:1500px;
+  margin:0 auto;
+}
+.ro-twin{
+  position:relative;
+  overflow:hidden;
+}
+.ro-twin:before{
+  content:"";
+  position:absolute;
+  inset:-40%;
+  background:conic-gradient(from 180deg,transparent,rgba(65,220,255,.12),transparent,rgba(160,70,255,.13),transparent);
+  animation:roSpin 14s linear infinite;
+  pointer-events:none;
+}
+.ro-twin>*{position:relative;z-index:1}
+.ro-core{
+  position:relative;
+}
+.ro-core:after{
+  content:"";
+  position:absolute;
+  inset:-9px;
+  border-radius:50%;
+  border:1px solid rgba(80,220,255,.35);
+  box-shadow:0 0 30px rgba(80,220,255,.28);
+}
+.ro-twin h2{
+  background:linear-gradient(90deg,#fff,#74eaff,#a65cff);
+  -webkit-background-clip:text;
+  color:transparent;
+}
+.ro-state article{
+  backdrop-filter:blur(10px);
+}
+.ro-layout{
+  grid-template-columns:132px minmax(0,1fr) 300px;
+}
+.ro-rail{
+  gap:7px;
+}
+.ro-rail button{
+  position:relative;
+  overflow:hidden;
+}
+.ro-rail button:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
+  transform:translateX(-120%);
+}
+.ro-rail button.active:after{
+  animation:roSweep 2.2s ease-in-out infinite;
+}
+.ro-field{
+  padding:14px;
+}
+.ro-field-head{
+  align-items:center;
+}
+.ro-field-head h2{
+  letter-spacing:-.06em;
+}
+.ro-graph{
+  height:min(52vh,430px);
+  min-height:310px;
+  border:1px solid rgba(120,135,255,.14);
+  background:
+    radial-gradient(circle at center,rgba(110,50,255,.28),transparent 34%),
+    radial-gradient(circle at 20% 70%,rgba(32,255,154,.08),transparent 24%),
+    linear-gradient(180deg,#030816,#050a19);
+}
+.ro-graph:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:radial-gradient(circle at center,black,transparent 72%);
+}
+.ro-graph:after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:160px;
+  height:160px;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(126,87,255,.22),transparent 68%);
+  animation:roPulseField 3s ease-in-out infinite;
+}
+.ro-graph line{
+  stroke-dasharray:6 10;
+  animation:roDash 9s linear infinite;
+}
+.ro-node{
+  letter-spacing:.04em;
+  transition:.22s ease;
+}
+.ro-node:hover{
+  transform:scale(1.08);
+  border-color:rgba(32,255,154,.75);
+}
+.you{
+  font-size:13px;
+  padding:12px 16px;
+  box-shadow:0 0 45px rgba(126,87,255,.55);
+}
+.opportunities{
+  border-color:rgba(32,255,154,.7);
+  color:#dfffee;
+  box-shadow:0 0 38px rgba(32,255,154,.24);
+}
+.constraints{
+  border-color:rgba(255,74,106,.55);
+}
+.missions{
+  border-color:rgba(255,211,90,.65);
+}
+.ro-thoughts strong{
+  background:linear-gradient(90deg,#20ff9a,#74eaff);
+  -webkit-background-clip:text;
+  color:transparent;
+}
+.ro-bottom{
+  grid-template-columns:1.05fr .95fr;
+}
+.ro-stream div,.ro-agents div{
+  display:grid;
+  grid-template-columns:64px 1fr;
+  gap:8px;
+  align-items:start;
+}
+.ro-agents div{
+  grid-template-columns:1fr auto;
+}
+.ro-agents span{
+  grid-column:1/-1;
+}
+.ro-agents small{
+  grid-column:1/-1;
+}
+.ro-stream div:hover,.ro-agents div:hover{
+  background:rgba(255,255,255,.035);
+  margin-left:-8px;
+  margin-right:-8px;
+  padding-left:8px;
+  padding-right:8px;
+  border-radius:12px;
+}
+.ro-thoughts,.ro-stream,.ro-agents,.ro-field,.ro-rail,.ro-twin{
+  backdrop-filter:blur(14px);
+}
+@keyframes roSpin{
+  to{transform:rotate(360deg)}
+}
+@keyframes roSweep{
+  0%{transform:translateX(-120%)}
+  55%,100%{transform:translateX(120%)}
+}
+@keyframes roDash{
+  to{stroke-dashoffset:-180}
+}
+@keyframes roPulseField{
+  0%,100%{opacity:.3;transform:translate(-50%,-50%) scale(.92)}
+  50%{opacity:.7;transform:translate(-50%,-50%) scale(1.08)}
+}
+@media(max-width:900px){
+  #realityOS{
+    gap:10px;
+  }
+  .ro-twin{
+    padding:10px;
+    gap:10px;
+  }
+  .ro-twin h1{
+    font-size:13px;
+  }
+  .ro-twin h2{
+    font-size:24px;
+  }
+  .ro-state{
+    gap:6px;
+  }
+  .ro-state span{
+    font-size:9px;
+  }
+  .ro-layout{
+    gap:10px;
+  }
+  .ro-rail{
+    margin:-2px 0;
+  }
+  .ro-field{
+    padding:10px;
+  }
+  .ro-field-head h2{
+    font-size:28px;
+  }
+  .ro-field-head span{
+    display:none;
+  }
+  .ro-graph{
+    height:58vh;
+    min-height:360px;
+  }
+  .ro-node{
+    font-size:9px;
+    padding:7px 9px;
+  }
+  .you{
+    font-size:11px;
+    padding:9px 12px;
+  }
+  .cyvx{top:7%;left:44%}
+  .people{left:8%;top:19%}
+  .projects{left:32%;top:16%}
+  .revenue{left:62%;top:18%}
+  .missions{left:74%;top:29%}
+  .opportunities{left:34%;top:47%}
+  .constraints{left:9%;top:78%}
+  .agents{left:43%;top:82%}
+  .assets{left:72%;top:76%}
+}

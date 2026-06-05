@@ -290,3 +290,107 @@ button{cursor:pointer}button:hover{transform:translateY(-1px);filter:brightness(
 .workspace-wide{
   margin-top:16px;
 }
+
+.soft-hidden-hero{display:none!important}
+
+.agency-center{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 320px;
+  gap:18px;
+  margin-bottom:22px;
+}
+.agency-hero-panel,
+.agency-mission,
+.agency-next,
+.agency-feed,
+.agency-radar,
+.agency-agents,
+.agency-partner-panel,
+.agency-metrics-row article{
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(8,14,30,.82);
+  border-radius:24px;
+  box-shadow:0 20px 80px rgba(0,0,0,.28);
+}
+.agency-hero-panel{
+  grid-column:1;
+  display:grid;
+  grid-template-columns:1fr 1fr 1.2fr;
+  gap:22px;
+  align-items:center;
+  padding:28px;
+  min-height:250px;
+}
+.agency-score-card h1{
+  font-size:clamp(72px,12vw,150px);
+  line-height:.8;
+  margin:12px 0;
+  background:linear-gradient(90deg,#39dfff,#a441ff);
+  -webkit-background-clip:text;
+  color:transparent;
+}
+.agency-score-card h1 span{font-size:28px;color:#aeb9d8}
+.agency-up,.gain{color:#5fffd2;font-weight:900}
+.agency-orb{
+  width:220px;height:220px;margin:auto;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#65fff0,#645cff 38%,#b93cff 70%,#020817 100%);
+  box-shadow:0 0 80px rgba(126,87,255,.55);
+}
+.agency-bars h3{color:#5fffd2}
+.agency-bar-row{margin:12px 0}
+.agency-bar-row span{display:inline-block;width:120px}
+.agency-bar-row b{float:right}
+.agency-bar-row i{display:block;height:6px;background:rgba(255,255,255,.12);border-radius:99px;margin-top:7px;overflow:hidden}
+.agency-bar-row em{display:block;height:100%;background:linear-gradient(90deg,#39dfff,#a441ff,#5fffd2)}
+.agency-main-grid{
+  grid-column:1;
+  display:grid;
+  grid-template-columns:1.2fr .8fr;
+  gap:18px;
+}
+.agency-mission,.agency-next,.agency-feed,.agency-radar,.agency-agents{padding:24px}
+.agency-mission h2,.agency-next h2{font-size:clamp(28px,4vw,48px);line-height:.95}
+.mission-chips{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+.mission-chips span{padding:8px 12px;border-radius:99px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+.agency-next b{display:block;font-size:44px;color:#4f8cff;margin-top:24px}
+.agency-metrics-row{
+  grid-column:1;
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:0;
+  overflow:hidden;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(8,14,30,.82);
+}
+.agency-metrics-row article{border-radius:0;padding:18px;box-shadow:none}
+.agency-metrics-row span{display:block;color:#9aa8c5;font-size:12px;text-transform:uppercase}
+.agency-metrics-row b{font-size:26px}
+.agency-bottom-grid{
+  grid-column:1;
+  display:grid;
+  grid-template-columns:1fr 1fr 1.2fr;
+  gap:18px;
+}
+.agency-feed p span{color:#4f8cff;margin-right:10px}
+.agency-agents p{border-top:1px solid rgba(255,255,255,.08);padding-top:10px}
+.agency-partner-panel{
+  grid-column:2;
+  grid-row:1 / span 4;
+  padding:26px;
+  position:sticky;
+  top:18px;
+  align-self:start;
+}
+.agency-partner-panel h2{
+  font-size:32px;
+  line-height:.95;
+  color:#a441ff;
+}
+@media(max-width:1100px){
+  .agency-center{grid-template-columns:1fr}
+  .agency-partner-panel{grid-column:1;grid-row:auto;position:relative}
+  .agency-hero-panel,.agency-main-grid,.agency-bottom-grid{grid-template-columns:1fr}
+  .agency-metrics-row{grid-template-columns:1fr 1fr}
+  .agency-orb{width:180px;height:180px}
+}

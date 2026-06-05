@@ -12,7 +12,10 @@
     "dev": "node ./api/index.js",
     "serve": "node ./ui/server.js",
     "test": "node --test",
-    "partner": "node ./scripts/cyvx-partner-cli.js"
+    "partner": "node ./scripts/cyvx-partner-cli.js",
+    "strategy": "node scripts/cyvx-operating-loop.js",
+    "cyvx": "node scripts/cyvx-operating-loop.js",
+    "agency:loop": "node scripts/cyvx-agency-loop.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",

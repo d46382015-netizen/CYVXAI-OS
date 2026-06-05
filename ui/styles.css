@@ -163,3 +163,30 @@ button{cursor:pointer}button:hover{transform:translateY(-1px);filter:brightness(
 .page-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:18px}
 .side-nav button.active{background:linear-gradient(90deg,#38d5ff,#a855f7)!important;color:#fff!important}
 @media(max-width:900px){.page-grid{grid-template-columns:1fr}.cyvx-page-root h2{font-size:38px}}
+
+
+.workspace-view{
+  width:100%;
+  margin-bottom:24px;
+}
+
+.workspace-header{
+  margin-bottom:18px;
+}
+
+.workspace-header h1{
+  font-size:clamp(40px,8vw,90px);
+  line-height:.9;
+}
+
+.workspace-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+}
+
+@media(max-width:900px){
+  .workspace-grid{
+    grid-template-columns:1fr;
+  }
+}

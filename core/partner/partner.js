@@ -56,31 +56,67 @@ function createPartnerBrief(input = {}) {
   for (const r of resources) memory.resources.push({ value: r, at: now });
   for (const c of constraints) memory.constraints.push({ value: c, at: now });
 
-  const topConstraint =
-    constraints[0] ||
-    (raw.includes("customer") || raw.includes("sales") ? "Distribution and proof are the current bottlenecks." :
-    raw.includes("content") ? "Consistent content production and publishing cadence are the bottlenecks." :
-    raw.includes("business") ? "The offer must be compressed into one clear buyer outcome." :
-    raw.includes("repo") || raw.includes("github") ? "Existing code must be compressed into one user-facing agency loop." :
-    "The next bottleneck is converting intent into one measurable mission.");
+  const classified =
+    raw.includes("money") || raw.includes("income") || raw.includes("revenue") ? "income" :
+    raw.includes("customer") || raw.includes("client") || raw.includes("sales") ? "sales" :
+    raw.includes("content") || raw.includes("tiktok") || raw.includes("youtube") || raw.includes("video") ? "content" :
+    raw.includes("repo") || raw.includes("github") || raw.includes("code") || raw.includes("app") ? "product" :
+    raw.includes("health") || raw.includes("fitness") || raw.includes("sober") ? "life" :
+    "agency";
 
-  const opportunity =
-    raw.includes("money") || raw.includes("income") || raw.includes("revenue") ? "Build a proof-backed income mission that creates an asset, offer, and outreach path." :
-    raw.includes("content") ? "Turn one goal into a 20-piece content batch with a measurable call to action." :
-    raw.includes("business") ? "Launch one buyer-specific offer page and one outbound proof pack." :
-    raw.includes("repo") || raw.includes("github") ? "Turn the running CYVX platform into CYVX Partner Alpha." :
-    "Create one complete goal → mission → outcome loop.";
+  const playbooks = {
+    income: {
+      constraint: "No repeatable path from skill to paid demand.",
+      opportunity: "Package one specific outcome into a simple paid offer and test it with real buyers.",
+      mission: "Create and test one paid offer",
+      nba: "Write one offer, identify 10 reachable buyers, send 10 messages, and record replies."
+    },
+    sales: {
+      constraint: "No proof-backed distribution loop.",
+      opportunity: "Turn one result, demo, or capability into a buyer-specific proof pack.",
+      mission: "Acquire one proof conversation",
+      nba: "Create a short proof pack and contact 5 buyers with one clear outcome."
+    },
+    content: {
+      constraint: "Content lacks a repeatable production-to-conversion system.",
+      opportunity: "Turn one core idea into a batch of posts with a measurable call to action.",
+      mission: "Publish one content batch",
+      nba: "Create 10 hooks, 3 short scripts, 1 CTA, and publish the best piece today."
+    },
+    product: {
+      constraint: "Product capability is not compressed into one obvious user value moment.",
+      opportunity: "Make the homepage prove one outcome in under 60 seconds.",
+      mission: "Ship one undeniable value moment",
+      nba: "Make the first screen ask for a goal and return score, constraint, mission, and outcome capture."
+    },
+    life: {
+      constraint: "Daily actions are not connected to a measurable recovery or growth loop.",
+      opportunity: "Convert goals into a visible daily mission and proof record.",
+      mission: "Complete one stabilizing daily mission",
+      nba: "Choose one action that improves tomorrow, complete it, and record the result."
+    },
+    agency: {
+      constraint: "Intent is not yet converted into a measurable outcome loop.",
+      opportunity: "Create one clear mission from the goal and capture the result.",
+      mission: "Complete one agency loop",
+      nba: "Define the goal, choose the smallest measurable action, execute it, and record the outcome."
+    }
+  };
+
+  const selected = playbooks[classified];
+  const topConstraint = constraints[0] || selected.constraint;
+  const opportunity = selected.opportunity;
 
   const mission = {
     id: "mission-" + Date.now(),
-    title: "Create one measurable agency loop",
+    title: selected.mission,
     goal,
     top_constraint: topConstraint,
     opportunity,
-    next_best_action: "Complete one visible mission, record the outcome, and update the agency score.",
+    next_best_action: selected.nba,
     status: "active",
     created_at: now,
-    success_metric: "A user can see memory, next best action, mission, outcome, and agency score in one flow."
+    success_metric: "A specific action is completed and recorded as evidence, not just planned."
   };
 
   const outcomes = readJson(p("data/outcomes/latest-captured-outcome.json"), null);

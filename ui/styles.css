@@ -275,3 +275,18 @@ button{cursor:pointer}button:hover{transform:translateY(-1px);filter:brightness(
   -webkit-background-clip:text;
   color:transparent;
 }
+
+#missionOutcomeText{
+  width:100%;
+  min-height:120px;
+  margin:12px 0;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.06);
+  color:#fff;
+  padding:14px;
+  font:inherit;
+}
+.workspace-wide{
+  margin-top:16px;
+}

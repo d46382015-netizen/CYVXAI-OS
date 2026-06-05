@@ -1102,3 +1102,109 @@ document.addEventListener("click",e=>{
 window.addEventListener("DOMContentLoaded",()=>{
   setTimeout(()=>hydrateCyvxWorkspace("Command Center"),500);
 });
+
+
+async function cyvxJson(url){
+  try{
+    const r=await fetch(url+"?ts="+Date.now());
+    return r.ok ? await r.json() : null;
+  }catch(e){ return null; }
+}
+
+async function hydrateMissionControlWorkspace(){
+  const root=document.getElementById("cyvxWorkspace");
+  if(!root || root.style.display==="none") return;
+
+  const partnerRaw=await cyvxJson("/api/v1/partner/brief");
+  const agentRaw=await cyvxJson("/api/v1/agent-os");
+
+  const partner=partnerRaw?.partner || partnerRaw?.data?.partner || {};
+  const agentOS=agentRaw?.agentOS || agentRaw?.data?.agentOS || {};
+  const mission=partner.mission || agentOS.active_mission || {};
+
+  const esc=x=>String(x??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+  root.innerHTML=`
+    <div class="workspace-title-row">
+      <div>
+        <p class="kicker">Live CYVX Workspace</p>
+        <h1>Mission Control</h1>
+        <p>Goal → mission → action → outcome → updated agency.</p>
+      </div>
+      <button class="primary" id="workspaceCommandCenter">Command Center</button>
+    </div>
+
+    <div class="workspace-grid">
+      <article class="runtime-panel workspace-card">
+        <p class="kicker">Current Mission</p>
+        <h3>${esc(mission.title || "No active mission")}</h3>
+        <p>${esc(mission.goal || partner.goal || "No goal loaded.")}</p>
+      </article>
+
+      <article class="runtime-panel workspace-card">
+        <p class="kicker">Top Constraint</p>
+        <h3>${esc(partner.top_constraint || mission.top_constraint || "No constraint loaded")}</h3>
+        <p>${esc(partner.opportunity || mission.opportunity || "No opportunity loaded.")}</p>
+      </article>
+
+      <article class="runtime-panel workspace-card">
+        <p class="kicker">Next Best Action</p>
+        <h3>${esc(mission.next_best_action || agentOS.system_next_action || "No action loaded")}</h3>
+        <p>Owner: Commander → Executor → Auditor</p>
+      </article>
+
+      <article class="runtime-panel workspace-card">
+        <p class="kicker">Agency Proof</p>
+        <h3>${esc(partner.agency_score ?? agentOS.agency_score ?? "—")}</h3>
+        <p>Proof level: ${esc(partner.proof_level || agentOS.proof_level || "early")}</p>
+      </article>
+    </div>
+
+    <article class="runtime-panel workspace-wide">
+      <p class="kicker">Capture Mission Outcome</p>
+      <h3>Record what happened</h3>
+      <textarea id="missionOutcomeText" placeholder="What actually happened?"></textarea>
+      <button class="primary" id="missionOutcomeBtn">Capture Outcome + Refresh Mission</button>
+      <p id="missionOutcomeStatus"></p>
+    </article>
+  `;
+
+  document.getElementById("workspaceCommandCenter")?.addEventListener("click",()=>renderCyvxWorkspace("Command Center"));
+
+  document.getElementById("missionOutcomeBtn")?.addEventListener("click",async()=>{
+    const actual=document.getElementById("missionOutcomeText")?.value || "";
+    const status=document.getElementById("missionOutcomeStatus");
+    if(!actual.trim()){
+      status.textContent="Add an actual outcome first.";
+      return;
+    }
+
+    const res=await fetch("/api/v1/outcome",{
+      method:"POST",
+      headers:{"content-type":"application/json"},
+      body:JSON.stringify({
+        mission:mission.title || "Mission Control",
+        expectedOutcome:mission.success_metric || "Mission should create measurable agency.",
+        actualOutcome:actual,
+        success:"complete"
+      })
+    });
+
+    await fetch("/api/v1/partner/brief",{
+      method:"POST",
+      headers:{"content-type":"application/json"},
+      body:JSON.stringify({ goal: mission.goal || partner.goal || "Continue current CYVX mission." })
+    });
+
+    status.textContent=res.ok ? "Outcome captured. Refreshing mission state..." : "Outcome capture failed.";
+    setTimeout(hydrateMissionControlWorkspace,600);
+  });
+}
+
+document.addEventListener("click",e=>{
+  const btn=e.target.closest(".side-nav button");
+  if(!btn) return;
+  if(btn.textContent.trim()==="Mission Control"){
+    setTimeout(hydrateMissionControlWorkspace,140);
+  }
+},true);

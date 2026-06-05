@@ -11,6 +11,7 @@
 const { captureOutcome } = require("./outcome");
 const { createPartnerBrief } = require("../core/partner/partner");
 const { agentOsSnapshot } = require("../core/agent-os/agent_runtime");
+const { cognitiveCouncilSnapshot } = require("../core/council/cognitive_council");
 const { realityOsSnapshot } = require("../core/reality-os/primitives");
 const { execFileSync } = require("child_process");
 function cyvxOperatingLoop(goal){ return JSON.parse(execFileSync(process.execPath,["scripts/cyvx-operating-loop.js",goal||"Build enterprise value"],{encoding:"utf8"})); }
@@ -205,6 +206,7 @@ function createApiServer(controller, options = {}) {
       if (url.pathname === "/api/v1/partner/brief" && req.method === "GET") return json(res, 200, wrap({ partner: createPartnerBrief({ goal: "Show me my next best agency mission." }) }));
       if (url.pathname === "/api/v1/partner/brief" && req.method === "POST") return json(res, 200, wrap({ partner: createPartnerBrief(await readJson(req)) }));
       if (url.pathname === "/api/v1/agent-os" && req.method === "GET") return json(res, 200, wrap({ agentOS: agentOsSnapshot() }));
+      if (url.pathname === "/api/v1/council" && req.method === "GET") return json(res, 200, wrap({ council: cognitiveCouncilSnapshot() }));
       if (url.pathname === "/api/v1/reality-os" && req.method === "GET") return json(res, 200, wrap({ realityOS: realityOsSnapshot() }));
       if (url.pathname === "/api/v1/operating-loop" && req.method === "POST") { const body=await readJson(req); return json(res,200,wrap({ operatingLoop: cyvxOperatingLoop(body.goal || body.objective || "Build enterprise value") })); }
       if (url.pathname === "/api/v1/operating-loop" && req.method === "GET") return json(res,200,wrap({ operatingLoop: cyvxOperatingLoop("Build enterprise value") }));

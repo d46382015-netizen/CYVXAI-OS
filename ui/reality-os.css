@@ -147,3 +147,35 @@ body{background:radial-gradient(circle at 20% 10%,rgba(123,44,255,.25),transpare
     min-height:360px!important;
   }
 }
+
+.council-member b{
+  color:#fff;
+  letter-spacing:.08em;
+}
+.council-member:nth-child(2) b{color:#74eaff}
+.council-member:nth-child(3) b{color:#b879ff}
+.council-member:nth-child(4) b{color:#ffcf6a}
+.council-member:nth-child(5) b{color:#20ff9a}
+.aeon-synthesis{
+  margin-top:16px;
+  border-top:1px solid rgba(255,255,255,.1);
+  padding-top:14px;
+}
+.aeon-synthesis p{
+  color:#a65cff!important;
+  font-weight:900;
+  letter-spacing:.14em;
+}
+.aeon-synthesis h3{
+  margin:6px 0;
+  font-size:22px;
+}
+.aeon-synthesis span{
+  display:block;
+  color:#d7def5;
+  margin-bottom:10px;
+}
+.aeon-synthesis b{
+  display:block;
+  color:#20ff9a;
+}

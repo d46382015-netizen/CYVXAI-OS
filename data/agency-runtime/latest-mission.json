@@ -1,5 +1,5 @@
 {
-  "id": "agency-mission-1780674091400",
+  "id": "agency-mission-1780674978031",
   "title": "Run one autonomous agency loop",
   "goal": "Build a $10k/month autonomous agency",
   "constraint": "Distribution bottleneck",
@@ -8,5 +8,5 @@
   "owner": "AEON Ω",
   "status": "queued",
   "success_metric": "A real outcome is captured and converted into a lesson, asset, or next mission.",
-  "created_at": "2026-06-05T15:41:31.399Z"
+  "created_at": "2026-06-05T15:56:18.030Z"
 }

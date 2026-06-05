@@ -26,11 +26,12 @@ function words(x) {
 
 function scoreAgency({ memory, outcomes, mission }) {
   const completed = outcomes.filter(o => o.succeeded === true).length;
-  const total = Math.max(1, outcomes.length);
-  const outcomeScore = completed / total;
-  const memoryScore = Math.min(1, (memory.goals.length + memory.constraints.length + memory.resources.length) / 12);
-  const missionScore = mission ? 1 : 0;
-  return Math.round((outcomeScore * 40) + (memoryScore * 35) + (missionScore * 25));
+  const total = outcomes.length;
+  const outcomeScore = total ? Math.min(1, completed / Math.max(3, total)) : 0;
+  const memoryScore = Math.min(1, (memory.goals.length + memory.constraints.length + memory.resources.length) / 20);
+  const missionScore = mission ? 0.25 : 0;
+  const evidenceScore = Math.min(1, total / 10);
+  return Math.round((outcomeScore * 35) + (memoryScore * 20) + (missionScore * 20) + (evidenceScore * 25));
 }
 
 function createPartnerBrief(input = {}) {
@@ -98,6 +99,7 @@ function createPartnerBrief(input = {}) {
     created_at: now,
     primitive: "Agency",
     agency_score: agencyScore,
+    proof_level: agencyScore >= 80 ? "strong" : agencyScore >= 50 ? "forming" : "early",
     goal,
     memory_summary: {
       goals: memory.goals.length,

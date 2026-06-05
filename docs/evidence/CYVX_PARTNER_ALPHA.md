@@ -1,6 +1,6 @@
 # CYVX Partner Alpha
 
-Generated: 2026-06-05T15:56:18.211Z
+Generated: 2026-06-05T15:58:42.260Z
 
 ## Primitive
 Agency
@@ -9,7 +9,7 @@ Agency
 Build CYVX Partner Alpha into one measurable agency loop
 
 ## Agency Score
-41
+60
 
 ## Top Constraint
 must move fast

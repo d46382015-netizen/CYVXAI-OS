@@ -1,5 +1,5 @@
 {
-  "id": "council-session-1780674978031",
+  "id": "council-session-1780675122084",
   "kernel": "AEON Ω",
   "goal": "Build a $10k/month autonomous agency",
   "scores": {
@@ -25,7 +25,7 @@
       "current_focus": "Reality signal is incomplete; more evidence is needed.",
       "recommendation": "Verify the constraint with one measurable external signal.",
       "confidence": 72,
-      "observed_at": "2026-06-05T15:56:18.030Z"
+      "observed_at": "2026-06-05T15:58:42.083Z"
     },
     {
       "id": "odyssey",
@@ -42,7 +42,7 @@
       "current_focus": "The highest upside future comes from converting the goal into a visible outcome loop.",
       "recommendation": "Generate three future paths and choose the fastest validated path.",
       "confidence": 72,
-      "observed_at": "2026-06-05T15:56:18.030Z"
+      "observed_at": "2026-06-05T15:58:42.083Z"
     },
     {
       "id": "prometheus",
@@ -59,7 +59,7 @@
       "current_focus": "The next asset must directly support execution.",
       "recommendation": "Create one reusable asset that turns attention into action.",
       "confidence": 72,
-      "observed_at": "2026-06-05T15:56:18.030Z"
+      "observed_at": "2026-06-05T15:58:42.083Z"
     },
     {
       "id": "solon",
@@ -76,7 +76,7 @@
       "current_focus": "The strongest path is narrow execution.",
       "recommendation": "Choose the smallest action with the clearest feedback loop.",
       "confidence": 72,
-      "observed_at": "2026-06-05T15:56:18.030Z"
+      "observed_at": "2026-06-05T15:58:42.083Z"
     },
     {
       "id": "aurora",
@@ -93,11 +93,11 @@
       "current_focus": "Learning loops must compound before scale.",
       "recommendation": "Prioritize actions that create reusable distribution, trust, or revenue.",
       "confidence": 72,
-      "observed_at": "2026-06-05T15:56:18.030Z"
+      "observed_at": "2026-06-05T15:58:42.083Z"
     }
   ],
   "mission": {
-    "id": "agency-mission-1780674978031",
+    "id": "agency-mission-1780675122084",
     "title": "Run one autonomous agency loop",
     "goal": "Build a $10k/month autonomous agency",
     "constraint": "Distribution bottleneck",
@@ -106,10 +106,10 @@
     "owner": "AEON Ω",
     "status": "queued",
     "success_metric": "A real outcome is captured and converted into a lesson, asset, or next mission.",
-    "created_at": "2026-06-05T15:56:18.030Z"
+    "created_at": "2026-06-05T15:58:42.083Z"
   },
   "decision": {
-    "id": "decision-1780674978031",
+    "id": "decision-1780675122084",
     "question": "What should CYVX do next?",
     "synthesis": "AEON Ω selected the path with the clearest reality signal, smallest execution surface, and highest compounding upside.",
     "selected_path": "Execute the smallest measurable mission, capture the result, and let AEON update the model.",
@@ -124,16 +124,16 @@
       }
     ],
     "confidence": 91,
-    "created_at": "2026-06-05T15:56:18.030Z"
+    "created_at": "2026-06-05T15:58:42.083Z"
   },
   "asset": {
-    "id": "asset-1780674978031",
+    "id": "asset-1780675122084",
     "title": "Autonomous Agency Loop",
     "type": "runtime primitive",
     "purpose": "Convert reality into council deliberation, mission creation, decision memory, and learning.",
     "status": "active",
-    "created_at": "2026-06-05T15:56:18.030Z"
+    "created_at": "2026-06-05T15:58:42.083Z"
   },
   "autonomous": true,
-  "created_at": "2026-06-05T15:56:18.030Z"
+  "created_at": "2026-06-05T15:58:42.083Z"
 }

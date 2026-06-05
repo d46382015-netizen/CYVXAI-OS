@@ -1,14 +1,14 @@
 [
   {
-    "id": "approval-1780675321087-uwj4h",
+    "id": "approval-1780675385478-2437t",
     "type": "approval",
     "title": "Approve autonomous mission",
     "status": "approved",
     "priority": 3,
     "confidence": 0.78,
-    "createdAt": "2026-06-05T16:02:01.087Z",
-    "updatedAt": "2026-06-05T16:02:01.087Z",
-    "decisionId": "decision-1780675321086-7w5s1",
-    "missionId": "mission-1780675321086-q7oa2"
+    "createdAt": "2026-06-05T16:03:05.478Z",
+    "updatedAt": "2026-06-05T16:03:05.478Z",
+    "decisionId": "decision-1780675385477-8tvg3",
+    "missionId": "mission-1780675385476-t54kf"
   }
 ]

@@ -106,16 +106,18 @@ async function renderRealityOS(){
       </article>
 
       <article>
-        <p class="eyebrow">EXECUTION ENGINE</p>
-        ${(agents.length?agents:[
-          {name:"Commander",next_action:"Analyzing bottleneck",confidence:94},
-          {name:"Architect",next_action:"Structuring mission path",confidence:88},
-          {name:"Executor",next_action:"Preparing action loop",confidence:92}
-        ]).slice(0,4).map(a=>`
-          <div>
+        <p class="eyebrow">COGNITIVE COUNCIL</p>
+        ${[
+          {name:"ARGUS",next_action:"Reality: verifying what is true",confidence:94},
+          {name:"ODYSSEY",next_action:"Possibility: exploring alternate futures",confidence:88},
+          {name:"PROMETHEUS",next_action:"Creation: designing what can be built",confidence:91},
+          {name:"SOLON",next_action:"Judgment: ranking tradeoffs and leverage",confidence:93},
+          {name:"AURORA",next_action:"Growth: finding compounding outcomes",confidence:89}
+        ].map(a=>`
+          <div class="council-member">
             <b>${esc(a.name)}</b>
-            <span>${esc(a.next_action||"Working")}</span>
-            <small>${esc(a.confidence||88)}% confidence</small>
+            <span>${esc(a.next_action)}</span>
+            <small>${esc(a.confidence)}% confidence</small>
           </div>
         `).join("")}
       </article>
@@ -133,3 +135,23 @@ async function renderRealityOS(){
 }
 
 window.addEventListener("DOMContentLoaded",renderRealityOS);
+
+
+async function hydrateCouncil(){
+  const raw=await getJSON("/api/v1/council");
+  const council=raw.council||raw.data?.council;
+  if(!council)return;
+
+  const thoughts=document.querySelector(".ro-thoughts");
+  if(thoughts && !document.getElementById("aeonSynthesis")){
+    thoughts.insertAdjacentHTML("beforeend",`
+      <section id="aeonSynthesis" class="aeon-synthesis">
+        <p>AEON Ω SYNTHESIS</p>
+        <h3>${esc(council.synthesis.title)}</h3>
+        <span>${esc(council.synthesis.conclusion)}</span>
+        <b>${esc(council.synthesis.recommended_action)}</b>
+      </section>
+    `);
+  }
+}
+window.addEventListener("DOMContentLoaded",()=>setTimeout(hydrateCouncil,500));

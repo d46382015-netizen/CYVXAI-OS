@@ -1,0 +1,18 @@
+{
+  "id": "decision-1780663703010",
+  "question": "What should CYVX do next?",
+  "synthesis": "AEON Ω selected the path with the clearest reality signal, smallest execution surface, and highest compounding upside.",
+  "selected_path": "Execute the smallest measurable mission, capture the result, and let AEON update the model.",
+  "rejected_paths": [
+    {
+      "path": "Add more UI features",
+      "reason": "Lower leverage until agency loop is stronger."
+    },
+    {
+      "path": "Expand agent roles",
+      "reason": "Roles are weaker than perspective-based intelligence."
+    }
+  ],
+  "confidence": 91,
+  "created_at": "2026-06-05T12:48:23.008Z"
+}

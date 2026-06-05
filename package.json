@@ -15,7 +15,9 @@
     "partner": "node ./scripts/cyvx-partner-cli.js",
     "strategy": "node scripts/cyvx-operating-loop.js",
     "cyvx": "node scripts/cyvx-operating-loop.js",
-    "agency:loop": "node scripts/cyvx-agency-loop.js"
+    "agency:loop": "node scripts/cyvx-agency-loop.js",
+    "agency:tick": "node scripts/cyvx-agency-daemon.js",
+    "agency:daemon": "node scripts/cyvx-agency-daemon.js start"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",

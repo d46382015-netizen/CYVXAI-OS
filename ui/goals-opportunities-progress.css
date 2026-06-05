@@ -1,0 +1,88 @@
+.user-layer{
+  display:grid;
+  gap:18px;
+  margin-top:18px;
+}
+
+.user-card{
+  background:#060c1b;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:24px;
+  padding:22px;
+}
+
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+}
+
+.section-head h2{
+  margin:0;
+}
+
+.section-head span{
+  color:#9aa7c7;
+}
+
+.goal-cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+
+.goal-cards article{
+  background:#081428;
+  border-radius:16px;
+  padding:18px;
+}
+
+.opportunity-list{
+  display:grid;
+  gap:10px;
+}
+
+.opportunity-list article{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#081428;
+  border-radius:16px;
+  padding:16px;
+}
+
+.opportunity-list span{
+  color:#9b6cff;
+  font-weight:800;
+}
+
+.progress-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+
+.progress-grid article{
+  background:#081428;
+  border-radius:16px;
+  padding:18px;
+}
+
+.progress-grid label{
+  display:block;
+  color:#9aa7c7;
+  margin-bottom:8px;
+}
+
+@media(max-width:900px){
+
+  .goal-cards{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .progress-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+}

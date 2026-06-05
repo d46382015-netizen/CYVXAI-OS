@@ -1,0 +1,79 @@
+.cyvx-home-v2{
+  margin-bottom:20px;
+}
+
+.hero-card{
+  background:#060c1b;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:24px;
+  padding:24px;
+}
+
+.hero-header{
+  color:#9b6cff;
+  font-weight:800;
+  letter-spacing:.15em;
+}
+
+.hero-card h1{
+  font-size:clamp(32px,5vw,68px);
+  line-height:.95;
+  margin:16px 0 24px;
+}
+
+.goal-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.goal-grid button{
+  padding:16px;
+  border-radius:16px;
+}
+
+.recommendation{
+  margin-top:24px;
+  padding:24px;
+  border-radius:20px;
+  background:rgba(123,44,255,.08);
+}
+
+.recommendation span{
+  color:#9b6cff;
+}
+
+.recommendation h2{
+  margin:10px 0 18px;
+}
+
+.recommendation-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.recommendation-grid div{
+  background:#081428;
+  border-radius:14px;
+  padding:14px;
+}
+
+.execute-btn{
+  margin-top:20px;
+  width:100%;
+  padding:16px;
+  border-radius:16px;
+}
+
+@media(max-width:900px){
+
+  .goal-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .recommendation-grid{
+    grid-template-columns:1fr;
+  }
+
+}

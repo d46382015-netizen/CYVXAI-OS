@@ -1,0 +1,24 @@
+[
+  {
+    "id": "audit_event-1780675911924-4fwis",
+    "type": "audit_event",
+    "title": "Agency audit event",
+    "status": "active",
+    "priority": 3,
+    "confidence": 0.78,
+    "createdAt": "2026-06-05T16:11:51.924Z",
+    "updatedAt": "2026-06-05T16:11:51.924Z",
+    "actor": "Ω Executive",
+    "action": "agency.cycle",
+    "object": "mission-1780675911919-8b70j",
+    "result": "approved",
+    "timestamp": "2026-06-05T16:11:51.924Z",
+    "details": {
+      "goal": "Launch one measurable mission",
+      "bottlenecks": [
+        "Mission execution velocity"
+      ],
+      "recommendation": "Resolve mission execution velocity with one verifiable mission"
+    }
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "mission-1780675911919-8b70j",
+    "type": "mission",
+    "title": "Enterprise mission loop",
+    "status": "queued",
+    "priority": 1,
+    "confidence": 0.82,
+    "createdAt": "2026-06-05T16:11:51.919Z",
+    "updatedAt": "2026-06-05T16:11:51.919Z",
+    "objective": "Launch one measurable mission",
+    "stage": "creation",
+    "roi": 2.2,
+    "risk": 0.25
+  }
+]

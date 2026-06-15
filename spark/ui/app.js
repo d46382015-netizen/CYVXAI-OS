@@ -1,0 +1,124 @@
+"use strict";
+
+const state = { graph: null };
+const ownerInput = document.getElementById("owner-id");
+ownerInput.value = localStorage.getItem("spark.owner_id") || `founder_${crypto.randomUUID().slice(0, 8)}`;
+const $ = (id) => document.getElementById(id);
+
+async function api(path, options = {}) {
+  const headers = { "content-type": "application/json", ...(options.headers || {}) };
+  const response = await fetch(path, { ...options, headers });
+  const payload = await response.json();
+  if (!response.ok || payload.ok === false) throw new Error(payload.error?.message || `Request failed (${response.status})`);
+  return payload.data ?? payload;
+}
+
+async function refreshHealth() {
+  try {
+    const health = await api("/healthz");
+    $("runtime-status").textContent = health.status === "ok" ? "Operational" : health.status;
+  } catch (_) {
+    $("runtime-status").textContent = "Offline";
+  }
+}
+
+$("ignite-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const ownerId = ownerInput.value.trim();
+  const intention = $("intention").value.trim();
+  const worldName = $("world-name").value.trim();
+  localStorage.setItem("spark.owner_id", ownerId);
+  $("form-status").textContent = "Modeling your intention…";
+  try {
+    state.graph = await api("/api/v1/sparks", {
+      method: "POST",
+      headers: { "idempotency-key": crypto.randomUUID() },
+      body: JSON.stringify({ owner_id: ownerId, intention, world: { name: worldName || undefined } }),
+    });
+    $("form-status").textContent = "Spark created. Review and approve its bounded mission.";
+    render();
+    $("workspace").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (error) {
+    $("form-status").textContent = error.message;
+  }
+});
+
+$("approve-button").addEventListener("click", async () => {
+  if (!state.graph) return;
+  disableActions(true);
+  try {
+    state.graph = await api(`/api/v1/sparks/${state.graph.spark.id}/approval`, {
+      method: "POST",
+      body: JSON.stringify({ owner_id: ownerInput.value.trim(), decision: "approved", reason: "Founder approved bounded local World construction." }),
+    });
+    render();
+  } catch (error) {
+    alert(error.message);
+  } finally {
+    disableActions(false);
+  }
+});
+
+$("execute-button").addEventListener("click", async () => {
+  if (!state.graph) return;
+  disableActions(true);
+  try {
+    state.graph = await api(`/api/v1/sparks/${state.graph.spark.id}/execute`, {
+      method: "POST",
+      body: JSON.stringify({ owner_id: ownerInput.value.trim(), max_steps: 20 }),
+    });
+    render();
+  } catch (error) {
+    alert(error.message);
+  } finally {
+    disableActions(false);
+  }
+});
+
+function disableActions(disabled) {
+  $("approve-button").disabled = disabled;
+  $("execute-button").disabled = disabled;
+}
+
+function render() {
+  const graph = state.graph;
+  if (!graph) return;
+  $("workspace").classList.remove("hidden");
+  $("spark-title").textContent = graph.spark.title;
+  $("spark-intention").textContent = graph.spark.intention;
+  $("spark-status").textContent = graph.spark.status;
+  $("world-status").textContent = graph.world?.status || "—";
+  $("authority-tier").textContent = graph.spark.authority_tier.replaceAll("_", " ");
+  $("evidence-count").textContent = graph.evidence.length;
+  $("lead-count").textContent = graph.leads.length;
+  $("mission-status").textContent = graph.mission?.status || "—";
+  $("next-action").textContent = graph.spark.next_action || "No further action required.";
+  $("approve-button").disabled = !graph.approvals.some((approval) => approval.status === "pending");
+  $("execute-button").disabled = graph.spark.status !== "active" || graph.mission?.status !== "active";
+
+  const worldLink = $("world-link");
+  if (graph.world?.public_path) {
+    worldLink.href = graph.world.public_path;
+    worldLink.classList.remove("hidden");
+  } else {
+    worldLink.classList.add("hidden");
+  }
+
+  $("mission-steps").innerHTML = graph.mission.steps.map((step) => `
+    <div class="step ${escapeHtml(step.status)}">
+      <span class="step-dot"></span>
+      <div><strong>${escapeHtml(step.title)}</strong>${step.message ? `<small>${escapeHtml(step.message)}</small>` : ""}</div>
+      <small>${escapeHtml(step.status.replaceAll("_", " "))}</small>
+    </div>`).join("");
+
+  $("proof-stream").innerHTML = graph.evidence.length
+    ? graph.evidence.slice().reverse().map((item) => `<div class="proof-item"><strong>${escapeHtml(item.type)}</strong><small>${escapeHtml(item.source)} · ${escapeHtml(item.sha256.slice(0, 12))}</small></div>`).join("")
+    : '<p class="muted">Proof appears as real artifacts are created.</p>';
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+}
+
+refreshHealth();
+setInterval(refreshHealth, 30_000);

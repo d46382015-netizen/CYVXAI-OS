@@ -1,13 +1,18 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const crypto = require("node:crypto");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { Readable } = require("node:stream");
 const test = require("node:test");
 const { PlatformKernel } = require("../core/platform");
+const { GitHubAppClient } = require("../core/integrations/github_control_plane/app_auth");
+const { GitHubAuthStore } = require("../core/integrations/github_control_plane/auth_store");
+const { createCredentialCipher } = require("../core/integrations/github_control_plane/credential_crypto");
 const { mapGitHubEvent } = require("../core/integrations/github_control_plane/mapper");
+const { createOAuthStateService } = require("../core/integrations/github_control_plane/oauth_state");
 const { createGitHubWebhookService } = require("../core/integrations/github_control_plane/service");
 const { signWebhookBody, verifyWebhookSignature } = require("../core/integrations/github_control_plane/signature");
 const { GitHubWebhookStore } = require("../core/integrations/github_control_plane/store");
@@ -151,6 +156,90 @@ test("rejects invalid signatures and oversized bodies", async () => {
   assert.equal(oversized.statusCode, 413);
 });
 
+test("creates a valid GitHub App JWT and normalizes escaped private-key newlines", () => {
+  const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
+    modulusLength: 2048,
+    publicKeyEncoding: { type: "spki", format: "pem" },
+    privateKeyEncoding: { type: "pkcs8", format: "pem" },
+  });
+  const escaped = privateKey.replace(/\n/g, "\\n");
+  const nowMs = Date.parse("2026-06-15T07:00:00Z");
+  const client = new GitHubAppClient({ appId: "3853563", privateKey: escaped, now: () => nowMs, fetch: async () => null });
+  const jwt = client.createJwt();
+  const [header, payload, signature] = jwt.split(".");
+  const decodedHeader = JSON.parse(Buffer.from(header, "base64url").toString("utf8"));
+  const decodedPayload = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+  assert.equal(decodedHeader.alg, "RS256");
+  assert.equal(decodedPayload.iss, "3853563");
+  assert.ok(decodedPayload.exp > decodedPayload.iat);
+  assert.equal(crypto.verify("RSA-SHA256", Buffer.from(`${header}.${payload}`), publicKey, Buffer.from(signature, "base64url")), true);
+});
+
+test("caches installation tokens until the safety window", async () => {
+  const { privateKey } = crypto.generateKeyPairSync("rsa", {
+    modulusLength: 2048,
+    privateKeyEncoding: { type: "pkcs8", format: "pem" },
+  });
+  let nowMs = Date.parse("2026-06-15T07:00:00Z");
+  let calls = 0;
+  const fetch = async () => {
+    calls += 1;
+    return mockResponse(201, {
+      token: `installation-token-${calls}`,
+      expires_at: new Date(nowMs + 60 * 60 * 1000).toISOString(),
+      permissions: { contents: "read" },
+    });
+  };
+  const client = new GitHubAppClient({ appId: "3853563", privateKey, fetch, now: () => nowMs, safetySeconds: 120 });
+  const first = await client.getInstallationToken(123);
+  const second = await client.getInstallationToken(123);
+  assert.equal(first.from_cache, false);
+  assert.equal(second.from_cache, true);
+  assert.equal(calls, 1);
+  nowMs += 59 * 60 * 1000;
+  const refreshed = await client.getInstallationToken(123);
+  assert.equal(refreshed.from_cache, false);
+  assert.equal(calls, 2);
+});
+
+test("encrypts GitHub user tokens with authenticated encryption", () => {
+  const cipher = createCredentialCipher("0123456789abcdef0123456789abcdef");
+  const envelope = cipher.encrypt("secret-user-token", "github-user:dakota");
+  assert.notEqual(envelope.ciphertext, "secret-user-token");
+  assert.equal(cipher.decrypt(envelope, "github-user:dakota"), "secret-user-token");
+  assert.throws(() => cipher.decrypt(envelope, "github-user:other"));
+});
+
+test("issues expiring one-time OAuth states and rejects replay and tampering", () => {
+  let nowMs = Date.parse("2026-06-15T07:00:00Z");
+  const store = new GitHubAuthStore();
+  const stateService = createOAuthStateService({
+    secret: "state-secret-state-secret-state-secret-123",
+    store,
+    now: () => nowMs,
+    ttlSeconds: 60,
+  });
+  const issued = stateService.issue({ user_id: "dakota", return_to: "/settings/github" });
+  const verified = stateService.verify(issued.state);
+  assert.equal(verified.user_id, "dakota");
+  assert.equal(verified.return_to, "/settings/github");
+  assert.throws(() => stateService.verify(issued.state), /already been used/);
+
+  const tampered = issued.state.slice(0, -1) + (issued.state.endsWith("A") ? "B" : "A");
+  assert.throws(() => stateService.verify(tampered), /signature is invalid/);
+
+  const expiredStore = new GitHubAuthStore();
+  const expiredService = createOAuthStateService({
+    secret: "state-secret-state-secret-state-secret-123",
+    store: expiredStore,
+    now: () => nowMs,
+    ttlSeconds: 60,
+  });
+  const expiring = expiredService.issue({ user_id: "dakota" });
+  nowMs += 61_000;
+  assert.throws(() => expiredService.verify(expiring.state), /expired/);
+});
+
 async function invoke(service, body, headers) {
   const req = Readable.from([body]);
   req.method = "POST";
@@ -163,6 +252,15 @@ async function invoke(service, body, headers) {
   };
   await service.handle(req, response);
   return { statusCode: response.statusCode, body: JSON.parse(response.rawBody), headers: response.headers };
+}
+
+function mockResponse(status, payload) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    statusText: String(status),
+    async text() { return JSON.stringify(payload); },
+  };
 }
 
 function silentLogger() {

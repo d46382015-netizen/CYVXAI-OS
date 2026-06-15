@@ -3,34 +3,118 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Spark turns intention into an owned operational World powered by CYVX.">
-<title>Spark — Turn ideas into assets</title>
+<meta name="description" content="Spark turns an intention into an owned, operational World powered by CYVX.">
+<meta name="theme-color" content="#070a12">
+<title>Spark — Make it real</title>
 <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>
+<div class="ambient ambient-one"></div>
+<div class="ambient ambient-two"></div>
+<header class="topbar shell">
+  <a class="brand" href="/" aria-label="Spark home"><span class="mark">✦</span><span><strong>Spark</strong><small>powered by CYVX</small></span></a>
+  <nav class="top-actions" aria-label="Primary navigation">
+    <a href="#worlds">Live Worlds</a>
+    <a href="/os">Open CYVX OS</a>
+    <span class="status-pill" id="runtime-status">Connecting</span>
+  </nav>
+</header>
+
 <main>
-<header class="topbar"><div class="brand"><span class="mark">✦</span> Spark</div><div class="status-pill" id="runtime-status">Connecting</div></header>
-<section class="hero">
-<p class="eyebrow">The action layer of the internet</p>
-<h1>What do you want to make real?</h1>
-<p class="lede">Create an owned operational World with a website, offer, lead capture, automation, approvals, proof, and measurable outcomes.</p>
-<form id="ignite-form" class="ignite-card">
-<label><span>Intention</span><textarea id="intention" required minlength="8" maxlength="2000" placeholder="I want to launch a mobile car-detailing business in my city."></textarea></label>
-<div class="form-grid">
-<label><span>World name</span><input id="world-name" maxlength="120" placeholder="DetailFlow"></label>
-<label><span>Owner ID</span><input id="owner-id" maxlength="200" required></label>
-</div>
-<button type="submit" class="primary">Ignite a Spark</button>
-<p class="form-status" id="form-status" role="status"></p>
-</form>
-</section>
-<section id="workspace" class="workspace hidden" aria-live="polite">
-<div class="workspace-head"><div><p class="eyebrow">Founder control</p><h2 id="spark-title">Spark</h2><p id="spark-intention" class="muted"></p></div><span class="status-pill" id="spark-status">draft</span></div>
-<div class="kpi-grid"><article><span>World</span><strong id="world-status">—</strong></article><article><span>Authority</span><strong id="authority-tier">—</strong></article><article><span>Evidence</span><strong id="evidence-count">0</strong></article><article><span>Leads</span><strong id="lead-count">0</strong></article></div>
-<div class="action-row"><button id="approve-button" class="primary">Approve bounded execution</button><button id="execute-button" class="secondary">Execute approved mission</button><a id="world-link" class="secondary hidden" target="_blank" rel="noopener">Open World</a></div>
-<div class="panel-grid"><article class="panel"><div class="panel-title"><h3>Mission</h3><span id="mission-status"></span></div><div id="mission-steps" class="steps"></div></article><article class="panel"><div class="panel-title"><h3>Next action</h3></div><p id="next-action" class="next-action"></p><h3>Proof stream</h3><div id="proof-stream" class="proof-stream"></div></article></div>
-</section>
+  <section class="hero shell">
+    <div class="hero-copy">
+      <p class="eyebrow"><span class="pulse-dot"></span> The action layer of the internet</p>
+      <h1>Turn an intention into a <span>working, owned World.</span></h1>
+      <p class="lede">Spark creates the offer, website, lead intake, follow-up system, proof trail, and measurable operating loop. CYVX coordinates the intelligence underneath.</p>
+      <div class="hero-points" aria-label="Platform capabilities">
+        <span>Owned assets</span><span>Bounded autonomy</span><span>Real lead capture</span><span>Inspectable proof</span>
+      </div>
+      <div class="live-metrics" aria-label="Live platform metrics">
+        <article><strong id="metric-sparks">0</strong><span>Sparks</span></article>
+        <article><strong id="metric-worlds">0</strong><span>Worlds live</span></article>
+        <article><strong id="metric-leads">0</strong><span>Leads captured</span></article>
+        <article><strong id="metric-outcomes">0</strong><span>Verified outcomes</span></article>
+      </div>
+    </div>
+
+    <form id="ignite-form" class="ignite-card" autocomplete="on">
+      <div class="card-head">
+        <div><p class="eyebrow">Start here</p><h2>What do you want to make real?</h2></div>
+        <span class="step-badge">01</span>
+      </div>
+      <label class="field field-wide"><span>Describe the outcome</span><textarea id="intention" required minlength="8" maxlength="2000" placeholder="Launch a mobile car-detailing service that can accept leads and deposits this week."></textarea><small>Be specific about the customer, offer, and result.</small></label>
+      <div class="form-grid">
+        <label class="field"><span>World name</span><input id="world-name" maxlength="120" placeholder="DetailFlow"></label>
+        <label class="field"><span>Offer name</span><input id="offer-name" maxlength="120" placeholder="Mobile Detail Package"></label>
+        <label class="field field-wide"><span>Offer description</span><input id="offer-description" maxlength="500" placeholder="Professional interior and exterior detailing at the customer's location."></label>
+        <label class="field"><span>Starting price</span><input id="price" inputmode="decimal" min="0" max="1000000" step="0.01" type="number" placeholder="149"></label>
+        <label class="field"><span>Location</span><input id="location" maxlength="160" placeholder="La Crosse, WI"></label>
+        <label class="field"><span>Contact email</span><input id="contact-email" type="email" maxlength="200" placeholder="owner@example.com"></label>
+        <label class="field"><span>Payment link</span><input id="payment-url" type="url" maxlength="500" placeholder="https://buy.stripe.com/..."></label>
+      </div>
+      <input id="owner-id" type="hidden" required>
+      <button type="submit" class="primary primary-large"><span>Ignite my Spark</span><span aria-hidden="true">→</span></button>
+      <p class="security-note">Your device receives a private owner key. Execution stays bounded until you approve it.</p>
+      <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <section class="trust-strip shell" aria-label="How Spark works">
+    <div><span>1</span><strong>Describe</strong><small>State the real outcome.</small></div>
+    <div><span>2</span><strong>Review</strong><small>Inspect the bounded mission.</small></div>
+    <div><span>3</span><strong>Approve</strong><small>Grant only the needed authority.</small></div>
+    <div><span>4</span><strong>Launch</strong><small>Publish the World and proof.</small></div>
+  </section>
+
+  <section id="workspace" class="workspace shell hidden" aria-live="polite">
+    <div class="workspace-head">
+      <div><p class="eyebrow">Founder control</p><h2 id="spark-title">Spark</h2><p id="spark-intention" class="muted"></p></div>
+      <div class="workspace-status"><span class="status-pill" id="spark-status">draft</span><button id="new-spark-button" class="text-button" type="button">New Spark</button></div>
+    </div>
+
+    <div class="progress-shell"><div class="progress-track"><span id="mission-progress"></span></div><p id="progress-label">Mission planned</p></div>
+
+    <div class="kpi-grid">
+      <article><span>World</span><strong id="world-status">—</strong><small>operating state</small></article>
+      <article><span>Authority</span><strong id="authority-tier">—</strong><small>execution boundary</small></article>
+      <article><span>Evidence</span><strong id="evidence-count">0</strong><small>proof records</small></article>
+      <article><span>Leads</span><strong id="lead-count">0</strong><small>real customer intent</small></article>
+    </div>
+
+    <div class="action-row">
+      <button id="approve-button" class="primary" type="button">Approve bounded execution</button>
+      <button id="execute-button" class="secondary" type="button">Execute approved mission</button>
+      <a id="world-link" class="secondary hidden" target="_blank" rel="noopener">Open live World</a>
+      <button id="copy-world-button" class="secondary hidden" type="button">Copy public link</button>
+    </div>
+
+    <div class="panel-grid">
+      <article class="panel mission-panel">
+        <div class="panel-title"><div><p class="eyebrow">Execution graph</p><h3>Mission</h3></div><span id="mission-status"></span></div>
+        <div id="mission-steps" class="steps"></div>
+      </article>
+      <article class="panel proof-panel">
+        <div class="panel-title"><div><p class="eyebrow">Decision layer</p><h3>Next action</h3></div></div>
+        <p id="next-action" class="next-action"></p>
+        <div class="proof-heading"><h3>Proof stream</h3><span id="proof-count-label">0 records</span></div>
+        <div id="proof-stream" class="proof-stream"></div>
+      </article>
+    </div>
+  </section>
+
+  <section id="worlds" class="worlds-section shell">
+    <div class="section-head"><div><p class="eyebrow">Public reality</p><h2>Worlds made operational</h2></div><button id="refresh-worlds" class="secondary" type="button">Refresh</button></div>
+    <div id="world-grid" class="world-grid"><article class="empty-card">Operational Worlds will appear here.</article></div>
+  </section>
+
+  <section class="platform-section shell">
+    <div class="platform-copy"><p class="eyebrow">The invisible engine</p><h2>Simple on the surface. Autonomous underneath.</h2><p>CYVX observes reality, identifies constraints, creates a bounded intervention, executes approved work, verifies the outcome, and learns from the difference between prediction and reality.</p><a href="/os" class="secondary inline-action">Enter CYVX OS</a></div>
+    <div class="loop-card" aria-label="CYVX operating loop"><span>Observe</span><i>→</i><span>Verify</span><i>→</i><span>Decide</span><i>→</i><span>Act</span><i>→</i><span>Prove</span><i>→</i><span>Learn</span></div>
+  </section>
 </main>
+
+<footer class="footer shell"><div><strong>Spark + CYVX</strong><span>Created and architected by Dakota Lee Jonsgaard.</span></div><div><a href="/healthz">System health</a><a href="/os">Operator OS</a></div></footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="/assets/app.js" defer></script>
 </body>
 </html>

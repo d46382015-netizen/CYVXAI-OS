@@ -22,7 +22,7 @@
     "agency:loop": "node scripts/cyvx-agency-loop.js",
     "agency:tick": "node scripts/cyvx-agency-daemon.js",
     "agency:daemon": "node scripts/cyvx-agency-daemon.js start",
-    "wiki:generate": "node ./scripts/generate-wiki.js ./dist/wiki",
+    "wiki:generate": "node --check ./scripts/generate-wiki-v2.js && node ./scripts/generate-wiki-v2.js ./dist/wiki",
     "wiki:publish": "bash ./scripts/publish-wiki.sh"
   },
   "dependencies": {

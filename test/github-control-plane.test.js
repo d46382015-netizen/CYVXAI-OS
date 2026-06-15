@@ -6,6 +6,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { Readable } = require("node:stream");
 const test = require("node:test");
+const { PlatformKernel } = require("../core/platform");
 const { mapGitHubEvent } = require("../core/integrations/github_control_plane/mapper");
 const { createGitHubWebhookService } = require("../core/integrations/github_control_plane/service");
 const { signWebhookBody, verifyWebhookSignature } = require("../core/integrations/github_control_plane/signature");
@@ -72,6 +73,30 @@ test("maps push, issue, and merged pull request events into CYVX primitives", ()
   assert.equal(calls[1][1].severity, "critical");
   assert.equal(calls[2][1].actual_outcome.merge_commit_sha, "abc123");
   assert.equal(calls[0][1].metadata.delivery_id, "push-1");
+});
+
+test("persists mapped GitHub reality through PlatformKernel restart", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "cyvx-platform-github-"));
+  const filePath = path.join(directory, "platform.json");
+  const platform = new PlatformKernel({ filePath });
+  mapGitHubEvent({
+    event: "push",
+    delivery_id: "persistent-push-1",
+    platform,
+    payload: {
+      ref: "refs/heads/main",
+      before: "before-sha",
+      after: "after-sha",
+      repository: { id: 22, full_name: "owner/persistent-repo" },
+      commits: [{ id: "after-sha" }],
+    },
+  });
+
+  const restarted = new PlatformKernel({ filePath });
+  const observation = restarted.observations().find((item) => item.id === "github-observation-persistent-push-1");
+  assert.ok(observation);
+  assert.equal(observation.metadata.delivery_id, "persistent-push-1");
+  assert.equal(observation.observed_state.after, "after-sha");
 });
 
 test("accepts a signed webhook once and acknowledges duplicate redelivery", async () => {

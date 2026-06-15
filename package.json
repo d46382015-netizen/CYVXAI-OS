@@ -5,7 +5,8 @@
   "type": "commonjs",
   "description": "CYVX autonomous infrastructure intelligence system",
   "scripts": {
-    "start": "sh -c 'CYVX_READY_FILE=/dev/null node ./api/operations.js & OPS=$!; trap \"kill $OPS 2>/dev/null || true\" EXIT INT TERM; node ./api/production.js'",
+    "start": "sh -c 'CYVX_READY_FILE=/dev/null node ./api/operations.js & OPS=$!; trap \"kill $OPS 2>/dev/null || true\" EXIT INT TERM; bash ./start.sh'",
+    "public": "node ./api/public.js",
     "api": "node ./api/production.js",
     "ops": "CYVX_READY_FILE=/dev/null node ./api/operations.js",
     "cli": "node ./cli/cyvx.js",
@@ -13,7 +14,7 @@
     "dev": "npm start",
     "serve": "node ./ui/server.js",
     "test": "node --test",
-    "test:runtime": "node --check ./api/operations.js && node --check ./core/runtime/index.js && node -e \"const {FixedWindowRateLimiter,RequestCounters}=require('./core/runtime');let now=0;const limiter=new FixedWindowRateLimiter({limit:1,windowMs:10,now:()=>now});if(!limiter.take('x').allowed||limiter.take('x').allowed)process.exit(1);now=11;if(!limiter.take('x').allowed)process.exit(1);const counters=new RequestCounters({now:()=>now});const done=counters.begin();now=21;done(503);const state=counters.snapshot();if(state.errors_total!==1||state.latency_ms.p95!==10)process.exit(1)\"",
+    "test:runtime": "node --check ./api/public.js && node --check ./api/operations.js && node --check ./core/runtime/index.js && node -e \"const {FixedWindowRateLimiter,RequestCounters}=require('./core/runtime');let now=0;const limiter=new FixedWindowRateLimiter({limit:1,windowMs:10,now:()=>now});if(!limiter.take('x').allowed||limiter.take('x').allowed)process.exit(1);now=11;if(!limiter.take('x').allowed)process.exit(1);const counters=new RequestCounters({now:()=>now});const done=counters.begin();now=21;done(503);const state=counters.snapshot();if(state.errors_total!==1||state.latency_ms.p95!==10)process.exit(1)\"",
     "verify": "npm run verify:production",
     "verify:production": "node --check ./api/production.js && npm run test:runtime && npm test && npm run build",
     "github:test": "node --test ./test/github-control-plane.test.js ./test/github-control-plane-advanced.test.js",

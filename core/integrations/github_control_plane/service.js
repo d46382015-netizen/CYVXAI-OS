@@ -9,7 +9,7 @@ function createGitHubWebhookService(options = {}) {
   const platform = options.platform;
   const logger = options.logger || console;
   const maxBodyBytes = Number(options.maxBodyBytes || 1_000_000);
-  const scheduler = options.scheduler || ((task) => setImmediate(task));
+  const scheduler = options.scheduler || ((task) => queueMicrotask(task));
   const maxAttempts = Math.max(1, Number(options.maxAttempts || 5));
   if (!store) throw new Error("GitHubWebhookStore is required");
   if (!platform) throw new Error("PlatformKernel is required");

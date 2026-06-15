@@ -79,8 +79,8 @@ jobs:
             -H 'content-type: application/json' \
             -H 'idempotency-key: ci-spark' \
             -d '{"owner_id":"ci-founder","intention":"Launch a test service World with real lead capture","world":{"name":"CI World"}}')"
-          SPARK_ID="$(printf '%s' "$CREATED" | node -pe 'JSON.parse(fs.readFileSync(0,"utf8")).data.spark.id')"
-          WORLD_ID="$(printf '%s' "$CREATED" | node -pe 'JSON.parse(fs.readFileSync(0,"utf8")).data.world.id')"
+          SPARK_ID="$(printf '%s' "$CREATED" | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).data.spark.id')"
+          WORLD_ID="$(printf '%s' "$CREATED" | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).data.world.id')"
 
           curl -fsS -X POST "$BASE/api/v1/sparks/$SPARK_ID/approval" \
             -H "x-api-key: $KEY" -H 'content-type: application/json' \

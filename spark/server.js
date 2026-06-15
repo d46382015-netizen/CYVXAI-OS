@@ -16,6 +16,7 @@ function createSparkServer(options = {}) {
   const bodyLimit = Number(options.bodyLimit || process.env.SPARK_BODY_LIMIT || DEFAULT_BODY_LIMIT);
   const requestLimit = Number(options.requestLimit || process.env.SPARK_RATE_LIMIT || 120);
   const publicLeadLimit = Number(options.publicLeadLimit || process.env.SPARK_LEAD_RATE_LIMIT || 20);
+  const trustProxy = options.trustProxy ?? process.env.SPARK_TRUST_PROXY === "1";
   const buckets = new Map();
   const logPath = path.resolve(options.logPath || process.env.SPARK_LOG || path.join(process.cwd(), ".cyvx", "logs", "spark-runtime.log"));
   fs.mkdirSync(path.dirname(logPath), { recursive: true });
@@ -33,7 +34,7 @@ function createSparkServer(options = {}) {
       const pathname = decodeURIComponent(url.pathname);
       const isLeadRoute = req.method === "POST" && /^\/api\/v1\/worlds\/[^/]+\/leads$/.test(pathname);
       const rate = isLeadRoute ? publicLeadLimit : requestLimit;
-      if (!takeRateLimit(req, buckets, rate, isLeadRoute ? "lead" : "api")) {
+      if (!takeRateLimit(req, buckets, rate, isLeadRoute ? "lead" : "api", trustProxy)) {
         throw new SparkError("RATE_LIMITED", "Too many requests", 429);
       }
 
@@ -105,7 +106,7 @@ function createSparkServer(options = {}) {
         path: req.url,
         status: res.statusCode,
         duration_ms: Math.round(durationMs * 100) / 100,
-        remote: clientKey(req),
+        remote: clientKey(req, trustProxy),
       });
     }
   });
@@ -162,10 +163,10 @@ function requireApiKey(req, apiKey) {
   }
 }
 
-function takeRateLimit(req, buckets, maxPerMinute, namespace) {
+function takeRateLimit(req, buckets, maxPerMinute, namespace, trustProxy = false) {
   if (!Number.isFinite(maxPerMinute) || maxPerMinute <= 0) return true;
   const now = Date.now();
-  const key = `${namespace}:${clientKey(req)}`;
+  const key = `${namespace}:${clientKey(req, trustProxy)}`;
   const bucket = buckets.get(key) || { start: now, count: 0 };
   if (now - bucket.start >= 60_000) {
     bucket.start = now;
@@ -179,9 +180,12 @@ function takeRateLimit(req, buckets, maxPerMinute, namespace) {
   return bucket.count <= maxPerMinute;
 }
 
-function clientKey(req) {
-  const forwarded = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
-  return forwarded || req.socket.remoteAddress || "unknown";
+function clientKey(req, trustProxy = false) {
+  if (trustProxy) {
+    const forwarded = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+    if (forwarded) return forwarded;
+  }
+  return req.socket.remoteAddress || "unknown";
 }
 
 function setSecurityHeaders(res) {

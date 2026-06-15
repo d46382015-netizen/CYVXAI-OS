@@ -9,6 +9,8 @@ function createGitHubWebhookService(options = {}) {
   const platform = options.platform;
   const logger = options.logger || console;
   const maxBodyBytes = Number(options.maxBodyBytes || 1_000_000);
+  const scheduler = options.scheduler || ((task) => queueMicrotask(task));
+  const maxAttempts = Math.max(1, Number(options.maxAttempts || 5));
   if (!store) throw new Error("GitHubWebhookStore is required");
   if (!platform) throw new Error("PlatformKernel is required");
 
@@ -65,48 +67,96 @@ function createGitHubWebhookService(options = {}) {
       });
     }
 
-    store.markProcessing(deliveryId);
+    scheduleDelivery(deliveryId);
+    return sendJson(res, 202, {
+      ok: true,
+      duplicate: false,
+      delivery_id: deliveryId,
+      event,
+      status: "accepted",
+    });
+  }
+
+  function scheduleDelivery(deliveryId) {
+    scheduler(() => {
+      processDelivery(deliveryId).catch((error) => {
+        log(logger, "error", "github_webhook_scheduler_failed", {
+          delivery_id: deliveryId,
+          error: error.message,
+        });
+      });
+    });
+  }
+
+  async function processDelivery(deliveryId) {
+    const delivery = store.get(deliveryId);
+    if (!delivery) {
+      const error = new Error(`unknown GitHub delivery: ${deliveryId}`);
+      error.code = "DELIVERY_NOT_FOUND";
+      error.statusCode = 404;
+      throw error;
+    }
+    if (delivery.status === "completed") return delivery;
+    if (Number(delivery.attempts || 0) >= maxAttempts) {
+      const error = new Error(`delivery exceeded ${maxAttempts} processing attempts`);
+      error.code = "DELIVERY_ATTEMPTS_EXHAUSTED";
+      error.statusCode = 409;
+      throw error;
+    }
+
+    const processing = store.markProcessing(deliveryId);
     try {
-      const mapping = mapGitHubEvent({ event, delivery_id: deliveryId, payload, platform });
-      store.complete(deliveryId, mapping);
+      const mapping = mapGitHubEvent({
+        event: processing.event,
+        delivery_id: deliveryId,
+        payload: processing.payload,
+        platform,
+      });
+      const completed = store.complete(deliveryId, mapping);
       log(logger, "info", "github_webhook_completed", {
         delivery_id: deliveryId,
-        event,
-        repository: metadata.repository,
+        event: processing.event,
+        repository: processing.repository,
         created: mapping.created.length,
+        attempts: completed.attempts,
       });
-      return sendJson(res, 202, {
-        ok: true,
-        duplicate: false,
-        delivery_id: deliveryId,
-        event,
-        mapping: {
-          created: mapping.created.map((item) => ({ kind: item.kind, id: item.id })),
-          ignored: mapping.ignored,
-          ignored_reason: mapping.ignored_reason,
-        },
-      });
+      return completed;
     } catch (error) {
-      store.fail(deliveryId, error);
+      const failed = store.fail(deliveryId, error);
       log(logger, "error", "github_webhook_failed", {
         delivery_id: deliveryId,
-        event,
-        repository: metadata.repository,
+        event: processing.event,
+        repository: processing.repository,
+        attempts: failed.attempts,
         error: error.message,
       });
-      return sendJson(res, 500, { ok: false, error: "processing_failed", delivery_id: deliveryId });
+      throw error;
     }
+  }
+
+  async function retry(deliveryId) {
+    const record = store.get(deliveryId);
+    if (!record) {
+      const error = new Error(`unknown GitHub delivery: ${deliveryId}`);
+      error.code = "DELIVERY_NOT_FOUND";
+      error.statusCode = 404;
+      throw error;
+    }
+    if (record.status === "completed") return record;
+    return processDelivery(deliveryId);
   }
 
   function health() {
     return {
       configured: Boolean(secret),
       max_body_bytes: maxBodyBytes,
+      max_attempts: maxAttempts,
+      asynchronous_processing: true,
       store: store.health(),
     };
   }
 
-  return { handle, health };
+  return { handle, health, processDelivery, retry, scheduleDelivery };
 }
 
 function stringHeader(req, name) {
@@ -118,6 +168,7 @@ function sendJson(res, status, body, headers = {}) {
   res.statusCode = status;
   res.setHeader("content-type", "application/json; charset=utf-8");
   res.setHeader("cache-control", "no-store");
+  res.setHeader("x-content-type-options", "nosniff");
   for (const [name, value] of Object.entries(headers)) res.setHeader(name, value);
   res.end(JSON.stringify(body));
 }

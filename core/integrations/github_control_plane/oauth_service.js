@@ -12,6 +12,7 @@ function createGitHubOAuthService(options = {}) {
   const cipher = options.cipher || null;
   const appClient = options.appClient || null;
   const ownerUserId = String(options.ownerUserId || process.env.CYVX_OWNER_ID || "").trim();
+  const authorizeRequest = typeof options.authorizeRequest === "function" ? options.authorizeRequest : () => false;
   const githubOrigin = String(options.githubOrigin || "https://github.com").replace(/\/$/, "");
   const apiOrigin = String(options.apiOrigin || process.env.CYVX_GITHUB_API_BASE || "https://api.github.com").replace(/\/$/, "");
 
@@ -22,10 +23,16 @@ function createGitHubOAuthService(options = {}) {
     return Boolean(clientId && clientSecret && appSlug && cipher && typeof fetchImpl === "function" && stateService.configured());
   }
 
+  function requestUserId(req) {
+    if (ownerUserId) return ownerUserId;
+    if (!authorizeRequest(req)) return "";
+    return authenticatedUserId(req);
+  }
+
   async function handleInstall(req, res, url) {
     if (req.method !== "GET") return sendJson(res, 405, { ok: false, error: "method_not_allowed" }, { allow: "GET" });
     if (!configured()) return sendJson(res, 503, { ok: false, error: "github_oauth_not_configured" });
-    const userId = authenticatedUserId(req) || ownerUserId;
+    const userId = requestUserId(req);
     if (!userId) return sendJson(res, 401, { ok: false, error: "authenticated_cyvx_user_required" });
     const issued = stateService.issue({
       user_id: userId,
@@ -93,7 +100,7 @@ function createGitHubOAuthService(options = {}) {
 
   async function handleInstallations(req, res) {
     if (req.method !== "GET") return sendJson(res, 405, { ok: false, error: "method_not_allowed" }, { allow: "GET" });
-    const userId = authenticatedUserId(req) || ownerUserId;
+    const userId = requestUserId(req);
     if (!userId) return sendJson(res, 401, { ok: false, error: "authenticated_cyvx_user_required" });
     const connection = authStore.getConnection(userId);
     return sendJson(res, 200, {
@@ -105,7 +112,7 @@ function createGitHubOAuthService(options = {}) {
 
   async function handleDisconnect(req, res, installationId) {
     if (req.method !== "DELETE") return sendJson(res, 405, { ok: false, error: "method_not_allowed" }, { allow: "DELETE" });
-    const userId = authenticatedUserId(req) || ownerUserId;
+    const userId = requestUserId(req);
     if (!userId) return sendJson(res, 401, { ok: false, error: "authenticated_cyvx_user_required" });
     const connection = authStore.getConnection(userId);
     if (!connection) return sendJson(res, 404, { ok: false, error: "github_connection_not_found" });
@@ -118,6 +125,11 @@ function createGitHubOAuthService(options = {}) {
     return sendJson(res, 200, { ok: true, disconnected: true, installation_id: connection.installation_id || requested || null });
   }
 
+  function connectionForRequest(req) {
+    const userId = requestUserId(req);
+    return userId ? authStore.getConnection(userId) : null;
+  }
+
   function health() {
     return {
       configured: configured(),
@@ -125,6 +137,8 @@ function createGitHubOAuthService(options = {}) {
       client_secret_configured: Boolean(clientSecret),
       app_slug_configured: Boolean(appSlug),
       encryption_configured: Boolean(cipher),
+      owner_mode: Boolean(ownerUserId),
+      header_identity_requires_authorization: !ownerUserId,
       fetch_available: typeof fetchImpl === "function",
       state: stateService.health(),
       store: authStore.health(),
@@ -165,11 +179,13 @@ function createGitHubOAuthService(options = {}) {
 
   return {
     configured,
+    connectionForRequest,
     handleCallback,
     handleDisconnect,
     handleInstall,
     handleInstallations,
     health,
+    requestUserId,
   };
 }
 
@@ -231,6 +247,7 @@ function redirect(res, location) {
   res.statusCode = 302;
   res.setHeader("location", location);
   res.setHeader("cache-control", "no-store");
+  res.setHeader("referrer-policy", "no-referrer");
   res.end();
 }
 
@@ -247,4 +264,4 @@ function positiveIntegerOrNull(value) {
   return Number.isInteger(number) && number > 0 ? number : null;
 }
 
-module.exports = { createGitHubOAuthService, sanitizeConnection };
+module.exports = { createGitHubOAuthService, sanitizeConnection, sanitizeInstallation };

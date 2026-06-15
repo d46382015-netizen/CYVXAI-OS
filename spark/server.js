@@ -16,6 +16,7 @@ function createSparkServer(options = {}) {
   const bodyLimit = Number(options.bodyLimit || process.env.SPARK_BODY_LIMIT || DEFAULT_BODY_LIMIT);
   const requestLimit = Number(options.requestLimit || process.env.SPARK_RATE_LIMIT || 120);
   const publicLeadLimit = Number(options.publicLeadLimit || process.env.SPARK_LEAD_RATE_LIMIT || 20);
+  const trustProxy = options.trustProxy ?? process.env.SPARK_TRUST_PROXY === "1";
   const buckets = new Map();
   const logPath = path.resolve(options.logPath || process.env.SPARK_LOG || path.join(process.cwd(), ".cyvx", "logs", "spark-runtime.log"));
   fs.mkdirSync(path.dirname(logPath), { recursive: true });
@@ -33,7 +34,7 @@ function createSparkServer(options = {}) {
       const pathname = decodeURIComponent(url.pathname);
       const isLeadRoute = req.method === "POST" && /^\/api\/v1\/worlds\/[^/]+\/leads$/.test(pathname);
       const rate = isLeadRoute ? publicLeadLimit : requestLimit;
-      if (!takeRateLimit(req, buckets, rate, isLeadRoute ? "lead" : "api")) {
+      if (!takeRateLimit(req, buckets, rate, isLeadRoute ? "lead" : "api", trustProxy)) {
         throw new SparkError("RATE_LIMITED", "Too many requests", 429);
       }
 
@@ -105,7 +106,7 @@ function createSparkServer(options = {}) {
         path: req.url,
         status: res.statusCode,
         duration_ms: Math.round(durationMs * 100) / 100,
-        remote: clientKey(req),
+        remote: clientKey(req, trustProxy),
       });
     }
   });
@@ -130,14 +131,7 @@ function main() {
   }
   const { server, runtime } = createSparkServer({ apiKey });
   server.listen(port, host, () => {
-    console.log(JSON.stringify({
-      event: "spark.started",
-      host,
-      port,
-      url: `http://${host}:${port}`,
-      authenticated: Boolean(apiKey),
-      health: runtime.health(),
-    }));
+    console.log(JSON.stringify({ event: "spark.started", host, port, url: `http://${host}:${port}`, authenticated: Boolean(apiKey), health: runtime.health() }));
   });
 
   let closing = false;
@@ -157,31 +151,27 @@ function requireApiKey(req, apiKey) {
   const supplied = String(req.headers["x-api-key"] || req.headers.authorization || "").replace(/^Bearer\s+/i, "");
   const expected = Buffer.from(apiKey);
   const actual = Buffer.from(supplied);
-  if (expected.length !== actual.length || !crypto.timingSafeEqual(expected, actual)) {
-    throw new SparkError("UNAUTHORIZED", "A valid API key is required", 401);
-  }
+  if (expected.length !== actual.length || !crypto.timingSafeEqual(expected, actual)) throw new SparkError("UNAUTHORIZED", "A valid API key is required", 401);
 }
 
-function takeRateLimit(req, buckets, maxPerMinute, namespace) {
+function takeRateLimit(req, buckets, maxPerMinute, namespace, trustProxy = false) {
   if (!Number.isFinite(maxPerMinute) || maxPerMinute <= 0) return true;
   const now = Date.now();
-  const key = `${namespace}:${clientKey(req)}`;
+  const key = `${namespace}:${clientKey(req, trustProxy)}`;
   const bucket = buckets.get(key) || { start: now, count: 0 };
-  if (now - bucket.start >= 60_000) {
-    bucket.start = now;
-    bucket.count = 0;
-  }
+  if (now - bucket.start >= 60_000) { bucket.start = now; bucket.count = 0; }
   bucket.count += 1;
   buckets.set(key, bucket);
-  if (buckets.size > 10_000) {
-    for (const [bucketKey, value] of buckets) if (now - value.start >= 120_000) buckets.delete(bucketKey);
-  }
+  if (buckets.size > 10_000) for (const [bucketKey, value] of buckets) if (now - value.start >= 120_000) buckets.delete(bucketKey);
   return bucket.count <= maxPerMinute;
 }
 
-function clientKey(req) {
-  const forwarded = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
-  return forwarded || req.socket.remoteAddress || "unknown";
+function clientKey(req, trustProxy = false) {
+  if (trustProxy) {
+    const forwarded = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+    if (forwarded) return forwarded;
+  }
+  return req.socket.remoteAddress || "unknown";
 }
 
 function setSecurityHeaders(res) {
@@ -195,10 +185,7 @@ function setSecurityHeaders(res) {
 
 function setCorsHeaders(req, res, allowedOrigin) {
   const origin = String(req.headers.origin || "");
-  if (allowedOrigin && origin === allowedOrigin) {
-    res.setHeader("access-control-allow-origin", origin);
-    res.setHeader("vary", "origin");
-  }
+  if (allowedOrigin && origin === allowedOrigin) { res.setHeader("access-control-allow-origin", origin); res.setHeader("vary", "origin"); }
   res.setHeader("access-control-allow-headers", "content-type, authorization, x-api-key, x-request-id, idempotency-key");
   res.setHeader("access-control-allow-methods", "GET,POST,PATCH,OPTIONS");
 }
@@ -209,11 +196,7 @@ function readJson(req, limit) {
     const chunks = [];
     req.on("data", (chunk) => {
       size += chunk.length;
-      if (size > limit) {
-        reject(new SparkError("PAYLOAD_TOO_LARGE", `JSON body exceeds ${limit} bytes`, 413));
-        req.destroy();
-        return;
-      }
+      if (size > limit) { reject(new SparkError("PAYLOAD_TOO_LARGE", `JSON body exceeds ${limit} bytes`, 413)); req.destroy(); return; }
       chunks.push(chunk);
     });
     req.on("end", () => {
@@ -222,9 +205,7 @@ function readJson(req, limit) {
         const value = JSON.parse(Buffer.concat(chunks).toString("utf8"));
         if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("body must be a JSON object");
         resolve(value);
-      } catch (error) {
-        reject(new SparkError("INVALID_JSON", error.message, 400));
-      }
+      } catch (error) { reject(new SparkError("INVALID_JSON", error.message, 400)); }
     });
     req.on("error", reject);
   });
@@ -235,93 +216,24 @@ function serveUiFile(res, relativePath) {
   const file = path.resolve(UI_ROOT, safe);
   if (file !== UI_ROOT && !file.startsWith(`${UI_ROOT}${path.sep}`)) throw new SparkError("NOT_FOUND", "Asset not found", 404);
   if (!fs.existsSync(file) || !fs.statSync(file).isFile()) throw new SparkError("NOT_FOUND", "Asset not found", 404);
-  const type = file.endsWith(".html") ? "text/html; charset=utf-8"
-    : file.endsWith(".js") ? "application/javascript; charset=utf-8"
-      : file.endsWith(".css") ? "text/css; charset=utf-8"
-        : "application/octet-stream";
+  const type = file.endsWith(".html") ? "text/html; charset=utf-8" : file.endsWith(".js") ? "application/javascript; charset=utf-8" : file.endsWith(".css") ? "text/css; charset=utf-8" : "application/octet-stream";
   return sendBuffer(res, 200, fs.readFileSync(file), type);
 }
 
-function sendJson(res, status, payload) {
-  if (res.writableEnded) return;
-  const body = Buffer.from(`${JSON.stringify(payload)}\n`);
-  res.statusCode = status;
-  res.setHeader("content-type", "application/json; charset=utf-8");
-  res.setHeader("content-length", body.length);
-  res.end(body);
-}
-
-function sendText(res, status, payload, type = "text/plain; charset=utf-8") {
-  return sendBuffer(res, status, Buffer.from(payload), type);
-}
-
-function sendBuffer(res, status, body, type) {
-  if (res.writableEnded) return;
-  res.statusCode = status;
-  res.setHeader("content-type", type);
-  res.setHeader("content-length", body.length);
-  res.end(body);
-}
-
-function sendEmpty(res, status) {
-  res.statusCode = status;
-  res.end();
-}
-
-function envelope(requestId, data, error = null) {
-  return {
-    powered_by: "Spark + CYVX",
-    version: "1.0.0",
-    request_id: requestId,
-    timestamp: new Date().toISOString(),
-    ok: !error,
-    ...(error ? { error: { code: error.code, message: error.message, details: error.details } } : { data }),
-  };
-}
-
-function normalizeError(error) {
-  if (error instanceof SparkError) return error;
-  return new SparkError("INTERNAL_ERROR", "The Spark runtime could not complete the request", 500, process.env.NODE_ENV === "production" ? undefined : { cause: error.message });
-}
-
-function requiredQuery(url, key) {
-  const value = url.searchParams.get(key);
-  if (!value) throw new SparkError("VALIDATION_ERROR", `${key} is required`, 422, { field: key });
-  return value;
-}
-
-function writable(filePath) {
-  try {
-    fs.accessSync(path.dirname(filePath), fs.constants.W_OK);
-    return true;
-  } catch (_) {
-    return false;
-  }
-}
-
-function appendLog(logPath, event) {
-  try {
-    fs.appendFileSync(logPath, `${JSON.stringify(event)}\n`, { mode: 0o600 });
-  } catch (error) {
-    console.error(JSON.stringify({ event: "spark.log_failed", error: error.message }));
-  }
-}
-
-function safeFilename(value) {
-  return String(value).replace(/[^a-z0-9_-]/gi, "_");
-}
-
-function isLoopback(host) {
-  return new Set(["127.0.0.1", "localhost", "::1"]).has(host);
-}
+function sendJson(res, status, payload) { if (res.writableEnded) return; const body = Buffer.from(`${JSON.stringify(payload)}\n`); res.statusCode = status; res.setHeader("content-type", "application/json; charset=utf-8"); res.setHeader("content-length", body.length); res.end(body); }
+function sendText(res, status, payload, type = "text/plain; charset=utf-8") { return sendBuffer(res, status, Buffer.from(payload), type); }
+function sendBuffer(res, status, body, type) { if (res.writableEnded) return; res.statusCode = status; res.setHeader("content-type", type); res.setHeader("content-length", body.length); res.end(body); }
+function sendEmpty(res, status) { res.statusCode = status; res.end(); }
+function envelope(requestId, data, error = null) { return { powered_by: "Spark + CYVX", version: "1.0.0", request_id: requestId, timestamp: new Date().toISOString(), ok: !error, ...(error ? { error: { code: error.code, message: error.message, details: error.details } } : { data }) }; }
+function normalizeError(error) { if (error instanceof SparkError) return error; return new SparkError("INTERNAL_ERROR", "The Spark runtime could not complete the request", 500, process.env.NODE_ENV === "production" ? undefined : { cause: error.message }); }
+function requiredQuery(url, key) { const value = url.searchParams.get(key); if (!value) throw new SparkError("VALIDATION_ERROR", `${key} is required`, 422, { field: key }); return value; }
+function writable(filePath) { try { fs.accessSync(path.dirname(filePath), fs.constants.W_OK); return true; } catch (_) { return false; } }
+function appendLog(logPath, event) { try { fs.appendFileSync(logPath, `${JSON.stringify(event)}\n`, { mode: 0o600 }); } catch (error) { console.error(JSON.stringify({ event: "spark.log_failed", error: error.message })); } }
+function safeFilename(value) { return String(value).replace(/[^a-z0-9_-]/gi, "_"); }
+function isLoopback(host) { return new Set(["127.0.0.1", "localhost", "::1"]).has(host); }
 
 if (require.main === module) {
-  try {
-    main();
-  } catch (error) {
-    console.error(JSON.stringify({ event: "spark.start_failed", error: error.message }));
-    process.exit(1);
-  }
+  try { main(); } catch (error) { console.error(JSON.stringify({ event: "spark.start_failed", error: error.message })); process.exit(1); }
 }
 
 module.exports = { createSparkServer, envelope, normalizeError, readJson };

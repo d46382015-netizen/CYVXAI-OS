@@ -140,13 +140,13 @@ function createApiServer(controller, options = {}) {
         return json(res, 200, wrap({ proofLedger: analyzeProofLedger(loadProofLedger({ ledgerPath: options.proofLedgerPath || process.env.CYVX_PROOF_LEDGER_PATH || null })) }));
       }
       if (url.pathname === "/api/v1/thesis") {
-        return json(res, 200, wrap({ thesis: platform.thesisDashboard(), thesisReport: platform.thesisReport(), thesisEngine: platform.thesisEngine(), thesisBeliefs: platform.thesisBeliefs(), thesisVerdicts: platform.thesisVerdicts() }));
+        return json(res, 200, wrap({ thesis: platform.thesisDashboard(), thesisReport: platform.thesisReport(), thesisEngine: platform.thesisEngine(), thesisBeliefs: platform.thesisBeliefs(), the[...]
       }
       if (url.pathname === "/api/v1/thesis-report") {
         return json(res, 200, wrap({ thesisReport: platform.thesisReport(), thesis: platform.thesisDashboard() }));
       }
       if (url.pathname === "/api/v1/decision-intelligence") {
-        return json(res, 200, wrap({ decisionIntelligence: platform.decisionIntelligence(), dailyDecisionBrief: platform.dailyDecisionBrief(), truthModel: platform.truthModel(), decisionImprovementRate: platform.decisionImprovementRate(), decisionMemories: platform.decisionMemories(), decisionQualityRecords: platform.decisionQualityRecords(), decisionCalibrationRecords: platform.decisionCalibrationRecords() }));
+        return json(res, 200, wrap({ decisionIntelligence: platform.decisionIntelligence(), dailyDecisionBrief: platform.dailyDecisionBrief(), truthModel: platform.truthModel(), decisionImproveme[...]
       }
       if (url.pathname === "/api/v1/daily-decision-brief") {
         return json(res, 200, wrap({ dailyDecisionBrief: platform.dailyDecisionBrief(), decisionIntelligence: platform.decisionIntelligence(), truthModel: platform.truthModel() }));
@@ -229,7 +229,8 @@ function createApiServer(controller, options = {}) {
         return json(res, 200, wrap({ cycle: runAgencyCycle({ goal: body.goal || "Launch one measurable autonomous enterprise mission", autoApprove: body.autoApprove !== false }) }));
       }
       if (url.pathname === "/api/v1/reality-os" && req.method === "GET") return json(res, 200, wrap({ realityOS: realityOsSnapshot() }));
-      if (url.pathname === "/api/v1/operating-loop" && req.method === "POST") { const body=await readJson(req); return json(res,200,wrap({ operatingLoop: cyvxOperatingLoop(body.goal || body.objective || "Build enterprise value") })); }
+      if (url.pathname === "/api/v1/operating-loop" && req.method === "POST") { const body=await readJson(req); return json(res,200,wrap({ operatingLoop: cyvxOperatingLoop(body.goal || body.objec[...]
+      }
       if (url.pathname === "/api/v1/operating-loop" && req.method === "GET") return json(res,200,wrap({ operatingLoop: cyvxOperatingLoop("Build enterprise value") }));
       if (url.pathname === "/api/v1/intelligence") return json(res, 200, wrap(platform.intelligence()));
       if (url.pathname === "/api/v1/entities" && req.method === "GET") return json(res, 200, wrap({ entities: platform.entities() }));
@@ -290,8 +291,11 @@ function createApiServer(controller, options = {}) {
       if (url.pathname === "/metrics") return text(res, 200, promMetrics(controller));
       if (url.pathname === "/ask" && req.method === "POST") return json(res, 200, wrap(await parseAsk(req, controller)));
       if (url.pathname === "/api/v1/command" && req.method === "POST") return json(res, 200, wrap(await handleCommand(req, controller)));
-      if (url.pathname === "/api/v1/workloads") return json(res, 200, wrap(await handleWorkloads(req, controller)));
-      if (url.pathname === "/api/v1/actions") return json(res, 200, wrap(await handleActions(req, controller)));
+      if (url.pathname === "/api/v1/workloads" && req.method === "GET") return json(res, 200, wrap(await handleWorkloadsGet(controller)));
+      if (url.pathname === "/api/v1/workloads" && req.method === "POST") return json(res, 200, wrap(await handleWorkloadsPost(req, controller)));
+      if (url.pathname === "/api/outcome" && req.method === "POST") return await handleOutcomePost(req, res);
+      if (url.pathname === "/api/v1/actions" && req.method === "GET") return json(res, 200, wrap(await handleActionsGet(controller)));
+      if (url.pathname === "/api/v1/actions" && req.method === "POST") return json(res, 200, wrap(await handleActionsPost(req, controller)));
       if (url.pathname === "/api/v1/state") return json(res, 200, wrap(controller.snapshot()));
       return json(res, 404, wrap({ error: "not found" }));
     } catch (error) {
@@ -345,40 +349,32 @@ async function parseAsk(req, controller) {
   return controller.ask(body.task || body.prompt || "", body.context || body);
 }
 
-async function handleWorkloads(req, controller) {
-  if (req.method === "GET") return { workloads: controller.snapshot().cluster.workloads };
-  
-  if (req.method === "POST" && url.pathname === "/api/outcome") {
-    let body = "";
-    req.on("data", chunk => body += chunk);
-    req.on("end", () => {
-      try {
-        const payload = JSON.parse(body || "{}");
-        const outcome = captureOutcome(payload);
-        res.writeHead(200, {"content-type":"application/json"});
-        res.end(JSON.stringify({ ok:true, outcome }));
-      } catch (e) {
-        res.writeHead(500, {"content-type":"application/json"});
-        res.end(JSON.stringify({ ok:false, error:String(e.message || e) }));
-      }
-    });
-    return;
-  }
-
-if (req.method === "POST") {
-    const body = await readJson(req);
-    return controller.submitWorkload(body);
-  }
-  return { error: "method not allowed" };
+async function handleWorkloadsGet(controller) {
+  return { workloads: controller.snapshot().cluster.workloads };
 }
 
-async function handleActions(req, controller) {
-  if (req.method === "GET") return { actions: controller.actions };
-  if (req.method === "POST") {
-    const body = await readJson(req);
-    return controller.executeAction(body);
+async function handleWorkloadsPost(req, controller) {
+  const body = await readJson(req);
+  return controller.submitWorkload(body);
+}
+
+async function handleOutcomePost(req, res) {
+  const body = await readJson(req);
+  try {
+    const outcome = captureOutcome(body);
+    return json(res, 200, { ok: true, outcome });
+  } catch (error) {
+    return json(res, 400, { ok: false, error: String(error.message || error) });
   }
-  return { error: "method not allowed" };
+}
+
+async function handleActionsGet(controller) {
+  return { actions: controller.actions };
+}
+
+async function handleActionsPost(req, controller) {
+  const body = await readJson(req);
+  return controller.executeAction(body);
 }
 
 async function handleCommand(req, controller) {

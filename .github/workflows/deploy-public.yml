@@ -1,0 +1,132 @@
+name: Verify and deploy public app
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - api/public.js
+      - api/production.js
+      - api/index.js
+      - spark/**
+      - ui/**
+      - start.sh
+      - package.json
+      - package-lock.json
+      - render.yaml
+      - .github/workflows/deploy-public.yml
+  pull_request:
+    paths:
+      - api/public.js
+      - api/production.js
+      - api/index.js
+      - spark/**
+      - ui/**
+      - start.sh
+      - package.json
+      - package-lock.json
+      - render.yaml
+      - .github/workflows/deploy-public.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  verify-public-runtime:
+    name: Verify unified public runtime
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Run repository verification
+        run: |
+          npm run verify
+          npm run spark:verify
+          node --check api/public.js
+          node --check spark/ui/app.js
+
+      - name: Start unified public runtime
+        env:
+          PORT: "3200"
+          CYVX_DATA_ROOT: /tmp/cyvx-public-ci
+          CYVX_REQUIRE_GITHUB_APP: "false"
+          SPARK_PUBLIC_MODE: "1"
+        run: |
+          rm -rf /tmp/cyvx-public-ci
+          node api/public.js > /tmp/cyvx-public.log 2>&1 &
+          echo $! > /tmp/cyvx-public.pid
+          for _ in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:3200/healthz >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/cyvx-public.log
+          exit 1
+
+      - name: Test public product end to end
+        env:
+          BASE: http://127.0.0.1:3200
+        run: |
+          set -Eeuo pipefail
+          curl -fsS "$BASE/" | grep 'What do you want to make real?'
+          curl -fsS "$BASE/os" | grep 'CYVX'
+          curl -fsS "$BASE/healthz" | node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync(0,"utf8"));if(!x.ok||x.services.spark.status!=="ok")process.exit(1)'
+          curl -fsS "$BASE/api/public/status" | node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync(0,"utf8"));if(!x.ok||!x.metrics)process.exit(1)'
+
+          CREATED="$(curl -fsS -X POST "$BASE/api/v1/sparks" \
+            -H 'content-type: application/json' \
+            -H 'idempotency-key: public-ci-spark' \
+            -d '{"owner_id":"public-ci-founder","intention":"Launch a public test service with a website and real lead capture","world":{"name":"Public CI World","offer_name":"Launch Package","offer_description":"A verified CI offer","price_cents":9900}}')"
+          SPARK_ID="$(printf '%s' "$CREATED" | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).data.spark.id')"
+          WORLD_ID="$(printf '%s' "$CREATED" | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).data.world.id')"
+
+          curl -fsS -X POST "$BASE/api/v1/sparks/$SPARK_ID/approval" \
+            -H 'content-type: application/json' \
+            -d '{"owner_id":"public-ci-founder","decision":"approved"}' >/dev/null
+
+          EXECUTED="$(curl -fsS -X POST "$BASE/api/v1/sparks/$SPARK_ID/execute" \
+            -H 'content-type: application/json' \
+            -d '{"owner_id":"public-ci-founder","max_steps":20}')"
+          WORLD_PATH="$(printf '%s' "$EXECUTED" | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).data.world.public_path')"
+          printf '%s' "$EXECUTED" | node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync(0,"utf8"));if(x.data.world.status!=="operational")process.exit(1)'
+          curl -fsS "$BASE$WORLD_PATH" | grep 'Public CI World'
+
+          curl -fsS -X POST "$BASE/api/v1/worlds/$WORLD_ID/leads" \
+            -H 'content-type: application/json' \
+            -H 'idempotency-key: public-ci-lead' \
+            -d '{"name":"CI Customer","email":"customer@example.com","message":"I want the launch package"}' \
+            | node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync(0,"utf8"));if(x.data.lead.status!=="new")process.exit(1)'
+
+      - name: Stop runtime and print logs
+        if: always()
+        run: |
+          if [ -f /tmp/cyvx-public.pid ]; then kill "$(cat /tmp/cyvx-public.pid)" || true; fi
+          if [ -f /tmp/cyvx-public.log ]; then cat /tmp/cyvx-public.log; fi
+
+  deploy-render:
+    name: Trigger Render deployment
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify-public-runtime
+    runs-on: ubuntu-latest
+    env:
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+    steps:
+      - name: Trigger deploy hook when configured
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "RENDER_DEPLOY_HOOK_URL is not configured; Render auto-deploy or the Blueprint can deploy this commit."
+            exit 0
+          fi
+          curl --fail --silent --show-error --request POST "$RENDER_DEPLOY_HOOK_URL"

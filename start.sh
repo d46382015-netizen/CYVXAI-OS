@@ -35,7 +35,7 @@ fi
 mkdir -p ~/.cyvx
 
 export CYVX_HOST="${CYVX_HOST:-0.0.0.0}"
-export CYVX_PORT="${CYVX_PORT:-3000}"
+export CYVX_PORT="${CYVX_PORT:-${PORT:-3000}}"
 export CYVX_INTERNAL_PORT="${CYVX_INTERNAL_PORT:-$((CYVX_PORT + 1))}"
 
 echo "Starting CYVX production gateway on http://${CYVX_HOST}:${CYVX_PORT}"

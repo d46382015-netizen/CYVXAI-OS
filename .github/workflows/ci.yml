@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   build-and-smoke-test:
     name: Build and smoke test
@@ -92,3 +95,89 @@ jobs:
           if [ -f /tmp/spark-ci.pid ]; then kill "$(cat /tmp/spark-ci.pid)" || true; fi
           if [ -f /tmp/cyvx-ci.log ]; then cat /tmp/cyvx-ci.log; fi
           if [ -f /tmp/spark-ci.log ]; then cat /tmp/spark-ci.log; fi
+
+  publish-v6-release:
+    name: Publish immutable v6.0.0 release
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.head_commit.message == 'Publish CYVXAI-OS v6.0.0' }}
+    needs: build-and-smoke-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: v6.0.0
+
+    steps:
+      - name: Check out verified release commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify complete release surface
+        run: |
+          npm run verify
+          npm run github:test
+          npm run spark:verify
+
+      - name: Refuse an existing immutable tag
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "::error::Release tag $TAG already exists. Refusing to mutate an immutable release."
+            exit 1
+          fi
+
+      - name: Build source archive and checksum
+        run: |
+          mkdir -p dist
+          ARCHIVE="CYVXAI-OS-$TAG.tar.gz"
+          git archive --format=tar.gz --prefix="CYVXAI-OS-$TAG/" --output="dist/$ARCHIVE" "$GITHUB_SHA"
+          (cd dist && sha256sum "$ARCHIVE" > "$ARCHIVE.sha256")
+
+      - name: Write release notes
+        run: |
+          cat > /tmp/cyvx-release-notes.md <<'EOF'
+          # CYVXAI-OS v6.0.0
+
+          Production release of CYVXAI-OS with the Spark runtime and GitHub App control plane.
+
+          ## Highlights
+
+          - Intention-to-World lifecycle with explicit approval and bounded execution
+          - Persistent Worlds, generated sites, lead intake, follow-up queues, exports, metrics, and structured logs
+          - Secure GitHub App authentication, owner sessions, webhook processing, retries, and repository event mapping
+          - Health, readiness, build, test, and end-to-end smoke-test coverage
+          - Canonical commands: `npm run spark`, `npm run spark:start`, and `npm run spark:verify`
+
+          ## Verify
+
+          ```bash
+          npm ci
+          npm run verify
+          npm run github:test
+          npm run spark:verify
+          ```
+
+          Created and architected by Dakota Lee Jonsgaard.
+
+          Copyright 2026 Dakota Lee Jonsgaard. All rights reserved.
+          EOF
+
+      - name: Publish immutable GitHub release
+        run: |
+          ARCHIVE="CYVXAI-OS-$TAG.tar.gz"
+          gh release create "$TAG" \
+            "dist/$ARCHIVE" \
+            "dist/$ARCHIVE.sha256" \
+            --target "$GITHUB_SHA" \
+            --title "CYVXAI-OS v6.0.0 — Spark Runtime & GitHub Control Plane" \
+            --notes-file /tmp/cyvx-release-notes.md \
+            --latest

@@ -8,6 +8,11 @@ const { createApiServer, wrap } = require("./index");
 const { captureOutcome } = require("./outcome");
 const { CyvxController } = require("../core/controller");
 const { PlatformKernel } = require("../core/platform");
+const { GitHubAppClient } = require("../core/integrations/github_control_plane/app_auth");
+const { GitHubAuthStore } = require("../core/integrations/github_control_plane/auth_store");
+const { createCredentialCipher } = require("../core/integrations/github_control_plane/credential_crypto");
+const { createGitHubOAuthService } = require("../core/integrations/github_control_plane/oauth_service");
+const { createOAuthStateService } = require("../core/integrations/github_control_plane/oauth_state");
 const { GitHubWebhookStore } = require("../core/integrations/github_control_plane/store");
 const { createGitHubWebhookService, sendJson } = require("../core/integrations/github_control_plane/service");
 
@@ -36,14 +41,50 @@ async function createProductionGateway(options = {}) {
     maxBodyBytes: Number(process.env.CYVX_GITHUB_WEBHOOK_MAX_BYTES || 1_000_000),
   });
 
+  const authStore = options.authStore || new GitHubAuthStore({
+    filePath: process.env.CYVX_GITHUB_AUTH_STORE || path.join(os.homedir(), ".cyvx", "github-auth.json"),
+  });
+  const appClient = options.appClient || new GitHubAppClient({
+    appId: process.env.GITHUB_APP_ID || "",
+    privateKey: process.env.GITHUB_PRIVATE_KEY_PEM || "",
+  });
+  const stateService = options.stateService || createOAuthStateService({
+    secret: process.env.GITHUB_OAUTH_STATE_SECRET || "",
+    store: authStore,
+  });
+  const cipher = options.cipher === undefined ? safeCreateCredentialCipher(process.env.GITHUB_TOKEN_ENCRYPTION_KEY || "") : options.cipher;
+  const oauth = options.oauthService || createGitHubOAuthService({
+    clientId: process.env.GITHUB_CLIENT_ID || "",
+    clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+    appSlug: process.env.GITHUB_APP_SLUG || "",
+    ownerUserId: process.env.CYVX_OWNER_ID || "",
+    stateService,
+    authStore,
+    cipher,
+    appClient,
+  });
+
   const { server: internalServer } = createApiServer(controller, { platform });
   const gateway = http.createServer(async (req, res) => {
     const url = new URL(req.url, "http://localhost");
     try {
       if (url.pathname === "/api/github/webhook") return webhook.handle(req, res);
+      if (url.pathname === "/api/github/install") return oauth.handleInstall(req, res, url);
+      if (url.pathname === "/api/github/oauth/callback") return oauth.handleCallback(req, res, url);
+      if (url.pathname === "/api/github/installations") return oauth.handleInstallations(req, res);
+      if (url.pathname.startsWith("/api/github/installations/")) {
+        const installationId = url.pathname.split("/").pop();
+        return oauth.handleDisconnect(req, res, installationId);
+      }
       if (url.pathname === "/api/github/control-plane/health") {
         if (req.method !== "GET") return sendJson(res, 405, { ok: false, error: "method_not_allowed" }, { allow: "GET" });
-        return sendJson(res, 200, wrap({ github_control_plane: webhook.health() }));
+        return sendJson(res, 200, wrap({
+          github_control_plane: {
+            webhook: webhook.health(),
+            app_auth: appClient.health(),
+            oauth: oauth.health(),
+          },
+        }));
       }
 
       if (url.pathname === "/api/v1/workloads") {
@@ -88,13 +129,18 @@ async function createProductionGateway(options = {}) {
   gateway.on("upgrade", (req, socket, head) => proxyUpgrade(req, socket, head, internalPort));
 
   return {
+    appClient,
+    authStore,
+    cipher,
     controller,
     gateway,
     host,
     internalPort,
     internalServer,
+    oauth,
     platform,
     port: publicPort,
+    stateService,
     store,
     webhook,
     async listen() {
@@ -107,6 +153,20 @@ async function createProductionGateway(options = {}) {
       if (typeof controller.stop === "function") controller.stop();
     },
   };
+}
+
+function safeCreateCredentialCipher(secret) {
+  if (!String(secret || "").trim()) return null;
+  try {
+    return createCredentialCipher(secret);
+  } catch (error) {
+    console.error(JSON.stringify({
+      message: "github_credential_cipher_unavailable",
+      error: error.message,
+      timestamp: new Date().toISOString(),
+    }));
+    return null;
+  }
 }
 
 function proxyHttp(req, res, internalPort) {
@@ -206,7 +266,13 @@ async function main() {
   await runtime.listen();
   console.log(`CYVX production gateway listening on http://${runtime.host}:${runtime.port}`);
   console.log(`CYVX internal API listening on http://127.0.0.1:${runtime.internalPort}`);
-  console.log(JSON.stringify(wrap({ github_control_plane: runtime.webhook.health() }), null, 2));
+  console.log(JSON.stringify(wrap({
+    github_control_plane: {
+      webhook: runtime.webhook.health(),
+      app_auth: runtime.appClient.health(),
+      oauth: runtime.oauth.health(),
+    },
+  }), null, 2));
 
   const shutdown = async (signal) => {
     console.log(`Received ${signal}; shutting down CYVX.`);
@@ -228,4 +294,5 @@ module.exports = {
   authorize,
   createProductionGateway,
   readJsonLimited,
+  safeCreateCredentialCipher,
 };

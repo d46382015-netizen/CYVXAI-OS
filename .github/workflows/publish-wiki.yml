@@ -1,0 +1,41 @@
+name: Publish CYVX Wiki
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - scripts/generate-wiki-v2.js
+      - scripts/publish-wiki.sh
+      - package.json
+      - .github/workflows/publish-wiki.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+concurrency:
+  group: publish-cyvx-wiki
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Validate wiki generator
+        run: node --check scripts/generate-wiki-v2.js
+
+      - name: Generate and publish all Wiki pages
+        env:
+          GH_TOKEN: ${{ secrets.WIKI_TOKEN || github.token }}
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: bash scripts/publish-wiki.sh

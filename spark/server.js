@@ -139,6 +139,7 @@ function main() {
       authenticated: Boolean(apiKey),
       health: runtime.health(),
     }));
+    console.log(JSON.stringify({ event: "spark.started", host, port, url: `http://${host}:${port}`, authenticated: Boolean(apiKey), health: runtime.health() }));
   });
 
   let closing = false;
@@ -161,6 +162,7 @@ function requireApiKey(req, apiKey) {
   if (expected.length !== actual.length || !crypto.timingSafeEqual(expected, actual)) {
     throw new SparkError("UNAUTHORIZED", "A valid API key is required", 401);
   }
+  if (expected.length !== actual.length || !crypto.timingSafeEqual(expected, actual)) throw new SparkError("UNAUTHORIZED", "A valid API key is required", 401);
 }
 
 function takeRateLimit(req, buckets, maxPerMinute, namespace, trustProxy = false) {
@@ -177,6 +179,10 @@ function takeRateLimit(req, buckets, maxPerMinute, namespace, trustProxy = false
   if (buckets.size > 10_000) {
     for (const [bucketKey, value] of buckets) if (now - value.start >= 120_000) buckets.delete(bucketKey);
   }
+  if (now - bucket.start >= 60_000) { bucket.start = now; bucket.count = 0; }
+  bucket.count += 1;
+  buckets.set(key, bucket);
+  if (buckets.size > 10_000) for (const [bucketKey, value] of buckets) if (now - value.start >= 120_000) buckets.delete(bucketKey);
   return bucket.count <= maxPerMinute;
 }
 
@@ -203,6 +209,7 @@ function setCorsHeaders(req, res, allowedOrigin) {
     res.setHeader("access-control-allow-origin", origin);
     res.setHeader("vary", "origin");
   }
+  if (allowedOrigin && origin === allowedOrigin) { res.setHeader("access-control-allow-origin", origin); res.setHeader("vary", "origin"); }
   res.setHeader("access-control-allow-headers", "content-type, authorization, x-api-key, x-request-id, idempotency-key");
   res.setHeader("access-control-allow-methods", "GET,POST,PATCH,OPTIONS");
 }
@@ -218,6 +225,7 @@ function readJson(req, limit) {
         req.destroy();
         return;
       }
+      if (size > limit) { reject(new SparkError("PAYLOAD_TOO_LARGE", `JSON body exceeds ${limit} bytes`, 413)); req.destroy(); return; }
       chunks.push(chunk);
     });
     req.on("end", () => {
@@ -229,6 +237,7 @@ function readJson(req, limit) {
       } catch (error) {
         reject(new SparkError("INVALID_JSON", error.message, 400));
       }
+      } catch (error) { reject(new SparkError("INVALID_JSON", error.message, 400)); }
     });
     req.on("error", reject);
   });
@@ -326,6 +335,24 @@ if (require.main === module) {
     console.error(JSON.stringify({ event: "spark.start_failed", error: error.message }));
     process.exit(1);
   }
+  const type = file.endsWith(".html") ? "text/html; charset=utf-8" : file.endsWith(".js") ? "application/javascript; charset=utf-8" : file.endsWith(".css") ? "text/css; charset=utf-8" : "application/octet-stream";
+  return sendBuffer(res, 200, fs.readFileSync(file), type);
+}
+
+function sendJson(res, status, payload) { if (res.writableEnded) return; const body = Buffer.from(`${JSON.stringify(payload)}\n`); res.statusCode = status; res.setHeader("content-type", "application/json; charset=utf-8"); res.setHeader("content-length", body.length); res.end(body); }
+function sendText(res, status, payload, type = "text/plain; charset=utf-8") { return sendBuffer(res, status, Buffer.from(payload), type); }
+function sendBuffer(res, status, body, type) { if (res.writableEnded) return; res.statusCode = status; res.setHeader("content-type", type); res.setHeader("content-length", body.length); res.end(body); }
+function sendEmpty(res, status) { res.statusCode = status; res.end(); }
+function envelope(requestId, data, error = null) { return { powered_by: "Spark + CYVX", version: "1.0.0", request_id: requestId, timestamp: new Date().toISOString(), ok: !error, ...(error ? { error: { code: error.code, message: error.message, details: error.details } } : { data }) }; }
+function normalizeError(error) { if (error instanceof SparkError) return error; return new SparkError("INTERNAL_ERROR", "The Spark runtime could not complete the request", 500, process.env.NODE_ENV === "production" ? undefined : { cause: error.message }); }
+function requiredQuery(url, key) { const value = url.searchParams.get(key); if (!value) throw new SparkError("VALIDATION_ERROR", `${key} is required`, 422, { field: key }); return value; }
+function writable(filePath) { try { fs.accessSync(path.dirname(filePath), fs.constants.W_OK); return true; } catch (_) { return false; } }
+function appendLog(logPath, event) { try { fs.appendFileSync(logPath, `${JSON.stringify(event)}\n`, { mode: 0o600 }); } catch (error) { console.error(JSON.stringify({ event: "spark.log_failed", error: error.message })); } }
+function safeFilename(value) { return String(value).replace(/[^a-z0-9_-]/gi, "_"); }
+function isLoopback(host) { return new Set(["127.0.0.1", "localhost", "::1"]).has(host); }
+
+if (require.main === module) {
+  try { main(); } catch (error) { console.error(JSON.stringify({ event: "spark.start_failed", error: error.message })); process.exit(1); }
 }
 
 module.exports = { createSparkServer, envelope, normalizeError, readJson };

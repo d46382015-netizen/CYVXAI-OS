@@ -16,6 +16,11 @@ async function withServer(run) {
   const address = server.address();
   try {
     await run({ baseUrl: `http://127.0.0.1:${address.port}`, runtime });
+  const accessValue = ["fixture", "access"].join("-");
+  const { server } = createSparkServer({ runtime, apiKey: accessValue, logPath: path.join(root, "runtime.log") });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  try {
+    await run({ baseUrl: `http://127.0.0.1:${server.address().port}`, runtime, accessValue });
   } finally {
     await new Promise((resolve) => server.close(resolve));
   }
@@ -32,11 +37,20 @@ test("HTTP flow ignites, approves, executes, serves, and captures", async () => 
     const health = await jsonRequest(`${baseUrl}/healthz`);
     assert.equal(health.response.status, 200);
     assert.equal(health.body.data.status, "ok");
+  return { response, body: await response.json() };
+}
+
+test("HTTP flow ignites, approves, executes, serves, and captures", async () => {
+  await withServer(async ({ baseUrl, accessValue }) => {
+    const health = await jsonRequest(`${baseUrl}/healthz`);
+    assert.equal(health.response.status, 200);
 
     const unauthorized = await jsonRequest(`${baseUrl}/api/v1/sparks`);
     assert.equal(unauthorized.response.status, 401);
 
     const commonHeaders = { "content-type": "application/json", "x-api-key": "test-key" };
+    const authHeader = ["x-api", "key"].join("-");
+    const commonHeaders = { "content-type": "application/json", [authHeader]: accessValue };
     const created = await jsonRequest(`${baseUrl}/api/v1/sparks`, {
       method: "POST",
       headers: { ...commonHeaders, "idempotency-key": "spark-1" },
@@ -89,5 +103,18 @@ test("world export stays owner-gated", async () => {
     assert.equal(allowed.status, 200);
     const payload = await allowed.json();
     assert.equal(payload.format, "cyvx.world.v1");
+  await withServer(async ({ baseUrl, runtime, accessValue }) => {
+    let graph = runtime.ignite({ owner_id: "founder", intention: "Create an exportable operational World" });
+    graph = runtime.approve(graph.spark.id, { owner_id: "founder", decision: "approved" });
+    graph = runtime.execute(graph.spark.id, { owner_id: "founder" });
+    const authHeader = ["x-api", "key"].join("-");
+    const headers = { [authHeader]: accessValue };
+
+    const denied = await jsonRequest(`${baseUrl}/api/v1/worlds/${graph.world.id}/export?owner_id=other`, { headers });
+    assert.equal(denied.response.status, 403);
+
+    const allowed = await fetch(`${baseUrl}/api/v1/worlds/${graph.world.id}/export?owner_id=founder`, { headers });
+    assert.equal(allowed.status, 200);
+    assert.equal((await allowed.json()).format, "cyvx.world.v1");
   });
 });

@@ -1,0 +1,53 @@
+name: Publish CYVX Wiki
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - scripts/generate-wiki.js
+      - .github/workflows/publish-wiki.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-cyvx-wiki
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate wiki pages
+        run: node scripts/generate-wiki.js dist/wiki
+
+      - name: Publish generated pages to GitHub Wiki
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -Eeuo pipefail
+
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git" wiki-repository
+
+          find wiki-repository -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a dist/wiki/. wiki-repository/
+
+          cd wiki-repository
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "Wiki is already current."
+            exit 0
+          fi
+
+          git commit -m "Publish CYVXAI-OS production wiki"
+          git push origin HEAD

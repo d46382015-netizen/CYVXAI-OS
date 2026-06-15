@@ -19,9 +19,10 @@ class GitHubAppIntegration extends GitHubIntegration {
 
   async authenticationHealth() {
     const installationId = await this.installationIdProvider();
+    const appConfigured = Boolean(this.appClient && typeof this.appClient.configured === "function" && this.appClient.configured());
     return {
-      mode: installationId && this.appClient && this.appClient.configured() ? "github_app_installation" : this.token ? "static_token" : "anonymous",
-      installation_id: installationId || null,
+      mode: installationId && appConfigured ? "github_app_installation" : this.token ? "static_token" : "anonymous",
+      installation_connected: Boolean(installationId),
       app: this.appClient && typeof this.appClient.health === "function" ? this.appClient.health() : null,
       fallback_token_configured: Boolean(this.token),
     };

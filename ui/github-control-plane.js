@@ -23,6 +23,7 @@
         </div>
         <div class="gh-actions">
           <button class="gh-button" id="ghOperatorLogin">Unlock</button>
+          <button class="gh-button gh-hidden" id="ghOperatorLogout">Lock</button>
           <button class="gh-button primary" id="ghConnect">Connect GitHub</button>
           <button class="gh-button" id="ghRefresh">Refresh</button>
           <button class="gh-button danger gh-hidden" id="ghDisconnect">Disconnect</button>
@@ -43,6 +44,7 @@
   function wirePanel() {
     document.getElementById("ghRefresh").addEventListener("click", loadStatus);
     document.getElementById("ghOperatorLogin").addEventListener("click", unlockOperator);
+    document.getElementById("ghOperatorLogout").addEventListener("click", lockOperator);
     document.getElementById("ghConnect").addEventListener("click", () => {
       if (!state.payload?.github?.authenticated) {
         setNote("Unlock the owner session first. The API key is used once and is never saved by this page.", "warn");
@@ -84,6 +86,22 @@
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || data.error || "Operator authentication failed");
       setNote("Owner session unlocked. You can connect and manage GitHub safely.", "ok");
+      await loadStatus();
+    } catch (error) {
+      setNote(error.message, "bad");
+    }
+  }
+
+  async function lockOperator() {
+    try {
+      const response = await fetch("/api/session/operator", {
+        method: "DELETE",
+        credentials: "same-origin",
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || data.error || "Session lock failed");
+      state.payload = null;
+      setNote("Owner session locked.", "ok");
       await loadStatus();
     } catch (error) {
       setNote(error.message, "bad");
@@ -134,11 +152,12 @@
       statusCard("Control plane", readiness.ready ? "Ready" : "Needs configuration", readiness.ready ? "All required security layers are configured." : readinessSummary(readiness), readiness.ready ? "ok" : "warn"),
       statusCard("Owner session", authenticated ? "Unlocked" : "Locked", authenticated ? "Authenticated with a secure HttpOnly session." : "Unlock with the CYVX operator key to manage GitHub.", authenticated ? "ok" : "warn"),
       statusCard("GitHub account", connection?.github_user?.login || "Not connected", connection?.installation_id ? `Installation ${connection.installation_id}` : "No installation linked to CYVX.", connection ? "ok" : "warn"),
-      statusCard("Repository auth", github.repository_auth?.mode || "unavailable", github.repository_auth?.installation_id ? `Using installation ${github.repository_auth.installation_id}` : "Waiting for a connected installation.", github.repository_auth?.mode === "github_app_installation" ? "ok" : "warn")
+      statusCard("Repository auth", github.repository_auth?.mode || "unavailable", connection?.installation_id ? `Connected installation is active.` : "Waiting for a connected installation.", github.repository_auth?.mode === "github_app_installation" ? "ok" : "warn")
     );
 
     document.getElementById("ghOperatorLogin").textContent = authenticated ? "Session unlocked" : "Unlock";
     document.getElementById("ghOperatorLogin").disabled = authenticated;
+    document.getElementById("ghOperatorLogout").classList.toggle("gh-hidden", !authenticated);
     document.getElementById("ghConnect").disabled = !authenticated || !readiness.oauth_ready;
     document.getElementById("ghConnect").textContent = connection ? "Reconnect GitHub" : "Connect GitHub";
     document.getElementById("ghDisconnect").classList.toggle("gh-hidden", !connection);
@@ -205,7 +224,7 @@
     if (!readiness.webhook_ready) missing.push("webhook secret");
     if (!readiness.app_auth_ready) missing.push("App ID/private key");
     if (!readiness.oauth_ready) missing.push("OAuth/encryption");
-    if (!readiness.operator_session_ready) missing.push("operator session");
+    if (!readiness.operator_session_ready) missing.push("operator session/API key");
     return missing.length ? missing.join(", ") : "readiness unknown";
   }
 

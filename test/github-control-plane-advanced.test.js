@@ -19,6 +19,7 @@ test("operator session issues an HttpOnly cookie and rejects tampering and expir
   const session = createOperatorSession({
     secret: "operator-session-secret-operator-session-secret",
     ownerUserId: "dakota",
+    apiKeyConfigured: true,
     ttlSeconds: 300,
     now: () => nowMs,
   });
@@ -36,7 +37,17 @@ test("operator session issues an HttpOnly cookie and rejects tampering and expir
   assert.equal(session.userId({ headers: { cookie } }), "");
 });
 
-test("repository intelligence uses the connected GitHub App installation token path", async () => {
+test("operator readiness requires the API key as well as owner and session secrets", () => {
+  const incomplete = createOperatorSession({
+    secret: "operator-session-secret-operator-session-secret",
+    ownerUserId: "dakota",
+    apiKeyConfigured: false,
+  });
+  assert.equal(incomplete.configured(), false);
+  assert.equal(incomplete.health().operator_api_key_configured, false);
+});
+
+test("repository intelligence uses installation auth without exposing the installation identifier in health", async () => {
   const calls = [];
   const appClient = {
     configured: () => true,
@@ -63,6 +74,8 @@ test("repository intelligence uses the connected GitHub App installation token p
   assert.equal(calls[0].pathname, "/repos/d46382015-netizen/CYVXAI-OS");
   const health = await integration.authenticationHealth();
   assert.equal(health.mode, "github_app_installation");
+  assert.equal(health.installation_connected, true);
+  assert.equal(Object.prototype.hasOwnProperty.call(health, "installation_id"), false);
 });
 
 test("maps installation, pull request, review, closed issue, and successful check events", () => {

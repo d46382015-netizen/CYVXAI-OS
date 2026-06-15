@@ -5,12 +5,15 @@ const crypto = require("node:crypto");
 function createOperatorSession(options = {}) {
   const secret = String(options.secret || process.env.CYVX_OPERATOR_SESSION_SECRET || "").trim();
   const ownerUserId = String(options.ownerUserId || process.env.CYVX_OWNER_ID || "").trim();
+  const apiKeyConfigured = options.apiKeyConfigured == null
+    ? Boolean(String(process.env.CYVX_API_KEY || "").trim())
+    : Boolean(options.apiKeyConfigured);
   const now = options.now || (() => Date.now());
   const ttlSeconds = Math.max(300, Math.min(86_400, Number(options.ttlSeconds || 3_600)));
   const cookieName = options.cookieName || "cyvx_operator";
 
   function configured() {
-    return secret.length >= 32 && Boolean(ownerUserId);
+    return secret.length >= 32 && Boolean(ownerUserId) && apiKeyConfigured;
   }
 
   function issue(res, input = {}) {
@@ -58,6 +61,7 @@ function createOperatorSession(options = {}) {
       configured: configured(),
       owner_id_configured: Boolean(ownerUserId),
       session_secret_configured: secret.length >= 32,
+      operator_api_key_configured: apiKeyConfigured,
       ttl_seconds: ttlSeconds,
       cookie_name: cookieName,
     };

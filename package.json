@@ -1,6 +1,6 @@
 {
   "name": "cyvx",
-  "version": "6.1.0",
+  "version": "6.0.0",
   "private": true,
   "type": "commonjs",
   "description": "Spark + CYVX public reality infrastructure",

@@ -2,6 +2,7 @@
 .DS_Store
 .env
 .env.*
+.cyvx/
 data/memory/partner-memory.json
 data/missions/latest-partner-mission.json
 data/partner/latest-brief.json

@@ -10,7 +10,8 @@ trap 'rm -rf "$WORK"' EXIT
 command -v node >/dev/null 2>&1 || { echo "ERROR: node is required" >&2; exit 1; }
 command -v git >/dev/null 2>&1 || { echo "ERROR: git is required" >&2; exit 1; }
 
-node "$ROOT/scripts/generate-wiki.js" "$DIST"
+node --check "$ROOT/scripts/generate-wiki-v2.js"
+node "$ROOT/scripts/generate-wiki-v2.js" "$DIST"
 
 PAGE_COUNT="$(find "$DIST" -maxdepth 1 -type f -name '*.md' | wc -l | tr -d ' ')"
 if [ "$PAGE_COUNT" -lt 19 ]; then

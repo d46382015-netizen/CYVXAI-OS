@@ -10,6 +10,8 @@ const BUILD_TIME = new Date().toISOString();
 
 const CHECK_FILES = [
   "api/index.js",
+  "api/production.js",
+  "api/public.js",
   "core/controller.js",
   "core/platform/models.js",
   "core/platform/file_store.js",
@@ -18,7 +20,11 @@ const CHECK_FILES = [
   "core/platform/decision_intelligence_v1.js",
   "core/platform/reality_engine_v1.js",
   "core/protocols/protobuf.js",
+  "spark/runtime.js",
+  "spark/server.js",
+  "spark/ui/app.js",
   "test/platform.test.js",
+  "test/public-runtime.test.js",
   "ui/app.js",
 ];
 
@@ -45,8 +51,14 @@ function validateSources() {
 function prepareDist() {
   fs.rmSync(DIST, { recursive: true, force: true });
   fs.mkdirSync(path.join(DIST, "ui"), { recursive: true });
+  fs.mkdirSync(path.join(DIST, "spark", "ui"), { recursive: true });
+
   for (const file of ["index.html", "app.js", "styles.css", "README.md"]) {
     fs.copyFileSync(path.join(ROOT, "ui", file), path.join(DIST, "ui", file));
+  }
+
+  for (const file of ["index.html", "app.js", "styles.css"]) {
+    fs.copyFileSync(path.join(ROOT, "spark", "ui", file), path.join(DIST, "spark", "ui", file));
   }
 }
 
@@ -57,13 +69,30 @@ function writeManifest() {
     version: pkg.version,
     builtAt: BUILD_TIME,
     entrypoints: {
+      public: "api/public.js",
       api: "api/index.js",
-      ui: "ui/index.html",
+      productionGateway: "api/production.js",
+      spark: "spark/server.js",
+      sparkUi: "spark/ui/index.html",
+      operatorUi: "ui/index.html",
     },
-    endpoints: [
+    publicRoutes: [
+      "/",
       "/healthz",
-      "/health",
-      "/status",
+      "/readyz",
+      "/api/public/status",
+      "/api/public/worlds",
+      "/api/public/sparks/:id",
+      "/api/v1/sparks",
+      "/api/v1/sparks/:id/approval",
+      "/api/v1/sparks/:id/execute",
+      "/api/v1/worlds/:id/leads",
+      "/w/:slug",
+      "/os",
+    ],
+    operatorRoutes: [
+      "/api/github/control-plane/health",
+      "/api/github/status",
       "/api/v1/platform",
       "/api/v1/entities",
       "/api/v1/relationships",

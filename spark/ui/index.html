@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Spark turns intention into an owned operational World powered by CYVX.">
+<title>Spark — Turn ideas into assets</title>
+<link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<main>
+<header class="topbar"><div class="brand"><span class="mark">✦</span> Spark</div><div class="status-pill" id="runtime-status">Connecting</div></header>
+<section class="hero">
+<p class="eyebrow">The action layer of the internet</p>
+<h1>What do you want to make real?</h1>
+<p class="lede">Create an owned operational World with a website, offer, lead capture, automation, approvals, proof, and measurable outcomes.</p>
+<form id="ignite-form" class="ignite-card">
+<label><span>Intention</span><textarea id="intention" required minlength="8" maxlength="2000" placeholder="I want to launch a mobile car-detailing business in my city."></textarea></label>
+<div class="form-grid">
+<label><span>World name</span><input id="world-name" maxlength="120" placeholder="DetailFlow"></label>
+<label><span>Owner ID</span><input id="owner-id" maxlength="200" required></label>
+</div>
+<button type="submit" class="primary">Ignite a Spark</button>
+<p class="form-status" id="form-status" role="status"></p>
+</form>
+</section>
+<section id="workspace" class="workspace hidden" aria-live="polite">
+<div class="workspace-head"><div><p class="eyebrow">Founder control</p><h2 id="spark-title">Spark</h2><p id="spark-intention" class="muted"></p></div><span class="status-pill" id="spark-status">draft</span></div>
+<div class="kpi-grid"><article><span>World</span><strong id="world-status">—</strong></article><article><span>Authority</span><strong id="authority-tier">—</strong></article><article><span>Evidence</span><strong id="evidence-count">0</strong></article><article><span>Leads</span><strong id="lead-count">0</strong></article></div>
+<div class="action-row"><button id="approve-button" class="primary">Approve bounded execution</button><button id="execute-button" class="secondary">Execute approved mission</button><a id="world-link" class="secondary hidden" target="_blank" rel="noopener">Open World</a></div>
+<div class="panel-grid"><article class="panel"><div class="panel-title"><h3>Mission</h3><span id="mission-status"></span></div><div id="mission-steps" class="steps"></div></article><article class="panel"><div class="panel-title"><h3>Next action</h3></div><p id="next-action" class="next-action"></p><h3>Proof stream</h3><div id="proof-stream" class="proof-stream"></div></article></div>
+</section>
+</main>
+<script src="/assets/app.js" defer></script>
+</body>
+</html>

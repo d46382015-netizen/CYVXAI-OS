@@ -1,0 +1,58 @@
+services:
+  - type: web
+    name: cyvxai-os
+    runtime: node
+    plan: starter
+    region: ohio
+    branch: main
+    autoDeploy: true
+    buildCommand: npm ci --no-audit --no-fund && npm run verify && npm run spark:verify
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 22.16.0
+      - key: APP_BASE_URL
+        value: https://cyvxai-os.onrender.com
+      - key: CYVX_DATA_ROOT
+        value: /var/data/cyvx
+      - key: RENDER_DISK_PATH
+        value: /var/data/cyvx
+      - key: CYVX_OWNER_ID
+        value: dakota
+      - key: SPARK_PUBLIC_MODE
+        value: "1"
+      - key: SPARK_RATE_LIMIT
+        value: "90"
+      - key: SPARK_LEAD_RATE_LIMIT
+        value: "20"
+      - key: CYVX_RATE_LIMIT
+        value: "180"
+      - key: CYVX_REQUIRE_GITHUB_APP
+        value: "false"
+      - key: CYVX_API_KEY
+        generateValue: true
+      - key: CYVX_OPERATOR_SESSION_SECRET
+        generateValue: true
+      - key: GITHUB_WEBHOOK_SECRET
+        generateValue: true
+      - key: GITHUB_OAUTH_STATE_SECRET
+        generateValue: true
+      - key: GITHUB_TOKEN_ENCRYPTION_KEY
+        generateValue: true
+      - key: GITHUB_APP_ID
+        value: "3853563"
+      - key: GITHUB_CLIENT_ID
+        value: Iv23lieBU1HBubq5cv03
+      - key: GITHUB_APP_SLUG
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_PRIVATE_KEY_PEM
+        sync: false
+    disk:
+      name: cyvx-data
+      mountPath: /var/data
+      sizeGB: 1

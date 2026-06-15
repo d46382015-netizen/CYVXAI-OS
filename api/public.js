@@ -1,10 +1,11 @@
 "use strict";
 
+const crypto = require("node:crypto");
+const fs = require("node:fs");
 const http = require("node:http");
 const net = require("node:net");
 const os = require("node:os");
 const path = require("node:path");
-const fs = require("node:fs");
 const { createProductionGateway, buildReadiness } = require("./production");
 const { createSparkServer } = require("../spark/server");
 
@@ -25,9 +26,9 @@ async function createPublicRuntime(options = {}) {
     host: "127.0.0.1",
   });
 
-  const sparkPublicMode = String(process.env.SPARK_PUBLIC_MODE || "1") !== "0";
+  const sparkInternalKey = String(options.sparkInternalKey || process.env.SPARK_INTERNAL_API_KEY || crypto.randomBytes(32).toString("base64url"));
   const spark = createSparkServer({
-    apiKey: sparkPublicMode ? "" : String(process.env.SPARK_API_KEY || ""),
+    apiKey: sparkInternalKey,
     allowedOrigin: process.env.APP_BASE_URL || "",
     trustProxy: true,
     requestLimit: Number(process.env.SPARK_RATE_LIMIT || 90),
@@ -72,8 +73,27 @@ async function createPublicRuntime(options = {}) {
         });
       }
 
-      if (isSparkRoute(url.pathname)) {
+      const publicGraphMatch = url.pathname.match(/^\/api\/public\/sparks\/([^/]+)$/);
+      if (req.method === "GET" && publicGraphMatch) {
+        const ownerId = String(req.headers["x-spark-owner"] || "").trim();
+        if (!ownerId) return sendJson(res, 401, { ok: false, error: "OWNER_KEY_REQUIRED", message: "The Spark owner key is required." });
+        const graph = spark.runtime.graph(decodeURIComponent(publicGraphMatch[1]));
+        if (!safeEqual(ownerId, graph.spark.owner_id)) {
+          return sendJson(res, 403, { ok: false, error: "OWNER_KEY_REJECTED", message: "This device does not control that Spark." });
+        }
+        return sendJson(res, 200, { ok: true, data: graph, timestamp: new Date().toISOString() });
+      }
+
+      if (isSparkStaticRoute(url.pathname)) {
         return proxyHttp(req, res, sparkPort, rewriteSparkPath(url));
+      }
+
+      const sparkPath = canonicalSparkApiPath(url);
+      if (sparkPath) {
+        if (!isAllowedPublicSparkApi(req.method, sparkPath)) {
+          return sendJson(res, 404, { ok: false, error: "NOT_FOUND", message: "Public Spark route not found." });
+        }
+        return proxyHttp(req, res, sparkPort, sparkPath + url.search, { "x-api-key": sparkInternalKey });
       }
 
       if (url.pathname === "/os" || url.pathname.startsWith("/os/")) {
@@ -82,7 +102,7 @@ async function createPublicRuntime(options = {}) {
 
       return proxyHttp(req, res, cyvxGatewayPort, req.url);
     } catch (error) {
-      return sendJson(res, error.statusCode || 500, {
+      return sendJson(res, error.statusCode || error.status || 500, {
         ok: false,
         error: error.code || "PUBLIC_GATEWAY_ERROR",
         message: error.message,
@@ -91,16 +111,14 @@ async function createPublicRuntime(options = {}) {
   });
 
   publicServer.on("upgrade", (req, socket, head) => {
-    const url = new URL(req.url, "http://cyvx.public");
-    const targetPort = isSparkRoute(url.pathname) ? sparkPort : cyvxGatewayPort;
-    const targetPath = isSparkRoute(url.pathname) ? rewriteSparkPath(url) : req.url;
-    proxyUpgrade(req, socket, head, targetPort, targetPath);
+    proxyUpgrade(req, socket, head, cyvxGatewayPort, req.url);
   });
 
   return {
     publicServer,
     cyvx,
     spark,
+    sparkInternalKey,
     ports: { publicPort, cyvxGatewayPort, cyvxApiPort, sparkPort },
     host,
     async listen() {
@@ -119,21 +137,39 @@ async function createPublicRuntime(options = {}) {
   };
 }
 
-function isSparkRoute(pathname) {
+function isSparkStaticRoute(pathname) {
   return pathname === "/" ||
     pathname === "/spark" ||
-    pathname.startsWith("/spark/") ||
+    pathname.startsWith("/spark/assets/") ||
+    pathname.startsWith("/spark/w/") ||
+    pathname === "/spark/metrics" ||
     pathname.startsWith("/assets/") ||
-    pathname.startsWith("/w/") ||
-    pathname === "/api/v1/spark" ||
-    pathname === "/api/v1/sparks" ||
-    pathname.startsWith("/api/v1/sparks/") ||
-    pathname.startsWith("/api/v1/worlds/");
+    pathname.startsWith("/w/");
+}
+
+function canonicalSparkApiPath(url) {
+  let pathname = url.pathname;
+  if (pathname.startsWith("/spark/api/")) pathname = pathname.slice("/spark".length);
+  if (pathname === "/api/v1/sparks" ||
+      pathname.startsWith("/api/v1/sparks/") ||
+      pathname.startsWith("/api/v1/worlds/")) {
+    return pathname;
+  }
+  return null;
+}
+
+function isAllowedPublicSparkApi(method, pathname) {
+  if (method === "POST" && pathname === "/api/v1/sparks") return true;
+  if (method === "POST" && /^\/api\/v1\/sparks\/[^/]+\/(approval|execute|control|outcomes)$/.test(pathname)) return true;
+  if (method === "PATCH" && /^\/api\/v1\/worlds\/[^/]+$/.test(pathname)) return true;
+  if (method === "POST" && /^\/api\/v1\/worlds\/[^/]+\/leads$/.test(pathname)) return true;
+  return false;
 }
 
 function rewriteSparkPath(url) {
   let pathname = url.pathname;
   if (pathname === "/spark" || pathname === "/spark/") pathname = "/";
+  else if (pathname === "/spark/metrics") pathname = "/metrics";
   else if (pathname.startsWith("/spark/")) pathname = pathname.slice("/spark".length) || "/";
   return pathname + url.search;
 }
@@ -154,8 +190,13 @@ function publicHealth(cyvx, sparkRuntime) {
   }
 
   const github = buildReadiness(cyvx);
-  const cyvxStatus = typeof cyvx.controller.status === "function" ? cyvx.controller.status() : { status: "ok" };
-  const cyvxHealthy = cyvxStatus && cyvxStatus.status !== "error";
+  let cyvxHealthy = true;
+  try {
+    const status = typeof cyvx.controller.status === "function" ? cyvx.controller.status() : { status: "ok" };
+    cyvxHealthy = status && status.status !== "error";
+  } catch {
+    cyvxHealthy = false;
+  }
   const sparkHealthy = sparkHealth.status === "ok";
 
   return {
@@ -217,12 +258,12 @@ function publicWorld(world) {
   };
 }
 
-function proxyHttp(req, res, port, requestPath) {
+function proxyHttp(req, res, port, requestPath, extraHeaders = {}) {
   const headers = Object.assign({}, req.headers, {
     host: `127.0.0.1:${port}`,
     "x-forwarded-proto": String(req.headers["x-forwarded-proto"] || (req.socket.encrypted ? "https" : "http")),
     "x-forwarded-host": String(req.headers["x-forwarded-host"] || req.headers.host || ""),
-  });
+  }, extraHeaders);
 
   const upstream = http.request({
     host: "127.0.0.1",
@@ -231,8 +272,7 @@ function proxyHttp(req, res, port, requestPath) {
     path: requestPath || req.url,
     headers,
   }, (upstreamRes) => {
-    const responseHeaders = Object.assign({}, upstreamRes.headers);
-    responseHeaders["x-cyvx-edge"] = "public-gateway";
+    const responseHeaders = Object.assign({}, upstreamRes.headers, { "x-cyvx-edge": "public-gateway" });
     res.writeHead(upstreamRes.statusCode || 502, responseHeaders);
     upstreamRes.pipe(res);
   });
@@ -273,6 +313,12 @@ function sendJson(res, status, payload) {
   res.setHeader("cache-control", "no-store");
   res.setHeader("content-length", body.length);
   res.end(body);
+}
+
+function safeEqual(left, right) {
+  const a = Buffer.from(String(left || ""));
+  const b = Buffer.from(String(right || ""));
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 function positivePort(value, label) {
@@ -342,8 +388,10 @@ if (require.main === module) {
 }
 
 module.exports = {
+  canonicalSparkApiPath,
   createPublicRuntime,
-  isSparkRoute,
+  isAllowedPublicSparkApi,
+  isSparkStaticRoute,
   publicHealth,
   publicStatus,
   rewriteOsPath,

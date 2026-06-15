@@ -15,7 +15,7 @@
     "verify": "npm test && npm run build",
     "spark": "node ./spark/server.js",
     "spark:start": "bash ./spark/start.sh",
-    "spark:verify": "node --test ./test/spark-runtime.test.js ./test/spark-server.test.js",
+    "spark:verify": "node --test ./test/spark-runtime.test.js ./test/spark-server.test.js ./test/spark-security.test.js",
     "partner": "node ./scripts/cyvx-partner-cli.js",
     "strategy": "node scripts/cyvx-operating-loop.js",
     "cyvx": "node scripts/cyvx-operating-loop.js",

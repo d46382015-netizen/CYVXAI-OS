@@ -27,36 +27,68 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run tests
+        run: npm test
+
       - name: Build distributable artifacts
         run: npm run build
 
-      - name: Start API for smoke tests
+      - name: Start CYVX API for smoke tests
         run: |
           node ./api/index.js > /tmp/cyvx-ci.log 2>&1 &
           echo $! > /tmp/cyvx-ci.pid
           for _ in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:3000/healthz >/dev/null; then
-              exit 0
-            fi
+            if curl -fsS http://127.0.0.1:3000/healthz >/dev/null; then exit 0; fi
             sleep 1
           done
           cat /tmp/cyvx-ci.log
           exit 1
 
-      - name: Smoke test health, overview, and command routes
+      - name: Smoke test CYVX routes
         run: |
           curl -fsS http://127.0.0.1:3000/healthz
           curl -fsS http://127.0.0.1:3000/status
           curl -fsS http://127.0.0.1:3000/api/v1/overview
           curl -fsS http://127.0.0.1:3000/api/v1/insights
-          curl -fsS -X POST http://127.0.0.1:3000/api/v1/command \
-            -H 'content-type: application/json' \
-            -d '{"task":"optimize:cluster"}'
 
-      - name: Stop API
+      - name: Start Spark runtime for smoke tests
+        run: |
+          SPARK_PORT=3100 node ./spark/server.js > /tmp/spark-ci.log 2>&1 &
+          echo $! > /tmp/spark-ci.pid
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3100/healthz >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/spark-ci.log
+          exit 1
+
+      - name: Smoke test Spark intention-to-World flow
+        env:
+          BASE: http://127.0.0.1:3100
+        run: |
+          CREATED="$(curl -fsS -X POST "$BASE/api/v1/sparks" \
+            -H 'content-type: application/json' \
+            -H 'idempotency-key: ci-spark' \
+            -d '{"owner_id":"ci-founder","intention":"Launch a test service World with real lead capture","world":{"name":"CI World"}}')"
+          SPARK_ID="$(printf '%s' "$CREATED" | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).data.spark.id')"
+          WORLD_ID="$(printf '%s' "$CREATED" | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).data.world.id')"
+          curl -fsS -X POST "$BASE/api/v1/sparks/$SPARK_ID/approval" \
+            -H 'content-type: application/json' \
+            -d '{"owner_id":"ci-founder","decision":"approved"}'
+          EXECUTED="$(curl -fsS -X POST "$BASE/api/v1/sparks/$SPARK_ID/execute" \
+            -H 'content-type: application/json' \
+            -d '{"owner_id":"ci-founder"}')"
+          printf '%s' "$EXECUTED" | node -e 'const fs=require("fs");const body=JSON.parse(fs.readFileSync(0,"utf8"));if(body.data.world.status!=="operational")process.exit(1)'
+          curl -fsS -X POST "$BASE/api/v1/worlds/$WORLD_ID/leads" \
+            -H 'content-type: application/json' \
+            -H 'idempotency-key: ci-lead' \
+            -d '{"name":"CI Lead","email":"ci@example.com"}'
+          curl -fsS "$BASE/metrics" | grep 'spark_leads_total 1'
+
+      - name: Stop services
         if: always()
         run: |
-          if [ -f /tmp/cyvx-ci.pid ]; then
-            kill "$(cat /tmp/cyvx-ci.pid)" || true
-          fi
-
+          if [ -f /tmp/cyvx-ci.pid ]; then kill "$(cat /tmp/cyvx-ci.pid)" || true; fi
+          if [ -f /tmp/spark-ci.pid ]; then kill "$(cat /tmp/spark-ci.pid)" || true; fi
+          if [ -f /tmp/cyvx-ci.log ]; then cat /tmp/cyvx-ci.log; fi
+          if [ -f /tmp/spark-ci.log ]; then cat /tmp/spark-ci.log; fi

@@ -267,9 +267,14 @@ function renderGraph() {
 
 function setLoading(loading) {
   state.loading = loading;
-  $("ignite-form").querySelector("button[type=submit]").disabled = loading;
-  $("approve-button").disabled = loading || $("approve-button").disabled;
-  $("execute-button").disabled = loading || $("execute-button").disabled;
+  const submit = $("ignite-form").querySelector("button[type=submit]");
+  if (submit) submit.disabled = loading;
+  if (state.graph) {
+    renderGraph();
+  } else {
+    $("approve-button").disabled = true;
+    $("execute-button").disabled = true;
+  }
 }
 
 function setFormStatus(message, isError = false) {

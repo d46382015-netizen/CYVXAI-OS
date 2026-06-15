@@ -189,7 +189,9 @@ async function restoreLastSpark() {
   const sparkId = localStorage.getItem("spark.last_id");
   if (!sparkId) return;
   try {
-    state.graph = await api(`/api/v1/sparks/${encodeURIComponent(sparkId)}`);
+    state.graph = await api(`/api/public/sparks/${encodeURIComponent(sparkId)}`, {
+      headers: { "x-spark-owner": ownerInput.value.trim() },
+    });
     renderGraph();
   } catch {
     localStorage.removeItem("spark.last_id");
@@ -200,7 +202,9 @@ async function refreshGraph() {
   const sparkId = state.graph?.spark?.id;
   if (!sparkId || state.loading) return;
   try {
-    state.graph = await api(`/api/v1/sparks/${encodeURIComponent(sparkId)}`);
+    state.graph = await api(`/api/public/sparks/${encodeURIComponent(sparkId)}`, {
+      headers: { "x-spark-owner": ownerInput.value.trim() },
+    });
     renderGraph();
   } catch {
     // Keep the last known local graph visible during a transient network failure.

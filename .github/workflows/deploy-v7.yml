@@ -1,0 +1,61 @@
+name: Deploy CYVX v7
+
+on:
+  push:
+    branches: [main]
+    paths: ["api/**", "core/ops/**", "core/production/**", "spark/**", "ui/**", "scripts/**", "package*.json", "render.yaml", ".github/workflows/deploy-v7.yml"]
+  pull_request:
+    paths: ["api/**", "core/ops/**", "core/production/**", "spark/**", "ui/**", "scripts/**", "package*.json", "render.yaml", ".github/workflows/deploy-v7.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-v7-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run verify
+      - name: Prove public runtime
+        env:
+          PORT: "3200"
+          CYVX_CONTROL_PORT: "3204"
+          CYVX_DATA_ROOT: /tmp/cyvx-deploy-ci
+          CYVX_REQUIRE_GITHUB_APP: "false"
+          CYVX_AUTONOMY_INTERVAL_MS: "500"
+        run: |
+          node api/runtime-v7.js > /tmp/cyvx-deploy.log 2>&1 &
+          PID=$!
+          trap 'kill $PID 2>/dev/null || true' EXIT
+          for _ in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:3200/readyz >/dev/null && curl -fsS http://127.0.0.1:3204/readyz >/dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:3200/ | grep 'What do you want to make real?'
+          curl -fsS http://127.0.0.1:3200/api/public/status
+          curl -fsS http://127.0.0.1:3204/api/control-plane
+
+  deploy-render:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-latest
+    env:
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+    steps:
+      - name: Trigger Render deployment when configured
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "Render auto-deploy remains authoritative."
+            exit 0
+          fi
+          curl --fail --silent --show-error --request POST "$RENDER_DEPLOY_HOOK_URL"

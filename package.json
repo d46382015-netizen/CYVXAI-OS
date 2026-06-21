@@ -12,7 +12,7 @@
     "public:test": "node --test ./test/public-runtime.test.js",
     "api": "node ./api/production.js",
     "cli": "node ./cli/cyvx.js",
-    "build": "node ./scripts/build.js",
+    "build": "node ./scripts/build-v7.js",
     "serve": "node ./ui/server.js",
     "test": "node --test",
     "test:ops": "node --test ./test/runtime-supervisor.test.js ./test/ops-overview.test.js",

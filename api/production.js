@@ -8,18 +8,21 @@ const { createApiServer, wrap } = require("./index");
 const { captureOutcome } = require("./outcome");
 const { CyvxController } = require("../core/controller");
 const { PlatformKernel } = require("../core/platform");
+const { GitHubAppIntegration } = require("../core/integrations/github_app_integration");
 const { GitHubAppClient } = require("../core/integrations/github_control_plane/app_auth");
 const { GitHubAuthStore } = require("../core/integrations/github_control_plane/auth_store");
 const { createCredentialCipher } = require("../core/integrations/github_control_plane/credential_crypto");
-const { createGitHubOAuthService } = require("../core/integrations/github_control_plane/oauth_service");
+const { createGitHubOAuthService, sanitizeConnection } = require("../core/integrations/github_control_plane/oauth_service");
 const { createOAuthStateService } = require("../core/integrations/github_control_plane/oauth_state");
 const { GitHubWebhookStore } = require("../core/integrations/github_control_plane/store");
 const { createGitHubWebhookService, sendJson } = require("../core/integrations/github_control_plane/service");
+const { createOperatorSession } = require("../core/security/operator_session");
 
 async function createProductionGateway(options = {}) {
   const publicPort = Number(options.port || process.env.CYVX_PORT || 3000);
   const host = options.host || process.env.CYVX_HOST || "0.0.0.0";
   const internalPort = Number(options.internalPort || process.env.CYVX_INTERNAL_PORT || publicPort + 1);
+  const ownerUserId = String(process.env.CYVX_OWNER_ID || "").trim();
   if (publicPort === internalPort) throw new Error("CYVX_INTERNAL_PORT must differ from CYVX_PORT");
 
   const controller = options.controller || new CyvxController({
@@ -39,6 +42,7 @@ async function createProductionGateway(options = {}) {
     store,
     platform,
     maxBodyBytes: Number(process.env.CYVX_GITHUB_WEBHOOK_MAX_BYTES || 1_000_000),
+    maxAttempts: Number(process.env.CYVX_GITHUB_WEBHOOK_MAX_ATTEMPTS || 5),
   });
 
   const authStore = options.authStore || new GitHubAuthStore({
@@ -53,22 +57,66 @@ async function createProductionGateway(options = {}) {
     store: authStore,
   });
   const cipher = options.cipher === undefined ? safeCreateCredentialCipher(process.env.GITHUB_TOKEN_ENCRYPTION_KEY || "") : options.cipher;
+  const operatorSession = options.operatorSession || createOperatorSession({
+    secret: process.env.CYVX_OPERATOR_SESSION_SECRET || "",
+    ownerUserId,
+  });
   const oauth = options.oauthService || createGitHubOAuthService({
     clientId: process.env.GITHUB_CLIENT_ID || "",
     clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
     appSlug: process.env.GITHUB_APP_SLUG || "",
-    ownerUserId: process.env.CYVX_OWNER_ID || "",
+    ownerUserId: "",
     stateService,
     authStore,
     cipher,
     appClient,
+    authorizeRequest: (req) => Boolean(operatorSession.userId(req)),
   });
 
-  const { server: internalServer } = createApiServer(controller, { platform });
+  const primaryConnection = () => ownerUserId ? authStore.getConnection(ownerUserId) : null;
+  const githubFactory = options.githubFactory || (() => new GitHubAppIntegration({
+    appClient,
+    installationIdProvider: () => {
+      const connection = primaryConnection();
+      return connection && connection.installation_id || null;
+    },
+    fallbackOptions: {},
+  }));
+
+  assertRequiredGitHubConfiguration({ appClient, oauth, operatorSession, webhook });
+
+  const { server: internalServer } = createApiServer(controller, { platform, githubFactory });
   const gateway = http.createServer(async (req, res) => {
     const url = new URL(req.url, "http://localhost");
     try {
       if (url.pathname === "/api/github/webhook") return webhook.handle(req, res);
+
+      if (url.pathname === "/api/session/operator") {
+        if (req.method === "GET") {
+          const payload = operatorSession.verify(req);
+          return sendJson(res, 200, {
+            ok: true,
+            authenticated: Boolean(payload),
+            user_id: payload && payload.sub || null,
+            expires_at: payload && payload.exp ? new Date(payload.exp * 1000).toISOString() : null,
+            configured: operatorSession.configured(),
+          });
+        }
+        if (req.method === "POST") {
+          if (!hasApiKey() || !authorize(req)) return sendJson(res, 401, { ok: false, error: "invalid_operator_key" });
+          const issued = operatorSession.issue(res, { secure: isSecureRequest(req) });
+          return sendJson(res, 200, { ok: true, authenticated: true, ...issued });
+        }
+        if (req.method === "DELETE") {
+          operatorSession.clear(res, isSecureRequest(req));
+          return sendJson(res, 200, { ok: true, authenticated: false });
+        }
+        return sendJson(res, 405, { ok: false, error: "method_not_allowed" }, { allow: "GET, POST, DELETE" });
+      }
+
+      const sessionUserId = operatorSession.userId(req);
+      if (sessionUserId) req.headers["x-cyvx-user-id"] = sessionUserId;
+
       if (url.pathname === "/api/github/install") return oauth.handleInstall(req, res, url);
       if (url.pathname === "/api/github/oauth/callback") return oauth.handleCallback(req, res, url);
       if (url.pathname === "/api/github/installations") return oauth.handleInstallations(req, res);
@@ -76,13 +124,48 @@ async function createProductionGateway(options = {}) {
         const installationId = url.pathname.split("/").pop();
         return oauth.handleDisconnect(req, res, installationId);
       }
+
+      if (url.pathname === "/api/github/status") {
+        if (req.method !== "GET") return sendJson(res, 405, { ok: false, error: "method_not_allowed" }, { allow: "GET" });
+        const authenticated = Boolean(sessionUserId);
+        const connection = authenticated ? oauth.connectionForRequest(req) : null;
+        const repositoryAuth = await githubFactory().authenticationHealth();
+        return sendJson(res, 200, wrap({
+          github: {
+            authenticated,
+            connection: authenticated ? sanitizeConnection(connection) : null,
+            recent_deliveries: authenticated ? store.list({ limit: 12 }).map(sanitizeDelivery) : [],
+            readiness: buildReadiness({ webhook, appClient, oauth, operatorSession }),
+            repository_auth: repositoryAuth,
+          },
+        }));
+      }
+
+      if (url.pathname === "/api/github/deliveries") {
+        if (req.method !== "GET") return sendJson(res, 405, { ok: false, error: "method_not_allowed" }, { allow: "GET" });
+        if (!operatorAuthorized(req, operatorSession)) return sendJson(res, 401, { ok: false, error: "operator_authentication_required" });
+        const limit = Math.max(1, Math.min(100, Number(url.searchParams.get("limit") || 25)));
+        return sendJson(res, 200, { ok: true, deliveries: store.list({ limit }).map(sanitizeDelivery) });
+      }
+
+      if (/^\/api\/github\/deliveries\/[^/]+\/retry$/.test(url.pathname)) {
+        if (req.method !== "POST") return sendJson(res, 405, { ok: false, error: "method_not_allowed" }, { allow: "POST" });
+        if (!operatorAuthorized(req, operatorSession)) return sendJson(res, 401, { ok: false, error: "operator_authentication_required" });
+        const deliveryId = decodeURIComponent(url.pathname.split("/")[4]);
+        const result = await webhook.retry(deliveryId);
+        return sendJson(res, 200, { ok: true, delivery: sanitizeDelivery(result) });
+      }
+
       if (url.pathname === "/api/github/control-plane/health") {
         if (req.method !== "GET") return sendJson(res, 405, { ok: false, error: "method_not_allowed" }, { allow: "GET" });
         return sendJson(res, 200, wrap({
           github_control_plane: {
+            readiness: buildReadiness({ webhook, appClient, oauth, operatorSession }),
             webhook: webhook.health(),
             app_auth: appClient.health(),
             oauth: oauth.health(),
+            operator_session: operatorSession.health(),
+            repository_auth: await githubFactory().authenticationHealth(),
           },
         }));
       }
@@ -134,10 +217,12 @@ async function createProductionGateway(options = {}) {
     cipher,
     controller,
     gateway,
+    githubFactory,
     host,
     internalPort,
     internalServer,
     oauth,
+    operatorSession,
     platform,
     port: publicPort,
     stateService,
@@ -152,6 +237,57 @@ async function createProductionGateway(options = {}) {
       await Promise.all([closeServer(gateway), closeServer(internalServer)]);
       if (typeof controller.stop === "function") controller.stop();
     },
+  };
+}
+
+function buildReadiness({ webhook, appClient, oauth, operatorSession }) {
+  const webhookReady = webhook.health().configured;
+  const appReady = appClient.health().configured;
+  const oauthReady = oauth.health().configured;
+  const sessionReady = operatorSession.health().configured;
+  return {
+    ready: webhookReady && appReady && oauthReady && sessionReady,
+    webhook_ready: webhookReady,
+    app_auth_ready: appReady,
+    oauth_ready: oauthReady,
+    operator_session_ready: sessionReady,
+  };
+}
+
+function assertRequiredGitHubConfiguration(services) {
+  if (String(process.env.CYVX_REQUIRE_GITHUB_APP || "").toLowerCase() !== "true") return;
+  const readiness = buildReadiness(services);
+  if (!readiness.ready) {
+    const missing = Object.entries(readiness).filter(([key, value]) => key !== "ready" && !value).map(([key]) => key);
+    throw new Error(`GitHub App production configuration is incomplete: ${missing.join(", ")}`);
+  }
+}
+
+function sanitizeDelivery(delivery) {
+  if (!delivery) return null;
+  return {
+    delivery_id: delivery.delivery_id,
+    event: delivery.event,
+    action: delivery.action,
+    installation_id: delivery.installation_id,
+    repository_id: delivery.repository_id,
+    repository: delivery.repository,
+    sender: delivery.sender,
+    payload_sha256: delivery.payload_sha256,
+    status: delivery.status,
+    attempts: delivery.attempts,
+    duplicate_count: delivery.duplicate_count,
+    mapping: delivery.mapping ? {
+      created: Array.isArray(delivery.mapping.created) ? delivery.mapping.created.map((item) => ({ kind: item.kind, id: item.id })) : [],
+      ignored: Boolean(delivery.mapping.ignored),
+      ignored_reason: delivery.mapping.ignored_reason || null,
+    } : null,
+    error: delivery.error ? { code: delivery.error.code, message: delivery.error.message } : null,
+    accepted_at: delivery.accepted_at,
+    processing_started_at: delivery.processing_started_at || null,
+    completed_at: delivery.completed_at || null,
+    failed_at: delivery.failed_at || null,
+    updated_at: delivery.updated_at,
   };
 }
 
@@ -233,11 +369,25 @@ function assertObject(value, label) {
   }
 }
 
+function hasApiKey() {
+  return Boolean(String(process.env.CYVX_API_KEY || "").trim());
+}
+
 function authorize(req) {
   const apiKey = process.env.CYVX_API_KEY || "";
   if (!apiKey) return true;
   const header = req.headers["x-api-key"] || req.headers.authorization || "";
   return String(header).replace(/^Bearer\s+/i, "") === apiKey;
+}
+
+function operatorAuthorized(req, operatorSession) {
+  if (operatorSession.userId(req)) return true;
+  return hasApiKey() && authorize(req);
+}
+
+function isSecureRequest(req) {
+  const forwarded = String(req.headers["x-forwarded-proto"] || "").split(",")[0].trim();
+  return forwarded === "https" || Boolean(req.socket && req.socket.encrypted);
 }
 
 function listen(server, port, host) {
@@ -268,9 +418,11 @@ async function main() {
   console.log(`CYVX internal API listening on http://127.0.0.1:${runtime.internalPort}`);
   console.log(JSON.stringify(wrap({
     github_control_plane: {
+      readiness: buildReadiness(runtime),
       webhook: runtime.webhook.health(),
       app_auth: runtime.appClient.health(),
       oauth: runtime.oauth.health(),
+      operator_session: runtime.operatorSession.health(),
     },
   }), null, 2));
 
@@ -292,7 +444,10 @@ if (require.main === module) {
 
 module.exports = {
   authorize,
+  buildReadiness,
   createProductionGateway,
+  operatorAuthorized,
   readJsonLimited,
   safeCreateCredentialCipher,
+  sanitizeDelivery,
 };

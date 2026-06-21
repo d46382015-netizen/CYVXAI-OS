@@ -18,7 +18,7 @@ export function installCreateActions({ client, state, elements, sync, setBusy })
       $("workspace").scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
       $("form-status").textContent = error.message;
-      showToast(error.messae, "error");
+      showToast(error.message, "error");
     } finally {
       setBusy(false);
     }

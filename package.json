@@ -1,20 +1,24 @@
 {
   "name": "cyvx",
-  "version": "6.0.0",
+  "version": "7.0.0",
   "private": true,
   "type": "commonjs",
-  "description": "Spark + CYVX public reality infrastructure",
+  "description": "Spark + CYVX autonomous production reality infrastructure",
   "scripts": {
-    "start": "bash ./start.sh",
-    "public": "node ./api/public.js",
+    "start": "node ./api/runtime-v7.js",
+    "dev": "node ./api/runtime-v7.js",
+    "public": "node ./api/runtime-v7.js",
+    "public:core": "node ./api/public.js",
     "public:test": "node --test ./test/public-runtime.test.js",
     "api": "node ./api/production.js",
     "cli": "node ./cli/cyvx.js",
     "build": "node ./scripts/build.js",
-    "dev": "node ./api/public.js",
     "serve": "node ./ui/server.js",
     "test": "node --test",
-    "verify": "npm test && npm run build",
+    "test:ops": "node --test ./test/runtime-supervisor.test.js ./test/ops-overview.test.js",
+    "test:ui": "node --test ./test/ui-contract.test.js",
+    "verify": "npm run verify:production",
+    "verify:production": "node --check ./api/runtime-v7.js && node --check ./core/production/autonomy_supervisor.js && node --check ./core/ops/overview.js && npm test && npm run build",
     "github:test": "node --test ./test/github-control-plane.test.js ./test/github-control-plane-advanced.test.js",
     "spark": "node ./spark/server.js",
     "spark:start": "bash ./spark/start.sh",
@@ -29,6 +33,9 @@
     "agency:daemon": "node scripts/cyvx-agency-daemon.js start",
     "wiki:generate": "node --check ./scripts/generate-wiki-v2.js && node ./scripts/generate-wiki-v2.js ./dist/wiki",
     "wiki:publish": "bash ./scripts/publish-wiki.sh"
+  },
+  "engines": {
+    "node": ">=22"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",

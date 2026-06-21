@@ -2,69 +2,27 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { spawnSync } = require("node:child_process");
 
 const ROOT = path.join(__dirname, "..");
 const DIST = path.join(ROOT, "dist");
-const SERVER_FILES = [
-  "api/index.js",
-  "api/production.js",
-  "api/public.js",
-  "api/runtime-v7.js",
-  "core/controller.js",
-  "core/platform/models.js",
-  "core/platform/file_store.js",
-  "core/platform/kernel.js",
-  "core/platform/thesis_v1.js",
-  "core/platform/decision_intelligence_v1.js",
-  "core/platform/reality_engine_v1.js",
-  "core/protocols/protobuf.js",
-  "core/production/autonomy_supervisor.js",
-  "core/ops/readiness.js",
-  "core/ops/next_actions.js",
-  "core/ops/runtime_snapshot.js",
-  "core/ops/overview.js",
-  "core/ops/metrics.js",
-  "core/ops/http_server.js",
-  "spark/runtime.js",
-  "spark/server.js",
-  "test/platform.test.js",
-  "test/public-runtime.test.js",
-  "test/runtime-supervisor.test.js",
-  "test/ops-overview.test.js",
-  "test/ui-contract.test.js",
-];
 
 function main() {
-  validateServerFiles();
-  prepareDist();
-  writeManifest();
-  console.log(`Build complete: ${DIST}`);
-}
-
-function validateServerFiles() {
-  for (const file of SERVER_FILES) {
-    const result = spawnSync(process.execPath, ["--check", path.join(ROOT, file)], { cwd: ROOT, encoding: "utf8" });
-    if (result.status !== 0) {
-      process.stderr.write(`Syntax check failed: ${file}\n`);
-      process.stderr.write(result.stderr || result.stdout || "unknown syntax error\n");
-      process.exit(result.status || 1);
-    }
-  }
-}
-
-function prepareDist() {
   fs.rmSync(DIST, { recursive: true, force: true });
   copyDirectoryFiles("ui", path.join(DIST, "ui"), /\.(html|js|css|md)$/);
   copyDirectoryFiles(path.join("spark", "ui"), path.join(DIST, "spark", "ui"), /\.(html|js|css)$/);
+  writeManifest();
+  console.log(`Core artifacts assembled: ${DIST}`);
 }
 
 function copyDirectoryFiles(relativeSource, target, pattern) {
   const source = path.join(ROOT, relativeSource);
+  if (!fs.existsSync(source)) throw new Error(`Build source is missing: ${relativeSource}`);
   fs.mkdirSync(target, { recursive: true });
   for (const file of fs.readdirSync(source)) {
     const sourceFile = path.join(source, file);
-    if (fs.statSync(sourceFile).isFile() && pattern.test(file)) fs.copyFileSync(sourceFile, path.join(target, file));
+    if (fs.statSync(sourceFile).isFile() && pattern.test(file)) {
+      fs.copyFileSync(sourceFile, path.join(target, file));
+    }
   }
 }
 

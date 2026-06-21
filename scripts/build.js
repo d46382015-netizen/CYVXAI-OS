@@ -6,12 +6,11 @@ const { spawnSync } = require("node:child_process");
 
 const ROOT = path.join(__dirname, "..");
 const DIST = path.join(ROOT, "dist");
-const BUILD_TIME = new Date().toISOString();
-
-const CHECK_FILES = [
+const SERVER_FILES = [
   "api/index.js",
   "api/production.js",
   "api/public.js",
+  "api/runtime-v7.js",
   "core/controller.js",
   "core/platform/models.js",
   "core/platform/file_store.js",
@@ -20,29 +19,35 @@ const CHECK_FILES = [
   "core/platform/decision_intelligence_v1.js",
   "core/platform/reality_engine_v1.js",
   "core/protocols/protobuf.js",
+  "core/production/autonomy_supervisor.js",
+  "core/ops/readiness.js",
+  "core/ops/next_actions.js",
+  "core/ops/runtime_snapshot.js",
+  "core/ops/overview.js",
+  "core/ops/metrics.js",
+  "core/ops/http_server.js",
   "spark/runtime.js",
   "spark/server.js",
-  "spark/ui/app.js",
   "test/platform.test.js",
   "test/public-runtime.test.js",
-  "ui/app.js",
+  "test/runtime-supervisor.test.js",
+  "test/ops-overview.test.js",
+  "test/ui-contract.test.js",
 ];
 
 function main() {
-  validateSources();
+  validateServerFiles();
   prepareDist();
   writeManifest();
   console.log(`Build complete: ${DIST}`);
 }
 
-function validateSources() {
-  for (const rel of CHECK_FILES) {
-    const result = spawnSync(process.execPath, ["--check", path.join(ROOT, rel)], {
-      cwd: ROOT,
-      encoding: "utf8",
-    });
+function validateServerFiles() {
+  for (const file of SERVER_FILES) {
+    const result = spawnSync(process.execPath, ["--check", path.join(ROOT, file)], { cwd: ROOT, encoding: "utf8" });
     if (result.status !== 0) {
-      process.stderr.write(result.stderr || result.stdout || `syntax check failed for ${rel}\n`);
+      process.stderr.write(`Syntax check failed: ${file}\n`);
+      process.stderr.write(result.stderr || result.stdout || "unknown syntax error\n");
       process.exit(result.status || 1);
     }
   }
@@ -50,15 +55,16 @@ function validateSources() {
 
 function prepareDist() {
   fs.rmSync(DIST, { recursive: true, force: true });
-  fs.mkdirSync(path.join(DIST, "ui"), { recursive: true });
-  fs.mkdirSync(path.join(DIST, "spark", "ui"), { recursive: true });
+  copyDirectoryFiles("ui", path.join(DIST, "ui"), /\.(html|js|css|md)$/);
+  copyDirectoryFiles(path.join("spark", "ui"), path.join(DIST, "spark", "ui"), /\.(html|js|css)$/);
+}
 
-  for (const file of ["index.html", "app.js", "styles.css", "README.md"]) {
-    fs.copyFileSync(path.join(ROOT, "ui", file), path.join(DIST, "ui", file));
-  }
-
-  for (const file of ["index.html", "app.js", "styles.css"]) {
-    fs.copyFileSync(path.join(ROOT, "spark", "ui", file), path.join(DIST, "spark", "ui", file));
+function copyDirectoryFiles(relativeSource, target, pattern) {
+  const source = path.join(ROOT, relativeSource);
+  fs.mkdirSync(target, { recursive: true });
+  for (const file of fs.readdirSync(source)) {
+    const sourceFile = path.join(source, file);
+    if (fs.statSync(sourceFile).isFile() && pattern.test(file)) fs.copyFileSync(sourceFile, path.join(target, file));
   }
 }
 
@@ -67,65 +73,25 @@ function writeManifest() {
   const manifest = {
     name: pkg.name,
     version: pkg.version,
-    builtAt: BUILD_TIME,
+    built_at: new Date().toISOString(),
+    node: pkg.engines?.node || ">=22",
     entrypoints: {
-      public: "api/public.js",
-      api: "api/index.js",
-      productionGateway: "api/production.js",
+      production: "api/runtime-v7.js",
+      public_core: "api/public.js",
+      production_gateway: "api/production.js",
+      legacy_api: "api/index.js",
       spark: "spark/server.js",
-      sparkUi: "spark/ui/index.html",
-      operatorUi: "ui/index.html",
+      spark_ui: "spark/ui/index.html",
+      operator_ui: "ui/index.html"
     },
-    publicRoutes: [
-      "/",
-      "/healthz",
-      "/readyz",
-      "/api/public/status",
-      "/api/public/worlds",
-      "/api/public/sparks/:id",
-      "/api/v1/sparks",
-      "/api/v1/sparks/:id/approval",
-      "/api/v1/sparks/:id/execute",
-      "/api/v1/worlds/:id/leads",
-      "/w/:slug",
-      "/os",
-    ],
-    operatorRoutes: [
-      "/api/github/control-plane/health",
-      "/api/github/status",
-      "/api/v1/platform",
-      "/api/v1/entities",
-      "/api/v1/relationships",
-      "/api/v1/graph",
-      "/api/v1/agents",
-      "/api/v1/objectives",
-      "/api/v1/missions",
-      "/api/v1/simulations",
-      "/api/v1/reports",
-      "/api/v1/decisions",
-      "/api/v1/interventions",
-      "/api/v1/outcomes",
-      "/api/v1/knowledge",
-      "/api/v1/capabilities",
-      "/api/v1/commands",
-      "/api/v1/events",
-      "/api/v1/executive",
-      "/api/v1/overview",
-      "/api/v1/insights",
-      "/api/v1/workloads",
-      "/api/v1/actions",
-      "/api/v1/command",
-      "/api/v1/coordination",
-      "/api/v1/intelligence",
-      "/api/v1/patterns",
-      "/api/v1/recommendations",
-      "/api/v1/priorities",
-      "/ask",
-      "/metrics",
-      "/api/v1/reality-engine",
-    ],
+    control_plane: {
+      bind: "127.0.0.1",
+      default_port_offset: 4,
+      routes: ["/healthz", "/readyz", "/api/control-plane", "/api/overview", "/metrics"]
+    },
+    public_routes: ["/", "/healthz", "/readyz", "/api/public/status", "/api/public/worlds", "/api/public/sparks/:id", "/api/v1/sparks", "/api/v1/sparks/:id/approval", "/api/v1/sparks/:id/execute", "/api/v1/worlds/:id/leads", "/w/:slug", "/os"]
   };
-  fs.writeFileSync(path.join(DIST, "build-manifest.json"), JSON.stringify(manifest, null, 2));
+  fs.writeFileSync(path.join(DIST, "build-manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
 }
 
 main();

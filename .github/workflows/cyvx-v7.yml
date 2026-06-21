@@ -1,0 +1,106 @@
+name: CYVX v7 Production
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cyvx-v7-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+
+  production-loop:
+    name: Prove autonomous production loop
+    runs-on: ubuntu-latest
+    needs: verify
+    env:
+      PORT: 3300
+      CYVX_PUBLIC_PORT: 3300
+      CYVX_GATEWAY_INTERNAL_PORT: 3301
+      CYVX_INTERNAL_PORT: 3302
+      CYVX_SPARK_INTERNAL_PORT: 3303
+      CYVX_CONTROL_PORT: 3304
+      CYVX_DATA_ROOT: /tmp/cyvx-v7
+      CYVX_PLATFORM_STATE: /tmp/cyvx-v7/platform.json
+      CYVX_GITHUB_WEBHOOK_STORE: /tmp/cyvx-v7/webhooks.json
+      CYVX_GITHUB_AUTH_STORE: /tmp/cyvx-v7/auth.json
+      SPARK_STATE_FILE: /tmp/cyvx-v7/spark.json
+      SPARK_ARTIFACT_ROOT: /tmp/cyvx-v7/worlds
+      CYVX_AUTONOMY: 1
+      CYVX_AUTONOMY_INTERVAL_MS: 500
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Start CYVX v7
+        run: |
+          npm start > /tmp/cyvx-v7.log 2>&1 &
+          echo $! > /tmp/cyvx-v7.pid
+          for _ in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3300/readyz >/dev/null && curl -fsS http://127.0.0.1:3304/readyz >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/cyvx-v7.log
+          exit 1
+      - name: Create and approve a Spark
+        run: |
+          CREATED="$(curl -fsS -X POST http://127.0.0.1:3300/api/v1/sparks \
+            -H 'content-type: application/json' \
+            -H 'idempotency-key: ci-v7-spark' \
+            -d '{"owner_id":"ci-founder","intention":"Launch an owned service World that captures qualified leads","world":{"name":"CI V7 World","offer_name":"Production Audit","offer_description":"A verified production systems audit","price_cents":150000}}')"
+          printf '%s' "$CREATED" > /tmp/created.json
+          SPARK_ID="$(node -pe 'JSON.parse(require("fs").readFileSync("/tmp/created.json","utf8")).data.spark.id')"
+          WORLD_ID="$(node -pe 'JSON.parse(require("fs").readFileSync("/tmp/created.json","utf8")).data.world.id')"
+          echo "$SPARK_ID" > /tmp/spark-id
+          echo "$WORLD_ID" > /tmp/world-id
+          curl -fsS -X POST "http://127.0.0.1:3300/api/v1/sparks/$SPARK_ID/approval" \
+            -H 'content-type: application/json' \
+            -d '{"owner_id":"ci-founder","decision":"approved","reason":"CI approved bounded production execution"}'
+      - name: Verify autonomous execution and proof
+        run: |
+          SPARK_ID="$(cat /tmp/spark-id)"
+          for _ in $(seq 1 30); do
+            GRAPH="$(curl -fsS -H 'x-spark-owner: ci-founder' "http://127.0.0.1:3300/api/public/sparks/$SPARK_ID")"
+            STATUS="$(printf '%s' "$GRAPH" | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).data.world.status')"
+            if [ "$STATUS" = "operational" ]; then printf '%s' "$GRAPH" > /tmp/graph.json; break; fi
+            sleep 1
+          done
+          node -e 'const g=JSON.parse(require("fs").readFileSync("/tmp/graph.json","utf8")).data;if(g.world.status!=="operational"||g.evidence.length<6)process.exit(1)'
+      - name: Capture intent and inspect control plane
+        run: |
+          WORLD_ID="$(cat /tmp/world-id)"
+          curl -fsS -X POST "http://127.0.0.1:3300/api/v1/worlds/$WORLD_ID/leads" \
+            -H 'content-type: application/json' -H 'idempotency-key: ci-v7-lead' \
+            -d '{"name":"CI Buyer","email":"buyer@example.com","message":"Requesting the production audit"}'
+          curl -fsS http://127.0.0.1:3300/api/public/worlds | grep 'CI V7 World'
+          curl -fsS http://127.0.0.1:3304/api/control-plane > /tmp/control.json
+          node -e 'const c=JSON.parse(require("fs").readFileSync("/tmp/control.json","utf8")).data;if(c.readiness.score<90||c.traction.leads_total<1||c.runtime.autonomy.metrics.executions<1)process.exit(1)'
+          curl -fsS http://127.0.0.1:3304/metrics | grep cyvx_autonomy_executions_total
+      - name: Stop runtime and print logs
+        if: always()
+        run: |
+          [ ! -f /tmp/cyvx-v7.pid ] || kill "$(cat /tmp/cyvx-v7.pid)" || true
+          [ ! -f /tmp/cyvx-v7.log ] || cat /tmp/cyvx-v7.log

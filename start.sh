@@ -41,8 +41,12 @@ export SPARK_STATE_FILE="${SPARK_STATE_FILE:-$CYVX_DATA_ROOT/spark-state.json}"
 export SPARK_ARTIFACT_ROOT="${SPARK_ARTIFACT_ROOT:-$CYVX_DATA_ROOT/worlds}"
 export SPARK_LOG="${SPARK_LOG:-$CYVX_DATA_ROOT/logs/spark-runtime.log}"
 export CYVX_PLATFORM_STATE="${CYVX_PLATFORM_STATE:-$CYVX_DATA_ROOT/platform-state.json}"
+export CYVX_PLATFORM_DB="${CYVX_PLATFORM_DB:-$CYVX_DATA_ROOT/platform.db}"
 export CYVX_GITHUB_WEBHOOK_STORE="${CYVX_GITHUB_WEBHOOK_STORE:-$CYVX_DATA_ROOT/github-webhooks.json}"
 export CYVX_GITHUB_AUTH_STORE="${CYVX_GITHUB_AUTH_STORE:-$CYVX_DATA_ROOT/github-auth.json}"
+# The public edge starts CYVX on an internal 127.0.0.1-only port. This does not
+# permit an unauthenticated external production bind.
+export CYVX_ALLOW_INSECURE_LOCALHOST=true
 
 mkdir -p "$CYVX_DATA_ROOT" "$SPARK_ARTIFACT_ROOT" "$(dirname "$SPARK_LOG")"
 

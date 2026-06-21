@@ -1,0 +1,37 @@
+name: CYVX v7 Build Stages
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cyvx-v7-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Assemble legacy artifacts
+        run: node ./scripts/build.js
+      - name: Validate v7 server and browser modules
+        run: node ./scripts/check-v7.js
+      - name: Assemble v7 artifacts
+        run: node ./scripts/package-v7.js
+      - name: Verify v7 manifest and browser assets
+        run: |
+          test -s dist/v7-manifest.json
+          test -s dist/spark/ui/spark-client.js
+          test -s dist/spark/ui/spark-render.js
+          test -s dist/spark/ui/spark-control-actions.js

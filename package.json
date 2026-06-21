@@ -13,7 +13,7 @@
     "api": "node ./api/production.js",
     "cli": "node ./cli/cyvx.js",
     "doctor": "node ./scripts/cyvx-doctor-v7.js",
-    "build": "node ./scripts/build-v7.js",
+    "build": "node ./scripts/build.js && node ./scripts/check-v7.js && node ./scripts/package-v7.js",
     "serve": "node ./ui/server.js",
     "test": "node --test",
     "test:ops": "node --test ./test/runtime-supervisor.test.js ./test/ops-overview.test.js",

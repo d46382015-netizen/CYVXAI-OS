@@ -46,4 +46,10 @@ export function installControlActions({ client, state, sync, setBusy }) {
 
   $("refresh-worlds").addEventListener("click", async () => {
     $("refresh-worlds").disabled = true;
-    awaitÍå¹Œ¹İ½É±‘Ì ¤ì(€€€€ ‰É•™É•Í µİ½É±‘Ìˆ¤¹‘¥Í…‰±•€ô™…±Í”ì(€ô¤ì)ô
+    try {
+      await sync.worlds();
+    } finally {
+      $("refresh-worlds").disabled = false;
+    }
+  });
+}

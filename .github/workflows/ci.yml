@@ -36,6 +36,31 @@ jobs:
       - name: Build distributable artifacts
         run: npm run build
 
+      - name: Verify reversible state migration
+        run: |
+          mkdir -p /tmp/cyvx-migration dist/evidence
+          node - <<'NODE'
+          const fs = require('fs');
+          fs.writeFileSync('/tmp/cyvx-migration/platform-state.json', JSON.stringify({
+            tenant: { id: 'ci', name: 'CI' },
+            entities: [{ id: 'ci-company', type: 'entity', label: 'CI Company' }],
+            relationships: [], events: [], agents: [], goals: [], initiatives: [], objectives: [],
+            constraints: [], opportunities: [], missions: [], simulations: [], reports: [], commands: [],
+            decisions: [], interventions: [], outcomes: [], knowledgeRecords: [], capabilities: [], trusts: [],
+            patterns: [], recommendations: [], priorities: [], observations: [], humans: [], resources: [],
+            assignments: [], approvals: [], queueItems: [], nextBestActions: [], criteria: [], realityObjects: [],
+            significanceRecords: [], evolutionRecommendations: [], cirMetrics: [], workflows: []
+          }, null, 2) + '\n');
+          NODE
+          node scripts/platform-state-migrate.js migrate \
+            --from /tmp/cyvx-migration/platform-state.json \
+            --to /tmp/cyvx-migration/platform.db \
+            > dist/evidence/migration.json
+          node scripts/platform-state-migrate.js rollback \
+            --from /tmp/cyvx-migration/platform.db \
+            --to /tmp/cyvx-migration/platform-state.rollback.json \
+            > dist/evidence/rollback.json
+
       - name: Start CYVX API for smoke tests
         run: |
           node ./api/index.js > /tmp/cyvx-ci.log 2>&1 &
@@ -53,6 +78,69 @@ jobs:
           curl -fsS http://127.0.0.1:3000/status
           curl -fsS http://127.0.0.1:3000/api/v1/overview
           curl -fsS http://127.0.0.1:3000/api/v1/insights
+
+      - name: Start hardened production gateway
+        env:
+          CYVX_API_KEY: ci-production-key
+          CYVX_PORT: 3200
+          CYVX_INTERNAL_PORT: 3201
+          CYVX_HOST: 127.0.0.1
+          CYVX_DB: /tmp/cyvx-production.db
+          CYVX_PLATFORM_DB: /tmp/cyvx-platform-production.db
+        run: |
+          node ./api/production.js > /tmp/cyvx-production.log 2>&1 &
+          echo $! > /tmp/cyvx-production.pid
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3200/healthz >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/cyvx-production.log
+          exit 1
+
+      - name: Prove production auth and validation
+        run: |
+          mkdir -p dist/evidence
+          MISSING_STATUS="$(curl -sS -o /tmp/missing-auth.json -w '%{http_code}' http://127.0.0.1:3200/api/v1/workloads)"
+          test "$MISSING_STATUS" = "401"
+
+          curl -fsS http://127.0.0.1:3200/api/v1/workloads \
+            -H 'x-api-key: ci-production-key' \
+            > /tmp/authorized-workloads.json
+
+          INVALID_STATUS="$(curl -sS -o /tmp/invalid-workload.json -w '%{http_code}' \
+            -X POST http://127.0.0.1:3200/api/v1/workloads \
+            -H 'x-api-key: ci-production-key' \
+            -H 'content-type: application/json' \
+            -d '{"name":"invalid","replicas":0}')"
+          test "$INVALID_STATUS" = "422"
+
+          curl -fsS -X POST http://127.0.0.1:3200/api/v1/workloads \
+            -H 'x-api-key: ci-production-key' \
+            -H 'content-type: application/json' \
+            -d '{"name":"ci-api","cpu_request":1,"mem_request_mb":512,"replicas":2,"target_latency_ms":120}' \
+            > /tmp/valid-workload.json
+
+          node - "$MISSING_STATUS" "$INVALID_STATUS" <<'NODE'
+          const fs = require('fs');
+          const [missingStatus, invalidStatus] = process.argv.slice(2);
+          const evidence = {
+            generated_at: new Date().toISOString(),
+            missing_credential_status: Number(missingStatus),
+            invalid_payload_status: Number(invalidStatus),
+            authorized_request_ok: JSON.parse(fs.readFileSync('/tmp/authorized-workloads.json', 'utf8')).powered_by === 'CYVX',
+            valid_workload_accepted: JSON.parse(fs.readFileSync('/tmp/valid-workload.json', 'utf8')).accepted === true,
+            migration_verified: JSON.parse(fs.readFileSync('dist/evidence/migration.json', 'utf8')).verified === true,
+            rollback_verified: JSON.parse(fs.readFileSync('dist/evidence/rollback.json', 'utf8')).verified === true
+          };
+          evidence.passed = evidence.missing_credential_status === 401 &&
+            evidence.invalid_payload_status === 422 &&
+            evidence.authorized_request_ok &&
+            evidence.valid_workload_accepted &&
+            evidence.migration_verified &&
+            evidence.rollback_verified;
+          fs.writeFileSync('dist/evidence/production-hardening.json', JSON.stringify(evidence, null, 2) + '\n');
+          if (!evidence.passed) process.exit(1);
+          NODE
 
       - name: Start Spark runtime for smoke tests
         run: |
@@ -88,12 +176,21 @@ jobs:
             -d '{"name":"CI Lead","email":"ci@example.com"}'
           curl -fsS "$BASE/metrics" | grep 'spark_leads_total 1'
 
+      - name: Upload production hardening evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-hardening-evidence
+          path: dist/evidence/
+          if-no-files-found: error
+
       - name: Stop services
         if: always()
         run: |
           if [ -f /tmp/cyvx-ci.pid ]; then kill "$(cat /tmp/cyvx-ci.pid)" || true; fi
+          if [ -f /tmp/cyvx-production.pid ]; then kill "$(cat /tmp/cyvx-production.pid)" || true; fi
           if [ -f /tmp/spark-ci.pid ]; then kill "$(cat /tmp/spark-ci.pid)" || true; fi
           if [ -f /tmp/cyvx-ci.log ]; then cat /tmp/cyvx-ci.log; fi
+          if [ -f /tmp/cyvx-production.log ]; then cat /tmp/cyvx-production.log; fi
           if [ -f /tmp/spark-ci.log ]; then cat /tmp/spark-ci.log; fi
 
   publish-v6-release:
@@ -167,7 +264,6 @@ jobs:
           ```
 
           Created and architected by Dakota Lee Jonsgaard.
-
           Copyright 2026 Dakota Lee Jonsgaard. All rights reserved.
           EOF
 

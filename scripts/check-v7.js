@@ -17,6 +17,7 @@ const NODE_FILES = [
   "core/ops/http_server.js",
 ];
 const BROWSER_FILES = [
+  "spark/ui/app.js",
   "spark/ui/spark-client.js",
   "spark/ui/spark-render.js",
   "spark/ui/spark-sync.js",

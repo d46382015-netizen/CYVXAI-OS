@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#090b10">
+  <title>CYVX SaaS Control Plane</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <p class="eyebrow">CYVX Reliable Multi-Tenant SaaS v1</p>
+        <h1>Governed execution control plane</h1>
+        <p class="sub">Tenant isolation, durable jobs, explicit approval, replay protection, usage proof and kill-switch control.</p>
+      </div>
+      <span id="health" class="status">Checking</span>
+    </header>
+
+    <section class="card auth-card">
+      <label for="token">Short-lived bearer token</label>
+      <div class="row">
+        <input id="token" type="password" autocomplete="off" placeholder="OIDC access token">
+        <input id="organization" autocomplete="organization" maxlength="200" placeholder="Organization name for first connection">
+        <button id="connect">Connect</button>
+      </div>
+      <p id="auth-message" class="muted">The token stays in this browser tab and is never persisted.</p>
+    </section>
+
+    <section id="workspace" class="workspace hidden">
+      <div class="grid metrics">
+        <article class="card"><span>Tenant</span><strong id="tenant-name">—</strong><small id="tenant-plan">—</small></article>
+        <article class="card"><span>Active missions</span><strong id="active-missions">0</strong><small id="mission-total">0 total</small></article>
+        <article class="card"><span>Queue</span><strong id="queue-total">0</strong><small id="queue-detail">0 leased</small></article>
+        <article class="card"><span>Completed</span><strong id="completed">0</strong><small id="cost">0¢ measured cost</small></article>
+      </div>
+
+      <div class="columns">
+        <section class="card">
+          <div class="section-head"><div><p class="eyebrow">Mission</p><h2>Create bounded work</h2></div><span id="mission-risk" class="badge">policy scored</span></div>
+          <form id="mission-form">
+            <label for="intention">Intention</label>
+            <textarea id="intention" minlength="8" maxlength="4000" required placeholder="Describe the measurable outcome this tenant authorizes."></textarea>
+            <div class="two">
+              <div><label for="budget">Budget, cents</label><input id="budget" type="number" min="0" step="1" value="0"></div>
+              <div><label for="capabilities">Capabilities</label><input id="capabilities" placeholder="crm.write, webhook.emit"></div>
+            </div>
+            <button type="submit">Create mission</button>
+          </form>
+        </section>
+
+        <section class="card">
+          <div class="section-head"><div><p class="eyebrow">Safety</p><h2>Tenant controls</h2></div><span id="kill-state" class="badge">unknown</span></div>
+          <p>Immediately stop or resume queued autonomous execution for this tenant only.</p>
+          <div class="row wrap">
+            <button id="stop" class="danger">Enable kill switch</button>
+            <button id="resume" class="secondary">Disable kill switch</button>
+            <button id="export" class="secondary">Export tenant data</button>
+          </div>
+        </section>
+      </div>
+
+      <section class="card">
+        <div class="section-head"><div><p class="eyebrow">Evidence</p><h2>Latest operation</h2></div><button id="refresh" class="secondary compact">Refresh</button></div>
+        <pre id="output">Connected. Create a mission or operate a tenant control.</pre>
+      </section>
+    </section>
+  </main>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>

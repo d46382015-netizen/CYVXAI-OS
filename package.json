@@ -1,6 +1,6 @@
 {
   "name": "cyvx",
-  "version": "7.0.1",
+  "version": "7.0.0",
   "private": true,
   "type": "commonjs",
   "description": "Spark and CYVX production coordination infrastructure",
@@ -27,8 +27,11 @@
     "spark:run": "bash ./spark/start.sh",
     "spark:test": "node --test ./test/spark-runtime.test.js ./test/spark-server.test.js ./test/spark-security.test.js",
     "partner": "node ./scripts/cyvx-partner-cli.js",
-    "strategy": "node ./scripts/cyvx-operating-loop.js",
-    "cyvx": "node ./scripts/cyvx-operating-loop.js",
+    "strategy": "node scripts/cyvx-operating-loop.js",
+    "cyvx": "node scripts/cyvx-operating-loop.js",
+    "agency:loop": "node scripts/cyvx-agency-loop.js",
+    "agency:tick": "node scripts/cyvx-agency-daemon.js",
+    "agency:daemon": "node scripts/cyvx-agency-daemon.js start",
     "wiki:generate": "node --check ./scripts/generate-wiki-v2.js && node ./scripts/generate-wiki-v2.js ./dist/wiki",
     "wiki:publish": "bash ./scripts/publish-wiki.sh"
   },

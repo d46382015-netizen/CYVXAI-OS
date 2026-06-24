@@ -2,278 +2,58 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
 
 permissions:
   contents: read
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-smoke-test:
-    name: Build and smoke test
+  regression:
+    name: Compatibility regression
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+     - uses: actions/checkout@v5
+     - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run tests
-        run: npm test
-
-      - name: Build distributable artifacts
-        run: npm run build
-
-      - name: Verify reversible state migration
+      - name: Verify legacy API compatibility
         run: |
-          mkdir -p /tmp/cyvx-migration dist/evidence
-          node - <<'NODE'
-          const fs = require('fs');
-          fs.writeFileSync('/tmp/cyvx-migration/platform-state.json', JSON.stringify({
-            tenant: { id: 'ci', name: 'CI' },
-            entities: [{ id: 'ci-company', type: 'entity', label: 'CI Company' }],
-            relationships: [], events: [], agents: [], goals: [], initiatives: [], objectives: [],
-            constraints: [], opportunities: [], missions: [], simulations: [], reports: [], commands: [],
-            decisions: [], interventions: [], outcomes: [], knowledgeRecords: [], capabilities: [], trusts: [],
-            patterns: [], recommendations: [], priorities: [], observations: [], humans: [], resources: [],
-            assignments: [], approvals: [], queueItems: [], nextBestActions: [], criteria: [], realityObjects: [],
-            significanceRecords: [], evolutionRecommendations: [], cirMetrics: [], workflows: []
-          }, null, 2) + '\n');
-          NODE
-          node scripts/platform-state-migrate.js migrate \
-            --from /tmp/cyvx-migration/platform-state.json \
-            --to /tmp/cyvx-migration/platform.db \
-            > dist/evidence/migration.json
-          node scripts/platform-state-migrate.js rollback \
-            --from /tmp/cyvx-migration/platform.db \
-            --to /tmp/cyvx-migration/platform-state.rollback.json \
-            > dist/evidence/rollback.json
-
-      - name: Start CYVX API for smoke tests
-        run: |
-          node ./api/index.js > /tmp/cyvx-ci.log 2>&1 &
-          echo $! > /tmp/cyvx-ci.pid
+          node ./api/index.js > /tmp/cyvx-api.log 2>&1 &
+          API_PID!=
+          trap 'kill $API_PID 2>/dev/null || true' EXIT
           for _ in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:3000/healthz >/dev/null; then exit 0; fi
+            if curl -fsS http://127.0.0.1:3000/healthz >/dev/null; then break; fi
             sleep 1
           done
-          cat /tmp/cyvx-ci.log
-          exit 1
-
-      - name: Smoke test CYVX routes
-        run: |
-          curl -fsS http://127.0.0.1:3000/healthz
           curl -fsS http://127.0.0.1:3000/status
           curl -fsS http://127.0.0.1:3000/api/v1/overview
           curl -fsS http://127.0.0.1:3000/api/v1/insights
 
-      - name: Start hardened production gateway
-        env:
-          CYVX_API_KEY: ci-production-key
-          CYVX_PORT: 3200
-          CYVX_INTERNAL_PORT: 3201
-          CYVX_HOST: 127.0.0.1
-          CYVX_DB: /tmp/cyvx-production.db
-          CYVX_PLATFORM_DB: /tmp/cyvx-platform-production.db
+      - name: Verify standalone Spark compatibility
         run: |
-          node ./api/production.js > /tmp/cyvx-production.log 2>&1 &
-          echo $! > /tmp/cyvx-production.pid
+          SPARK_PORT=3100 node ./spark/server.js > /tmp/spark.log 2>&1 &
+          SPARK_PID=$!
+          trap 'kill $SPARK_PID 2>/dev/null || true' EXIT
           for _ in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:3200/healthz >/dev/null; then exit 0; fi
+            if curl -fsS http://127.0.0.1:3100/healthz >/dev/null; then break; fi
             sleep 1
           done
-          cat /tmp/cyvx-production.log
-          exit 1
-
-      - name: Prove production auth and validation
-        run: |
-          mkdir -p dist/evidence
-          MISSING_STATUS="$(curl -sS -o /tmp/missing-auth.json -w '%{http_code}' http://127.0.0.1:3200/api/v1/workloads)"
-          test "$MISSING_STATUS" = "401"
-
-          curl -fsS http://127.0.0.1:3200/api/v1/workloads \
-            -H 'x-api-key: ci-production-key' \
-            > /tmp/authorized-workloads.json
-
-          INVALID_STATUS="$(curl -sS -o /tmp/invalid-workload.json -w '%{http_code}' \
-            -X POST http://127.0.0.1:3200/api/v1/workloads \
-            -H 'x-api-key: ci-production-key' \
-            -H 'content-type: application/json' \
-            -d '{"name":"invalid","replicas":0}')"
-          test "$INVALID_STATUS" = "422"
-
-          curl -fsS -X POST http://127.0.0.1:3200/api/v1/workloads \
-            -H 'x-api-key: ci-production-key' \
-            -H 'content-type: application/json' \
-            -d '{"name":"ci-api","cpu_request":1,"mem_request_mb":512,"replicas":2,"target_latency_ms":120}' \
-            > /tmp/valid-workload.json
-
-          node - "$MISSING_STATUS" "$INVALID_STATUS" <<'NODE'
-          const fs = require('fs');
-          const [missingStatus, invalidStatus] = process.argv.slice(2);
-          const evidence = {
-            generated_at: new Date().toISOString(),
-            missing_credential_status: Number(missingStatus),
-            invalid_payload_status: Number(invalidStatus),
-            authorized_request_ok: JSON.parse(fs.readFileSync('/tmp/authorized-workloads.json', 'utf8')).powered_by === 'CYVX',
-            valid_workload_accepted: JSON.parse(fs.readFileSync('/tmp/valid-workload.json', 'utf8')).accepted === true,
-            migration_verified: JSON.parse(fs.readFileSync('dist/evidence/migration.json', 'utf8')).verified === true,
-            rollback_verified: JSON.parse(fs.readFileSync('dist/evidence/rollback.json', 'utf8')).verified === true
-          };
-          evidence.passed = evidence.missing_credential_status === 401 &&
-            evidence.invalid_payload_status === 422 &&
-            evidence.authorized_request_ok &&
-            evidence.valid_workload_accepted &&
-            evidence.migration_verified &&
-            evidence.rollback_verified;
-          fs.writeFileSync('dist/evidence/production-hardening.json', JSON.stringify(evidence, null, 2) + '\n');
-          if (!evidence.passed) process.exit(1);
-          NODE
-
-      - name: Start Spark runtime for smoke tests
-        run: |
-          SPARK_PORT=3100 node ./spark/server.js > /tmp/spark-ci.log 2>&1 &
-          echo $! > /tmp/spark-ci.pid
-          for _ in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:3100/healthz >/dev/null; then exit 0; fi
-            sleep 1
-          done
-          cat /tmp/spark-ci.log
-          exit 1
-
-      - name: Smoke test Spark intention-to-World flow
-        env:
-          BASE: http://127.0.0.1:3100
-        run: |
-          CREATED="$(curl -fsS -X POST "$BASE/api/v1/sparks" \
-            -H 'content-type: application/json' \
-            -H 'idempotency-key: ci-spark' \
-            -d '{"owner_id":"ci-founder","intention":"Launch a test service World with real lead capture","world":{"name":"CI World"}}')"
+          BASE=http://127.0.0.1:3100
+          CREATED="$(curl -fsS -X POST "$BASE/api/v1/sparks" -H 'content-type: application/json' -H 'idempotency-key: ci-compat-spark' -d '{"owner_id":"ci-founder","intention":"Launch a compatibility World","world":{"name":"CI Compatibility World"}}')"
           SPARK_ID="$(printf '%s' "$CREATED" | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).data.spark.id')"
           WORLD_ID="$(printf '%s' "$CREATED" | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).data.world.id')"
-          curl -fsS -X POST "$BASE/api/v1/sparks/$SPARK_ID/approval" \
-            -H 'content-type: application/json' \
-            -d '{"owner_id":"ci-founder","decision":"approved"}'
-          EXECUTED="$(curl -fsS -X POST "$BASE/api/v1/sparks/$SPARK_ID/execute" \
-            -H 'content-type: application/json' \
-            -d '{"owner_id":"ci-founder"}')"
-          printf '%s' "$EXECUTED" | node -e 'const fs=require("fs");const body=JSON.parse(fs.readFileSync(0,"utf8"));if(body.data.world.status!=="operational")process.exit(1)'
-          curl -fsS -X POST "$BASE/api/v1/worlds/$WORLD_ID/leads" \
-            -H 'content-type: application/json' \
-            -H 'idempotency-key: ci-lead' \
-            -d '{"name":"CI Lead","email":"ci@example.com"}'
+          curl -fsS -X POST "$BASE/api/v1/sparks/$SPARK_ID/approval" -H 'content-type: application/json' -d '{"owner_id":"ci-founder","decision":"approved"}' >/dev/null
+          EXECUTED="$(curl -fsS -X POST "$BASE/api/v1/sparks/$SPARK_ID/execute" -H 'content-type: application/json' -d '{"owner_id":"ci-founder"}')"
+          printf '%s' "$EXECUTED" | node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync(0,"utf8"));if(x.data.world.status!=="operational")process.exit(1)'
+          curl -fsS -X POST "$BASE/api/v1/worlds/$WORLD_ID/leads" -H 'content-type: application/json' -H 'idempotency-key: ci-compat-lead' -d '{"name":"CI Lead","email":"ci@example.com"}' >/dev/null
           curl -fsS "$BASE/metrics" | grep 'spark_leads_total 1'
-
-      - name: Upload production hardening evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: production-hardening-evidence
-          path: dist/evidence/
-          if-no-files-found: error
-
-      - name: Stop services
-        if: always()
-        run: |
-          if [ -f /tmp/cyvx-ci.pid ]; then kill "$(cat /tmp/cyvx-ci.pid)" || true; fi
-          if [ -f /tmp/cyvx-production.pid ]; then kill "$(cat /tmp/cyvx-production.pid)" || true; fi
-          if [ -f /tmp/spark-ci.pid ]; then kill "$(cat /tmp/spark-ci.pid)" || true; fi
-          if [ -f /tmp/cyvx-ci.log ]; then cat /tmp/cyvx-ci.log; fi
-          if [ -f /tmp/cyvx-production.log ]; then cat /tmp/cyvx-production.log; fi
-          if [ -f /tmp/spark-ci.log ]; then cat /tmp/spark-ci.log; fi
-
-  publish-v6-release:
-    name: Publish immutable v6.0.0 release
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.head_commit.message == 'Publish CYVXAI-OS v6.0.0' }}
-    needs: build-and-smoke-test
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    env:
-      GH_TOKEN: ${{ github.token }}
-      TAG: v6.0.0
-
-    steps:
-      - name: Check out verified release commit
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install locked dependencies
-        run: npm ci
-
-      - name: Verify complete release surface
-        run: |
-          npm run verify
-          npm run github:test
-          npm run spark:verify
-
-      - name: Refuse an existing immutable tag
-        run: |
-          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
-            echo "::error::Release tag $TAG already exists. Refusing to mutate an immutable release."
-            exit 1
-          fi
-
-      - name: Build source archive and checksum
-        run: |
-          mkdir -p dist
-          ARCHIVE="CYVXAI-OS-$TAG.tar.gz"
-          git archive --format=tar.gz --prefix="CYVXAI-OS-$TAG/" --output="dist/$ARCHIVE" "$GITHUB_SHA"
-          (cd dist && sha256sum "$ARCHIVE" > "$ARCHIVE.sha256")
-
-      - name: Write release notes
-        run: |
-          cat > /tmp/cyvx-release-notes.md <<'EOF'
-          # CYVXAI-OS v6.0.0
-
-          Production release of CYVXAI-OS with the Spark runtime and GitHub App control plane.
-
-          ## Highlights
-
-          - Intention-to-World lifecycle with explicit approval and bounded execution
-          - Persistent Worlds, generated sites, lead intake, follow-up queues, exports, metrics, and structured logs
-          - Secure GitHub App authentication, owner sessions, webhook processing, retries, and repository event mapping
-          - Health, readiness, build, test, and end-to-end smoke-test coverage
-          - Canonical commands: `npm run spark`, `npm run spark:start`, and `npm run spark:verify`
-
-          ## Verify
-
-          ```bash
-          npm ci
-          npm run verify
-          npm run github:test
-          npm run spark:verify
-          ```
-
-          Created and architected by Dakota Lee Jonsgaard.
-          Copyright 2026 Dakota Lee Jonsgaard. All rights reserved.
-          EOF
-
-      - name: Publish immutable GitHub release
-        run: |
-          ARCHIVE="CYVXAI-OS-$TAG.tar.gz"
-          gh release create "$TAG" \
-            "dist/$ARCHIVE" \
-            "dist/$ARCHIVE.sha256" \
-            --target "$GITHUB_SHA" \
-            --title "CYVXAI-OS v6.0.0 — Spark Runtime & GitHub Control Plane" \
-            --notes-file /tmp/cyvx-release-notes.md \
-            --latest

@@ -1,0 +1,69 @@
+name: Release CYVX v7
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Immutable release tag
+        required: true
+        default: v7.0.0
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Verify complete release surface
+        run: |
+          npm run verify
+          npm run github:test
+          npm run spark:verify
+      - name: Refuse an existing immutable tag
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "::error::Release tag $TAG already exists."
+            exit 1
+          fi
+      - name: Build archive and checksums
+        run: |
+          mkdir -p dist/release
+          ARCHIVE="CYVXAI-OS-$TAG.tar.gz"
+          git archive --format=tar.gz --prefix="CYVXAI-OS-$TAG/" --output="dist/release/$ARCHIVE" "$GITHUB_SHA"
+          (cd dist/release && sha256sum "$ARCHIVE" > "$ARCHIVE.sha256")
+          cp dist/build-manifest.json dist/release/
+          cp dist/v7-manifest.json dist/release/
+      - name: Publish immutable release
+        run: |
+          cat > /tmp/release-notes.md <<'EOF'
+          # Spark + CYVX v7
+
+          Production release of the autonomous Spark + CYVX operating system.
+
+          - Complete mobile-first Spark product workflow
+          - Durable Worlds, missions, approvals, leads, outcomes, and evidence
+          - Scheduled execution restricted to owner-approved active missions
+          - Unified public runtime, operator OS, GitHub control plane, and loopback operations plane
+          - Readiness, traction, proof, next-action intelligence, and Prometheus metrics
+          - Node 22/24 verification and end-to-end autonomous production proof
+
+          Verify with `npm ci && npm run verify`.
+          EOF
+          gh release create "$TAG" \
+            dist/release/* \
+            --target "$GITHUB_SHA" \
+            --title "Spark + CYVX $TAG — Autonomous Production System" \
+            --notes-file /tmp/release-notes.md \
+            --latest

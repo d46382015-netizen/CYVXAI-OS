@@ -63,6 +63,7 @@ jobs:
           PORT: "3200"
           CYVX_DATA_ROOT: /tmp/cyvx-public-ci
           CYVX_REQUIRE_GITHUB_APP: "false"
+          CYVX_ALLOW_INSECURE_LOCALHOST: "true"
           SPARK_PUBLIC_MODE: "1"
         run: |
           rm -rf /tmp/cyvx-public-ci

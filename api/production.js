@@ -1,5 +1,6 @@
 "use strict";
 
+const crypto = require("node:crypto");
 const http = require("node:http");
 const net = require("node:net");
 const os = require("node:os");
@@ -17,6 +18,7 @@ const { createOAuthStateService } = require("../core/integrations/github_control
 const { GitHubWebhookStore } = require("../core/integrations/github_control_plane/store");
 const { createGitHubWebhookService, sendJson } = require("../core/integrations/github_control_plane/service");
 const { createOperatorSession } = require("../core/security/operator_session");
+const { validatePayload } = require("../core/security/request_validation");
 
 async function createProductionGateway(options = {}) {
   const publicPort = Number(options.port || process.env.CYVX_PORT || 3000);
@@ -25,15 +27,20 @@ async function createProductionGateway(options = {}) {
   const ownerUserId = String(process.env.CYVX_OWNER_ID || "").trim();
   if (publicPort === internalPort) throw new Error("CYVX_INTERNAL_PORT must differ from CYVX_PORT");
 
+  const security = resolveSecurityConfig(options, host);
+  assertRequiredSecurityConfiguration(security);
+
   const controller = options.controller || new CyvxController({
     port: publicPort,
     dbFile: process.env.CYVX_DB || undefined,
   });
   if (!options.controller) await controller.boot();
 
-  const platform = options.platform || new PlatformKernel({
-    filePath: process.env.CYVX_PLATFORM_STATE,
-  });
+  const platformBackend = String(options.platformBackend || process.env.CYVX_PLATFORM_BACKEND || "sqlite").toLowerCase();
+  const platformFile = platformBackend === "json"
+    ? process.env.CYVX_PLATFORM_STATE || path.join(os.homedir(), ".cyvx", "platform-state.json")
+    : process.env.CYVX_PLATFORM_DB || path.join(os.homedir(), ".cyvx", "platform.db");
+  const platform = options.platform || new PlatformKernel({ filePath: platformFile });
   const store = options.webhookStore || new GitHubWebhookStore({
     filePath: process.env.CYVX_GITHUB_WEBHOOK_STORE || path.join(os.homedir(), ".cyvx", "github-webhooks.json"),
   });
@@ -85,10 +92,17 @@ async function createProductionGateway(options = {}) {
 
   assertRequiredGitHubConfiguration({ appClient, oauth, operatorSession, webhook });
 
-  const { server: internalServer } = createApiServer(controller, { platform, githubFactory });
+  const { server: internalServer } = createApiServer(controller, { platform, githubFactory, apiKey: security.apiKey });
   const gateway = http.createServer(async (req, res) => {
     const url = new URL(req.url, "http://localhost");
     try {
+      if (url.pathname === "/healthz" || url.pathname === "/health") {
+        return sendJson(res, 200, { ok: true, status: "ok" });
+      }
+      if (url.pathname === "/readyz") {
+        const readiness = buildReadiness({ webhook, appClient, oauth, operatorSession, security, platform });
+        return sendJson(res, readiness.ready ? 200 : 503, { ok: readiness.ready, readiness });
+      }
       if (url.pathname === "/api/github/webhook") return webhook.handle(req, res);
 
       if (url.pathname === "/api/session/operator") {
@@ -103,7 +117,7 @@ async function createProductionGateway(options = {}) {
           });
         }
         if (req.method === "POST") {
-          if (!hasApiKey() || !authorize(req)) return sendJson(res, 401, { ok: false, error: "invalid_operator_key" });
+          if (!hasApiKey(security) || !authorize(req, security)) return sendJson(res, 401, { ok: false, error: "invalid_operator_key" });
           const issued = operatorSession.issue(res, { secure: isSecureRequest(req) });
           return sendJson(res, 200, { ok: true, authenticated: true, ...issued });
         }
@@ -135,7 +149,7 @@ async function createProductionGateway(options = {}) {
             authenticated,
             connection: authenticated ? sanitizeConnection(connection) : null,
             recent_deliveries: authenticated ? store.list({ limit: 12 }).map(sanitizeDelivery) : [],
-            readiness: buildReadiness({ webhook, appClient, oauth, operatorSession }),
+            readiness: buildReadiness({ webhook, appClient, oauth, operatorSession, security, platform }),
             repository_auth: repositoryAuth,
           },
         }));
@@ -143,14 +157,14 @@ async function createProductionGateway(options = {}) {
 
       if (url.pathname === "/api/github/deliveries") {
         if (req.method !== "GET") return sendJson(res, 405, { ok: false, error: "method_not_allowed" }, { allow: "GET" });
-        if (!operatorAuthorized(req, operatorSession)) return sendJson(res, 401, { ok: false, error: "operator_authentication_required" });
+        if (!operatorAuthorized(req, operatorSession, security)) return sendJson(res, 401, { ok: false, error: "operator_authentication_required" });
         const limit = Math.max(1, Math.min(100, Number(url.searchParams.get("limit") || 25)));
         return sendJson(res, 200, { ok: true, deliveries: store.list({ limit }).map(sanitizeDelivery) });
       }
 
       if (/^\/api\/github\/deliveries\/[^/]+\/retry$/.test(url.pathname)) {
         if (req.method !== "POST") return sendJson(res, 405, { ok: false, error: "method_not_allowed" }, { allow: "POST" });
-        if (!operatorAuthorized(req, operatorSession)) return sendJson(res, 401, { ok: false, error: "operator_authentication_required" });
+        if (!operatorAuthorized(req, operatorSession, security)) return sendJson(res, 401, { ok: false, error: "operator_authentication_required" });
         const deliveryId = decodeURIComponent(url.pathname.split("/")[4]);
         const result = await webhook.retry(deliveryId);
         return sendJson(res, 200, { ok: true, delivery: sanitizeDelivery(result) });
@@ -160,7 +174,7 @@ async function createProductionGateway(options = {}) {
         if (req.method !== "GET") return sendJson(res, 405, { ok: false, error: "method_not_allowed" }, { allow: "GET" });
         return sendJson(res, 200, wrap({
           github_control_plane: {
-            readiness: buildReadiness({ webhook, appClient, oauth, operatorSession }),
+            readiness: buildReadiness({ webhook, appClient, oauth, operatorSession, security, platform }),
             webhook: webhook.health(),
             app_auth: appClient.health(),
             oauth: oauth.health(),
@@ -171,32 +185,32 @@ async function createProductionGateway(options = {}) {
       }
 
       if (url.pathname === "/api/v1/workloads") {
-        if (!authorize(req)) return sendJson(res, 401, wrap({ error: "unauthorized" }));
+        if (!authorize(req, security)) return sendJson(res, 401, wrap({ error: "unauthorized" }));
         if (req.method === "GET") return sendJson(res, 200, wrap({ workloads: controller.snapshot().cluster.workloads }));
         if (req.method === "POST") {
           const body = await readJsonLimited(req);
-          assertObject(body, "workload");
+          validatePayload("workload", body);
           return sendJson(res, 200, wrap(controller.submitWorkload(body)));
         }
         return sendJson(res, 405, wrap({ error: "method_not_allowed" }), { allow: "GET, POST" });
       }
 
       if (url.pathname === "/api/v1/actions") {
-        if (!authorize(req)) return sendJson(res, 401, wrap({ error: "unauthorized" }));
+        if (!authorize(req, security)) return sendJson(res, 401, wrap({ error: "unauthorized" }));
         if (req.method === "GET") return sendJson(res, 200, wrap({ actions: controller.actions }));
         if (req.method === "POST") {
           const body = await readJsonLimited(req);
-          assertObject(body, "action");
+          validatePayload("action", body);
           return sendJson(res, 200, wrap(controller.executeAction(body)));
         }
         return sendJson(res, 405, wrap({ error: "method_not_allowed" }), { allow: "GET, POST" });
       }
 
       if (url.pathname === "/api/outcome") {
-        if (!authorize(req)) return sendJson(res, 401, wrap({ error: "unauthorized" }));
+        if (!authorize(req, security)) return sendJson(res, 401, wrap({ error: "unauthorized" }));
         if (req.method !== "POST") return sendJson(res, 405, wrap({ error: "method_not_allowed" }), { allow: "POST" });
         const body = await readJsonLimited(req);
-        assertObject(body, "outcome");
+        validatePayload("outcome", body);
         return sendJson(res, 200, { ok: true, outcome: captureOutcome(body) });
       }
 
@@ -205,11 +219,15 @@ async function createProductionGateway(options = {}) {
       return sendJson(res, error.statusCode || 400, wrap({
         error: error.code || "invalid_request",
         message: error.message,
+        field: error.field || null,
       }));
     }
   });
 
-  gateway.on("upgrade", (req, socket, head) => proxyUpgrade(req, socket, head, internalPort));
+  gateway.on("upgrade", (req, socket, head) => {
+    if (!operatorAuthorized(req, operatorSession, security)) return socket.destroy();
+    return proxyUpgrade(req, socket, head, internalPort);
+  });
 
   return {
     appClient,
@@ -225,6 +243,7 @@ async function createProductionGateway(options = {}) {
     operatorSession,
     platform,
     port: publicPort,
+    security,
     stateService,
     store,
     webhook,
@@ -236,21 +255,28 @@ async function createProductionGateway(options = {}) {
     async close() {
       await Promise.all([closeServer(gateway), closeServer(internalServer)]);
       if (typeof controller.stop === "function") controller.stop();
+      if (platform && platform.store && typeof platform.store.close === "function") platform.store.close();
     },
   };
 }
 
-function buildReadiness({ webhook, appClient, oauth, operatorSession }) {
+function buildReadiness({ webhook, appClient, oauth, operatorSession, security = null, platform = null }) {
   const webhookReady = webhook.health().configured;
   const appReady = appClient.health().configured;
   const oauthReady = oauth.health().configured;
   const sessionReady = operatorSession.health().configured;
+  const securityReady = security ? Boolean(security.apiKey) || (security.allowInsecureLocalhost && isLoopbackHost(security.host)) : true;
+  const persistence = platform && platform.store && typeof platform.store.metadata === "function" ? platform.store.metadata() : null;
+  const persistenceReady = !persistence || persistence.backend === "sqlite" || persistence.backend === "json";
   return {
-    ready: webhookReady && appReady && oauthReady && sessionReady,
+    ready: webhookReady && appReady && oauthReady && sessionReady && securityReady && persistenceReady,
     webhook_ready: webhookReady,
     app_auth_ready: appReady,
     oauth_ready: oauthReady,
     operator_session_ready: sessionReady,
+    security_ready: securityReady,
+    persistence_ready: persistenceReady,
+    persistence,
   };
 }
 
@@ -258,9 +284,29 @@ function assertRequiredGitHubConfiguration(services) {
   if (String(process.env.CYVX_REQUIRE_GITHUB_APP || "").toLowerCase() !== "true") return;
   const readiness = buildReadiness(services);
   if (!readiness.ready) {
-    const missing = Object.entries(readiness).filter(([key, value]) => key !== "ready" && !value).map(([key]) => key);
+    const missing = Object.entries(readiness).filter(([key, value]) => key.endsWith("_ready") && !value).map(([key]) => key);
     throw new Error(`GitHub App production configuration is incomplete: ${missing.join(", ")}`);
   }
+}
+
+function resolveSecurityConfig(options = {}, host = "0.0.0.0") {
+  const explicitAllow = options.allowInsecureLocalhost;
+  return {
+    apiKey: String(options.apiKey !== undefined ? options.apiKey : process.env.CYVX_API_KEY || "").trim(),
+    allowInsecureLocalhost: explicitAllow !== undefined
+      ? Boolean(explicitAllow)
+      : String(process.env.CYVX_ALLOW_INSECURE_LOCALHOST || "").toLowerCase() === "true",
+    host,
+  };
+}
+
+function assertRequiredSecurityConfiguration(security) {
+  if (security.apiKey) return true;
+  if (security.allowInsecureLocalhost && isLoopbackHost(security.host)) return true;
+  const error = new Error("CYVX_API_KEY is required for the production gateway; localhost-only bypass requires CYVX_ALLOW_INSECURE_LOCALHOST=true and a loopback bind");
+  error.code = "PRODUCTION_AUTH_NOT_CONFIGURED";
+  error.statusCode = 503;
+  throw error;
 }
 
 function sanitizeDelivery(delivery) {
@@ -360,29 +406,38 @@ async function readJsonLimited(req, limitBytes = 1_000_000) {
   }
 }
 
-function assertObject(value, label) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    const error = new Error(`${label} payload must be a JSON object`);
-    error.code = "INVALID_PAYLOAD";
-    error.statusCode = 422;
-    throw error;
+function hasApiKey(security = resolveSecurityConfig()) {
+  return Boolean(String(security.apiKey || "").trim());
+}
+
+function authorize(req, security = resolveSecurityConfig()) {
+  const apiKey = String(security.apiKey || "");
+  if (!apiKey) {
+    return Boolean(security.allowInsecureLocalhost) && isLoopbackAddress(req && req.socket && req.socket.remoteAddress);
   }
-}
-
-function hasApiKey() {
-  return Boolean(String(process.env.CYVX_API_KEY || "").trim());
-}
-
-function authorize(req) {
-  const apiKey = process.env.CYVX_API_KEY || "";
-  if (!apiKey) return true;
   const header = req.headers["x-api-key"] || req.headers.authorization || "";
-  return String(header).replace(/^Bearer\s+/i, "") === apiKey;
+  const token = String(header).replace(/^Bearer\s+/i, "");
+  return safeTokenEqual(token, apiKey);
 }
 
-function operatorAuthorized(req, operatorSession) {
+function operatorAuthorized(req, operatorSession, security = resolveSecurityConfig()) {
   if (operatorSession.userId(req)) return true;
-  return hasApiKey() && authorize(req);
+  return authorize(req, security);
+}
+
+function safeTokenEqual(left, right) {
+  const a = Buffer.from(String(left || ""));
+  const b = Buffer.from(String(right || ""));
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+function isLoopbackHost(host) {
+  return ["127.0.0.1", "::1", "localhost"].includes(String(host || "").toLowerCase());
+}
+
+function isLoopbackAddress(address) {
+  const normalized = String(address || "").replace(/^::ffff:/, "");
+  return normalized === "127.0.0.1" || normalized === "::1";
 }
 
 function isSecureRequest(req) {
@@ -417,6 +472,7 @@ async function main() {
   console.log(`CYVX production gateway listening on http://${runtime.host}:${runtime.port}`);
   console.log(`CYVX internal API listening on http://127.0.0.1:${runtime.internalPort}`);
   console.log(JSON.stringify(wrap({
+    production_readiness: buildReadiness(runtime),
     github_control_plane: {
       readiness: buildReadiness(runtime),
       webhook: runtime.webhook.health(),
@@ -443,11 +499,16 @@ if (require.main === module) {
 }
 
 module.exports = {
+  assertRequiredSecurityConfiguration,
   authorize,
   buildReadiness,
   createProductionGateway,
+  hasApiKey,
+  isLoopbackAddress,
+  isLoopbackHost,
   operatorAuthorized,
   readJsonLimited,
+  resolveSecurityConfig,
   safeCreateCredentialCipher,
   sanitizeDelivery,
 };

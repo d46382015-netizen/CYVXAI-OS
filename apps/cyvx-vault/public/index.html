@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#08090c">
+  <meta name="description" content="CYVX Vault — transparent collectible discovery, ownership, vaulting, buyback, and shipping.">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/styles.css">
+  <title>CYVX Vault</title>
+</head>
+<body>
+  <div class="noise"></div>
+  <header class="topbar">
+    <a class="brand" href="#discover" aria-label="CYVX Vault home">
+      <span class="brand-mark">C</span><span>CYVX <b>VAULT</b></span>
+    </a>
+    <nav>
+      <button class="nav-btn active" data-view="discover">Discover</button>
+      <button class="nav-btn" data-view="vault">My Vault</button>
+      <button class="nav-btn admin-only hidden" data-view="admin">Operate</button>
+    </nav>
+    <button id="accountButton" class="account-pill">Sign in</button>
+  </header>
+
+  <main>
+    <section id="discover" class="view active">
+      <div class="hero">
+        <div>
+          <p class="eyebrow">PHYSICAL OWNERSHIP · DIGITAL SPEED</p>
+          <h1>Every reveal is a <span>real asset.</span></h1>
+          <p class="hero-copy">Transparent inventory pools, committed draw receipts, instant vault ownership, trade-in credit, and physical delivery.</p>
+          <div class="hero-actions">
+            <button class="primary" id="exploreButton">Explore live packs</button>
+            <button class="secondary" id="proofButton">How fairness works</button>
+          </div>
+        </div>
+        <div class="hero-orbit" aria-hidden="true">
+          <div class="orbit-ring"></div>
+          <div class="hero-card"><span>VERIFIED</span><strong>PHYSICAL<br>COLLECTIBLE</strong><small>OWN · VAULT · SHIP</small></div>
+        </div>
+      </div>
+
+      <div class="metric-strip">
+        <div><span>Inventory</span><strong id="inventoryMetric">0</strong></div>
+        <div><span>Published pools</span><strong id="packMetric">0</strong></div>
+        <div><span>Audit status</span><strong id="auditMetric">Checking</strong></div>
+      </div>
+
+      <section class="section" id="packSection">
+        <div class="section-head">
+          <div><p class="eyebrow">LIVE INVENTORY POOLS</p><h2>Choose your next world.</h2></div>
+          <button class="text-button" id="refreshPacks">Refresh ↻</button>
+        </div>
+        <div id="packGrid" class="pack-grid"><div class="empty">Loading live packs…</div></div>
+      </section>
+
+      <section class="proof-grid" id="proofSection">
+        <article><b>01</b><h3>Pool committed first</h3><p>Every item, value, and seed hash is frozen before a pack opens.</p></article>
+        <article><b>02</b><h3>Server selects once</h3><p>The reveal animation displays an allocation already recorded in a transaction.</p></article>
+        <article><b>03</b><h3>Receipt follows ownership</h3><p>Your vault stores the item, commitment, client seed, nonce, and draw digest.</p></article>
+      </section>
+    </section>
+
+    <section id="vault" class="view">
+      <div class="page-head"><div><p class="eyebrow">YOUR COLLECTION</p><h1>My Vault</h1></div><div class="wallet-chip">Wallet <b id="walletBalance">$0.00</b></div></div>
+      <div id="vaultGrid" class="vault-grid"><div class="empty">Sign in to view your owned collectibles.</div></div>
+    </section>
+
+    <section id="admin" class="view">
+      <div class="page-head"><div><p class="eyebrow">CONTROL PLANE</p><h1>Vault Operations</h1></div><button id="verifyAudit" class="secondary">Verify audit chain</button></div>
+      <div class="admin-grid">
+        <form id="itemForm" class="panel">
+          <p class="eyebrow">INVENTORY INTAKE</p><h2>Register an asset</h2>
+          <label>SKU<input name="sku" required placeholder="PKM-BASE-001"></label>
+          <label>Title<input name="title" required placeholder="1999 Charizard Holo"></label>
+          <div class="two"><label>Category<input name="category" required placeholder="POKEMON"></label><label>Grade<input name="grade" placeholder="PSA 8"></label></div>
+          <label>Certification number<input name="cert_no" placeholder="Optional"></label>
+          <div class="two"><label>Acquisition cost ($)<input name="acquisition_cost" type="number" min="0" step="0.01" required></label><label>Market value ($)<input name="market_value" type="number" min="0" step="0.01" required></label></div>
+          <label>Image URL<input name="image_url" type="url" placeholder="https://…"></label>
+          <button class="primary" type="submit">Register inventory</button>
+        </form>
+
+        <form id="packForm" class="panel">
+          <p class="eyebrow">PACK FACTORY</p><h2>Create a transparent pool</h2>
+          <label>Name<input name="name" required placeholder="Pokémon Genesis Drop"></label>
+          <label>URL slug<input name="slug" required placeholder="pokemon-genesis"></label>
+          <label>Category<input name="category" required placeholder="POKEMON"></label>
+          <label>Description<textarea name="description" rows="3" placeholder="Authenticated graded cards from…"></textarea></label>
+          <label>Price ($)<input name="price" type="number" min="0" step="0.01" required value="0"></label>
+          <button class="primary" type="submit">Build draft from inventory</button>
+        </form>
+      </div>
+      <section class="section"><div class="section-head"><div><p class="eyebrow">PACK GOVERNANCE</p><h2>Drafts and published pools</h2></div></div><div id="adminPacks" class="table-wrap"></div></section>
+      <section class="section"><div class="section-head"><div><p class="eyebrow">FULFILLMENT</p><h2>Shipment queue</h2></div></div><div id="shipmentList" class="table-wrap"></div></section>
+    </section>
+  </main>
+
+  <dialog id="authDialog" class="dialog">
+    <form method="dialog" class="dialog-card" id="authForm">
+      <button class="close" value="cancel" aria-label="Close">×</button>
+      <p class="eyebrow">COLLECTOR ACCESS</p><h2 id="authTitle">Sign in</h2>
+      <label>Email<input name="email" type="email" required autocomplete="email"></label>
+      <label>Password<input name="password" type="password" minlength="10" required autocomplete="current-password"></label>
+      <button class="primary" id="authSubmit" value="default">Sign in</button>
+      <button type="button" class="text-button" id="authMode">Create a new collector account</button>
+    </form>
+  </dialog>
+
+  <dialog id="packDialog" class="dialog"><div class="dialog-card wide" id="packDetail"></div></dialog>
+  <dialog id="revealDialog" class="dialog reveal-dialog"><div class="reveal-stage" id="revealStage"></div></dialog>
+  <div id="toast" class="toast"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

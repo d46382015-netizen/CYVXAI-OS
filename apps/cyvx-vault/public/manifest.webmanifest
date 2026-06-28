@@ -1,0 +1,12 @@
+{
+  "name": "CYVX Vault",
+  "short_name": "CYVX Vault",
+  "description": "Transparent physical collectible ownership and vaulting.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08090c",
+  "theme_color": "#08090c",
+  "icons": [
+    {"src":"/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}

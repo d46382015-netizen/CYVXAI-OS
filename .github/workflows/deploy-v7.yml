@@ -45,17 +45,18 @@ jobs:
           curl -fsS http://127.0.0.1:3200/api/public/status
           curl -fsS http://127.0.0.1:3204/api/control-plane
 
-  deploy-render:
+  deploy-staging:
+    name: Trigger staging Render deployment
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: verify
     runs-on: ubuntu-latest
     env:
-      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+      CYVX_STAGING_RENDER_DEPLOY_HOOK_URL: ${{ secrets.CYVX_STAGING_RENDER_DEPLOY_HOOK_URL }}
     steps:
-      - name: Trigger Render deployment when configured
+      - name: Trigger staging deploy hook when configured
         run: |
-          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
-            echo "Render auto-deploy remains authoritative."
+          if [ -z "$CYVX_STAGING_RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "Staging Render checks-passing auto-deploy remains authoritative. Production releases only through release-production-baseline.yml."
             exit 0
           fi
-          curl --fail --silent --show-error --request POST "$RENDER_DEPLOY_HOOK_URL"
+          curl --fail --silent --show-error --request POST "$CYVX_STAGING_RENDER_DEPLOY_HOOK_URL"

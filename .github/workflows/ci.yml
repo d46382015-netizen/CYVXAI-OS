@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -13,47 +14,98 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  regression:
-    name: Compatibility regression
+  production-baseline:
+    name: Production baseline and compatibility regression
     runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NODE_ENV: test
+      CYVX_ENV: test
+      CYVX_ALLOW_INSECURE_LOCAL: "true"
+      CYVX_DATA_ROOT: /tmp/cyvx-ci
+      SPARK_ARTIFACT_ROOT: /tmp/cyvx-ci/worlds
+      SPARK_STATE_FILE: /tmp/cyvx-ci/spark-state.json
+      CYVX_PLATFORM_STATE: /tmp/cyvx-ci/platform-state.json
+      CYVX_LOG_PATH: /tmp/cyvx-ci/logs/runtime.jsonl
     steps:
-     - uses: actions/checkout@v5
-     - uses: actions/setup-node@v5
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Execute production baseline gate
+        run: npm run verify:production-baseline
 
       - name: Verify legacy API compatibility
+        shell: bash
         run: |
-          node ./api/index.js > /tmp/cyvx-api.log 2>&1 &
-          API_PID!=
-          trap 'kill $API_PID 2>/dev/null || true' EXIT
+          set -Eeuo pipefail
+          rm -rf "$CYVX_DATA_ROOT"
+          mkdir -p "$CYVX_DATA_ROOT"
+          PORT=3000 node ./api/index.js > /tmp/cyvx-api.log 2>&1 &
+          API_PID=$!
+          cleanup() { kill "$API_PID" 2>/dev/null || true; }
+          trap cleanup EXIT
           for _ in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:3000/healthz >/dev/null; then break; fi
+            if curl -fsS http://127.0.0.1:3000/healthz >/dev/null; then
+              break
+            fi
             sleep 1
           done
+          curl -fsS http://127.0.0.1:3000/healthz
           curl -fsS http://127.0.0.1:3000/status
           curl -fsS http://127.0.0.1:3000/api/v1/overview
           curl -fsS http://127.0.0.1:3000/api/v1/insights
 
       - name: Verify standalone Spark compatibility
+        shell: bash
         run: |
+          set -Eeuo pipefail
           SPARK_PORT=3100 node ./spark/server.js > /tmp/spark.log 2>&1 &
           SPARK_PID=$!
-          trap 'kill $SPARK_PID 2>/dev/null || true' EXIT
+          cleanup() { kill "$SPARK_PID" 2>/dev/null || true; }
+          trap cleanup EXIT
           for _ in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:3100/healthz >/dev/null; then break; fi
+            if curl -fsS http://127.0.0.1:3100/healthz >/dev/null; then
+              break
+            fi
             sleep 1
           done
           BASE=http://127.0.0.1:3100
-          CREATED="$(curl -fsS -X POST "$BASE/api/v1/sparks" -H 'content-type: application/json' -H 'idempotency-key: ci-compat-spark' -d '{"owner_id":"ci-founder","intention":"Launch a compatibility World","world":{"name":"CI Compatibility World"}}')"
+          CREATED="$(curl -fsS -X POST "$BASE/api/v1/sparks" \
+            -H 'content-type: application/json' \
+            -H 'idempotency-key: ci-compat-spark' \
+            -d '{"owner_id":"ci-founder","intention":"Launch a compatibility World","world":{"name":"CI Compatibility World"}}')"
           SPARK_ID="$(printf '%s' "$CREATED" | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).data.spark.id')"
           WORLD_ID="$(printf '%s' "$CREATED" | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).data.world.id')"
-          curl -fsS -X POST "$BASE/api/v1/sparks/$SPARK_ID/approval" -H 'content-type: application/json' -d '{"owner_id":"ci-founder","decision":"approved"}' >/dev/null
-          EXECUTED="$(curl -fsS -X POST "$BASE/api/v1/sparks/$SPARK_ID/execute" -H 'content-type: application/json' -d '{"owner_id":"ci-founder"}')"
+          curl -fsS -X POST "$BASE/api/v1/sparks/$SPARK_ID/approval" \
+            -H 'content-type: application/json' \
+            -d '{"owner_id":"ci-founder","decision":"approved"}' >/dev/null
+          EXECUTED="$(curl -fsS -X POST "$BASE/api/v1/sparks/$SPARK_ID/execute" \
+            -H 'content-type: application/json' \
+            -d '{"owner_id":"ci-founder"}')"
           printf '%s' "$EXECUTED" | node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync(0,"utf8"));if(x.data.world.status!=="operational")process.exit(1)'
-          curl -fsS -X POST "$BASE/api/v1/worlds/$WORLD_ID/leads" -H 'content-type: application/json' -H 'idempotency-key: ci-compat-lead' -d '{"name":"CI Lead","email":"ci@example.com"}' >/dev/null
+          curl -fsS -X POST "$BASE/api/v1/worlds/$WORLD_ID/leads" \
+            -H 'content-type: application/json' \
+            -H 'idempotency-key: ci-compat-lead' \
+            -d '{"name":"CI Lead","email":"ci@example.com"}' >/dev/null
           curl -fsS "$BASE/metrics" | grep 'spark_leads_total 1'
+
+      - name: Upload diagnostic logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyvx-ci-diagnostics
+          path: |
+            /tmp/cyvx-api.log
+            /tmp/spark.log
+            /tmp/cyvx-ci/logs/*.jsonl*
+          if-no-files-found: ignore
+          retention-days: 14

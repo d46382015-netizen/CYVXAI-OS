@@ -1,0 +1,94 @@
+groups:
+  - name: cyvx-production
+    interval: 30s
+    rules:
+      - alert: CYVXServiceDown
+        expr: up{job=~"cyvx.*"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: cyvx
+        annotations:
+          summary: "CYVX service is unreachable"
+          description: "Prometheus has been unable to scrape {{ $labels.instance }} for more than two minutes."
+          runbook_url: "https://github.com/d46382015-netizen/CYVXAI-OS/blob/main/docs/operations/INCIDENT_RESPONSE.md"
+
+      - alert: CYVXReadinessDegraded
+        expr: cyvx_readiness_score < 90
+        for: 10m
+        labels:
+          severity: warning
+          service: cyvx
+        annotations:
+          summary: "CYVX production readiness is below target"
+          description: "Readiness score is {{ $value }}; target is at least 90."
+
+      - alert: CYVXRuntimeErrorsIncreasing
+        expr: increase(cyvx_errors_total[10m]) >= 5
+        for: 5m
+        labels:
+          severity: warning
+          service: cyvx
+        annotations:
+          summary: "CYVX error rate is increasing"
+          description: "At least five structured runtime errors were captured in ten minutes."
+
+      - alert: CYVXAutonomyFailures
+        expr: increase(cyvx_autonomy_failures_total[15m]) >= 3
+        for: 5m
+        labels:
+          severity: warning
+          service: cyvx-autonomy
+        annotations:
+          summary: "CYVX autonomy execution is failing"
+          description: "Three or more autonomy failures occurred during the last fifteen minutes."
+
+      - alert: CYVXBackupMissing
+        expr: cyvx_backup_enabled == 1 and cyvx_backup_last_success_timestamp_seconds == 0
+        for: 30m
+        labels:
+          severity: critical
+          service: cyvx-backup
+        annotations:
+          summary: "CYVX has not completed its first encrypted backup"
+          description: "Backups are enabled, but no successful backup timestamp has been recorded."
+
+      - alert: CYVXBackupStale
+        expr: cyvx_backup_enabled == 1 and (time() - cyvx_backup_last_success_timestamp_seconds) > 28800
+        for: 15m
+        labels:
+          severity: critical
+          service: cyvx-backup
+        annotations:
+          summary: "CYVX encrypted backup is stale"
+          description: "The most recent successful backup is older than eight hours."
+
+      - alert: CYVXBackupFailures
+        expr: increase(cyvx_backup_failures_total[1h]) > 0
+        for: 5m
+        labels:
+          severity: critical
+          service: cyvx-backup
+        annotations:
+          summary: "CYVX backup execution failed"
+          description: "At least one encrypted backup failed during the last hour."
+
+      - alert: CYVXManagedPostgresUnavailable
+        expr: cyvx_managed_data_healthy == 0
+        for: 10m
+        labels:
+          severity: critical
+          service: cyvx-data
+        annotations:
+          summary: "CYVX managed PostgreSQL data plane is unhealthy"
+          description: "Runtime snapshots are not being synchronized to managed PostgreSQL."
+
+      - alert: CYVXHighPendingApprovals
+        expr: cyvx_pending_approvals > 25
+        for: 30m
+        labels:
+          severity: warning
+          service: cyvx-operations
+        annotations:
+          summary: "CYVX approval queue is accumulating"
+          description: "More than 25 governed actions have remained pending for thirty minutes."

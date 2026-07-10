@@ -1,0 +1,38 @@
+name: CYVX Uptime and Incident Monitor
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cyvx-uptime-monitor
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CYVX_STAGING_URL: ${{ secrets.CYVX_STAGING_URL }}
+      CYVX_PRODUCTION_URL: ${{ secrets.CYVX_PRODUCTION_URL }}
+      CYVX_INCIDENT_WEBHOOK_URL: ${{ secrets.CYVX_INCIDENT_WEBHOOK_URL }}
+      CYVX_UPTIME_OUTPUT: /tmp/cyvx-uptime-report.json
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Check staging and production health
+        run: node ./scripts/uptime-check-v7.js
+      - name: Retain uptime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyvx-uptime-${{ github.run_id }}
+          path: /tmp/cyvx-uptime-report.json
+          if-no-files-found: ignore
+          retention-days: 30

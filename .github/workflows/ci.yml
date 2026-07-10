@@ -41,7 +41,10 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Execute production baseline gate
-        run: npm run verify:production-baseline
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm run verify:production-baseline 2>&1 | tee /tmp/cyvx-production-baseline.log
 
       - name: Verify legacy API compatibility
         shell: bash
@@ -104,6 +107,7 @@ jobs:
         with:
           name: cyvx-ci-diagnostics
           path: |
+            /tmp/cyvx-production-baseline.log
             /tmp/cyvx-api.log
             /tmp/spark.log
             /tmp/cyvx-ci/logs/*.jsonl*

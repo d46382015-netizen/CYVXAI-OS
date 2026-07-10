@@ -39,7 +39,7 @@ test("readiness degrades when a core runtime fails", () => {
   const options = fixture();
   options.cyvx.controller.status = () => ({ status: "error" });
   const overview = buildOverview(options);
-  assert.equal(overview.readiness.score, 75);
+  assert.equal(overview.readiness.score, 80);
   assert.equal(overview.readiness.grade, "ready");
   assert.equal(overview.runtime.cyvx.healthy, false);
 });

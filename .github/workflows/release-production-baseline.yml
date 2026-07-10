@@ -1,0 +1,93 @@
+name: Controlled CYVX Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Release target
+        type: choice
+        required: true
+        default: staging
+        options: [staging, production]
+      ref:
+        description: Branch, tag, or immutable commit SHA to release
+        required: true
+        default: main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cyvx-release-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  verify-migrate-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment: ${{ inputs.environment }}
+    env:
+      NODE_ENV: test
+      CYVX_ENV: release-verification
+      CYVX_ALLOW_INSECURE_LOCAL: "true"
+      CYVX_DATA_ROOT: /tmp/cyvx-release-verification
+      CYVX_DATABASE_URL: ${{ secrets.CYVX_DATABASE_URL }}
+      CYVX_RENDER_DEPLOY_HOOK_URL: ${{ secrets.CYVX_RENDER_DEPLOY_HOOK_URL }}
+      CYVX_RELEASE_URL: ${{ secrets.CYVX_RELEASE_URL }}
+      PGSSLMODE: require
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify release candidate
+        run: npm run verify:production-baseline
+      - name: Apply managed PostgreSQL migrations
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -n "$CYVX_DATABASE_URL"
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+          for migration in ops/postgres/*.sql; do
+            psql "$CYVX_DATABASE_URL" -v ON_ERROR_STOP=1 -f "$migration"
+          done
+          psql "$CYVX_DATABASE_URL" -v ON_ERROR_STOP=1 -Atc "select cyvx_health();" | tee /tmp/cyvx-release-database-health.json
+      - name: Trigger controlled Render deployment
+        run: |
+          test -n "$CYVX_RENDER_DEPLOY_HOOK_URL"
+          curl --fail --silent --show-error --request POST "$CYVX_RENDER_DEPLOY_HOOK_URL" | tee /tmp/cyvx-render-deploy-response.txt
+      - name: Wait for release readiness
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -n "$CYVX_RELEASE_URL"
+          for attempt in $(seq 1 60); do
+            if curl -fsS "$CYVX_RELEASE_URL/readyz" > /tmp/cyvx-release-ready.json; then
+              curl -fsS "$CYVX_RELEASE_URL/healthz" > /tmp/cyvx-release-health.json
+              curl -fsS "$CYVX_RELEASE_URL/api/public/status" > /tmp/cyvx-release-status.json
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Release did not become ready within ten minutes"
+          exit 1
+      - name: Retain immutable release evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyvx-release-${{ inputs.environment }}-${{ github.sha }}
+          path: |
+            /tmp/cyvx-release-database-health.json
+            /tmp/cyvx-render-deploy-response.txt
+            /tmp/cyvx-release-ready.json
+            /tmp/cyvx-release-health.json
+            /tmp/cyvx-release-status.json
+          if-no-files-found: ignore
+          retention-days: 180

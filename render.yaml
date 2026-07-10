@@ -1,0 +1,153 @@
+services:
+  - type: web
+    name: cyvx-staging
+    runtime: node
+    plan: starter
+    region: ohio
+    branch: main
+    autoDeployTrigger: checksPass
+    buildCommand: npm ci --no-audit --no-fund && NODE_ENV=test CYVX_ENV=build CYVX_ALLOW_INSECURE_LOCAL=true CYVX_DATA_ROOT=/tmp/cyvx-build npm run verify:production-baseline
+    startCommand: npm start
+    healthCheckPath: /readyz
+    maxShutdownDelaySeconds: 60
+    previews:
+      generation: manual
+    disk:
+      name: cyvx-staging-data
+      mountPath: /var/lib/cyvx
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CYVX_ENV
+        value: staging
+      - key: CYVX_DATA_ROOT
+        value: /var/lib/cyvx
+      - key: CYVX_LOG_PATH
+        value: /var/lib/cyvx/logs/cyvx-runtime.jsonl
+      - key: CYVX_ALLOW_INSECURE_LOCAL
+        value: "false"
+      - key: CYVX_REQUIRE_MANAGED_DATA
+        value: "true"
+      - key: CYVX_BACKUP_ENABLED
+        value: "true"
+      - key: CYVX_BACKUP_UPLOAD
+        value: "true"
+      - key: CYVX_BACKUP_INTERVAL_MS
+        value: "21600000"
+      - key: CYVX_BACKUP_RETENTION_DAYS
+        value: "30"
+      - key: CYVX_BACKUP_PREFIX
+        value: staging
+      - key: CYVX_API_KEY
+        sync: false
+      - key: CYVX_OWNER_ID
+        sync: false
+      - key: CYVX_OPERATOR_SESSION_SECRET
+        sync: false
+      - key: APP_BASE_URL
+        sync: false
+      - key: CYVX_POSTGREST_URL
+        sync: false
+      - key: CYVX_POSTGREST_SERVICE_KEY
+        sync: false
+      - key: CYVX_BACKUP_STORAGE_URL
+        sync: false
+      - key: CYVX_BACKUP_STORAGE_TOKEN
+        sync: false
+      - key: CYVX_BACKUP_BUCKET
+        sync: false
+      - key: CYVX_BACKUP_ENCRYPTION_KEY
+        sync: false
+      - key: OTEL_EXPORTER_OTLP_ENDPOINT
+        sync: false
+      - key: OTEL_EXPORTER_OTLP_HEADERS
+        sync: false
+      - key: CYVX_ERROR_WEBHOOK_URL
+        sync: false
+
+  - type: web
+    name: cyvx-production
+    runtime: node
+    plan: starter
+    region: ohio
+    branch: main
+    autoDeployTrigger: off
+    buildCommand: npm ci --no-audit --no-fund && NODE_ENV=test CYVX_ENV=build CYVX_ALLOW_INSECURE_LOCAL=true CYVX_DATA_ROOT=/tmp/cyvx-build npm run verify:production-baseline
+    startCommand: npm start
+    healthCheckPath: /readyz
+    maxShutdownDelaySeconds: 60
+    disk:
+      name: cyvx-production-data
+      mountPath: /var/lib/cyvx
+      sizeGB: 5
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CYVX_ENV
+        value: production
+      - key: CYVX_DATA_ROOT
+        value: /var/lib/cyvx
+      - key: CYVX_LOG_PATH
+        value: /var/lib/cyvx/logs/cyvx-runtime.jsonl
+      - key: CYVX_ALLOW_INSECURE_LOCAL
+        value: "false"
+      - key: CYVX_REQUIRE_MANAGED_DATA
+        value: "true"
+      - key: CYVX_BACKUP_ENABLED
+        value: "true"
+      - key: CYVX_BACKUP_UPLOAD
+        value: "true"
+      - key: CYVX_BACKUP_INTERVAL_MS
+        value: "21600000"
+      - key: CYVX_BACKUP_RETENTION_DAYS
+        value: "90"
+      - key: CYVX_BACKUP_PREFIX
+        value: production
+      - key: CYVX_API_KEY
+        sync: false
+      - key: CYVX_OWNER_ID
+        sync: false
+      - key: CYVX_OPERATOR_SESSION_SECRET
+        sync: false
+      - key: APP_BASE_URL
+        sync: false
+      - key: CYVX_POSTGREST_URL
+        sync: false
+      - key: CYVX_POSTGREST_SERVICE_KEY
+        sync: false
+      - key: CYVX_BACKUP_STORAGE_URL
+        sync: false
+      - key: CYVX_BACKUP_STORAGE_TOKEN
+        sync: false
+      - key: CYVX_BACKUP_BUCKET
+        sync: false
+      - key: CYVX_BACKUP_ENCRYPTION_KEY
+        sync: false
+      - key: OTEL_EXPORTER_OTLP_ENDPOINT
+        sync: false
+      - key: OTEL_EXPORTER_OTLP_HEADERS
+        sync: false
+      - key: CYVX_ERROR_WEBHOOK_URL
+        sync: false
+
+  - type: web
+    name: cyvx-status
+    runtime: node
+    plan: starter
+    region: ohio
+    branch: main
+    autoDeployTrigger: checksPass
+    buildCommand: node --check status/server.js && node --check scripts/uptime-check-v7.js
+    startCommand: node status/server.js
+    healthCheckPath: /healthz
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CYVX_ENV
+        value: status
+      - key: CYVX_STAGING_URL
+        sync: false
+      - key: CYVX_PRODUCTION_URL
+        sync: false

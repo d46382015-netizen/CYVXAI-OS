@@ -4,6 +4,21 @@
 
 CYVXAI-OS is an autonomous infrastructure intelligence platform for reality graphs, digital twins, missions, simulations, knowledge, and executive operations.
 
+## Production Baseline v7.1
+
+CYVXAI-OS now includes a controlled production baseline with:
+
+- Fail-closed production authentication and startup validation
+- Managed PostgreSQL migrations and runtime snapshot persistence
+- Authenticated encrypted backups, remote retention, restore commands, and scheduled restore drills
+- Structured redacted logs, hosted OTLP traces/logs, Prometheus metrics, and alert rules
+- External uptime checks, incident notifications, measurable SLOs, and an independent public status service
+- Isolated staging and production deployment definitions
+- Protected verify → migrate → deploy → readiness release workflows
+- Incident response, support, security, recovery, and release runbooks
+
+Production deployment remains intentionally controlled: staging may deploy after passing checks, while production auto-deploy is disabled and requires the protected release workflow.
+
 ## Architecture
 - Reality Graph: entities, relationships, state, health, and impact
 - Agent OS: lifecycle, memory, planning, delegation, and mission execution
@@ -27,9 +42,20 @@ bash ./install.sh
 bash ./start.sh
 ```
 
+## Production verification
+```bash
+npm ci --no-audit --no-fund && npm run verify:production-baseline
+```
+
+## Backup and recovery proof
+```bash
+npm run backup:verify
+```
+
 ## API
 - `GET /health`
 - `GET /healthz`
+- `GET /readyz`
 - `GET /status`
 - `GET /api/v1/platform`
 - `GET /api/v1/entities`
@@ -85,7 +111,6 @@ node ./cli/cyvx.js help
 - `dakota@cyvx.ai`
 - https://cyvx.ai
 
-
 ## Kernel v1
 - Kernel services: Constitution, Reality, Significance, Intervention, Learning, Evolution
 - Canonical objects: ConstitutionalCriterion, RealityObject, SignificanceRecord, Intervention, Outcome, EvolutionRecommendation, CIRMetric
@@ -93,7 +118,6 @@ node ./cli/cyvx.js help
 - CLI: criteria, reality-objects, significance, interventions, outcomes, evolution, cir, kernel
 - Compatibility debt: the legacy controller plane remains for backward compatibility and is not the formal kernel.
 - Next build target: CYVX Coordination Platform v1.
-
 
 ## Coordination Platform v1
 
@@ -152,7 +176,6 @@ CYVX Intelligence Platform v1 extends the frozen kernel and coordination layer w
 ### Purpose
 The intelligence layer strengthens the existing loop by turning outcomes, learning, trust, and CIR history into reusable patterns, explainable recommendations, and priority rankings.
 
-
 ## Proof Surfaces
 - API: /api/v1/github/repository?owner=acme&repo=cyvx
 - API: /api/v1/github/health?owner=acme&repo=cyvx
@@ -166,14 +189,13 @@ The intelligence layer strengthens the existing loop by turning outcomes, learni
 - CLI: `reality-engine`
 - Purpose: compress architecture into verified prediction -> outcome -> error -> learning loops.
 
-## 
-Self-Scan & Proof Loop
+## Self-Scan & Proof Loop
 CLI: node ./cli/cyvx.js scan-self
 CLI: node ./cli/cyvx.js self-scan-mission
 API: GET /api/v1/self-scan
 API: GET /api/v1/self-scan-mission
 
-Purpose: CYVX can now analyze its own repository, identify top constraints, generate next-best actions, create missions, expose the result through API/dashboard surfaces, and record proof-ledger improvement over time.
+Purpose: CYVX can analyze its own repository, identify top constraints, generate next-best actions, create missions, expose the result through API/dashboard surfaces, and record proof-ledger improvement over time.
 
 Current Proof State
 - CI passing

@@ -1,0 +1,51 @@
+name: Managed PostgreSQL Migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: GitHub environment containing the managed PostgreSQL secret
+        type: choice
+        required: true
+        default: staging
+        options: [staging, production]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cyvx-database-migration-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ inputs.environment }}
+    env:
+      CYVX_DATABASE_URL: ${{ secrets.CYVX_DATABASE_URL }}
+      PGSSLMODE: require
+    steps:
+      - uses: actions/checkout@v5
+      - name: Require managed PostgreSQL connection
+        run: test -n "$CYVX_DATABASE_URL"
+      - name: Install PostgreSQL client
+        run: sudo apt-get update -qq && sudo apt-get install -y postgresql-client
+      - name: Apply idempotent production schema
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sha256sum ops/postgres/*.sql | tee /tmp/cyvx-migration-checksums.txt
+          for migration in ops/postgres/*.sql; do
+            psql "$CYVX_DATABASE_URL" -v ON_ERROR_STOP=1 -f "$migration"
+          done
+      - name: Verify managed data plane
+        run: psql "$CYVX_DATABASE_URL" -v ON_ERROR_STOP=1 -Atc "select cyvx_health();" | tee /tmp/cyvx-database-health.json
+      - name: Retain migration evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyvx-database-migration-${{ inputs.environment }}-${{ github.run_id }}
+          path: |
+            /tmp/cyvx-migration-checksums.txt
+            /tmp/cyvx-database-health.json
+          retention-days: 90

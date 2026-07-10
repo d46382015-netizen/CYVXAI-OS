@@ -1,59 +1,105 @@
 "use strict";
 
+const path = require("node:path");
+const os = require("node:os");
 const { createPublicRuntime } = require("./public");
 const { buildReadiness } = require("./production");
+const { Telemetry } = require("../core/observability/telemetry");
+const { BackupScheduler } = require("../core/production/backup_scheduler");
 const { AutonomySupervisor } = require("../core/production/autonomy_supervisor");
+const { assertProductionSecurity } = require("../core/security/production_guard");
+const { ManagedDataPlane } = require("../core/storage/managed_data_plane");
 const { buildOverview } = require("../core/ops/overview");
 const { close, createServer, listen } = require("../core/ops/http_server");
 
 async function createRuntimeV7(options = {}) {
   const startedAt = Date.now();
-  const publicRuntime = await createPublicRuntime(options.public || {});
-  const autonomy = new AutonomySupervisor({ runtime: publicRuntime.spark.runtime, ...options.autonomy });
-  const overview = () => buildOverview({
-    sparkRuntime: publicRuntime.spark.runtime,
-    autonomy,
-    cyvx: publicRuntime.cyvx,
-    github: buildReadiness(publicRuntime.cyvx),
-    startedAt,
+  const security = assertProductionSecurity(options.env || process.env);
+  const dataRoot = path.resolve(options.dataRoot || process.env.CYVX_DATA_ROOT || path.join(os.homedir(), ".cyvx"));
+  const telemetry = options.telemetry || new Telemetry({
+    environment: process.env.CYVX_ENV || process.env.NODE_ENV,
+    logPath: process.env.CYVX_LOG_PATH || path.join(dataRoot, "logs", "cyvx-runtime.jsonl"),
   });
-  const operationsPort = Number(options.operationsPort || process.env.CYVX_CONTROL_PORT || publicRuntime.ports.publicPort + 4);
-  const operations = createServer(overview);
+  const startupSpan = telemetry.startSpan("runtime.create", { production: security.production });
+  try {
+    const publicRuntime = await createPublicRuntime(options.public || {});
+    const autonomy = new AutonomySupervisor({ runtime: publicRuntime.spark.runtime, ...options.autonomy });
+    const backup = options.backup || new BackupScheduler({ dataRoot, telemetry, ...options.backupOptions });
+    const managedData = options.managedData || new ManagedDataPlane({ telemetry, ...options.managedDataOptions });
+    const overview = () => buildOverview({
+      sparkRuntime: publicRuntime.spark.runtime,
+      autonomy,
+      backup,
+      managedData,
+      telemetry,
+      security,
+      cyvx: publicRuntime.cyvx,
+      github: buildReadiness(publicRuntime.cyvx),
+      startedAt,
+    });
+    const operationsPort = Number(options.operationsPort || process.env.CYVX_CONTROL_PORT || publicRuntime.ports.publicPort + 4);
+    const operations = createServer(overview);
 
-  return {
-    publicRuntime,
-    autonomy,
-    operations,
-    operationsPort,
-    overview,
-    async listen() {
-      await publicRuntime.listen();
-      try { await listen(operations, operationsPort); }
-      catch (error) { await publicRuntime.close(); throw error; }
-      autonomy.start();
-      return this;
-    },
-    async close() {
-      autonomy.stop();
-      await Promise.all([close(operations), publicRuntime.close()]);
-    },
-  };
+    startupSpan.end("ok");
+    return {
+      publicRuntime,
+      autonomy,
+      backup,
+      managedData,
+      telemetry,
+      security,
+      operations,
+      operationsPort,
+      overview,
+      async listen() {
+        const span = telemetry.startSpan("runtime.listen", { public_port: publicRuntime.ports.publicPort, control_port: operationsPort });
+        await publicRuntime.listen();
+        try { await listen(operations, operationsPort); }
+        catch (error) { await publicRuntime.close(); span.end("error", { error: error.message }); throw error; }
+        autonomy.start();
+        backup.start();
+        managedData.start(overview);
+        telemetry.log("info", "cyvx.runtime.v7.ready", {
+          public_port: publicRuntime.ports.publicPort,
+          control_port: operationsPort,
+          backup: backup.snapshot(),
+          managed_data: managedData.snapshot(),
+          security,
+        });
+        span.end("ok");
+        return this;
+      },
+      async close() {
+        telemetry.log("info", "cyvx.runtime.v7.closing");
+        managedData.stop();
+        backup.stop();
+        autonomy.stop();
+        await Promise.all([close(operations), publicRuntime.close()]);
+        telemetry.log("info", "cyvx.runtime.v7.closed");
+      },
+    };
+  } catch (error) {
+    startupSpan.end("error", { error: error.code || error.message });
+    telemetry.captureError(error, { operation: "runtime.create" });
+    throw error;
+  }
 }
 
 async function main() {
   const runtime = await createRuntimeV7();
   await runtime.listen();
-  console.log(JSON.stringify({
-    event: "cyvx.runtime.v7.started",
+  runtime.telemetry.log("info", "cyvx.runtime.v7.started", {
     public: runtime.publicRuntime.ports.publicPort,
     control: runtime.operationsPort,
     autonomy: runtime.autonomy.snapshot(),
-  }));
+    backup: runtime.backup.snapshot(),
+    managed_data: runtime.managedData.snapshot(),
+  });
   let closing = false;
   const shutdown = async (signal) => {
     if (closing) return;
     closing = true;
-    console.log(JSON.stringify({ event: "cyvx.runtime.v7.shutdown", signal }));
+    runtime.telemetry.log("info", "cyvx.runtime.v7.shutdown", { signal });
     await runtime.close();
     process.exit(0);
   };
@@ -62,7 +108,7 @@ async function main() {
 }
 
 if (require.main === module) main().catch((error) => {
-  console.error(JSON.stringify({ event: "cyvx.runtime.v7.failed", error: error.message }));
+  process.stderr.write(`${JSON.stringify({ timestamp: new Date().toISOString(), level: "error", event: "cyvx.runtime.v7.failed", code: error.code || null, error: error.message })}\n`);
   process.exit(1);
 });
 

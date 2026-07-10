@@ -115,18 +115,18 @@ jobs:
           if [ -f /tmp/cyvx-public.pid ]; then kill "$(cat /tmp/cyvx-public.pid)" || true; fi
           if [ -f /tmp/cyvx-public.log ]; then cat /tmp/cyvx-public.log; fi
 
-  deploy-render:
-    name: Trigger Render deployment
+  deploy-staging:
+    name: Trigger staging Render deployment
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: verify-public-runtime
     runs-on: ubuntu-latest
     env:
-      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+      CYVX_STAGING_RENDER_DEPLOY_HOOK_URL: ${{ secrets.CYVX_STAGING_RENDER_DEPLOY_HOOK_URL }}
     steps:
-      - name: Trigger deploy hook when configured
+      - name: Trigger staging deploy hook when configured
         run: |
-          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
-            echo "RENDER_DEPLOY_HOOK_URL is not configured; Render auto-deploy or the Blueprint can deploy this commit."
+          if [ -z "$CYVX_STAGING_RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "Staging Render checks-passing auto-deploy remains authoritative. Production releases only through release-production-baseline.yml."
             exit 0
           fi
-          curl --fail --silent --show-error --request POST "$RENDER_DEPLOY_HOOK_URL"
+          curl --fail --silent --show-error --request POST "$CYVX_STAGING_RENDER_DEPLOY_HOOK_URL"

@@ -38,6 +38,18 @@ function verify() {
   checks.push(check("ci:pid_capture", ci.includes("API_PID=$!"), "legacy API PID must be captured correctly"));
   checks.push(check("ci:no_malformed_pid", !ci.includes("API_PID!="), "malformed API_PID assignment must be absent"));
   checks.push(check("ci:baseline_gate", ci.includes("npm run verify:production-baseline"), "CI must execute the production baseline gate"));
+
+  const deployV7 = read(".github/workflows/deploy-v7.yml");
+  const deployPublic = read(".github/workflows/deploy-public.yml");
+  for (const [name, workflow] of [["deploy-v7", deployV7], ["deploy-public", deployPublic]]) {
+    checks.push(check(`release:${name}:staging_hook`, workflow.includes("CYVX_STAGING_RENDER_DEPLOY_HOOK_URL"), `${name} may trigger only the staging deploy hook`));
+    checks.push(check(`release:${name}:no_legacy_hook`, !workflow.includes("secrets.RENDER_DEPLOY_HOOK_URL"), `${name} must not use the ambiguous legacy Render hook`));
+    checks.push(check(`release:${name}:production_boundary`, workflow.includes("Production releases only through release-production-baseline.yml"), `${name} must preserve the controlled production release boundary`));
+  }
+  const controlledRelease = read(".github/workflows/release-production-baseline.yml");
+  checks.push(check("release:controlled_environment", controlledRelease.includes("environment: ${{ inputs.environment }}"), "controlled releases must use protected GitHub environments"));
+  checks.push(check("release:production_hook", controlledRelease.includes("CYVX_RENDER_DEPLOY_HOOK_URL"), "the controlled workflow must own the environment-specific release hook"));
+
   const runtime = read("api/runtime-v7.js");
   const packageJson = JSON.parse(read("package.json") || "{}");
   checks.push(check("security:api_entrypoint", packageJson.scripts && packageJson.scripts.api === "node ./api/secure-production.js", "direct production gateway command must use the fail-closed wrapper"));

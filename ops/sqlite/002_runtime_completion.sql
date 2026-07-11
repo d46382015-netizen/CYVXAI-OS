@@ -88,6 +88,37 @@ CREATE INDEX IF NOT EXISTS idx_jobs_claim ON jobs(status, available_at, lease_ex
 CREATE INDEX IF NOT EXISTS idx_jobs_org_mission ON jobs(organization_id, mission_id);
 CREATE INDEX IF NOT EXISTS idx_jobs_lease_owner ON jobs(lease_owner, status);
 
+CREATE TRIGGER IF NOT EXISTS trg_jobs_safe_requeue
+AFTER UPDATE OF status ON jobs
+WHEN NEW.status = 'queued' AND OLD.status IN ('failed','retryable')
+BEGIN
+  UPDATE jobs
+  SET attempts=0,started_at=NULL,completed_at=NULL,result_hash=NULL,last_error=NULL,
+      lease_owner=NULL,lease_expires_at=NULL
+  WHERE id=NEW.id;
+
+  UPDATE missions
+  SET status=CASE WHEN status='failed' THEN 'queued' ELSE status END,
+      updated_at=NEW.updated_at,
+      payload=json_set(COALESCE(payload,'{}'),'$.status',CASE WHEN status='failed' THEN 'queued' ELSE status END,'$.updated_at',NEW.updated_at)
+  WHERE id=NEW.mission_id AND organization_id=NEW.organization_id;
+
+  INSERT INTO events(id,organization_id,type,correlation_id,causation_id,timestamp,actor,data,payload)
+  VALUES(
+    'event_' || lower(hex(randomblob(16))),NEW.organization_id,'job.requeue_checkpoint',NEW.correlation_id,NEW.id,
+    NEW.updated_at,'system:requeue',
+    json_object('mission_id',NEW.mission_id,'job_id',NEW.id,'attempts_reset',1),
+    json_object('organization_id',NEW.organization_id,'type','job.requeue_checkpoint','correlation_id',NEW.correlation_id,'causation_id',NEW.id,'timestamp',NEW.updated_at,'actor','system:requeue','data',json_object('mission_id',NEW.mission_id,'job_id',NEW.id,'attempts_reset',1))
+  );
+
+  INSERT INTO audit_log(id,organization_id,resource_type,resource_id,action,actor,reason,changes,timestamp)
+  VALUES(
+    'audit_' || lower(hex(randomblob(16))),NEW.organization_id,'job',NEW.id,'requeue_checkpoint','system:requeue',
+    'Reset durable job attempts and synchronized mission state for safe requeue',
+    json_object('mission_id',NEW.mission_id,'previous_status',OLD.status,'status','queued','attempts_reset',1),NEW.updated_at
+  );
+END;
+
 CREATE TABLE IF NOT EXISTS worker_heartbeats (
   worker_id TEXT PRIMARY KEY,
   started_at TEXT NOT NULL,

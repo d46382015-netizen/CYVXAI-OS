@@ -6,9 +6,12 @@ const { RuntimeError, now, id, parseJson } = require("./base");
 function rowPayload(row) {
   if (!row) return null;
   const payload = parseJson(row.payload, null);
-  if (payload) return payload;
+  if (payload && payload.id && payload.id === row.id) return payload;
   const copy = { ...row };
-  delete copy.payload;
+  if (Object.prototype.hasOwnProperty.call(copy, "payload")) copy.payload = payload;
+  for (const key of ["data", "metrics", "evidence_ids", "changes", "metadata"]) {
+    if (Object.prototype.hasOwnProperty.call(copy, key)) copy[key] = parseJson(copy[key], copy[key]);
+  }
   return copy;
 }
 

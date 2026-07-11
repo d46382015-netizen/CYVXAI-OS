@@ -217,6 +217,21 @@ contract FlashArb is IAaveFlashLoanSimpleReceiver {
         Route memory route = abi.decode(params, (Route));
         _validateRoute(asset, route.deadline, route.first, route.second);
 
+        uint256 realizedProfit = _executeRouteAndValidate(asset, amount, premium, route);
+        _forceApprove(asset, address(aavePool), amount + premium);
+
+        callbackCompleted = true;
+        executionState = ExecutionState.LoanRequested;
+        emit ArbitrageSettled(keccak256(params), asset, amount, premium, realizedProfit);
+        return true;
+    }
+
+    function _executeRouteAndValidate(
+        address asset,
+        uint256 amount,
+        uint256 premium,
+        Route memory route
+    ) internal returns (uint256 realizedProfit) {
         uint256 startingBalance = IERC20Minimal(asset).balanceOf(address(this));
         if (startingBalance < amount) revert InvalidCallback();
         uint256 treasuryBefore = startingBalance - amount;
@@ -230,13 +245,7 @@ contract FlashArb is IAaveFlashLoanSimpleReceiver {
         if (finalBalance < requiredBalance) {
             revert Unprofitable(requiredBalance, finalBalance);
         }
-
-        uint256 realizedProfit = finalBalance - treasuryBefore - totalOwed;
-        _forceApprove(asset, address(aavePool), totalOwed);
-        callbackCompleted = true;
-        executionState = ExecutionState.LoanRequested;
-        emit ArbitrageSettled(keccak256(params), asset, amount, premium, realizedProfit);
-        return true;
+        realizedProfit = finalBalance - treasuryBefore - totalOwed;
     }
 
     function _executeLeg(Leg memory leg, uint256 amountIn, uint256 deadline)

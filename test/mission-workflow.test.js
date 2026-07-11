@@ -191,7 +191,6 @@ async function runTests() {
     assert(graph.evidence.length > 0);
   });
 
-  // Failure tests
   await test('Reject invalid state transition', () => {
     const state = store.load();
     const mission = state.missions[0];
@@ -199,7 +198,7 @@ async function runTests() {
       engine.validateMission(mission.id, { feasible: true, validated_by: 'test' });
       assert.fail('Should have thrown error');
     } catch (error) {
-      assert(error.message.includes('transition'));
+      assert.strictEqual(error.code, 'INVALID_TRANSITION');
     }
   });
 
@@ -214,8 +213,7 @@ async function runTests() {
     }
   });
 
-  // Summary
-  console.log(`\n=== Summary ===");
+  console.log(`\n=== Summary ===`);
   console.log(`Passed: ${testsPassed}`);
   console.log(`Failed: ${testsFailed}`);
 

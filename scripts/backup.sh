@@ -1,27 +1,25 @@
 #!/usr/bin/env bash
-set -euo pipefail
-
-# CYVXAI-OS Backup Script
-# © 2026 Dakota Lee Jonsgaard. All rights reserved.
+set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
-DATA_DIR="${CYVX_DATA_ROOT:-.cyvx}"
-BACKUP_DIR="${DATA_DIR}/backups"
-BACKUP_TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_FILE="${BACKUP_DIR}/backup_${BACKUP_TIMESTAMP}.tar.gz"
+DATA_DIR="${CYVX_DATA_ROOT:-$REPO_ROOT/.cyvx}"
+BACKUP_DIR="${CYVX_BACKUP_DIR:-$DATA_DIR/backups}"
+OUTPUT="${1:-$BACKUP_DIR/cyvx-mission-$(date -u +%Y%m%dT%H%M%SZ).tar.gz}"
 
-echo "Creating backup..."
-mkdir -p "$BACKUP_DIR"
-
-# Backup database
-if [ -f "${DATA_DIR}/cyvx.db" ]; then
-  tar -czf "$BACKUP_FILE" \
-    -C "$(dirname "$DATA_DIR")" \
-    "$(basename "$DATA_DIR")"
-  echo "Backup created: $BACKUP_FILE"
-  echo "Size: $(du -h "$BACKUP_FILE" | cut -f1)"
-else
-  echo "No database found"
-  exit 1
-fi
+mkdir -p "$(dirname "$OUTPUT")"
+cd "$REPO_ROOT"
+node - "$DATA_DIR" "$OUTPUT" <<'NODE'
+const path = require('node:path');
+const { createMissionRuntime } = require('./runtime/missions');
+const { createBackup } = require('./runtime/missions/backup');
+const dataRoot = path.resolve(process.argv[2]);
+const output = path.resolve(process.argv[3]);
+const runtime = createMissionRuntime({ dataRoot });
+try {
+  const result = createBackup({ runtime, output });
+  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+} finally {
+  runtime.close();
+}
+NODE

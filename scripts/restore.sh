@@ -1,23 +1,35 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
-# CYVXAI-OS Restore Script
-# © 2026 Dakota Lee Jonsgaard. All rights reserved.
-
-if [ -z "${1:-}" ]; then
-  echo "Usage: bash scripts/restore.sh <backup_file>"
-  exit 1
+if [[ -z "${1:-}" ]]; then
+  echo "Usage: CYVX_ALLOW_RESTORE=1 bash scripts/restore.sh <backup.tar.gz> [clean-target-data-root]" >&2
+  exit 64
+fi
+if [[ "${CYVX_ALLOW_RESTORE:-0}" != "1" ]]; then
+  echo "Restore is protected. Set CYVX_ALLOW_RESTORE=1 after validating the target." >&2
+  exit 77
 fi
 
-BACKUP_FILE="$1"
-DATA_DIR="${CYVX_DATA_ROOT:-.cyvx}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+ARCHIVE="$(realpath "$1")"
+TARGET="${2:-${CYVX_DATA_ROOT:-$REPO_ROOT/.cyvx-restored}}"
 
-if [ ! -f "$BACKUP_FILE" ]; then
-  echo "Backup file not found: $BACKUP_FILE"
-  exit 1
-fi
-
-echo "Restoring from backup: $BACKUP_FILE"
-mkdir -p "$(dirname "$DATA_DIR")"
-tar -xzf "$BACKUP_FILE" -C "$(dirname "$DATA_DIR")"
-echo "Restore complete"
+[[ -f "$ARCHIVE" ]] || { echo "Backup file not found: $ARCHIVE" >&2; exit 66; }
+cd "$REPO_ROOT"
+node - "$ARCHIVE" "$TARGET" <<'NODE'
+const path = require('node:path');
+const { restoreBackup } = require('./runtime/missions/backup');
+const { createMissionRuntime } = require('./runtime/missions');
+const archive = path.resolve(process.argv[2]);
+const targetDataRoot = path.resolve(process.argv[3]);
+const result = restoreBackup({ archive, targetDataRoot, allow: true });
+const runtime = createMissionRuntime({ dataRoot: targetDataRoot });
+try {
+  const database = runtime.db.prepare('SELECT 1 AS ok').get();
+  if (!database || database.ok !== 1) throw new Error('Restored database validation failed');
+  process.stdout.write(`${JSON.stringify({ ...result, database_verified: true }, null, 2)}\n`);
+} finally {
+  runtime.close();
+}
+NODE

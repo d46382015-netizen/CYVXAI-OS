@@ -213,7 +213,7 @@ test("UI is server-served uses real endpoints and contains operational states in
   const response = await fetch(`${harness.baseUrl}/missions`);
   const html = await response.text();
   assert.equal(response.status, 200);
-  for (const required of ["/api/v1/missions", "/api/v1/evidence/verify", "Worker offline", "Permission", "No missions exist", "confirm("]) {
+  for (const required of ["/api/v1/missions", "/api/v1/evidence/verify", "Worker offline", "Viewer access is read-only", "No missions exist", "confirm("]) {
     assert.match(html, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
   assert.doesNotMatch(html, /mock mission|hardcoded operational totals/i);

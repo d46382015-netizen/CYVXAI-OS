@@ -1,0 +1,35 @@
+name: CYVX Flash Relay
+
+on:
+  push:
+    paths:
+      - "apps/cyvx-flash-relay/**"
+      - ".github/workflows/cyvx-flash-relay.yml"
+  pull_request:
+    paths:
+      - "apps/cyvx-flash-relay/**"
+      - ".github/workflows/cyvx-flash-relay.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/cyvx-flash-relay
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Configure fork-only environment
+        run: |
+          cp .env.example .env
+          sed -i 's|^READ_RPC_UPSTREAM=.*|READ_RPC_UPSTREAM=https://ethereum-rpc.publicnode.com|' .env
+          chmod 600 .env
+          chmod +x scripts/cyvx.sh
+      - name: Verify contracts and runtime policy
+        run: ./scripts/cyvx.sh verify

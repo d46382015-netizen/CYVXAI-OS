@@ -1,0 +1,62 @@
+name: Cloudflare Edge Baseline
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Protected GitHub environment containing Cloudflare credentials
+        type: choice
+        required: true
+        default: staging
+        options: [staging, production]
+      apply:
+        description: Apply the CYVX rules instead of generating a redacted plan
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cyvx-cloudflare-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ inputs.environment }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      CYVX_EDGE_ORIGIN_SECRET: ${{ secrets.CYVX_EDGE_ORIGIN_SECRET }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Validate edge secret
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "${#CYVX_EDGE_ORIGIN_SECRET}" -ge 32
+          if [ "${{ inputs.apply }}" = "true" ]; then
+            test -n "$CLOUDFLARE_API_TOKEN"
+            test -n "$CLOUDFLARE_ZONE_ID"
+          fi
+      - name: Generate redacted edge plan
+        run: node ./scripts/provision-cloudflare-v8.js | tee /tmp/cyvx-cloudflare-plan.json
+      - name: Apply managed CYVX edge rules
+        if: inputs.apply
+        run: node ./scripts/provision-cloudflare-v8.js --apply | tee /tmp/cyvx-cloudflare-apply.json
+      - name: Retain edge evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyvx-cloudflare-${{ inputs.environment }}-${{ github.run_id }}
+          path: |
+            /tmp/cyvx-cloudflare-plan.json
+            /tmp/cyvx-cloudflare-apply.json
+          if-no-files-found: ignore
+          retention-days: 90

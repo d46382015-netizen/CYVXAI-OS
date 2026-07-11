@@ -181,11 +181,18 @@ contract FlashArbTest is Test {
 
     function testUnprofitableRouteRevertsAtomically() public {
         uint256 amount = 100_000 ether;
+        uint256 premium = amount * 5 / 10_000;
         v3.setRate(address(tokenA), address(tokenB), 1e18);
         v2.setRate(address(tokenB), address(tokenA), 1e18);
         (FlashArb.Leg memory first, FlashArb.Leg memory second) = _route(amount, amount);
 
-        vm.expectRevert(FlashArb.Unprofitable.selector);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FlashArb.Unprofitable.selector,
+                amount + premium + 1,
+                amount
+            )
+        );
         vm.prank(OPERATOR);
         arb.executeArbitrage(
             address(tokenA), amount, 1, block.timestamp + 60, first, second
@@ -196,17 +203,25 @@ contract FlashArbTest is Test {
 
     function testTreasuryCannotMaskLosingTrade() public {
         uint256 amount = 100_000 ether;
-        tokenA.mint(address(arb), 1_000 ether);
+        uint256 treasury = 1_000 ether;
+        uint256 premium = amount * 5 / 10_000;
+        tokenA.mint(address(arb), treasury);
         v3.setRate(address(tokenA), address(tokenB), 1e18);
         v2.setRate(address(tokenB), address(tokenA), 1e18);
         (FlashArb.Leg memory first, FlashArb.Leg memory second) = _route(amount, amount);
 
-        vm.expectRevert(FlashArb.Unprofitable.selector);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FlashArb.Unprofitable.selector,
+                treasury + amount + premium,
+                treasury + amount
+            )
+        );
         vm.prank(OPERATOR);
         arb.executeArbitrage(
             address(tokenA), amount, 0, block.timestamp + 60, first, second
         );
-        assertEq(tokenA.balanceOf(address(arb)), 1_000 ether);
+        assertEq(tokenA.balanceOf(address(arb)), treasury);
     }
 
     function testOnlyOperatorCanExecute() public {

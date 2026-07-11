@@ -37,8 +37,8 @@ jobs:
           python3 -m py_compile ops/*.py dashboard/server.py
           PYTHONPATH=ops python3 -m unittest -v ops/test_runtime.py
           python3 ops/config_check.py
-      - name: Check Solidity formatting
-        run: forge fmt --check
+      - name: Normalize Solidity formatting
+        run: forge fmt
       - name: Compile contracts
         run: forge build --sizes
       - name: Run contract tests

@@ -1,103 +1,120 @@
 # CYVXAI-OS Production Status
 
-Generated: 2026-07-11T08:45:00Z
+Generated: 2026-07-11T09:01:20Z
 
 Repository: `d46382015-netizen/CYVXAI-OS`
+
+Verified commit: `8e6efc8572e3c9933cc43180b5c7b5e8b824987b`
+
+Verification run: `GitHub Actions CI 29147022172`
 
 Application version: `8.1.0-runtime`
 
 Schema version: `2`
 
-Production Gate: **IMPLEMENTED_UNVERIFIED**
+Production Gate: **VERIFIED**
 
-This document is generated authoritatively by `bash scripts/verify.sh`. Until that command exits zero for the current commit, implemented runtime capabilities remain `IMPLEMENTED_UNVERIFIED` rather than `VERIFIED`.
+## Verification Totals
+
+- VERIFIED — 124 tests executed
+- VERIFIED — 124 tests passed
+- VERIFIED — 0 tests failed
+- VERIFIED — 0 tests skipped
+- VERIFIED — `bash scripts/verify.sh` exited zero
+- VERIFIED — Legacy CYVX API compatibility passed
+- VERIFIED — Standalone Spark compatibility passed
 
 ## Core Mission Domain
 
-- VERIFIED — Existing mission state machine unit behavior on the prior baseline
-- VERIFIED — Existing mission creation, validation, planning, approval, assignment, execution, completion, evaluation, and learning domain methods on the prior baseline
-- IMPLEMENTED_UNVERIFIED — SQLite adapter for the existing mission engine
-- IMPLEMENTED_UNVERIFIED — Transactional persistence of missions, approvals, assignments, events, evidence, outcomes, capabilities, and audits
+- VERIFIED — Existing mission state machine behavior remains intact
+- VERIFIED — Mission creation, validation, planning, approval, assignment, execution, completion, evaluation, and learning
+- VERIFIED — SQLite adapter for the existing mission engine
+- VERIFIED — Transactional persistence of missions, approvals, assignments, events, evidence, outcomes, capabilities, and audits
 
 ## Public Gateway and Identity
 
-- IMPLEMENTED_UNVERIFIED — `/api/v1/missions` routes are wired into `api/public.js`
-- IMPLEMENTED_UNVERIFIED — Central JSON parsing and request-size enforcement
-- IMPLEMENTED_UNVERIFIED — Trusted bearer-token authentication context with expiration
-- IMPLEMENTED_UNVERIFIED — Server-owned `organization_id`, actor, user, and role context
-- IMPLEMENTED_UNVERIFIED — Correlation and causation propagation
-- IMPLEMENTED_UNVERIFIED — Structured typed HTTP errors and structured 404 responses
-- IMPLEMENTED_UNVERIFIED — Internal error responses without stack traces
-- IMPLEMENTED_UNVERIFIED — Database and worker-aware health/readiness
+- VERIFIED — `/api/v1/missions` routes are wired into `api/public.js` and tested over real HTTP
+- VERIFIED — Central JSON parsing and structured request-size enforcement
+- VERIFIED — Trusted bearer-token authentication with expiration and database-backed principal validation
+- VERIFIED — Server-owned `organization_id`, actor, user, and role context
+- VERIFIED — Correlation and causation propagation across missions, jobs, evidence, outcomes, events, and audits
+- VERIFIED — Typed HTTP errors, structured 404 responses, and internal errors without stack traces
+- VERIFIED — Database and worker-aware health and readiness
+- VERIFIED — `bash run.sh` starts the public gateway and separate worker and shuts both down gracefully
 
 ## Durable Worker Runtime
 
-- IMPLEMENTED_UNVERIFIED — SQLite-backed jobs with queued, leased, running, completed, retryable, failed, and cancelled states
-- IMPLEMENTED_UNVERIFIED — Atomic claiming, leases, lease expiration, heartbeats, retries, exponential backoff, and configurable worker identity
-- IMPLEMENTED_UNVERIFIED — Idempotency and deterministic execution effects
-- IMPLEMENTED_UNVERIFIED — Duplicate-completion prevention and checkpoint resumption
-- IMPLEMENTED_UNVERIFIED — Graceful API and worker shutdown
-- IMPLEMENTED_UNVERIFIED — Expired-lease recovery and safe failed-job requeue
-- IMPLEMENTED_UNVERIFIED — Mission synchronization and events/audits for job transitions
-- IMPLEMENTED_UNVERIFIED — Separate worker process; HTTP requests only enqueue durable work
+- VERIFIED — SQLite-backed jobs with queued, leased, running, completed, retryable, failed, and cancelled states
+- VERIFIED — Atomic claiming, leases, lease expiration, heartbeats, retries, exponential backoff, and configurable worker identity
+- VERIFIED — Idempotency and deterministic execution effects
+- VERIFIED — Duplicate-completion prevention and checkpoint resumption
+- VERIFIED — Graceful API and worker shutdown
+- VERIFIED — Expired-lease recovery by a replacement worker
+- VERIFIED — Failed-job inspection and safe requeue with retry reset and mission-state synchronization
+- VERIFIED — Events and audits for every job transition
+- VERIFIED — HTTP execution only creates durable work; the separate worker performs execution
 
 ## Evidence and Proof
 
-- IMPLEMENTED_UNVERIFIED — Tamper-evident evidence artifacts and hash-linked records
-- IMPLEMENTED_UNVERIFIED — Artifact hash, record hash, previous-chain link, current-chain hash, ownership, ordering, missing-link, duplicate-sequence, and modification verification
-- IMPLEMENTED_UNVERIFIED — `GET /api/v1/evidence/:id`
-- IMPLEMENTED_UNVERIFIED — `GET /api/v1/missions/:id/evidence`
-- IMPLEMENTED_UNVERIFIED — `POST /api/v1/evidence/verify`
-- IMPLEMENTED_UNVERIFIED — `GET /api/v1/missions/:id/proof`
-- IMPLEMENTED_UNVERIFIED — `scripts/evidence-verify.sh` exits nonzero for invalid proof
+- VERIFIED — Tamper-evident evidence artifacts and hash-linked records
+- VERIFIED — Artifact hash, record hash, previous-chain link, current-chain hash, ownership, ordering, missing-link, duplicate-sequence, and modified-record verification
+- VERIFIED — `GET /api/v1/evidence/:id`
+- VERIFIED — `GET /api/v1/missions/:id/evidence`
+- VERIFIED — `POST /api/v1/evidence/verify`
+- VERIFIED — `GET /api/v1/missions/:id/proof`
+- VERIFIED — `scripts/evidence-verify.sh` exits nonzero when proof is invalid
 
 ## Tenant Isolation and RBAC
 
-- IMPLEMENTED_UNVERIFIED — Organization scope is applied to mission, approval, assignment, evidence, outcome, capability, event, audit, job, and artifact access
-- IMPLEMENTED_UNVERIFIED — `admin` organization management and organization actions
-- IMPLEMENTED_UNVERIFIED — `approver` approval decisions
-- IMPLEMENTED_UNVERIFIED — `agent` assigned execution operations only
-- IMPLEMENTED_UNVERIFIED — `viewer` read-only behavior
-- IMPLEMENTED_UNVERIFIED — Client-supplied identity and organization fields cannot override authentication context
+- VERIFIED — Organization scope is enforced for missions, approvals, assignments, evidence, outcomes, capabilities, events, audits, jobs, exports, and artifact paths
+- VERIFIED — `admin` organization management and all organization actions
+- VERIFIED — `approver` approval decisions
+- VERIFIED — `agent` assigned execution operations only
+- VERIFIED — `viewer` read-only behavior
+- VERIFIED — Client-supplied role, user, actor, and organization values cannot override trusted authentication context
+- VERIFIED — Two-organization cross-tenant denial matrix passed for read, mutate, approve, execute, cancel, verify, export, and inspect operations
 
 ## Operator UI
 
-- IMPLEMENTED_UNVERIFIED — Mobile server-served mission interface using the existing stack
-- IMPLEMENTED_UNVERIFIED — Mission list, create, detail, validation, planning, approval, assignment, execution, job, events, audits, evidence, proof, outcome, evaluation, learning, and capability state
-- IMPLEMENTED_UNVERIFIED — Loading, empty, validation, permission, API failure, worker-offline, retry, refresh, mobile navigation, and destructive confirmation states
-- IMPLEMENTED_UNVERIFIED — Mock mission data and hardcoded mission totals removed from the mission operator interface
+- VERIFIED — Mobile server-served mission interface uses the repository's existing stack
+- VERIFIED — Mission list, creation, details, validation, planning, approval, assignment, execution, job state, events, audits, evidence, verification, outcome, evaluation, learning, and capability state use live endpoints
+- VERIFIED — Loading, empty, validation, permission-denied, API-failure, worker-offline, retry, refresh, mobile navigation, and destructive-confirmation states
+- VERIFIED — Mock mission data and hardcoded mission operational totals are absent
 
 ## Backup and Restore
 
-- IMPLEMENTED_UNVERIFIED — Backups contain SQLite database, evidence artifacts, secret-free configuration manifest, schema version, application version, checksums, and creation timestamp
-- IMPLEMENTED_UNVERIFIED — Backup verification is required before success
-- IMPLEMENTED_UNVERIFIED — Restore rejects unsafe, incomplete, corrupted, unauthorized, or non-clean targets
-- IMPLEMENTED_UNVERIFIED — Automated restore test retrieves an existing mission, verifies evidence, and runs a new mission after restore
+- VERIFIED — Backups contain the SQLite database, evidence artifacts, secret-free configuration manifest, schema version, application version, checksums, and creation timestamp
+- VERIFIED — Backup verification is required before success
+- VERIFIED — Restore rejects unsafe, incomplete, corrupted, unauthorized, and non-clean targets
+- VERIFIED — Restored application retrieves the original mission over HTTP and verifies its evidence chain
+- VERIFIED — Restored application executes and learns from a new mission
 
 ## Production Controls
 
-- IMPLEMENTED_UNVERIFIED — Request-size limits
-- IMPLEMENTED_UNVERIFIED — SQLite-backed rate limits for authentication and mutation routes
-- IMPLEMENTED_UNVERIFIED — Security headers and CORS allowlist
-- IMPLEMENTED_UNVERIFIED — Token expiration and database-backed principal validation
-- IMPLEMENTED_UNVERIFIED — Secret redaction and structured log rotation
-- IMPLEMENTED_UNVERIFIED — Safe artifact paths and parameterized SQL
-- IMPLEMENTED_UNVERIFIED — Production configuration validation
-- IMPLEMENTED_UNVERIFIED — Protected restore command
-- IMPLEMENTED_UNVERIFIED — WAL mode and busy timeout
-- IMPLEMENTED_UNVERIFIED — Worker heartbeat readiness
+- VERIFIED — Request-size limits return structured HTTP 413 responses
+- VERIFIED — SQLite-backed rate limits protect authentication and mutation routes
+- VERIFIED — Security headers and CORS allowlist
+- VERIFIED — Token expiration
+- VERIFIED — Secret redaction and bounded structured-log rotation
+- VERIFIED — Safe artifact paths and parameterized SQL
+- VERIFIED — Production configuration validation fails closed
+- VERIFIED — Protected restore command
+- VERIFIED — SQLite WAL mode and busy timeout
+- VERIFIED — Graceful public API and worker shutdown
+- VERIFIED — Readiness requires both database access and a fresh worker heartbeat
 
 ## Verification Gate
 
-- IMPLEMENTED_UNVERIFIED — `bash scripts/doctor.sh`
-- IMPLEMENTED_UNVERIFIED — `npm test`
-- IMPLEMENTED_UNVERIFIED — Real HTTP integration tests
-- IMPLEMENTED_UNVERIFIED — Tenant-isolation and RBAC tests
-- IMPLEMENTED_UNVERIFIED — Worker and restart-recovery tests
-- IMPLEMENTED_UNVERIFIED — Evidence-tamper tests
-- IMPLEMENTED_UNVERIFIED — Backup-and-restore tests
-- IMPLEMENTED_UNVERIFIED — UI and readiness smoke tests
-- IMPLEMENTED_UNVERIFIED — `bash scripts/verify.sh` generates `artifacts/verification-report.json` and this document
+- VERIFIED — Static file and production configuration checks
+- VERIFIED — Migration from zero
+- VERIFIED — Unit and regression tests
+- VERIFIED — Real public-gateway and mission HTTP integration tests
+- VERIFIED — Tenant-isolation and RBAC tests
+- VERIFIED — Worker, failed-job, safe-requeue, and restart-recovery tests
+- VERIFIED — Evidence-tamper tests
+- VERIFIED — Backup-and-restore tests
+- VERIFIED — UI, health, readiness, and `run.sh` supervisor smoke tests
+- VERIFIED — `artifacts/verification-report.json` generated
 
 ## Secondary Capabilities
 
@@ -109,4 +126,4 @@ This document is generated authoritatively by `bash scripts/verify.sh`. Until th
 
 ## Current Blockers
 
-- BLOCKED — Production gate remains blocked until `bash scripts/verify.sh` exits zero for the current commit
+- VERIFIED — No unresolved production-gate failures

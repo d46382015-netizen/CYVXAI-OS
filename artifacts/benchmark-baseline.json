@@ -1,0 +1,48 @@
+# Benchmark Baseline
+# © 2026 Dakota Lee Jonsgaard. All rights reserved.
+# Measured on 2026-07-11 at 07:54 UTC
+
+{
+  "timestamp": "2026-07-11T07:54:31Z",
+  "environment": {
+    "node_version": ">=18.0.0",
+    "os": "Linux/Darwin/Windows",
+    "arch": "arm64/x64"
+  },
+  "startup": {
+    "cold_start_ms": 0,
+    "warm_start_ms": 0,
+    "readiness_ms": 0,
+    "note": "To be measured after worker implementation"
+  },
+  "api": {
+    "mission_create_ms": 0,
+    "mission_validate_ms": 0,
+    "mission_plan_ms": 0,
+    "approval_request_ms": 0,
+    "approval_decide_ms": 0,
+    "agent_assign_ms": 0,
+    "mission_execute_ms": 0,
+    "evidence_record_ms": 0,
+    "outcome_complete_ms": 0,
+    "evaluate_ms": 0,
+    "learn_capability_ms": 0,
+    "note": "To be measured against running API server"
+  },
+  "database": {
+    "mission_insert_ms": 0,
+    "approval_query_ms": 0,
+    "evidence_chain_verify_ms": 0,
+    "note": "To be measured with production workload"
+  },
+  "resource_usage": {
+    "idle_memory_mb": 0,
+    "mission_execution_memory_mb": 0,
+    "max_memory_mb": 0,
+    "note": "To be measured during actual execution"
+  },
+  "full_workflow": {
+    "create_to_learn_ms": 0,
+    "note": "To be measured with complete mission workflow"
+  }
+}

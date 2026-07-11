@@ -32,10 +32,14 @@ async function createProductionGateway(options = {}) {
       if (isProtectedApi(url.pathname) && integrations.identity.required && !context.authenticated) {
         return sendJson(res, 401, { ok: false, error: "AUTHENTICATION_REQUIRED", message: "A valid CYVX identity is required." });
       }
-      return proxyHttp(req, res, legacyGatewayPort, context);
+      return proxyHttp(req, res, legacyGatewayPort, context, integrations.edge.headerName);
     } catch (error) {
-      await integrations.captureError(error, { operation: "integrated_gateway", path: url.pathname, method: req.method });
-      return sendJson(res, error.statusCode || 500, { ok: false, error: error.code || "INTEGRATION_GATEWAY_ERROR", message: error.message });
+      try { await integrations.captureError(error, { operation: "integrated_gateway", path: url.pathname, method: req.method }); }
+      catch {}
+      if (!res.headersSent && !res.writableEnded) {
+        return sendJson(res, error.statusCode || 500, { ok: false, error: error.code || "INTEGRATION_GATEWAY_ERROR", message: error.message });
+      }
+      if (!res.writableEnded) res.end();
     }
   });
 
@@ -46,7 +50,7 @@ async function createProductionGateway(options = {}) {
       const context = await integrations.identity.resolve(req, { allowAnonymous: !isProtectedApi(url.pathname) });
       if (isProtectedApi(url.pathname) && integrations.identity.required && !context.authenticated) return socket.destroy();
       attachContext(req, context);
-      proxyUpgrade(req, socket, head, legacyGatewayPort, context);
+      proxyUpgrade(req, socket, head, legacyGatewayPort, context, integrations.edge.headerName);
     } catch {
       socket.destroy();
     }
@@ -86,6 +90,10 @@ function isProtectedApi(pathname) {
 }
 
 function attachContext(req, context) {
+  delete req.headers["x-cyvx-user-id"];
+  delete req.headers["x-cyvx-tenant-id"];
+  delete req.headers["x-cyvx-role"];
+  delete req.headers["x-cyvx-aal"];
   if (!context || !context.authenticated) return;
   req.headers["x-cyvx-user-id"] = String(context.user_id || "");
   req.headers["x-cyvx-tenant-id"] = String(context.tenant_id || "");
@@ -93,10 +101,10 @@ function attachContext(req, context) {
   req.headers["x-cyvx-aal"] = String(context.aal || "aal1");
 }
 
-function proxyHttp(req, res, port, context) {
+function proxyHttp(req, res, port, context, edgeHeaderName) {
   const headers = { ...req.headers, host: `127.0.0.1:${port}` };
   if (context && context.authenticated && process.env.CYVX_API_KEY) headers["x-api-key"] = process.env.CYVX_API_KEY;
-  delete headers["x-cyvx-edge-secret"];
+  delete headers[String(edgeHeaderName || "x-cyvx-edge-secret").toLowerCase()];
   const upstream = http.request({ host: "127.0.0.1", port, method: req.method, path: req.url, headers }, (upstreamRes) => {
     res.writeHead(upstreamRes.statusCode || 502, upstreamRes.headers);
     upstreamRes.pipe(res);
@@ -108,10 +116,10 @@ function proxyHttp(req, res, port, context) {
   req.pipe(upstream);
 }
 
-function proxyUpgrade(req, clientSocket, head, port, context) {
+function proxyUpgrade(req, clientSocket, head, port, context, edgeHeaderName) {
   const headersObject = { ...req.headers, host: `127.0.0.1:${port}` };
   if (context && context.authenticated && process.env.CYVX_API_KEY) headersObject["x-api-key"] = process.env.CYVX_API_KEY;
-  delete headersObject["x-cyvx-edge-secret"];
+  delete headersObject[String(edgeHeaderName || "x-cyvx-edge-secret").toLowerCase()];
   const upstream = net.connect(port, "127.0.0.1", () => {
     const headers = Object.entries(headersObject).map(([key, value]) => `${key}: ${value}`).join("\r\n");
     upstream.write(`${req.method} ${req.url} HTTP/${req.httpVersion}\r\n${headers}\r\n\r\n`);

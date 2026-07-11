@@ -22,7 +22,42 @@ CREATE TABLE IF NOT EXISTS users (
   PRIMARY KEY (organization_id, id),
   FOREIGN KEY (organization_id) REFERENCES organizations(id)
 );
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_global_id ON users(id);
 CREATE INDEX IF NOT EXISTS idx_users_org_role ON users(organization_id, role);
+
+CREATE TRIGGER IF NOT EXISTS trg_users_agent_insert
+AFTER INSERT ON users
+WHEN NEW.role = 'agent'
+BEGIN
+  INSERT INTO agents(id,organization_id,name,role,capabilities,status,created_at,updated_at)
+  VALUES(NEW.id,NEW.organization_id,NEW.id,'agent','["deterministic.local.v1"]',CASE WHEN NEW.active=1 THEN 'idle' ELSE 'disabled' END,NEW.created_at,NEW.updated_at)
+  ON CONFLICT(id) DO UPDATE SET
+    organization_id=excluded.organization_id,
+    name=excluded.name,
+    role=excluded.role,
+    capabilities=excluded.capabilities,
+    status=excluded.status,
+    updated_at=excluded.updated_at;
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_users_agent_update
+AFTER UPDATE OF role,active,updated_at ON users
+WHEN NEW.role = 'agent'
+BEGIN
+  INSERT INTO agents(id,organization_id,name,role,capabilities,status,created_at,updated_at)
+  VALUES(NEW.id,NEW.organization_id,NEW.id,'agent','["deterministic.local.v1"]',CASE WHEN NEW.active=1 THEN 'idle' ELSE 'disabled' END,NEW.created_at,NEW.updated_at)
+  ON CONFLICT(id) DO UPDATE SET
+    organization_id=excluded.organization_id,
+    name=excluded.name,
+    role=excluded.role,
+    capabilities=excluded.capabilities,
+    status=excluded.status,
+    updated_at=excluded.updated_at;
+END;
+
+INSERT OR IGNORE INTO agents(id,organization_id,name,role,capabilities,status,created_at,updated_at)
+SELECT id,organization_id,id,'agent','["deterministic.local.v1"]',CASE WHEN active=1 THEN 'idle' ELSE 'disabled' END,created_at,updated_at
+FROM users WHERE role='agent';
 
 CREATE TABLE IF NOT EXISTS jobs (
   id TEXT PRIMARY KEY,

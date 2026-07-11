@@ -1,31 +1,31 @@
 .PHONY: run bootstrap configure rpc quote fork verify dashboard status stop
 
 run:
-	./scripts/cyvx.sh run
+	bash ./scripts/cyvx.sh run
 
 bootstrap:
-	./scripts/cyvx.sh bootstrap
+	bash ./scripts/cyvx.sh bootstrap
 
 configure:
-	./scripts/cyvx.sh configure
+	bash ./scripts/cyvx.sh configure
 
 rpc:
-	./scripts/cyvx.sh rpc
+	bash ./scripts/cyvx.sh rpc
 
 quote:
-	./scripts/cyvx.sh quote
+	bash ./scripts/cyvx.sh quote
 
 fork:
-	./scripts/cyvx.sh fork
+	bash ./scripts/cyvx.sh fork
 
 verify:
-	./scripts/cyvx.sh verify
+	bash ./scripts/cyvx.sh verify
 
 dashboard:
-	./scripts/cyvx.sh dashboard
+	bash ./scripts/cyvx.sh dashboard
 
 status:
-	./scripts/cyvx.sh status
+	bash ./scripts/cyvx.sh status
 
 stop:
-	./scripts/cyvx.sh stop
+	bash ./scripts/cyvx.sh stop

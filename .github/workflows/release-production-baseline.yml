@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: cyvx-release-${{ inputs.environment }}
@@ -24,7 +25,7 @@ concurrency:
 jobs:
   verify-migrate-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     environment: ${{ inputs.environment }}
     env:
       NODE_ENV: test
@@ -34,9 +35,15 @@ jobs:
       CYVX_DATABASE_URL: ${{ secrets.CYVX_DATABASE_URL }}
       CYVX_RENDER_DEPLOY_HOOK_URL: ${{ secrets.CYVX_RENDER_DEPLOY_HOOK_URL }}
       CYVX_RELEASE_URL: ${{ secrets.CYVX_RELEASE_URL }}
+      CYVX_API_KEY: ${{ secrets.CYVX_API_KEY }}
+      CYVX_EDGE_ORIGIN_SECRET: ${{ secrets.CYVX_EDGE_ORIGIN_SECRET }}
+      CYVX_WORKLOAD_IDENTITY_AUDIENCE: ${{ vars.CYVX_WORKLOAD_IDENTITY_AUDIENCE || 'cyvx-production' }}
+      CYVX_WORKLOAD_IDENTITY_EXCHANGE_URL: ${{ secrets.CYVX_WORKLOAD_IDENTITY_EXCHANGE_URL }}
+      CYVX_WORKLOAD_IDENTITY_SCOPE: ${{ vars.CYVX_WORKLOAD_IDENTITY_SCOPE || 'deploy migrate backup' }}
+      CYVX_OIDC_EVIDENCE_FILE: /tmp/cyvx-oidc-evidence.json
       PGSSLMODE: require
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
@@ -48,6 +55,15 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Verify release candidate
         run: npm run verify:production-baseline
+      - name: Prove GitHub workload identity
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [ -n "$CYVX_WORKLOAD_IDENTITY_EXCHANGE_URL" ]; then
+            node ./scripts/oidc-smoke-v8.js --exchange
+          else
+            node ./scripts/oidc-smoke-v8.js
+          fi
       - name: Apply managed PostgreSQL migrations
         shell: bash
         run: |
@@ -63,20 +79,35 @@ jobs:
         run: |
           test -n "$CYVX_RENDER_DEPLOY_HOOK_URL"
           curl --fail --silent --show-error --request POST "$CYVX_RENDER_DEPLOY_HOOK_URL" | tee /tmp/cyvx-render-deploy-response.txt
-      - name: Wait for release readiness
+      - name: Wait for release readiness and integration health
         shell: bash
         run: |
           set -Eeuo pipefail
           test -n "$CYVX_RELEASE_URL"
+          test "${#CYVX_API_KEY}" -ge 32
+          test "${#CYVX_EDGE_ORIGIN_SECRET}" -ge 32
+          BASE="${CYVX_RELEASE_URL%/}"
+          EDGE="x-cyvx-edge-secret: $CYVX_EDGE_ORIGIN_SECRET"
+          KEY="x-api-key: $CYVX_API_KEY"
           for attempt in $(seq 1 60); do
-            if curl -fsS "$CYVX_RELEASE_URL/readyz" > /tmp/cyvx-release-ready.json; then
-              curl -fsS "$CYVX_RELEASE_URL/healthz" > /tmp/cyvx-release-health.json
-              curl -fsS "$CYVX_RELEASE_URL/api/public/status" > /tmp/cyvx-release-status.json
+            if curl -fsS -H "$EDGE" "$BASE/readyz" > /tmp/cyvx-release-ready.json; then
+              curl -fsS "$BASE/healthz" > /tmp/cyvx-release-health.json
+              curl -fsS -H "$EDGE" "$BASE/api/public/status" > /tmp/cyvx-release-status.json
+              curl -fsS -H "$EDGE" -H "$KEY" "$BASE/api/v1/integrations/status" > /tmp/cyvx-release-integrations.json
+              curl -fsS -X POST -H "$EDGE" -H "$KEY" -H 'content-type: application/json' -d '{}' \
+                "$BASE/api/v1/integrations/probe" > /tmp/cyvx-release-integration-probe.json
+              node - <<'NODE'
+              const fs = require('fs');
+              const ready = JSON.parse(fs.readFileSync('/tmp/cyvx-release-ready.json'));
+              const integrations = JSON.parse(fs.readFileSync('/tmp/cyvx-release-integrations.json'));
+              const probe = JSON.parse(fs.readFileSync('/tmp/cyvx-release-integration-probe.json'));
+              if (!ready.ready || !integrations.integrations?.ready || !probe.integrations?.ready || !probe.integrations?.live?.data?.healthy) process.exit(1);
+              NODE
               exit 0
             fi
             sleep 10
           done
-          echo "::error::Release did not become ready within ten minutes"
+          echo "::error::Release did not become integration-ready within ten minutes"
           exit 1
       - name: Retain immutable release evidence
         if: always()
@@ -84,10 +115,13 @@ jobs:
         with:
           name: cyvx-release-${{ inputs.environment }}-${{ github.sha }}
           path: |
+            /tmp/cyvx-oidc-evidence.json
             /tmp/cyvx-release-database-health.json
             /tmp/cyvx-render-deploy-response.txt
             /tmp/cyvx-release-ready.json
             /tmp/cyvx-release-health.json
             /tmp/cyvx-release-status.json
+            /tmp/cyvx-release-integrations.json
+            /tmp/cyvx-release-integration-probe.json
           if-no-files-found: ignore
           retention-days: 180

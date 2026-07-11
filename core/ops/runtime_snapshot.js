@@ -2,7 +2,7 @@
 
 const { readiness } = require("./readiness");
 
-function runtimeSnapshot({ sparkRuntime, autonomy, backup, managedData, telemetry, security = {}, cyvx, github = {}, startedAt = Date.now() }) {
+function runtimeSnapshot({ sparkRuntime, autonomy, backup, managedData, telemetry, integrations, security = {}, cyvx, github = {}, startedAt = Date.now() }) {
   const spark = sparkRuntime.snapshot();
   const metrics = spark.metrics || {};
   const sparkHealth = safely(() => sparkRuntime.health(), { status: "error" });
@@ -11,24 +11,27 @@ function runtimeSnapshot({ sparkRuntime, autonomy, backup, managedData, telemetr
   const backupState = backup && typeof backup.snapshot === "function" ? backup.snapshot() : { enabled: false };
   const managedDataState = managedData && typeof managedData.snapshot === "function" ? managedData.snapshot() : { configured: false, required: false };
   const telemetryState = telemetry && typeof telemetry.snapshot === "function" ? telemetry.snapshot() : { errors_total: 0, exporters: {} };
+  const integrationState = integrations && typeof integrations.snapshot === "function" ? integrations.snapshot() : { ready: true, required: false, checks: [], providers: {} };
   const pending = spark.sparks.filter((item) => item.status === "awaiting_approval").length;
   const active = spark.sparks.filter((item) => item.status === "active").length;
   const operational = spark.worlds.filter((item) => item.status === "operational").length;
   const backupReady = !security.backups_required || (backupState.enabled && !backupState.last_error);
   const managedDataReady = !security.managed_data_required || (managedDataState.configured && managedDataState.healthy !== false);
+  const integrationReady = !integrationState.required || integrationState.ready;
   const checks = [
-    item("cyvx_runtime", cyvxStatus.status !== "error", 20, cyvxStatus.status),
-    item("spark_runtime", sparkHealth.status === "ok", 20, sparkHealth.status),
+    item("cyvx_runtime", cyvxStatus.status !== "error", 15, cyvxStatus.status),
+    item("spark_runtime", sparkHealth.status === "ok", 15, sparkHealth.status),
     item("durable_state", Boolean(spark.updated_at), 10, spark.updated_at || "missing"),
     item("approval_governance", spark.capabilities.some((capability) => capability.requires_approval), 10, "bounded"),
-    item("autonomy", autonomyState.enabled && autonomyState.scheduled, 10, autonomyState.enabled ? "scheduled" : "disabled"),
+    item("autonomy", autonomyState.enabled && autonomyState.scheduled, 10, autonomyState.effective_enabled ? "scheduled" : "scheduled-kill-switch-active"),
     item("observability", Boolean(spark.recent_events) && Boolean(telemetryState), 10, `${spark.recent_events.length} events; ${telemetryState.errors_total || 0} errors`),
     item("encrypted_backups", backupReady, 10, backupState.enabled ? (backupState.last_success_at || "scheduled") : "not-required"),
     item("managed_postgres", managedDataReady, 10, managedDataState.configured ? (managedDataState.healthy === false ? "unhealthy" : "configured") : "not-required"),
+    item("production_integrations", integrationReady, 10, integrationState.ready ? "ready" : integrationState.checks.filter((entry) => entry.required && !entry.ok).map((entry) => entry.key).join(",") || "optional"),
   ];
   return {
     powered_by: "Spark + CYVX",
-    version: "7.1.0-production-baseline",
+    version: "8.0.0-integration-baseline",
     generated_at: new Date().toISOString(),
     uptime_seconds: Math.max(0, Math.floor((Date.now() - startedAt) / 1000)),
     readiness: readiness(checks),
@@ -40,6 +43,7 @@ function runtimeSnapshot({ sparkRuntime, autonomy, backup, managedData, telemetr
       backup: backupState,
       managed_data: managedDataState,
       telemetry: telemetryState,
+      integrations: integrationState,
       security: sanitizeSecurity(security),
     },
     state: { pending, active, operational },

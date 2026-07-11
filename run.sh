@@ -14,7 +14,8 @@ command -v node >/dev/null 2>&1 || { echo "Node.js 22+ is required" >&2; exit 69
 node -e 'const major=Number(process.versions.node.split(".")[0]);if(major<22){console.error("Node.js 22+ is required");process.exit(1)}'
 
 if [[ "$NODE_ENV" == "production" ]]; then
-  [[ ${#CYVX_AUTH_SECRET:-0} -ge 32 ]] || { echo "CYVX_AUTH_SECRET must contain at least 32 characters in production" >&2; exit 78; }
+  AUTH_SECRET="${CYVX_AUTH_SECRET:-}"
+  [[ ${#AUTH_SECRET} -ge 32 ]] || { echo "CYVX_AUTH_SECRET must contain at least 32 characters in production" >&2; exit 78; }
   [[ -n "${CYVX_CORS_ALLOWLIST:-}" ]] || { echo "CYVX_CORS_ALLOWLIST is required in production" >&2; exit 78; }
   export CYVX_ALLOW_INSECURE_LOCAL=false
 else

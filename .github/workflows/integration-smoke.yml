@@ -1,0 +1,72 @@
+name: CYVX Integration Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployed environment to verify
+        type: choice
+        required: true
+        default: staging
+        options: [staging, production]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cyvx-integration-smoke-${{ inputs.environment }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ inputs.environment }}
+    env:
+      CYVX_RELEASE_URL: ${{ secrets.CYVX_RELEASE_URL }}
+      CYVX_API_KEY: ${{ secrets.CYVX_API_KEY }}
+      CYVX_EDGE_ORIGIN_SECRET: ${{ secrets.CYVX_EDGE_ORIGIN_SECRET }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Validate smoke credentials
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -n "$CYVX_RELEASE_URL"
+          test "${#CYVX_API_KEY}" -ge 32
+          test "${#CYVX_EDGE_ORIGIN_SECRET}" -ge 32
+      - name: Verify liveness, edge readiness, identity, providers, and managed data
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          BASE="${CYVX_RELEASE_URL%/}"
+          EDGE="x-cyvx-edge-secret: $CYVX_EDGE_ORIGIN_SECRET"
+          KEY="x-api-key: $CYVX_API_KEY"
+          curl -fsS "$BASE/healthz" | tee /tmp/cyvx-health.json
+          curl -fsS -H "$EDGE" "$BASE/readyz" | tee /tmp/cyvx-ready.json
+          curl -fsS -H "$EDGE" -H "$KEY" "$BASE/api/v1/integrations/me" | tee /tmp/cyvx-identity.json
+          curl -fsS -H "$EDGE" -H "$KEY" "$BASE/api/v1/integrations/status" | tee /tmp/cyvx-integrations.json
+          curl -fsS -X POST -H "$EDGE" -H "$KEY" -H 'content-type: application/json' -d '{}' \
+            "$BASE/api/v1/integrations/probe" | tee /tmp/cyvx-integration-probe.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const ready = JSON.parse(fs.readFileSync('/tmp/cyvx-ready.json'));
+          const identity = JSON.parse(fs.readFileSync('/tmp/cyvx-identity.json'));
+          const status = JSON.parse(fs.readFileSync('/tmp/cyvx-integrations.json'));
+          const probe = JSON.parse(fs.readFileSync('/tmp/cyvx-integration-probe.json'));
+          if (!ready.ready || !identity.identity?.authenticated || identity.identity?.kind !== 'service') process.exit(1);
+          if (!status.integrations?.ready || !probe.integrations?.ready || !probe.integrations?.live?.data?.healthy) process.exit(1);
+          NODE
+      - name: Retain integration evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyvx-integration-smoke-${{ inputs.environment }}-${{ github.run_id }}
+          path: |
+            /tmp/cyvx-health.json
+            /tmp/cyvx-ready.json
+            /tmp/cyvx-identity.json
+            /tmp/cyvx-integrations.json
+            /tmp/cyvx-integration-probe.json
+          if-no-files-found: ignore
+          retention-days: 90

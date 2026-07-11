@@ -6,10 +6,15 @@ const { RuntimeError, now, id, parseJson } = require("./base");
 function rowPayload(row) {
   if (!row) return null;
   const payload = parseJson(row.payload, null);
-  if (payload && payload.id && payload.id === row.id) return payload;
-  const copy = { ...row };
-  if (Object.prototype.hasOwnProperty.call(copy, "payload")) copy.payload = payload;
-  for (const key of ["data", "metrics", "evidence_ids", "changes", "metadata"]) {
+  const snapshot = payload && payload.id && payload.id === row.id ? payload : {};
+  const copy = { ...snapshot, ...row };
+  if (snapshot.id === row.id) delete copy.payload;
+  else if (Object.prototype.hasOwnProperty.call(copy, "payload")) copy.payload = payload;
+  for (const key of [
+    "constraints", "opportunities", "success_metrics", "outcome_ids", "evidence_ids", "audit_trail",
+    "evaluation", "inputs", "outputs", "permissions_required", "tests", "cost_basis", "data", "metrics",
+    "changes", "metadata",
+  ]) {
     if (Object.prototype.hasOwnProperty.call(copy, key)) copy[key] = parseJson(copy[key], copy[key]);
   }
   return copy;

@@ -1,75 +1,47 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
-# CYVXAI-OS Health Diagnostic
-# © 2026 Dakota Lee Jonsgaard. All rights reserved.
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(dirname "$SCRIPT_DIR")"
-
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-echo -e "${BLUE}=== CYVXAI-OS Diagnostics ===${NC}"
-echo ""
-
-echo -e "${YELLOW}Environment${NC}"
-echo "Node.js version: $(node --version)"
-echo "npm version: $(npm --version)"
-echo "User: $(whoami)"
-echo "Platform: $(uname -s)"
-echo "Architecture: $(uname -m)"
-echo ""
-
-echo -e "${YELLOW}Repository${NC}"
-echo "Root: $REPO_ROOT"
-echo "Git branch: $(cd $REPO_ROOT && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'N/A')"
-echo "Git commit: $(cd $REPO_ROOT && git rev-parse --short HEAD 2>/dev/null || echo 'N/A')"
-echo ""
-
-echo -e "${YELLOW}Dependencies${NC}"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
-if npm list --depth=0 2>/dev/null | head -20; then
-  echo "Dependencies OK"
-else
-  echo -e "${RED}Warning: Some dependencies may be missing${NC}"
-  echo "Run: npm install"
+
+failures=0
+check() {
+  local label="$1"; shift
+  if "$@" >/dev/null 2>&1; then printf 'OK   %s\n' "$label";
+  else printf 'FAIL %s\n' "$label" >&2; failures=$((failures+1)); fi
+}
+
+printf 'CYVXAI-OS runtime doctor\n'
+printf 'repository=%s\n' "$REPO_ROOT"
+printf 'commit=%s\n' "$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+printf 'platform=%s/%s\n' "$(uname -s)" "$(uname -m)"
+printf 'node=%s\n' "$(node --version 2>/dev/null || echo missing)"
+printf 'npm=%s\n' "$(npm --version 2>/dev/null || echo missing)"
+
+check "Node.js 22+" node -e 'if(Number(process.versions.node.split(".")[0])<22)process.exit(1)'
+check "npm executable" npm --version
+check "package lock" test -f package-lock.json
+check "public gateway" test -f api/public.js
+check "mission runtime" test -f runtime/missions/index.js
+check "worker process" test -f runtime/missions/worker.js
+check "base migration" test -f ops/sqlite/001_mission_workflow.sql
+check "runtime migration" test -f ops/sqlite/002_runtime_completion.sql
+check "operator UI" test -f ui/missions.html
+check "backup command dependency" tar --version
+check "data root writable" bash -c 'root="${CYVX_DATA_ROOT:-.cyvx}"; mkdir -p "$root/.doctor"; test -w "$root/.doctor"; rmdir "$root/.doctor"'
+check "SQLite migration from zero" node -e '
+const fs=require("node:fs"),os=require("node:os"),path=require("node:path");
+const {createMissionRuntime}=require("./runtime/missions");
+const root=fs.mkdtempSync(path.join(os.tmpdir(),"cyvx-doctor-"));
+try{const runtime=createMissionRuntime({dataRoot:root,allowLocalAuth:true});
+const versions=runtime.db.prepare("SELECT version FROM schema_migrations ORDER BY version").all();
+if(versions.length!==2||versions[1].version!==2)process.exitCode=1;
+runtime.close();}finally{fs.rmSync(root,{recursive:true,force:true});}
+'
+check "JavaScript syntax" bash -c 'find runtime/missions api -maxdepth 2 -name "*.js" -print0 | xargs -0 -n1 node --check'
+
+if (( failures > 0 )); then
+  printf '%d diagnostic check(s) failed\n' "$failures" >&2
+  exit 1
 fi
-echo ""
-
-echo -e "${YELLOW}Filesystem${NC}"
-echo "Disk usage: $(du -sh $REPO_ROOT 2>/dev/null || echo 'N/A')"
-echo "Home directory writable: $(test -w ~ && echo 'Yes' || echo 'No')"
-echo ""
-
-echo -e "${YELLOW}Database${NC}"
-if command -v sqlite3 &> /dev/null; then
-  echo "sqlite3 available: $(sqlite3 --version)"
-else
-  echo -e "${RED}sqlite3 not found${NC}"
-fi
-echo ""
-
-echo -e "${YELLOW}Configuration${NC}"
-if [ -f "$REPO_ROOT/.env" ]; then
-  echo "Local .env exists: Yes"
-else
-  echo "Local .env exists: No (using defaults)"
-fi
-echo ""
-
-echo -e "${YELLOW}Network${NC}"
-echo "Port 3000 available: $(nc -z 127.0.0.1 3000 2>/dev/null && echo 'No (in use)' || echo 'Yes')"
-echo "Port 9001 available: $(nc -z 127.0.0.1 9001 2>/dev/null && echo 'No (in use)' || echo 'Yes')"
-echo ""
-
-echo -e "${YELLOW}Next Steps${NC}"
-echo "1. Run: cd $REPO_ROOT && bash run.sh"
-echo "2. Visit: http://localhost:3000"
-echo "3. Run tests: bash scripts/test-integration.sh"
-echo ""
-
-echo -e "${GREEN}Diagnostic complete${NC}"
+printf 'All runtime diagnostics passed\n'

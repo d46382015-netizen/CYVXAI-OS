@@ -98,15 +98,17 @@ async function main() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ organization_id: "default", user_id: "admin-local" }),
     });
-    assert.equal(tokenResponse.status, 200, await tokenResponse.text());
-    const tokenPayload = await tokenResponse.json();
+    const tokenText = await tokenResponse.text();
+    assert.equal(tokenResponse.status, 200, tokenText);
+    const tokenPayload = JSON.parse(tokenText);
     assert.ok(tokenPayload.token);
 
     const missions = await fetch(`${baseUrl}/api/v1/missions`, {
       headers: { authorization: `Bearer ${tokenPayload.token}` },
     });
-    assert.equal(missions.status, 200, await missions.text());
-    const missionPayload = await missions.json();
+    const missionText = await missions.text();
+    assert.equal(missions.status, 200, missionText);
+    const missionPayload = JSON.parse(missionText);
     assert.deepEqual(missionPayload.missions, []);
 
     const exitCode = await stop(child, output);

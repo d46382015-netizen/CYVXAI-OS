@@ -19,21 +19,30 @@ function readJson(req, limit) {
   return new Promise((resolve, reject) => {
     const chunks = [];
     let size = 0;
+    let settled = false;
+    const fail = (error) => {
+      if (settled) return;
+      settled = true;
+      reject(error);
+    };
     req.on("data", (chunk) => {
+      if (settled) return;
       size += chunk.length;
       if (size > limit) {
-        reject(new RuntimeError("REQUEST_TOO_LARGE", `Request body exceeds ${limit} bytes`, 413));
-        req.destroy();
+        chunks.length = 0;
+        fail(new RuntimeError("REQUEST_TOO_LARGE", `Request body exceeds ${limit} bytes`, 413));
         return;
       }
       chunks.push(chunk);
     });
     req.on("end", () => {
+      if (settled) return;
+      settled = true;
       if (!chunks.length) return resolve({});
       try { resolve(JSON.parse(Buffer.concat(chunks).toString("utf8"))); }
       catch { reject(new RuntimeError("INVALID_JSON", "Request body must be valid JSON", 400)); }
     });
-    req.on("error", reject);
+    req.on("error", fail);
   });
 }
 
@@ -63,6 +72,14 @@ function match(pathname, pattern) {
   const found = pathname.match(new RegExp(`^${expression}$`));
   if (!found) return null;
   return Object.fromEntries(keys.map((key, index) => [key, decodeURIComponent(found[index + 1])]));
+}
+
+function positiveInteger(value, name, minimum = 1) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < minimum) {
+    throw new RuntimeError("CONFIG_INVALID", `${name} must be an integer greater than or equal to ${minimum}`, 500);
+  }
+  return parsed;
 }
 
 function clientIp(req) { return String(req.socket && req.socket.remoteAddress || "unknown"); }
@@ -103,13 +120,20 @@ function createMissionRuntime(options = {}) {
     ? options.allowLocalAuth
     : process.env.CYVX_ALLOW_INSECURE_LOCAL === "true" || !production;
   const authSecret = String(options.authSecret || process.env.CYVX_AUTH_SECRET || (allowLocalAuth ? "local-development-secret-change-before-production-123" : ""));
-  if (authSecret.length < 32) throw new RuntimeError("AUTH_SECRET_INVALID", "CYVX_AUTH_SECRET must contain at least 32 characters", 500);
-  const bodyLimit = Number(options.bodyLimit || process.env.CYVX_REQUEST_BODY_LIMIT || 256 * 1024);
-  const mutationLimit = Number(options.mutationLimit || process.env.CYVX_MUTATION_RATE_LIMIT || 120);
-  const authLimit = Number(options.authLimit || process.env.CYVX_AUTH_RATE_LIMIT || 20);
-  const workerFreshMs = Number(options.workerFreshMs || process.env.CYVX_WORKER_FRESH_MS || 5000);
+  if (authSecret.length < 32) {
+    db.close();
+    throw new RuntimeError("AUTH_SECRET_INVALID", "CYVX_AUTH_SECRET must contain at least 32 characters", 500);
+  }
+  const bodyLimit = positiveInteger(options.bodyLimit || process.env.CYVX_REQUEST_BODY_LIMIT || 256 * 1024, "request body limit", 256);
+  const mutationLimit = positiveInteger(options.mutationLimit || process.env.CYVX_MUTATION_RATE_LIMIT || 120, "mutation rate limit");
+  const authLimit = positiveInteger(options.authLimit || process.env.CYVX_AUTH_RATE_LIMIT || 20, "authentication rate limit");
+  const workerFreshMs = positiveInteger(options.workerFreshMs || process.env.CYVX_WORKER_FRESH_MS || 5000, "worker freshness window", 100);
   const corsAllowlist = new Set(String(options.corsAllowlist || process.env.CYVX_CORS_ALLOWLIST || "")
     .split(",").map((value) => value.trim()).filter(Boolean));
+  if (production && !corsAllowlist.size) {
+    db.close();
+    throw new RuntimeError("CORS_ALLOWLIST_REQUIRED", "CYVX_CORS_ALLOWLIST is required in production", 500);
+  }
   const uiFile = path.join(repoRoot, "ui", "missions.html");
 
   function authenticate(req) {
@@ -199,8 +223,9 @@ function createMissionRuntime(options = {}) {
         const user = db.prepare("SELECT id,organization_id,role,active FROM users WHERE organization_id=? AND id=?")
           .get(organizationId, userId);
         if (!user || !user.active) throw new RuntimeError("AUTH_REJECTED", "Authentication principal is not active", 401);
-        const token = issueToken({ sub: user.id, organization_id: user.organization_id, role: user.role }, authSecret, Math.min(3600, Number(input.ttl_seconds) || 3600));
-        return sendJson(res, 200, { ok: true, token, expires_in: Math.min(3600, Number(input.ttl_seconds) || 3600), principal: user }, correlationId);
+        const ttl = Math.min(3600, Number(input.ttl_seconds) || 3600);
+        const token = issueToken({ sub: user.id, organization_id: user.organization_id, role: user.role }, authSecret, ttl);
+        return sendJson(res, 200, { ok: true, token, expires_in: ttl, principal: user }, correlationId);
       }
 
       req.auth = authenticate(req);
@@ -291,13 +316,13 @@ function createMissionRuntime(options = {}) {
           .get(req.auth.organization_id, params.id);
         return sendJson(res, 200, { ok: true, job: rowPayload(job) }, correlationId);
       }
-      if ((params = match(url.pathname, "/api/v1/jobs/:id")) && req.method === "GET") {
-        authorize(req.auth, "jobsInspect");
-        return sendJson(res, 200, { ok: true, job: queue.get(req.auth, params.id) }, correlationId);
-      }
       if (req.method === "GET" && url.pathname === "/api/v1/jobs/failed") {
         authorize(req.auth, "jobsInspect");
         return sendJson(res, 200, { ok: true, jobs: queue.listFailed(req.auth) }, correlationId);
+      }
+      if ((params = match(url.pathname, "/api/v1/jobs/:id")) && req.method === "GET") {
+        authorize(req.auth, "jobsInspect");
+        return sendJson(res, 200, { ok: true, job: queue.get(req.auth, params.id) }, correlationId);
       }
       if ((params = match(url.pathname, "/api/v1/jobs/:id/requeue")) && req.method === "POST") {
         authorize(req.auth, "jobsRequeue");
@@ -311,8 +336,13 @@ function createMissionRuntime(options = {}) {
       }
       if ((params = match(url.pathname, "/api/v1/missions/:id/audits")) && req.method === "GET") {
         authorize(req.auth, "read"); requireMission(db, req.auth, params.id);
-        const audits = db.prepare("SELECT * FROM audit_log WHERE organization_id=? AND (resource_id=? OR json_extract(changes,'$.mission_id')=?) ORDER BY timestamp")
-          .all(req.auth.organization_id, params.id, params.id);
+        const audits = db.prepare(`SELECT * FROM audit_log WHERE organization_id=? AND (
+          resource_id=? OR json_extract(changes,'$.mission_id')=? OR (
+            resource_type='job' AND resource_id IN (
+              SELECT id FROM jobs WHERE organization_id=? AND mission_id=?
+            )
+          )
+        ) ORDER BY timestamp`).all(req.auth.organization_id, params.id, params.id, req.auth.organization_id, params.id);
         return sendJson(res, 200, { ok: true, audits }, correlationId);
       }
       if ((params = match(url.pathname, "/api/v1/missions/:id/outcome")) && req.method === "GET") {

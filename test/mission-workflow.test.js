@@ -198,7 +198,7 @@ async function runTests() {
       engine.validateMission(mission.id, { feasible: true, validated_by: 'test' });
       assert.fail('Should have thrown error');
     } catch (error) {
-      assert(error.message.includes('transition'));
+      assert.strictEqual(error.code, 'INVALID_TRANSITION');
     }
   });
 

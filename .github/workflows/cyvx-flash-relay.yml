@@ -1,0 +1,53 @@
+name: CYVX Flash Relay
+
+on:
+  push:
+    paths:
+      - "apps/cyvx-flash-relay/**"
+      - ".github/workflows/cyvx-flash-relay.yml"
+  pull_request:
+    paths:
+      - "apps/cyvx-flash-relay/**"
+      - ".github/workflows/cyvx-flash-relay.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/cyvx-flash-relay
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Configure fork-only environment
+        run: |
+          cp .env.example .env
+          sed -i 's|^READ_RPC_UPSTREAM=.*|READ_RPC_UPSTREAM=https://ethereum-rpc.publicnode.com|' .env
+          chmod 600 .env
+      - name: Install forge-std
+        run: forge install foundry-rs/forge-std --no-git
+      - name: Validate Python runtime
+        run: |
+          python3 -m py_compile ops/*.py dashboard/server.py
+          PYTHONPATH=ops python3 -m unittest -v ops/test_runtime.py
+          python3 ops/config_check.py
+      - name: Normalize Solidity formatting
+        run: forge fmt
+      - name: Compile contracts
+        run: forge build --sizes
+      - name: Test profitable settlement
+        run: forge test --match-test testProfitableRouteRepaysLoanAndStoresProfit -vvvv
+      - name: Test atomic unprofitable revert
+        run: forge test --match-test testUnprofitableRouteRevertsAtomically -vvvv
+      - name: Test treasury isolation
+        run: forge test --match-test testTreasuryCannotMaskLosingTrade -vvvv
+      - name: Test operator authorization
+        run: forge test --match-test testOnlyOperatorCanExecute -vvvv
+      - name: Test pause circuit breaker
+        run: forge test --match-test testPauseStopsExecution -vvvv

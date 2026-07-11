@@ -1,0 +1,11 @@
+.env
+out/
+cache/
+broadcast/
+logs/*.log
+data/*.pid
+data/events.jsonl
+node_modules/
+*.keystore
+*.key
+vendor/reference/the-flash-loan/.git/

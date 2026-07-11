@@ -1,0 +1,57 @@
+name: Workload Identity Proof
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Protected environment whose workload identity is being proven
+        type: choice
+        required: true
+        default: staging
+        options: [staging, production]
+      exchange:
+        description: Exchange the GitHub OIDC token through the configured credential broker
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cyvx-workload-identity-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.environment }}
+    env:
+      CYVX_ENV: ${{ inputs.environment }}
+      CYVX_WORKLOAD_IDENTITY_AUDIENCE: ${{ vars.CYVX_WORKLOAD_IDENTITY_AUDIENCE || 'cyvx-production' }}
+      CYVX_WORKLOAD_IDENTITY_EXCHANGE_URL: ${{ secrets.CYVX_WORKLOAD_IDENTITY_EXCHANGE_URL }}
+      CYVX_WORKLOAD_IDENTITY_SCOPE: ${{ vars.CYVX_WORKLOAD_IDENTITY_SCOPE || 'deploy migrate backup' }}
+      CYVX_OIDC_EVIDENCE_FILE: /tmp/cyvx-oidc-evidence.json
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Request GitHub OIDC identity and optionally exchange it
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [ "${{ inputs.exchange }}" = "true" ]; then
+            test -n "$CYVX_WORKLOAD_IDENTITY_EXCHANGE_URL"
+            node ./scripts/oidc-smoke-v8.js --exchange
+          else
+            node ./scripts/oidc-smoke-v8.js
+          fi
+      - name: Retain sanitized workload-identity evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyvx-workload-identity-${{ inputs.environment }}-${{ github.run_id }}
+          path: /tmp/cyvx-oidc-evidence.json
+          retention-days: 90

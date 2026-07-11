@@ -4,9 +4,25 @@
 
 CYVXAI-OS is an autonomous infrastructure intelligence platform for reality graphs, digital twins, missions, simulations, knowledge, and executive operations.
 
+## Integration Baseline v8
+
+CYVXAI-OS now includes credential-ready, fail-closed contracts for:
+
+- Supabase Auth/OIDC, MFA, tenant context, RBAC, and PostgreSQL Row Level Security
+- Supabase Queues/PGMQ, retries, dead letters, and pg_cron scheduling
+- Cloudflare WAF, API rate limits, and direct-origin bypass protection
+- Tenant-aware feature flags with an OpenFeature-compatible provider and live kill switches
+- Hosted infrastructure telemetry, Langfuse AI traces/evaluations, and Sentry error tracking
+- Privacy-bounded PostHog analytics
+- Stripe webhook verification, subscriptions, and tenant entitlements
+- Queue-backed Resend or Postmark transactional email
+- GitHub Actions OIDC and optional short-lived credential exchange
+
+The integration code is complete without embedding provider credentials. Live activation still requires real provider accounts, protected GitHub environments, encrypted secrets, database migrations, and retained staging evidence. See `docs/operations/INTEGRATION_BASELINE.md`.
+
 ## Production Baseline v7.1
 
-CYVXAI-OS now includes a controlled production baseline with:
+The production baseline provides:
 
 - Fail-closed production authentication and startup validation
 - Managed PostgreSQL migrations and runtime snapshot persistence
@@ -29,7 +45,7 @@ Production deployment remains intentionally controlled: staging may deploy after
 - Executive Intelligence: answers, forecasts, recommendations, and risk assessments
 - Reality Engine: predictions, outcomes, calibration, proof, and baseline comparison
 - Economics: costs, savings, ROI, utilization, and licensing
-- Governance: RBAC, audit logs, approvals, kill switch, and tenant isolation
+- Governance: RBAC, audit logs, approvals, kill switches, MFA, and tenant isolation
 - Dashboard: `http://localhost:3000/`
 
 ## Installation
@@ -42,9 +58,24 @@ bash ./install.sh
 bash ./start.sh
 ```
 
-## Production verification
+## Complete verification
 ```bash
 npm ci --no-audit --no-fund && npm run verify:production-baseline
+```
+
+## Integration-only verification
+```bash
+npm run verify:integrations
+```
+
+## Cloudflare edge plan
+```bash
+CYVX_EDGE_ORIGIN_SECRET='32+ character secret' npm run cloudflare:plan
+```
+
+## GitHub OIDC proof
+```bash
+npm run oidc:smoke
 ```
 
 ## Backup and recovery proof
@@ -52,7 +83,20 @@ npm ci --no-audit --no-fund && npm run verify:production-baseline
 npm run backup:verify
 ```
 
-## API
+## Integration API
+- `POST /api/webhooks/stripe`
+- `GET /api/v1/integrations/me`
+- `GET /api/v1/integrations/status`
+- `POST /api/v1/integrations/probe`
+- `GET /api/v1/integrations/flags`
+- `POST /api/v1/integrations/flags/:key`
+- `POST /api/v1/integrations/jobs`
+- `POST /api/v1/integrations/email`
+- `POST /api/v1/integrations/analytics`
+- `POST /api/v1/integrations/ai/score`
+- `GET /api/v1/integrations/entitlements`
+
+## Core API
 - `GET /health`
 - `GET /healthz`
 - `GET /readyz`
@@ -99,8 +143,7 @@ npm run backup:verify
 - Intelligence surfaces: `GET /api/v1/intelligence`, `GET /api/v1/patterns`, `GET /api/v1/recommendations`, `GET /api/v1/priorities`
 - UI: Product v1 onboarding, search/filter, and audit trail
 - API aliases: GET /api/v1/dashboard, POST /api/v1/onboard
-- CLI alias: dashboard
-- CLI aliases: `workflow`, `onboard`, `coordination`
+- CLI aliases: `dashboard`, `workflow`, `onboard`, `coordination`
 
 ## CLI
 ```bash
@@ -117,13 +160,12 @@ node ./cli/cyvx.js help
 - API: /api/v1/criteria, /api/v1/reality-objects, /api/v1/significance, /api/v1/interventions, /api/v1/outcomes, /api/v1/evolution, /api/v1/cir, /api/v1/kernel
 - CLI: criteria, reality-objects, significance, interventions, outcomes, evolution, cir, kernel
 - Compatibility debt: the legacy controller plane remains for backward compatibility and is not the formal kernel.
-- Next build target: CYVX Coordination Platform v1.
 
 ## Coordination Platform v1
 
 CYVX Coordination Platform v1 runs on frozen Kernel v1 and extends the same JSON-backed state with live coordination records.
 
-### New live surfaces
+### Live surfaces
 - /api/v1/coordination
 - /api/v1/next-best-action
 - /api/v1/humans
@@ -132,7 +174,7 @@ CYVX Coordination Platform v1 runs on frozen Kernel v1 and extends the same JSON
 - /api/v1/approvals
 - /api/v1/queue
 
-### New CLI commands
+### CLI commands
 - humans
 - resources
 - assign
@@ -149,20 +191,19 @@ CYVX Coordination Platform v1 runs on frozen Kernel v1 and extends the same JSON
 - Queue items
 - Next best actions
 
-### Coordination rule
 Mission execution remains a pattern under the frozen kernel. Coordination decides who acts, when, and with what resources. The legacy controller plane remains compatibility debt.
 
 ## Intelligence Platform v1
 
 CYVX Intelligence Platform v1 extends the frozen kernel and coordination layer with explainable pattern, recommendation, and priority intelligence.
 
-### New live surfaces
+### Live surfaces
 - /api/v1/patterns
 - /api/v1/recommendations
 - /api/v1/priorities
 - /api/v1/intelligence
 
-### New CLI commands
+### CLI commands
 - patterns
 - recommendations
 - priorities
@@ -173,8 +214,7 @@ CYVX Intelligence Platform v1 extends the frozen kernel and coordination layer w
 - Recommendation
 - Priority
 
-### Purpose
-The intelligence layer strengthens the existing loop by turning outcomes, learning, trust, and CIR history into reusable patterns, explainable recommendations, and priority rankings.
+The intelligence layer turns outcomes, learning, trust, and CIR history into reusable patterns, explainable recommendations, and priority rankings.
 
 ## Proof Surfaces
 - API: /api/v1/github/repository?owner=acme&repo=cyvx
@@ -187,26 +227,24 @@ The intelligence layer strengthens the existing loop by turning outcomes, learni
 ## Reality Engine vΩ
 - API: `GET /api/v1/reality-engine`
 - CLI: `reality-engine`
-- Purpose: compress architecture into verified prediction -> outcome -> error -> learning loops.
+- Purpose: compress architecture into verified prediction → outcome → error → learning loops.
 
 ## Self-Scan & Proof Loop
-CLI: node ./cli/cyvx.js scan-self
-CLI: node ./cli/cyvx.js self-scan-mission
-API: GET /api/v1/self-scan
-API: GET /api/v1/self-scan-mission
+- CLI: `node ./cli/cyvx.js scan-self`
+- CLI: `node ./cli/cyvx.js self-scan-mission`
+- API: `GET /api/v1/self-scan`
+- API: `GET /api/v1/self-scan-mission`
 
-Purpose: CYVX can analyze its own repository, identify top constraints, generate next-best actions, create missions, expose the result through API/dashboard surfaces, and record proof-ledger improvement over time.
+CYVX can analyze its own repository, identify top constraints, generate next-best actions, create missions, expose the result through API/dashboard surfaces, and record proof-ledger improvement over time.
 
-Current Proof State
-- CI passing
+## Current proof state
+- Production and integration CI gates operational
 - Terraform workflow manual-only
-- Repository health improved from at-risk to healthy
-- Open issues: 0
-- Open pull requests: 0
-- Self-scan operational
+- Repository self-scan operational
 - Self-scan mission loop operational
+- Provider activation intentionally blocked until real credentials and live evidence exist
 
-RealityOS vΩ
-- RealityOS layers the repo around observation, modeling, intelligence, compression, operation, learning, and interface.
+## RealityOS vΩ
+- RealityOS layers the repository around observation, modeling, intelligence, compression, operation, learning, and interface.
 - The phone is the final presentation layer of a much larger system.
-- RealityEngine now exposes the layered model through `GET /api/v1/reality-engine`.
+- RealityEngine exposes the layered model through `GET /api/v1/reality-engine`.

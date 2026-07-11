@@ -6,7 +6,7 @@ const http = require("node:http");
 const net = require("node:net");
 const os = require("node:os");
 const path = require("node:path");
-const { createProductionGateway, buildReadiness } = require("./production");
+const { createProductionGateway, buildReadiness } = require("./integrated-production");
 const { createSparkServer } = require("../spark/server");
 
 async function createPublicRuntime(options = {}) {
@@ -23,7 +23,11 @@ async function createPublicRuntime(options = {}) {
   const cyvx = await createProductionGateway({
     port: cyvxGatewayPort,
     internalPort: cyvxApiPort,
+    legacyGatewayPort: options.cyvxLegacyGatewayPort || process.env.CYVX_LEGACY_GATEWAY_INTERNAL_PORT,
     host: "127.0.0.1",
+    telemetry: options.telemetry,
+    env: options.env,
+    fetch: options.fetch,
   });
 
   const sparkInternalKey = String(options.sparkInternalKey || process.env.SPARK_INTERNAL_API_KEY || crypto.randomBytes(32).toString("base64url"));
@@ -46,6 +50,7 @@ async function createPublicRuntime(options = {}) {
     setPublicHeaders(res);
 
     try {
+      cyvx.integrations.edge.require(req, url);
       if (req.method === "GET" && (url.pathname === "/healthz" || url.pathname === "/health")) {
         return sendJson(res, 200, publicHealth(cyvx, spark.runtime));
       }
@@ -111,7 +116,12 @@ async function createPublicRuntime(options = {}) {
   });
 
   publicServer.on("upgrade", (req, socket, head) => {
-    proxyUpgrade(req, socket, head, cyvxGatewayPort, req.url);
+    try {
+      cyvx.integrations.edge.require(req, new URL(req.url, "http://cyvx.public"));
+      proxyUpgrade(req, socket, head, cyvxGatewayPort, req.url);
+    } catch {
+      socket.destroy();
+    }
   });
 
   return {
@@ -119,7 +129,8 @@ async function createPublicRuntime(options = {}) {
     cyvx,
     spark,
     sparkInternalKey,
-    ports: { publicPort, cyvxGatewayPort, cyvxApiPort, sparkPort },
+    integrations: cyvx.integrations,
+    ports: { publicPort, cyvxGatewayPort, cyvxApiPort, sparkPort, legacyGatewayPort: cyvx.legacyGatewayPort },
     host,
     async listen() {
       await cyvx.listen();
@@ -190,6 +201,7 @@ function publicHealth(cyvx, sparkRuntime) {
   }
 
   const github = buildReadiness(cyvx);
+  const integrations = cyvx.integrations ? cyvx.integrations.snapshot() : { ready: true, required: false, checks: [] };
   let cyvxHealthy = true;
   try {
     const status = typeof cyvx.controller.status === "function" ? cyvx.controller.status() : { status: "ok" };
@@ -198,17 +210,19 @@ function publicHealth(cyvx, sparkRuntime) {
     cyvxHealthy = false;
   }
   const sparkHealthy = sparkHealth.status === "ok";
+  const integrationsHealthy = !integrations.required || integrations.ready;
 
   return {
-    ok: cyvxHealthy && sparkHealthy,
-    ready: cyvxHealthy && sparkHealthy,
-    status: cyvxHealthy && sparkHealthy ? "ok" : "degraded",
+    ok: cyvxHealthy && sparkHealthy && integrationsHealthy,
+    ready: cyvxHealthy && sparkHealthy && integrationsHealthy,
+    status: cyvxHealthy && sparkHealthy && integrationsHealthy ? "ok" : "degraded",
     service: "Spark + CYVX",
-    version: "6.1.0-public",
+    version: "8.0.0-integration-baseline",
     services: {
       spark: sparkHealth,
       cyvx: { status: cyvxHealthy ? "ok" : "degraded" },
       github: { configured: github.ready },
+      integrations: { configured: integrations.ready, required: integrations.required, failed: integrations.checks.filter((item) => item.required && !item.ok).map((item) => item.key) },
     },
     timestamp: new Date().toISOString(),
   };
@@ -217,10 +231,11 @@ function publicHealth(cyvx, sparkRuntime) {
 function publicStatus(cyvx, sparkRuntime) {
   const snapshot = sparkRuntime.snapshot();
   const github = buildReadiness(cyvx);
+  const integrations = cyvx.integrations ? cyvx.integrations.snapshot() : { ready: true, required: false, providers: {} };
   return {
     ok: true,
     powered_by: "Spark + CYVX",
-    version: "6.1.0-public",
+    version: "8.0.0-integration-baseline",
     metrics: snapshot.metrics,
     capabilities: snapshot.capabilities.map((capability) => ({
       key: capability.key,
@@ -233,6 +248,16 @@ function publicStatus(cyvx, sparkRuntime) {
       webhook_ready: github.webhook_ready,
       app_auth_ready: github.app_auth_ready,
       oauth_ready: github.oauth_ready,
+    },
+    integrations: {
+      ready: integrations.ready,
+      required: integrations.required,
+      identity: Boolean(integrations.providers.identity && integrations.providers.identity.configured),
+      edge: Boolean(integrations.providers.edge && integrations.providers.edge.configured),
+      queue: Boolean(integrations.providers.queue && integrations.providers.queue.configured),
+      feature_flags: Boolean(integrations.providers.feature_flags && integrations.providers.feature_flags.configured),
+      ai_observability: Boolean(integrations.providers.ai_observability && integrations.providers.ai_observability.configured),
+      error_tracking: Boolean(integrations.providers.error_tracking && integrations.providers.error_tracking.configured),
     },
     links: {
       spark: "/",
@@ -258,40 +283,43 @@ function publicWorld(world) {
   };
 }
 
-function proxyHttp(req, res, port, requestPath, extraHeaders = {}) {
-  const headers = Object.assign({}, req.headers, {
-    host: `127.0.0.1:${port}`,
-    "x-forwarded-proto": String(req.headers["x-forwarded-proto"] || (req.socket.encrypted ? "https" : "http")),
-    "x-forwarded-host": String(req.headers["x-forwarded-host"] || req.headers.host || ""),
-  }, extraHeaders);
+function setPublicHeaders(res) {
+  res.setHeader("x-content-type-options", "nosniff");
+  res.setHeader("x-frame-options", "SAMEORIGIN");
+  res.setHeader("referrer-policy", "strict-origin-when-cross-origin");
+  res.setHeader("permissions-policy", "camera=(), microphone=(), geolocation=()");
+}
 
+function sendJson(res, status, payload) {
+  const body = Buffer.from(`${JSON.stringify(payload)}\n`);
+  res.statusCode = status;
+  res.setHeader("content-type", "application/json; charset=utf-8");
+  res.setHeader("content-length", body.length);
+  res.end(body);
+}
+
+function proxyHttp(req, res, port, targetPath, headers = {}) {
   const upstream = http.request({
     host: "127.0.0.1",
     port,
     method: req.method,
-    path: requestPath || req.url,
-    headers,
+    path: targetPath,
+    headers: { ...req.headers, ...headers, host: `127.0.0.1:${port}` },
   }, (upstreamRes) => {
-    const responseHeaders = Object.assign({}, upstreamRes.headers, { "x-cyvx-edge": "public-gateway" });
-    res.writeHead(upstreamRes.statusCode || 502, responseHeaders);
+    res.writeHead(upstreamRes.statusCode || 502, upstreamRes.headers);
     upstreamRes.pipe(res);
   });
-
   upstream.on("error", (error) => {
-    if (!res.headersSent) {
-      sendJson(res, 502, { ok: false, error: "UPSTREAM_UNAVAILABLE", message: error.message });
-    } else {
-      res.destroy(error);
-    }
+    if (!res.headersSent) sendJson(res, 502, { ok: false, error: "UPSTREAM_UNAVAILABLE", message: error.message });
+    else res.destroy(error);
   });
-
   req.pipe(upstream);
 }
 
-function proxyUpgrade(req, clientSocket, head, port, requestPath) {
+function proxyUpgrade(req, clientSocket, head, port, targetPath) {
   const upstream = net.connect(port, "127.0.0.1", () => {
-    const headers = Object.entries(req.headers).map(([key, value]) => `${key}: ${value}`).join("\r\n");
-    upstream.write(`${req.method} ${requestPath || req.url} HTTP/${req.httpVersion}\r\n${headers}\r\n\r\n`);
+    const headers = Object.entries({ ...req.headers, host: `127.0.0.1:${port}` }).map(([key, value]) => `${key}: ${value}`).join("\r\n");
+    upstream.write(`${req.method} ${targetPath} HTTP/${req.httpVersion}\r\n${headers}\r\n\r\n`);
     if (head && head.length) upstream.write(head);
     clientSocket.pipe(upstream).pipe(clientSocket);
   });
@@ -299,53 +327,10 @@ function proxyUpgrade(req, clientSocket, head, port, requestPath) {
   clientSocket.on("error", () => upstream.destroy());
 }
 
-function setPublicHeaders(res) {
-  res.setHeader("x-content-type-options", "nosniff");
-  res.setHeader("referrer-policy", "strict-origin-when-cross-origin");
-  res.setHeader("permissions-policy", "camera=(), microphone=(), geolocation=()");
-  res.setHeader("cross-origin-opener-policy", "same-origin");
-}
-
-function sendJson(res, status, payload) {
-  const body = Buffer.from(`${JSON.stringify(payload)}\n`);
-  res.statusCode = status;
-  res.setHeader("content-type", "application/json; charset=utf-8");
-  res.setHeader("cache-control", "no-store");
-  res.setHeader("content-length", body.length);
-  res.end(body);
-}
-
-function safeEqual(left, right) {
-  const a = Buffer.from(String(left || ""));
-  const b = Buffer.from(String(right || ""));
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
-}
-
-function positivePort(value, label) {
-  const number = Number(value);
-  if (!Number.isInteger(number) || number < 1 || number > 65535) {
-    throw new Error(`${label} must be an integer between 1 and 65535`);
-  }
-  return number;
-}
-
-function assertDistinctPorts(ports) {
-  const values = Object.values(ports);
-  if (new Set(values).size !== values.length) {
-    throw new Error(`public runtime ports must be distinct: ${JSON.stringify(ports)}`);
-  }
-}
-
 function listen(server, port, host) {
   return new Promise((resolve, reject) => {
-    const onError = (error) => {
-      server.off("listening", onListening);
-      reject(error);
-    };
-    const onListening = () => {
-      server.off("error", onError);
-      resolve();
-    };
+    const onError = (error) => { server.off("listening", onListening); reject(error); };
+    const onListening = () => { server.off("error", onError); resolve(); };
     server.once("error", onError);
     server.once("listening", onListening);
     server.listen(port, host);
@@ -354,44 +339,40 @@ function listen(server, port, host) {
 
 function closeServer(server) {
   if (!server || !server.listening) return Promise.resolve();
-  return new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  return new Promise((resolve) => server.close(resolve));
 }
 
-async function main() {
-  const runtime = await createPublicRuntime();
-  await runtime.listen();
-  console.log(JSON.stringify({
-    event: "cyvx.public.started",
-    host: runtime.host,
-    ports: runtime.ports,
-    public_url: process.env.APP_BASE_URL || `http://${runtime.host}:${runtime.ports.publicPort}`,
-    routes: { spark: "/", cyvx_os: "/os", health: "/healthz" },
-  }));
+function positivePort(value, label) {
+  const port = Number(value);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error(`${label} must be a valid TCP port`);
+  return port;
+}
 
-  let closing = false;
-  const shutdown = async (signal) => {
-    if (closing) return;
-    closing = true;
-    console.log(JSON.stringify({ event: "cyvx.public.shutdown", signal }));
-    await runtime.close();
-    process.exit(0);
-  };
-  process.once("SIGINT", () => shutdown("SIGINT"));
-  process.once("SIGTERM", () => shutdown("SIGTERM"));
+function assertDistinctPorts(values) {
+  const entries = Object.entries(values);
+  if (new Set(entries.map(([, value]) => value)).size !== entries.length) throw new Error("Public, CYVX, and Spark ports must be distinct");
+}
+
+function safeEqual(left, right) {
+  const a = Buffer.from(String(left || ""));
+  const b = Buffer.from(String(right || ""));
+  return a.length === b.length && a.length > 0 && crypto.timingSafeEqual(a, b);
 }
 
 if (require.main === module) {
-  main().catch((error) => {
-    console.error(JSON.stringify({ event: "cyvx.public.failed", error: error.message, stack: error.stack }));
+  createPublicRuntime().then((runtime) => runtime.listen()).then((runtime) => {
+    process.stdout.write(`${JSON.stringify({ event: "cyvx.public.ready", ports: runtime.ports, powered_by: "Spark + CYVX" })}\n`);
+  }).catch((error) => {
+    process.stderr.write(`${JSON.stringify({ event: "cyvx.public.failed", error: error.message })}\n`);
     process.exit(1);
   });
 }
 
 module.exports = {
+  assertDistinctPorts,
   canonicalSparkApiPath,
   createPublicRuntime,
   isAllowedPublicSparkApi,
-  isSparkStaticRoute,
   publicHealth,
   publicStatus,
   rewriteOsPath,

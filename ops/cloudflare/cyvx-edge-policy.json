@@ -1,0 +1,93 @@
+{
+  "version": "1.0.0",
+  "description": "CYVXAI OS edge security baseline",
+  "phases": {
+    "http_request_firewall_custom": [
+      {
+        "ref": "cyvx-block-trace-method",
+        "description": "Block TRACE requests",
+        "expression": "http.request.method eq \"TRACE\"",
+        "action": "block",
+        "enabled": true
+      },
+      {
+        "ref": "cyvx-challenge-sensitive-scanners",
+        "description": "Challenge common secret and administration scanners",
+        "expression": "http.request.uri.path matches \"(?i)^/(\\.env|\\.git|wp-admin|phpmyadmin|server-status|actuator|debug)\"",
+        "action": "managed_challenge",
+        "enabled": true
+      }
+    ],
+    "http_ratelimit": [
+      {
+        "ref": "cyvx-rate-operator-session",
+        "description": "Limit operator-session authentication attempts",
+        "expression": "http.request.uri.path eq \"/api/session/operator\" and http.request.method eq \"POST\"",
+        "action": "block",
+        "enabled": true,
+        "ratelimit": {
+          "characteristics": ["cf.colo.id", "ip.src"],
+          "period": 60,
+          "requests_per_period": 5,
+          "mitigation_timeout": 600
+        }
+      },
+      {
+        "ref": "cyvx-rate-api-writes",
+        "description": "Bound mutating API traffic by source",
+        "expression": "starts_with(http.request.uri.path, \"/api/\") and http.request.method in {\"POST\" \"PUT\" \"PATCH\" \"DELETE\"}",
+        "action": "block",
+        "enabled": true,
+        "ratelimit": {
+          "characteristics": ["cf.colo.id", "ip.src"],
+          "period": 60,
+          "requests_per_period": 60,
+          "mitigation_timeout": 60
+        }
+      },
+      {
+        "ref": "cyvx-rate-public-leads",
+        "description": "Limit public lead capture abuse",
+        "expression": "http.request.uri.path matches \"^/api/v1/worlds/[^/]+/leads$\" and http.request.method eq \"POST\"",
+        "action": "managed_challenge",
+        "enabled": true,
+        "ratelimit": {
+          "characteristics": ["cf.colo.id", "ip.src"],
+          "period": 60,
+          "requests_per_period": 10,
+          "mitigation_timeout": 600
+        }
+      },
+      {
+        "ref": "cyvx-rate-stripe-webhook",
+        "description": "Bound Stripe webhook traffic while preserving retries",
+        "expression": "http.request.uri.path eq \"/api/webhooks/stripe\" and http.request.method eq \"POST\"",
+        "action": "block",
+        "enabled": true,
+        "ratelimit": {
+          "characteristics": ["cf.colo.id", "ip.src"],
+          "period": 60,
+          "requests_per_period": 120,
+          "mitigation_timeout": 60
+        }
+      }
+    ],
+    "http_request_late_transform": [
+      {
+        "ref": "cyvx-inject-origin-secret",
+        "description": "Replace any client-supplied origin secret with the trusted edge value",
+        "expression": "true",
+        "action": "rewrite",
+        "enabled": true,
+        "action_parameters": {
+          "headers": {
+            "x-cyvx-edge-secret": {
+              "operation": "set",
+              "value": "__CYVX_EDGE_ORIGIN_SECRET__"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -8,6 +8,10 @@ const { spawnSync } = require("node:child_process");
 const ROOT = path.join(__dirname, "..");
 const NODE_FILES = [
   "api/runtime-v7.js",
+  "api/public.js",
+  "api/secure-production.js",
+  "api/integrated-production.js",
+  "api/integration_routes.js",
   "core/production/autonomy_supervisor.js",
   "core/ops/readiness.js",
   "core/ops/next_actions.js",
@@ -15,6 +19,23 @@ const NODE_FILES = [
   "core/ops/overview.js",
   "core/ops/metrics.js",
   "core/ops/http_server.js",
+  "core/security/production_guard.js",
+  "core/security/identity_gateway.js",
+  "core/security/authorization_policy.js",
+  "core/security/edge_guard.js",
+  "core/security/workload_identity.js",
+  "core/integrations/integration_hub.js",
+  "core/integrations/supabase_data_client.js",
+  "core/integrations/supabase_queue.js",
+  "core/integrations/feature_flags.js",
+  "core/integrations/stripe_billing.js",
+  "core/integrations/transactional_email.js",
+  "core/integrations/posthog_client.js",
+  "core/integrations/sentry_transport.js",
+  "core/observability/ai_trace.js",
+  "scripts/verify-integrations-v8.js",
+  "scripts/provision-cloudflare-v8.js",
+  "scripts/oidc-smoke-v8.js",
 ];
 const BROWSER_FILES = [
   "spark/ui/app.js",
@@ -27,7 +48,7 @@ const BROWSER_FILES = [
 
 for (const file of NODE_FILES) check(file, path.join(ROOT, file));
 
-const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "cyvx-v7-"));
+const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "cyvx-v8-"));
 try {
   for (const file of BROWSER_FILES) {
     const moduleFile = path.join(temporary, `${path.basename(file, ".js")}.mjs`);
@@ -38,7 +59,7 @@ try {
   fs.rmSync(temporary, { recursive: true, force: true });
 }
 
-console.log("CYVX v7 source validation passed");
+console.log("CYVX v8 source validation passed");
 
 function check(label, file) {
   const result = spawnSync(process.execPath, ["--check", file], { cwd: ROOT, encoding: "utf8" });

@@ -36,12 +36,19 @@ function shellQuote(value) {
   return /^[A-Za-z0-9_./:@%+=,-]+$/.test(text) ? text : `'${text.replace(/'/g, `'\\''`)}'`;
 }
 
+function tapMetric(output, name) {
+  const expression = new RegExp(`^(?:#\\s*|ℹ\\s*)${name}\\s+(\\d+)\\s*$`, "gm");
+  return [...output.matchAll(expression)].reduce((sum, match) => sum + Number(match[1]), 0);
+}
+
 function parseTap(output) {
-  const total = [...output.matchAll(/^# tests (\d+)$/gm)].reduce((sum, match) => sum + Number(match[1]), 0);
-  const passed = [...output.matchAll(/^# pass (\d+)$/gm)].reduce((sum, match) => sum + Number(match[1]), 0);
-  const failed = [...output.matchAll(/^# fail (\d+)$/gm)].reduce((sum, match) => sum + Number(match[1]), 0);
-  const skipped = [...output.matchAll(/^# skipped (\d+)$/gm)].reduce((sum, match) => sum + Number(match[1]), 0);
-  const skipReasons = [...output.matchAll(/^ok \d+ - (.+?) # SKIP(?: (.*))?$/gm)].map((match) => ({ test: match[1], reason: match[2] || "No reason supplied" }));
+  const passed = tapMetric(output, "pass");
+  const failed = tapMetric(output, "fail");
+  const skipped = tapMetric(output, "skipped");
+  const reportedTotal = tapMetric(output, "tests");
+  const total = reportedTotal || passed + failed + skipped;
+  const skipReasons = [...output.matchAll(/^(?:ok \d+ - |[﹣-]\s+)(.+?)(?:\s+\([^)]*\))?\s+# SKIP(?:\s+(.*))?$/gm)]
+    .map((match) => ({ test: match[1], reason: match[2] || "No reason supplied" }));
   return { total, passed, failed, skipped, skip_reasons: skipReasons };
 }
 

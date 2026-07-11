@@ -8,7 +8,7 @@ services:
     autoDeployTrigger: checksPass
     buildCommand: npm ci --no-audit --no-fund && NODE_ENV=test CYVX_ENV=build CYVX_ALLOW_INSECURE_LOCAL=true CYVX_DATA_ROOT=/tmp/cyvx-build npm run verify:production-baseline
     startCommand: npm start
-    healthCheckPath: /readyz
+    healthCheckPath: /healthz
     maxShutdownDelaySeconds: 60
     previews:
       generation: manual
@@ -27,8 +27,24 @@ services:
         value: /var/lib/cyvx/logs/cyvx-runtime.jsonl
       - key: CYVX_ALLOW_INSECURE_LOCAL
         value: "false"
+      - key: CYVX_REQUIRE_INTEGRATIONS
+        value: "true"
       - key: CYVX_REQUIRE_MANAGED_DATA
         value: "true"
+      - key: CYVX_REQUIRE_MFA_FOR_PRIVILEGED
+        value: "true"
+      - key: CYVX_QUEUE_WORKER
+        value: "true"
+      - key: CYVX_FEATURE_FLAG_ENVIRONMENT
+        value: staging
+      - key: CYVX_EMAIL_ENABLED
+        value: "true"
+      - key: CYVX_EMAIL_PROVIDER
+        value: resend
+      - key: CYVX_PRODUCT_ANALYTICS_ENABLED
+        value: "false"
+      - key: CYVX_BILLING_ENABLED
+        value: "false"
       - key: CYVX_BACKUP_ENABLED
         value: "true"
       - key: CYVX_BACKUP_UPLOAD
@@ -51,6 +67,16 @@ services:
         sync: false
       - key: CYVX_POSTGREST_SERVICE_KEY
         sync: false
+      - key: CYVX_OIDC_ISSUER
+        sync: false
+      - key: CYVX_OIDC_AUDIENCE
+        value: authenticated
+      - key: CYVX_OIDC_JWKS_URL
+        sync: false
+      - key: CYVX_SERVICE_TENANT_ID
+        sync: false
+      - key: CYVX_EDGE_ORIGIN_SECRET
+        sync: false
       - key: CYVX_BACKUP_STORAGE_URL
         sync: false
       - key: CYVX_BACKUP_STORAGE_TOKEN
@@ -65,6 +91,18 @@ services:
         sync: false
       - key: CYVX_ERROR_WEBHOOK_URL
         sync: false
+      - key: LANGFUSE_OTLP_ENDPOINT
+        sync: false
+      - key: LANGFUSE_OTLP_HEADERS
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: CYVX_EMAIL_FROM
+        sync: false
+      - key: CYVX_EMAIL_REPLY_TO
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
 
   - type: web
     name: cyvx-production
@@ -75,7 +113,7 @@ services:
     autoDeployTrigger: off
     buildCommand: npm ci --no-audit --no-fund && NODE_ENV=test CYVX_ENV=build CYVX_ALLOW_INSECURE_LOCAL=true CYVX_DATA_ROOT=/tmp/cyvx-build npm run verify:production-baseline
     startCommand: npm start
-    healthCheckPath: /readyz
+    healthCheckPath: /healthz
     maxShutdownDelaySeconds: 60
     disk:
       name: cyvx-production-data
@@ -92,7 +130,27 @@ services:
         value: /var/lib/cyvx/logs/cyvx-runtime.jsonl
       - key: CYVX_ALLOW_INSECURE_LOCAL
         value: "false"
+      - key: CYVX_REQUIRE_INTEGRATIONS
+        value: "true"
       - key: CYVX_REQUIRE_MANAGED_DATA
+        value: "true"
+      - key: CYVX_REQUIRE_MFA_FOR_PRIVILEGED
+        value: "true"
+      - key: CYVX_QUEUE_WORKER
+        value: "true"
+      - key: CYVX_FEATURE_FLAG_ENVIRONMENT
+        value: production
+      - key: CYVX_EMAIL_ENABLED
+        value: "true"
+      - key: CYVX_EMAIL_PROVIDER
+        value: resend
+      - key: CYVX_REQUIRE_PRODUCT_ANALYTICS
+        value: "true"
+      - key: CYVX_PRODUCT_ANALYTICS_ENABLED
+        value: "true"
+      - key: CYVX_REQUIRE_BILLING
+        value: "true"
+      - key: CYVX_BILLING_ENABLED
         value: "true"
       - key: CYVX_BACKUP_ENABLED
         value: "true"
@@ -116,6 +174,16 @@ services:
         sync: false
       - key: CYVX_POSTGREST_SERVICE_KEY
         sync: false
+      - key: CYVX_OIDC_ISSUER
+        sync: false
+      - key: CYVX_OIDC_AUDIENCE
+        value: authenticated
+      - key: CYVX_OIDC_JWKS_URL
+        sync: false
+      - key: CYVX_SERVICE_TENANT_ID
+        sync: false
+      - key: CYVX_EDGE_ORIGIN_SECRET
+        sync: false
       - key: CYVX_BACKUP_STORAGE_URL
         sync: false
       - key: CYVX_BACKUP_STORAGE_TOKEN
@@ -129,6 +197,30 @@ services:
       - key: OTEL_EXPORTER_OTLP_HEADERS
         sync: false
       - key: CYVX_ERROR_WEBHOOK_URL
+        sync: false
+      - key: LANGFUSE_OTLP_ENDPOINT
+        sync: false
+      - key: LANGFUSE_OTLP_HEADERS
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: POSTHOG_HOST
+        value: https://us.i.posthog.com
+      - key: POSTHOG_API_KEY
+        sync: false
+      - key: CYVX_ANALYTICS_SALT
+        sync: false
+      - key: CYVX_STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: CYVX_STRIPE_PRICE_PLANS
+        sync: false
+      - key: CYVX_EMAIL_FROM
+        sync: false
+      - key: CYVX_EMAIL_REPLY_TO
+        sync: false
+      - key: RESEND_API_KEY
         sync: false
 
   - type: web

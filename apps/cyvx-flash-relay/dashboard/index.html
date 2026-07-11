@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CYVX Flash Relay</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:#0b0d12;color:#f3f5f7}
+    main{width:min(1180px,94%);margin:30px auto 60px}h1{margin-bottom:4px}.subtitle{opacity:.7;margin-top:0}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:22px 0}
+    .card,.panel{background:#141821;border:1px solid #292f3c;border-radius:12px;padding:16px}
+    .label{opacity:.65;font-size:12px;text-transform:uppercase}.value{margin-top:8px;overflow-wrap:anywhere;font-weight:700}
+    .safe{color:#73e6a2}.danger{color:#ff7b7b}.muted{opacity:.65}table{width:100%;border-collapse:collapse}
+    td,th{text-align:left;padding:10px 6px;border-bottom:1px solid #292f3c;vertical-align:top}th{opacity:.7}
+    code{overflow-wrap:anywhere}.panels{display:grid;gap:16px}.scroll{overflow:auto}
+  </style>
+</head>
+<body>
+<main>
+  <h1>CYVX Flash Relay</h1>
+  <p class="subtitle">Pinned-block quotes and local mainnet-fork execution</p>
+  <section id="status" class="grid"></section>
+  <section class="panels">
+    <article class="panel"><h2>Best Exact Quote</h2><div id="bestQuote" class="grid"></div></article>
+    <article class="panel scroll"><h2>Route Candidates</h2><table><thead><tr><th>Direction</th><th>Fee</th><th>Input</th><th>Output</th><th>Premium</th><th>Gas</th><th>Net</th></tr></thead><tbody id="quotes"></tbody></table></article>
+    <article class="panel"><h2>Latest Fork Simulation</h2><div id="fork" class="grid"></div></article>
+    <article class="panel scroll"><h2>Validation Events</h2><table><thead><tr><th>Time</th><th>Event</th><th>Status</th><th>Detail</th></tr></thead><tbody id="events"></tbody></table></article>
+  </section>
+</main>
+<script>
+const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+const card=(l,v,c="")=>`<article class="card"><div class="label">${esc(l)}</div><div class="value ${c}">${esc(v)}</div></article>`;
+const fmt=(n,d=6)=>{if(n===undefined||n===null)return"—";const x=BigInt(n),sign=x<0n?"-":"",a=x<0n?-x:x,base=10n**BigInt(d),whole=a/base,frac=a%base;return `${sign}${whole}.${frac.toString().padStart(d,"0").replace(/0+$/," ").trim()||"0"}`};
+async function refresh(){
+  const [s,q,f,e]=await Promise.all([fetch('/api/status',{cache:'no-store'}),fetch('/api/quotes',{cache:'no-store'}),fetch('/api/fork',{cache:'no-store'}),fetch('/api/events',{cache:'no-store'})]);
+  const status=await s.json(),quotes=await q.json(),fork=await f.json(),events=await e.json();
+  document.querySelector('#status').innerHTML=[
+    card('Mode',status.mode,status.liveEnabled?'danger':'safe'),
+    card('Live execution',status.liveEnabled?'ENABLED':'DISABLED',status.liveEnabled?'danger':'safe'),
+    card('Chain ID',status.chainId),card('Pinned block',quotes.blockNumber??'Not scanned'),
+    card('Aave pool',status.aavePool),card('RPC gateway',status.localRpc),card('RPC configured',status.rpcConfigured?'Yes':'No')
+  ].join('');
+  const b=quotes.bestCandidate,bf=quotes.bestCandidateFormatted||{};
+  document.querySelector('#bestQuote').innerHTML=b?[
+    card('Direction',b.direction),card('Fee tier',b.feeTier),card('Input',`${bf.amountInUSDC} USDC`),
+    card('Output',`${bf.secondQuotedOutUSDC} USDC`),card('Aave premium',`${bf.aavePremiumUSDC} USDC`),
+    card('Gas assumption',`${bf.gasCostUSDC} USDC`),card('Expected net',`${bf.expectedNetUSDC} USDC`,b.profitable?'safe':'danger')
+  ].join(''):card('Status','No quote scan yet','muted');
+  document.querySelector('#quotes').innerHTML=(quotes.candidates||[]).slice(0,30).map(x=>`<tr><td>${esc(x.direction)}</td><td>${esc(x.feeTier)}</td><td>${fmt(x.amountInUSDC)} USDC</td><td>${fmt(x.secondQuotedOutUSDC)} USDC</td><td>${fmt(x.aavePremiumUSDC)} USDC</td><td>${fmt(x.gasCostUSDC)} USDC</td><td class="${x.profitable?'safe':'danger'}">${fmt(x.expectedNetUSDC)} USDC</td></tr>`).join('');
+  document.querySelector('#fork').innerHTML=fork.contract?[
+    card('Mode',fork.mode),card('Public broadcast',fork.liveBroadcast?'YES':'NO',fork.liveBroadcast?'danger':'safe'),
+    card('Contract',fork.contract),card('USDC profit balance',fmt(fork.profitBalanceUSDC)),card('Gas used',fork.gasUsed??'—'),card('Local tx',fork.transactionHash??'—')
+  ].join(''):card('Status','No profitable route has been executed on the fork','muted');
+  document.querySelector('#events').innerHTML=events.map(x=>`<tr><td>${esc(x.timestamp)}</td><td>${esc(x.event)}</td><td>${esc(x.status)}</td><td><code>${esc(x.detail)}</code></td></tr>`).join('');
+}
+refresh();setInterval(refresh,4000);
+</script>
+</body>
+</html>

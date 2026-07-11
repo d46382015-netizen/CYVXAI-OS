@@ -1,0 +1,137 @@
+{
+  "generated_at": "2026-07-11T09:01:20Z",
+  "verified_by": "GitHub Actions CI run 29147022172",
+  "git_commit": "8e6efc8572e3c9933cc43180b5c7b5e8b824987b",
+  "git_branch": "runtime/critical-completion",
+  "application_version": "8.1.0-runtime",
+  "schema_version": 2,
+  "production_gate": "VERIFIED",
+  "commands_executed": [
+    {
+      "name": "runtime_doctor",
+      "command": "bash scripts/doctor.sh",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "shell_syntax",
+      "command": "bash -n run.sh scripts/doctor.sh scripts/backup.sh scripts/restore.sh scripts/evidence-verify.sh scripts/test-integration.sh",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "unit_and_regression_tests",
+      "command": "npm test",
+      "status": "passed",
+      "exit_code": 0,
+      "tests": {
+        "total": 115,
+        "passed": 115,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "name": "real_http_integration",
+      "command": "bash scripts/test-integration.sh",
+      "status": "passed",
+      "exit_code": 0,
+      "tests": {
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "name": "restart_recovery",
+      "command": "node --test test/mission-recovery.test.js",
+      "status": "passed",
+      "exit_code": 0,
+      "tests": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "name": "backup_restore",
+      "command": "node --test test/mission-backup-restore.test.js",
+      "status": "passed",
+      "exit_code": 0,
+      "tests": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      }
+    }
+  ],
+  "tests": {
+    "total": 124,
+    "passed": 124,
+    "failed": 0,
+    "skipped": 0,
+    "skipped_with_reasons": []
+  },
+  "runtime_health": {
+    "status": "VERIFIED",
+    "evidence": "Real public gateway and mission HTTP servers, SQLite readiness, separate worker heartbeat, and run.sh supervisor smoke test passed."
+  },
+  "worker_health": {
+    "status": "VERIFIED",
+    "evidence": "Durable enqueue, atomic claim, lease, heartbeat, retry, failed-job inspection, safe requeue, completion, graceful shutdown, and replacement-worker recovery passed."
+  },
+  "evidence_verification_result": {
+    "status": "VERIFIED",
+    "evidence": "Artifact, record, previous-link, current-chain, ownership, ordering, missing-link, duplicate-sequence, and modified-record corruption tests passed."
+  },
+  "recovery_result": {
+    "status": "VERIFIED",
+    "evidence": "Worker interruption after claim, lease expiration, new-worker recovery, one execution effect, one evidence record, one outcome, and one learning record passed."
+  },
+  "backup_restore_result": {
+    "status": "VERIFIED",
+    "evidence": "Checksummed database and artifact backup, manifest verification, clean restore, HTTP retrieval, evidence verification, and post-restore mission execution passed."
+  },
+  "tenant_isolation_result": {
+    "status": "VERIFIED",
+    "evidence": "Two-organization read, mutate, approve, execute, cancel, verify, export, job, evidence, outcome, event, and audit denial matrix passed."
+  },
+  "ui_result": {
+    "status": "VERIFIED",
+    "evidence": "Server-served mobile operator UI uses live endpoints and includes loading, empty, permission, API error, worker-offline, retry, refresh, navigation, and confirmation states."
+  },
+  "production_controls_result": {
+    "status": "VERIFIED",
+    "evidence": "Request limits, rate limits, token expiration, CORS, security headers, secret redaction, log rotation, safe artifact paths, production configuration validation, protected restore, WAL, busy timeout, and worker-aware readiness passed."
+  },
+  "compatibility": {
+    "legacy_api": "VERIFIED",
+    "standalone_spark": "VERIFIED"
+  },
+  "known_limitations": [
+    {
+      "capability": "Complex mission branching",
+      "status": "PARTIAL"
+    },
+    {
+      "capability": "Scheduled mission execution",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "capability": "External model provider execution in the mission worker",
+      "status": "PARTIAL"
+    },
+    {
+      "capability": "Internationalization",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "capability": "Advanced capability version migration",
+      "status": "NOT_IMPLEMENTED"
+    }
+  ],
+  "failing_commands": []
+}

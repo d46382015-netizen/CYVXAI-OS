@@ -85,7 +85,7 @@ function normalizeLegacySchema(sql) {
       continue;
     }
     if (/^\s*\);\s*$/.test(source) && lines.length) {
-      lines[lines.length - 1] = lines[lines.length - 1].replace(/,\s*$/, "");
+      lines[lines.length - 1] = lines[lines.length - 1].replace(/,(\s*--.*)?$/, "$1");
       table = null;
     }
     lines.push(source);

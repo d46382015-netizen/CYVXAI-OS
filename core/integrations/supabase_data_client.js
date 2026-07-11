@@ -47,37 +47,41 @@ class SupabaseDataClient {
   }
 
   async select(table, query = "", options = {}) {
-    const response = await this.request(`${encodeURIComponent(table)}${query ? `?${query}` : ""}`, { method: "GET", ...options });
+    const response = await this.request(`${encodeURIComponent(table)}${query ? `?${query}` : ""}`, { ...options, method: "GET" });
     return response.json();
   }
 
   async insert(table, rows, options = {}) {
+    const { returnRepresentation = true, headers = {}, ...requestOptions } = options;
     const response = await this.request(encodeURIComponent(table), {
+      ...requestOptions,
       method: "POST",
       body: JSON.stringify(rows),
-      headers: { Prefer: options.returnRepresentation === false ? "return=minimal" : "return=representation", ...(options.headers || {}) },
-      ...options,
+      headers: { Prefer: returnRepresentation === false ? "return=minimal" : "return=representation", ...headers },
     });
-    return options.returnRepresentation === false ? null : response.json();
+    return returnRepresentation === false ? null : response.json();
   }
 
   async upsert(table, rows, options = {}) {
-    const query = options.onConflict ? `?on_conflict=${encodeURIComponent(options.onConflict)}` : "";
+    const { onConflict, returnRepresentation = true, headers = {}, ...requestOptions } = options;
+    const query = onConflict ? `?on_conflict=${encodeURIComponent(onConflict)}` : "";
     const response = await this.request(`${encodeURIComponent(table)}${query}`, {
+      ...requestOptions,
       method: "POST",
       body: JSON.stringify(rows),
-      headers: { Prefer: `resolution=merge-duplicates,${options.returnRepresentation === false ? "return=minimal" : "return=representation"}`, ...(options.headers || {}) },
-      ...options,
+      headers: { Prefer: `resolution=merge-duplicates,${returnRepresentation === false ? "return=minimal" : "return=representation"}`, ...headers },
     });
-    return options.returnRepresentation === false ? null : response.json();
+    return returnRepresentation === false ? null : response.json();
   }
 
   async rpc(name, args = {}, options = {}) {
+    const { headers = {}, schema = this.schema, ...requestOptions } = options;
     const response = await this.request(`rpc/${encodeURIComponent(name)}`, {
+      ...requestOptions,
       method: "POST",
       body: JSON.stringify(args),
-      schema: options.schema || this.schema,
-      headers: options.headers,
+      schema,
+      headers,
     });
     if (response.status === 204) return null;
     const text = await response.text();

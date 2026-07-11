@@ -15,13 +15,14 @@ concurrency:
 
 jobs:
   production-baseline:
-    name: Production baseline and compatibility regression
+    name: Authoritative runtime gate and compatibility regression
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     env:
       NODE_ENV: test
       CYVX_ENV: test
       CYVX_ALLOW_INSECURE_LOCAL: "true"
+      CYVX_AUTH_SECRET: "ci-runtime-secret-longer-than-thirty-two-characters"
       CYVX_DATA_ROOT: /tmp/cyvx-ci
       SPARK_ARTIFACT_ROOT: /tmp/cyvx-ci/worlds
       SPARK_STATE_FILE: /tmp/cyvx-ci/spark-state.json
@@ -40,11 +41,11 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Execute production baseline gate
+      - name: Execute authoritative production gate
         shell: bash
         run: |
           set -Eeuo pipefail
-          npm run verify:production-baseline 2>&1 | tee /tmp/cyvx-production-baseline.log
+          bash scripts/verify.sh 2>&1 | tee /tmp/cyvx-production-verification.log
 
       - name: Verify legacy API compatibility
         shell: bash
@@ -101,13 +102,16 @@ jobs:
             -d '{"name":"CI Lead","email":"ci@example.com"}' >/dev/null
           curl -fsS "$BASE/metrics" | grep 'spark_leads_total 1'
 
-      - name: Upload diagnostic logs
+      - name: Upload verification and diagnostic artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cyvx-ci-diagnostics
+          name: cyvx-ci-verification
           path: |
-            /tmp/cyvx-production-baseline.log
+            artifacts/verification-report.json
+            artifacts/verification-logs/*.log
+            docs/PRODUCTION_STATUS.md
+            /tmp/cyvx-production-verification.log
             /tmp/cyvx-api.log
             /tmp/spark.log
             /tmp/cyvx-ci/logs/*.jsonl*

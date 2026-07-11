@@ -15,21 +15,22 @@ class EdgeGuard {
   }
 
   configured() {
-    return !this.required || this.secret.length >= 32;
+    return this.secret.length >= 32;
   }
 
   allow(req, url) {
     const pathname = typeof url === "string" ? new URL(url, "http://cyvx.local").pathname : url && url.pathname || "/";
     if (!this.required || this.bypassPaths.has(pathname)) return true;
+    if (!this.configured()) return false;
     const provided = String(req && req.headers && req.headers[this.headerName] || "").trim();
     return safeEqual(provided, this.secret);
   }
 
   require(req, url) {
     if (this.allow(req, url)) return true;
-    const error = new Error("The request did not arrive through the trusted CYVX edge.");
-    error.code = "TRUSTED_EDGE_REQUIRED";
-    error.statusCode = 403;
+    const error = new Error(this.configured() ? "The request did not arrive through the trusted CYVX edge." : "The trusted CYVX edge secret is not configured.");
+    error.code = this.configured() ? "TRUSTED_EDGE_REQUIRED" : "TRUSTED_EDGE_UNCONFIGURED";
+    error.statusCode = this.configured() ? 403 : 503;
     throw error;
   }
 

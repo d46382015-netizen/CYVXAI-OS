@@ -4,6 +4,8 @@ class AutonomySupervisor {
   constructor(options = {}) {
     if (!options.runtime) throw new Error("Spark runtime is required");
     this.runtime = options.runtime;
+    this.flagProvider = options.flagProvider || null;
+    this.environment = options.environment || process.env.CYVX_ENV || process.env.NODE_ENV || "development";
     this.enabled = options.enabled ?? String(process.env.CYVX_AUTONOMY || "1") !== "0";
     this.intervalMs = positiveInteger(options.intervalMs || process.env.CYVX_AUTONOMY_INTERVAL_MS, 3000);
     this.maxPerTick = positiveInteger(options.maxPerTick || process.env.CYVX_AUTONOMY_MAX_PER_TICK, 10);
@@ -14,6 +16,7 @@ class AutonomySupervisor {
       ticks: 0,
       executions: 0,
       skipped: 0,
+      flag_blocks: 0,
       failures: 0,
       last_started_at: null,
       last_completed_at: null,
@@ -35,8 +38,23 @@ class AutonomySupervisor {
     return this.snapshot();
   }
 
+  effectiveEnabled() {
+    if (!this.enabled) return false;
+    if (!this.flagProvider || typeof this.flagProvider.getBooleanValue !== "function") return true;
+    return this.flagProvider.getBooleanValue("autonomy.enabled", true, { environment: this.environment });
+  }
+
   async tick() {
     if (!this.enabled || this.running) return this.snapshot();
+    if (!this.effectiveEnabled()) {
+      this.metrics.ticks += 1;
+      this.metrics.skipped += 1;
+      this.metrics.flag_blocks += 1;
+      this.metrics.last_started_at = new Date().toISOString();
+      this.metrics.last_completed_at = this.metrics.last_started_at;
+      this.log("autonomy.execution.blocked", { reason: "feature_flag", flag: "autonomy.enabled" });
+      return this.snapshot();
+    }
     this.running = true;
     this.metrics.ticks += 1;
     this.metrics.last_started_at = new Date().toISOString();
@@ -48,6 +66,12 @@ class AutonomySupervisor {
         .slice(0, this.maxPerTick);
 
       for (const spark of sparks) {
+        if (!this.effectiveEnabled()) {
+          this.metrics.skipped += 1;
+          this.metrics.flag_blocks += 1;
+          this.log("autonomy.execution.blocked", { spark_id: spark.id, reason: "feature_flag", flag: "autonomy.enabled" });
+          break;
+        }
         try {
           const graph = this.runtime.graph(spark.id);
           const approved = graph.approvals.some((approval) => approval.status === "approved");
@@ -75,6 +99,7 @@ class AutonomySupervisor {
   snapshot() {
     return {
       enabled: this.enabled,
+      effective_enabled: this.effectiveEnabled(),
       running: this.running,
       scheduled: Boolean(this.timer),
       interval_ms: this.intervalMs,

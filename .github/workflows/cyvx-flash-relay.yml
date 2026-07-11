@@ -41,5 +41,13 @@ jobs:
         run: forge fmt
       - name: Compile contracts
         run: forge build --sizes
-      - name: Run contract tests
-        run: forge test -vvv
+      - name: Test profitable settlement
+        run: forge test --match-test testProfitableRouteRepaysLoanAndStoresProfit -vvvv
+      - name: Test atomic unprofitable revert
+        run: forge test --match-test testUnprofitableRouteRevertsAtomically -vvvv
+      - name: Test treasury isolation
+        run: forge test --match-test testTreasuryCannotMaskLosingTrade -vvvv
+      - name: Test operator authorization
+        run: forge test --match-test testOnlyOperatorCanExecute -vvvv
+      - name: Test pause circuit breaker
+        run: forge test --match-test testPauseStopsExecution -vvvv

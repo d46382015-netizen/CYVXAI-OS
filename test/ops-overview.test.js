@@ -18,7 +18,7 @@ function fixture() {
       snapshot: () => state,
       health: () => ({ status: "ok", version: 1 }),
     },
-    autonomy: { snapshot: () => ({ enabled: true, scheduled: true, metrics: { executions: 0, failures: 0 } }) },
+    autonomy: { snapshot: () => ({ enabled: true, effective_enabled: true, scheduled: true, metrics: { executions: 0, failures: 0 } }) },
     cyvx: { controller: { status: () => ({ status: "ok" }) } },
     github: { ready: true, webhook_ready: true, app_auth_ready: true, oauth_ready: true },
     startedAt: Date.now() - 5000,
@@ -39,7 +39,7 @@ test("readiness degrades when a core runtime fails", () => {
   const options = fixture();
   options.cyvx.controller.status = () => ({ status: "error" });
   const overview = buildOverview(options);
-  assert.equal(overview.readiness.score, 80);
+  assert.equal(overview.readiness.score, 85);
   assert.equal(overview.readiness.grade, "ready");
   assert.equal(overview.runtime.cyvx.healthy, false);
 });

@@ -5,8 +5,8 @@
   "type": "commonjs",
   "description": "CYVXAI operating system with durable mission execution, governed agent creation, cloud evidence, and production activation",
   "scripts": {
-    "start": "bash ./run.sh",
-    "dev": "CYVX_ALLOW_INSECURE_LOCAL=true bash ./run.sh",
+    "start": "node ./api/runtime-v7.js",
+    "dev": "CYVX_ALLOW_INSECURE_LOCAL=true node ./api/runtime-v7.js",
     "public": "node ./api/runtime-v7.js",
     "public:core": "node ./api/public.js",
     "public:test": "node --test ./test/public-runtime.test.js ./test/mission-public-gateway.test.js",

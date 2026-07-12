@@ -1,0 +1,62 @@
+name: Supabase Schema CI
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/**'
+      - 'core/integrations/supabase-runtime.js'
+      - 'api/governance-public.js'
+      - 'scripts/verify-supabase-schema.js'
+      - 'test/supabase-public-config.test.js'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  migration-reset-and-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Install locked Node dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify static schema contract
+        run: node ./scripts/verify-supabase-schema.js
+      - name: Start local Supabase stack
+        run: supabase start
+      - name: Rebuild database from migrations
+        run: supabase db reset
+      - name: Verify live local schema contract through PostgREST
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          eval "$(supabase status -o env)"
+          response="$(curl --fail-with-body --silent --show-error \
+            -X POST "${API_URL}/rest/v1/rpc/cyvx_schema_status" \
+            -H "apikey: ${ANON_KEY}" \
+            -H "Authorization: Bearer ${ANON_KEY}" \
+            -H 'Content-Type: application/json' \
+            --data '{}')"
+          SCHEMA_RESPONSE="$response" node - <<'NODE'
+          const report = JSON.parse(process.env.SCHEMA_RESPONSE);
+          if (!report.ready || Number(report.applied_version) < 202607120004) {
+            console.error(JSON.stringify(report, null, 2));
+            process.exit(1);
+          }
+          console.log(JSON.stringify({ ok: true, schema: report.schema, version: report.applied_version }));
+          NODE
+      - name: Run Supabase runtime tests
+        run: node --test ./test/supabase-public-config.test.js
+      - name: Stop local Supabase stack
+        if: always()
+        run: supabase stop --no-backup

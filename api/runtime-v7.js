@@ -24,6 +24,12 @@ async function createRuntimeV7(options = {}) {
   const startupSpan = telemetry.startSpan("runtime.create", { production: security.production });
   try {
     const publicRuntime = await createPublicRuntime({ ...(options.public || {}), telemetry, env, fetch: options.fetch });
+    const missionWorker = options.missionWorker || publicRuntime.missions.createWorker({
+      workerId: options.missionWorkerId || env.CYVX_WORKER_ID || "worker-main",
+      pollMs: Number(options.missionWorkerPollMs || env.CYVX_WORKER_POLL_MS || 100),
+    });
+    let missionWorkerPromise = null;
+    let missionWorkerError = null;
     const integrations = publicRuntime.integrations;
     const autonomy = new AutonomySupervisor({ runtime: publicRuntime.spark.runtime, flagProvider: integrations.flags, ...options.autonomy });
     const backup = options.backup || new BackupScheduler({ dataRoot, telemetry, ...options.backupOptions });
@@ -43,6 +49,25 @@ async function createRuntimeV7(options = {}) {
     const operationsPort = Number(options.operationsPort || env.CYVX_CONTROL_PORT || publicRuntime.ports.publicPort + 4);
     const operations = createServer(overview);
 
+    function startMissionWorker() {
+      if (missionWorkerPromise) return missionWorkerPromise;
+      missionWorkerPromise = missionWorker.start().catch((error) => {
+        missionWorkerError = error;
+        telemetry.captureError(error, { operation: "mission_worker.run", worker_id: missionWorker.workerId });
+        telemetry.log("error", "cyvx.mission_worker.failed", {
+          worker_id: missionWorker.workerId,
+          code: error.code || null,
+          error: error.message,
+        });
+      });
+      return missionWorkerPromise;
+    }
+
+    async function stopMissionWorker() {
+      missionWorker.stop();
+      if (missionWorkerPromise) await missionWorkerPromise;
+    }
+
     startupSpan.end("ok");
     return {
       publicRuntime,
@@ -54,18 +79,28 @@ async function createRuntimeV7(options = {}) {
       security,
       operations,
       operationsPort,
+      missionWorker,
+      get missionWorkerError() { return missionWorkerError; },
       overview,
       async listen() {
         const span = telemetry.startSpan("runtime.listen", { public_port: publicRuntime.ports.publicPort, control_port: operationsPort });
-        await publicRuntime.listen();
-        try { await listen(operations, operationsPort); }
-        catch (error) { await publicRuntime.close(); span.end("error", { error: error.message }); throw error; }
+        startMissionWorker();
+        try {
+          await publicRuntime.listen();
+          await listen(operations, operationsPort);
+        } catch (error) {
+          await stopMissionWorker();
+          await publicRuntime.close().catch(() => undefined);
+          span.end("error", { error: error.message });
+          throw error;
+        }
         autonomy.start();
         backup.start();
         managedData.start(overview);
         telemetry.log("info", "cyvx.runtime.v8.ready", {
           public_port: publicRuntime.ports.publicPort,
           control_port: operationsPort,
+          mission_worker: { worker_id: missionWorker.workerId, ready: !missionWorkerError },
           backup: backup.snapshot(),
           managed_data: managedData.snapshot(),
           integrations: integrations.snapshot(),
@@ -79,6 +114,7 @@ async function createRuntimeV7(options = {}) {
         managedData.stop();
         backup.stop();
         autonomy.stop();
+        await stopMissionWorker();
         await Promise.all([close(operations), publicRuntime.close()]);
         telemetry.log("info", "cyvx.runtime.v8.closed");
       },
@@ -96,6 +132,7 @@ async function main() {
   runtime.telemetry.log("info", "cyvx.runtime.v8.started", {
     public: runtime.publicRuntime.ports.publicPort,
     control: runtime.operationsPort,
+    mission_worker: { worker_id: runtime.missionWorker.workerId, ready: !runtime.missionWorkerError },
     autonomy: runtime.autonomy.snapshot(),
     backup: runtime.backup.snapshot(),
     managed_data: runtime.managedData.snapshot(),

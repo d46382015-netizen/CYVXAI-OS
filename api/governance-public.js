@@ -19,11 +19,13 @@ function sendJson(res, status, payload, correlationId) {
 
 function sendError(res, error, correlationId) {
   const status = Number(error.status || 500);
-  return sendJson(res, status, {
+  const payload = {
     ok: false,
-    error: status >= 500 ? "INTERNAL_ERROR" : error.code || "REQUEST_FAILED",
-    message: status >= 500 ? "An internal error occurred" : error.message
-  }, correlationId);
+    error: status >= 500 ? error.code || "INTERNAL_ERROR" : error.code || "REQUEST_FAILED",
+    message: status >= 500 && !error.code ? "An internal error occurred" : error.message
+  };
+  if (error.details !== undefined) payload.details = error.details;
+  return sendJson(res, status, payload, correlationId);
 }
 
 function createPublicGovernanceHandler(options = {}) {
@@ -57,6 +59,16 @@ function createPublicGovernanceHandler(options = {}) {
         }, correlationId);
       }
 
+      if (req.method === "GET" && url.pathname === "/api/v1/runtime/supabase/schema-status") {
+        const report = await supabase.schemaStatus({ force: url.searchParams.get("cached") !== "true" });
+        return sendJson(res, report.ready ? 200 : 503, {
+          ok: report.ready,
+          cloud_writes_ready: report.ready,
+          report,
+          timestamp: new Date().toISOString()
+        }, correlationId);
+      }
+
       if (req.method === "GET" && url.pathname === "/api/v1/integrations/supabase/probe") {
         if (typeof options.authenticate !== "function") {
           const error = new Error("Authentication is unavailable");
@@ -65,8 +77,16 @@ function createPublicGovernanceHandler(options = {}) {
           throw error;
         }
         options.authenticate(req);
-        const report = await supabase.probe();
-        return sendJson(res, report.ok ? 200 : 503, { ok: report.ok, report }, correlationId);
+        const [connectivity, schema] = await Promise.all([
+          supabase.probe(),
+          supabase.schemaStatus({ force: true })
+        ]);
+        const ok = connectivity.ok && schema.ready;
+        return sendJson(res, ok ? 200 : 503, {
+          ok,
+          cloud_writes_ready: schema.ready,
+          report: { connectivity, schema }
+        }, correlationId);
       }
 
       await supabase.refreshSession(req, res);
@@ -132,13 +152,16 @@ async function main() {
   const host = String(process.env.CYVX_GOVERNANCE_HOST || "127.0.0.1");
   const address = await server.listen(port, host);
   const supabaseStatus = supabase.status();
+  const schemaStatus = await supabase.schemaStatus({ force: true });
   runtime.logger.write("info", "governance.started", {
     host: address.address,
     port: address.port,
     db_path: runtime.dbPath,
     supabase_ready: supabaseStatus.ready,
     supabase_project_url: supabaseStatus.project_url,
-    supabase_key_fingerprint: supabaseStatus.publishable_key_fingerprint
+    supabase_key_fingerprint: supabaseStatus.publishable_key_fingerprint,
+    supabase_schema_version: schemaStatus.applied_version,
+    cloud_writes_ready: schemaStatus.ready
   });
   process.stdout.write(`${JSON.stringify({
     ok: true,
@@ -146,9 +169,12 @@ async function main() {
     url: `http://${host}:${address.port}/governance`,
     public_config_url: `http://${host}:${address.port}/api/v1/runtime/public-config`,
     supabase_status_url: `http://${host}:${address.port}/api/v1/runtime/supabase/status`,
+    supabase_schema_status_url: `http://${host}:${address.port}/api/v1/runtime/supabase/schema-status`,
     supabase_probe_url: `http://${host}:${address.port}/api/v1/integrations/supabase/probe`,
     supabase_ready: supabaseStatus.ready,
-    supabase_missing: supabaseStatus.missing,
+    cloud_writes_ready: schemaStatus.ready,
+    supabase_schema_version: schemaStatus.applied_version,
+    supabase_expected_schema_version: schemaStatus.expected_version,
     db_path: runtime.dbPath
   })}\n`);
 

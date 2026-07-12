@@ -59,7 +59,7 @@ as $$
       ('foundry_spend_receipts'),('outcomes')
   ), table_checks as (
     select r.name,
-      to_regclass('public.' || r.name) is not null as exists,
+      to_regclass('public.' || r.name) is not null as table_exists,
       coalesce(c.relrowsecurity, false) as rls_enabled,
       coalesce(c.relforcerowsecurity, false) as rls_forced,
       (select count(*) from pg_policies p where p.schemaname = 'public' and p.tablename = r.name) as policy_count
@@ -73,7 +73,8 @@ as $$
       ('packages_worker_same_org_fk'),('grants_agent_same_org_fk'),
       ('runs_grant_same_org_fk'),('deployments_grant_same_org_fk'),('spend_grant_same_org_fk')
   ), constraint_checks as (
-    select r.name, exists(select 1 from pg_constraint c where c.conname = r.name) as exists
+    select r.name,
+      exists(select 1 from pg_constraint c where c.conname = r.name) as constraint_exists
     from required_constraints r
   ), required_triggers(name) as (
     values
@@ -81,16 +82,20 @@ as $$
       ('foundry_runs_grant_binding'),('deployments_grant_binding'),('spend_grant_binding'),
       ('artifacts_append_only'),('evidence_append_only'),('governance_events_append_only')
   ), trigger_checks as (
-    select r.name, exists(select 1 from pg_trigger t where t.tgname = r.name and not t.tgisinternal) as exists
+    select r.name,
+      exists(select 1 from pg_trigger t where t.tgname = r.name and not t.tgisinternal) as trigger_exists
     from required_triggers r
   ), migration_state as (
     select coalesce(max(version), 0) as version from public.cyvx_schema_migrations
   ), aggregate_state as (
     select
-      (select bool_and(exists and rls_enabled and rls_forced and policy_count > 0) from table_checks) as tables_ready,
-      (select bool_and(exists) from constraint_checks) as constraints_ready,
-      (select bool_and(exists) from trigger_checks) as triggers_ready,
-      exists(select 1 from storage.buckets where id = 'cyvx-artifacts' and not public) as storage_bucket_ready,
+      (select bool_and(table_exists and rls_enabled and rls_forced and policy_count > 0) from table_checks) as tables_ready,
+      (select bool_and(constraint_exists) from constraint_checks) as constraints_ready,
+      (select bool_and(trigger_exists) from trigger_checks) as triggers_ready,
+      exists(
+        select 1 from storage.buckets b
+        where b.id = 'cyvx-artifacts' and b.public = false
+      ) as storage_bucket_ready,
       exists(select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname = 'cyvx_artifacts_select')
         and exists(select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname = 'cyvx_artifacts_insert') as storage_policies_ready
   )

@@ -1,0 +1,37 @@
+name: Fix CYVX composite foreign keys
+
+on:
+  push:
+    branches:
+      - feat/supabase-production-schema-rls
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feat/supabase-production-schema-rls
+      - name: Prevent composite SET NULL from clearing organization IDs
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('supabase/migrations/202607120003_cyvx_tenant_and_grant_invariants.sql')
+          text = p.read_text()
+          count = text.count('on delete set null')
+          if count < 1:
+              raise SystemExit('No composite SET NULL actions found')
+          p.write_text(text.replace('on delete set null', 'on delete restrict'))
+          print(f'Replaced {count} composite delete actions')
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add supabase/migrations/202607120003_cyvx_tenant_and_grant_invariants.sql
+          git commit -m 'Restrict hard deletes across composite tenant keys'
+          git push origin HEAD:feat/supabase-production-schema-rls

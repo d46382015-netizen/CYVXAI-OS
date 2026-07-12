@@ -6,6 +6,7 @@ const http = require("node:http");
 const os = require("node:os");
 const path = require("node:path");
 const { GovernanceKernel, GovernanceError } = require("../core/governance");
+const { AgentFoundry, SENSITIVE_ACTIONS } = require("../core/agent-foundry");
 const { migrateDatabase, verifyToken, issueToken, JsonLogger } = require("../runtime/missions/base");
 
 function readJson(req, limit = 256 * 1024) {
@@ -90,6 +91,12 @@ function createGovernanceRuntime(options = {}) {
   const governanceSecret = String(options.governanceSecret || process.env.CYVX_GOVERNANCE_SECRET || authSecret);
   const logger = options.logger || new JsonLogger(path.join(dataRoot, "logs", "governance-runtime.jsonl"));
   const kernel = new GovernanceKernel({ db, repoRoot, secret: governanceSecret, logger });
+  const foundry = new AgentFoundry({
+    db, kernel, repoRoot, dataRoot, secret: governanceSecret, logger,
+    spendExecutor: options.spendExecutor,
+    maxLineageDepth: options.maxLineageDepth,
+    maxChildrenPerAgent: options.maxChildrenPerAgent
+  });
   const uiFile = path.join(repoRoot, "ui", "governance.html");
   const bodyLimit = Math.max(1024, Number(options.bodyLimit || process.env.CYVX_REQUEST_BODY_LIMIT || 256 * 1024));
   const corsAllowlist = new Set(String(options.corsAllowlist || process.env.CYVX_CORS_ALLOWLIST || "")
@@ -129,11 +136,16 @@ function createGovernanceRuntime(options = {}) {
       }
       if (req.method === "GET" && ["/healthz", "/api/v1/governance/health"].includes(url.pathname)) {
         const database = Number(db.prepare("SELECT 1 AS ok").get().ok) === 1;
-        return sendJson(res, database ? 200 : 503, {
-          ok: database,
+        const healthAuth = { user_id: "health", organization_id: "default", role: "viewer" };
+        const governanceLedger = kernel.verifyLedger(healthAuth);
+        const foundryBoundary = foundry.verifyBoundary(healthAuth);
+        const healthy = database && governanceLedger.ok && foundryBoundary.ok;
+        return sendJson(res, healthy ? 200 : 503, {
+          ok: healthy,
           service: "cyvx-autonomous-governance",
           database: { ready: database, path: dbPath },
-          ledger: kernel.verifyLedger({ user_id: "health", organization_id: "default", role: "viewer" }),
+          ledger: governanceLedger,
+          foundry_boundary: foundryBoundary,
           timestamp: new Date().toISOString()
         }, correlationId);
       }
@@ -154,7 +166,21 @@ function createGovernanceRuntime(options = {}) {
       const input = ["POST", "PUT", "PATCH"].includes(req.method) ? await readJson(req, bodyLimit) : {};
       let params;
       if (req.method === "GET" && url.pathname === "/api/v1/governance/dashboard") {
-        return sendJson(res, 200, { ok: true, dashboard: kernel.dashboard(auth, { limit: url.searchParams.get("limit") }) }, correlationId);
+        return sendJson(res, 200, {
+          ok: true,
+          dashboard: kernel.dashboard(auth, { limit: url.searchParams.get("limit") }),
+          foundry: foundry.dashboard(auth, { limit: url.searchParams.get("limit") })
+        }, correlationId);
+      }
+      if (req.method === "GET" && url.pathname === "/api/v1/foundry/dashboard") {
+        return sendJson(res, 200, { ok: true, foundry: foundry.dashboard(auth, { limit: url.searchParams.get("limit") }) }, correlationId);
+      }
+      if (req.method === "GET" && url.pathname === "/api/v1/foundry/boundary/verify") {
+        return sendJson(res, 200, { ok: true, report: foundry.verifyBoundary(auth) }, correlationId);
+      }
+      if ((params = match(url.pathname, "/api/v1/foundry/actions/:action")) && req.method === "POST") {
+        if (!SENSITIVE_ACTIONS.includes(params.action)) throw new GovernanceError("ACTION_NOT_SUPPORTED", "Unknown Foundry action", 404);
+        return sendJson(res, 200, { ok: true, execution: foundry.executeAction(auth, params.action, input) }, correlationId);
       }
       if (req.method === "GET" && url.pathname === "/api/v1/governance/constitution") {
         return sendJson(res, 200, { ok: true, constitution: kernel.getConstitution(auth) }, correlationId);
@@ -175,6 +201,10 @@ function createGovernanceRuntime(options = {}) {
         return sendJson(res, 200, { ok: true, package: kernel.bossReview(auth, params.id, input) }, correlationId);
       }
       if ((params = match(url.pathname, "/api/v1/governance/grants/:id/consume")) && req.method === "POST") {
+        const grant = kernel.getGrant(auth, params.id);
+        if (SENSITIVE_ACTIONS.includes(grant.capability)) {
+          throw new GovernanceError("FOUNDRY_GATEWAY_REQUIRED", "Sensitive Foundry grants can only be consumed by their matching Foundry action endpoint", 409);
+        }
         return sendJson(res, 200, { ok: true, grant: kernel.consumeGrant(auth, params.id, input) }, correlationId);
       }
       if ((params = match(url.pathname, "/api/v1/governance/grants/:id/revoke")) && req.method === "POST") {
@@ -190,7 +220,7 @@ function createGovernanceRuntime(options = {}) {
   }
 
   return {
-    repoRoot, dataRoot, dbPath, db, kernel, logger, authSecret, allowLocalAuth, handle,
+    repoRoot, dataRoot, dbPath, db, kernel, foundry, logger, authSecret, allowLocalAuth, handle,
     close() { db.close(); }
   };
 }
@@ -216,7 +246,13 @@ async function main() {
   const host = String(process.env.CYVX_GOVERNANCE_HOST || "127.0.0.1");
   const address = await server.listen(port, host);
   runtime.logger.write("info", "governance.started", { host: address.address, port: address.port, db_path: runtime.dbPath });
-  process.stdout.write(`${JSON.stringify({ ok: true, service: "cyvx-autonomous-governance", url: `http://${host}:${address.port}/governance`, db_path: runtime.dbPath })}\n`);
+  process.stdout.write(`${JSON.stringify({
+    ok: true,
+    service: "cyvx-autonomous-governance",
+    url: `http://${host}:${address.port}/governance`,
+    foundry_actions: SENSITIVE_ACTIONS,
+    db_path: runtime.dbPath
+  })}\n`);
   const shutdown = async (signal) => {
     runtime.logger.write("info", "governance.stopping", { signal });
     await server.close();

@@ -3,88 +3,86 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CYVX Autonomous Governance</title>
+<title>CYVX Governance + Agent Foundry</title>
 <style>
-:root{color-scheme:dark;--bg:#090d14;--panel:#121927;--line:#273249;--text:#edf3ff;--muted:#9aa8bd;--ok:#48d597;--warn:#ffbf5b;--bad:#ff6f7d;--accent:#75a7ff}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#090d14,#0d1320);color:var(--text);font:14px/1.45 system-ui,sans-serif}header{padding:24px;display:flex;gap:18px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);position:sticky;top:0;background:#090d14ee;backdrop-filter:blur(12px);z-index:4}h1,h2,h3,p{margin:0}h1{font-size:22px}.muted{color:var(--muted)}main{max-width:1400px;margin:auto;padding:20px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 12px 35px #0004}.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-6{grid-column:span 6}.span-4{grid-column:span 4}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{padding:14px;border:1px solid var(--line);border-radius:12px}.stat strong{font-size:22px;display:block}.controls,.actions{display:flex;gap:8px;flex-wrap:wrap}button,input,select,textarea{background:#0b111d;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px;font:inherit}input,select,textarea{width:100%}textarea{min-height:88px;resize:vertical}button{cursor:pointer;font-weight:700}button:hover{border-color:var(--accent)}button.danger{border-color:#8e3441;color:#ffbac2}button.safe{border-color:#247b59;color:#9cf5cc}.form{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.full{grid-column:1/-1}.row{padding:12px 0;border-top:1px solid var(--line)}.row:first-child{border-top:0}.pill{display:inline-flex;padding:3px 8px;border-radius:999px;background:#202a3d;color:#dce8ff;font-size:12px}.pill.authorized,.pill.consumed{background:#153c30;color:#93efc8}.pill.blocked,.pill.denied,.pill.rejected,.pill.quarantined{background:#4b2028;color:#ffc0c7}.pill.awaiting_supervisor,.pill.awaiting_boss,.pill.remediation_required,.pill.human_exception{background:#4a3816;color:#ffd990}code{color:#bcd2ff;word-break:break-all}.notice{padding:10px;border-left:3px solid var(--warn);background:#241d11;border-radius:7px}.error{color:#ffafb8;white-space:pre-wrap}.success{color:#8ee8bd;white-space:pre-wrap}details summary{cursor:pointer}.token{max-width:560px}.package-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}@media(max-width:900px){.span-8,.span-6,.span-4{grid-column:span 12}.stats{grid-template-columns:repeat(2,1fr)}header{align-items:flex-start;flex-direction:column}.form{grid-template-columns:1fr}}
+:root{color-scheme:dark;--bg:#090d14;--panel:#121927;--line:#273249;--text:#edf3ff;--muted:#9aa8bd;--ok:#48d597;--warn:#ffbf5b;--bad:#ff6f7d;--accent:#75a7ff}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#090d14,#0d1320);color:var(--text);font:14px/1.45 system-ui,sans-serif}header{padding:22px;display:flex;gap:16px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);position:sticky;top:0;background:#090d14ee;backdrop-filter:blur(12px);z-index:4}h1,h2,h3,p{margin:0}h1{font-size:22px}.muted{color:var(--muted)}main{max-width:1500px;margin:auto;padding:18px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 12px 35px #0004}.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-6{grid-column:span 6}.span-4{grid-column:span 4}.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}.stat{padding:12px;border:1px solid var(--line);border-radius:12px}.stat strong{font-size:20px;display:block}.controls,.actions{display:flex;gap:8px;flex-wrap:wrap}button,input,select,textarea{background:#0b111d;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px;font:inherit}input,select,textarea{width:100%}textarea{min-height:96px;resize:vertical}button{cursor:pointer;font-weight:700}button:hover{border-color:var(--accent)}button.danger{border-color:#8e3441;color:#ffbac2}button.safe{border-color:#247b59;color:#9cf5cc}.form{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.full{grid-column:1/-1}.row{padding:11px 0;border-top:1px solid var(--line)}.row:first-child{border-top:0}.pill{display:inline-flex;padding:3px 8px;border-radius:999px;background:#202a3d;color:#dce8ff;font-size:12px}.pill.authorized,.pill.consumed,.pill.succeeded,.pill.active{background:#153c30;color:#93efc8}.pill.blocked,.pill.denied,.pill.rejected,.pill.quarantined,.pill.failed,.pill.reconciliation_required{background:#4b2028;color:#ffc0c7}.pill.awaiting_supervisor,.pill.awaiting_boss,.pill.running,.pill.human_exception{background:#4a3816;color:#ffd990}code{color:#bcd2ff;word-break:break-all}.notice{padding:10px;border-left:3px solid var(--warn);background:#241d11;border-radius:7px}.error{color:#ffafb8;white-space:pre-wrap}.success{color:#8ee8bd;white-space:pre-wrap}.token{max-width:590px}.scroll{max-height:480px;overflow:auto}@media(max-width:1000px){.span-8,.span-6,.span-4{grid-column:span 12}.stats{grid-template-columns:repeat(2,1fr)}header{align-items:flex-start;flex-direction:column}.form{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header>
-  <div><h1>CYVX Autonomous Governance</h1><p class="muted">Worker → Supervisor → Boss → deterministic policy gate → scoped capability grant</p></div>
+  <div><h1>CYVX Governance + Agent Foundry</h1><p class="muted">No child creation, deployment, or spend executes without a signed single-use capability grant.</p></div>
   <div class="actions token"><input id="token" type="password" placeholder="Bearer token"><button onclick="saveToken()">Save token</button><button onclick="refreshAll()">Refresh</button></div>
 </header>
-<main>
-<div class="grid">
-  <section class="panel span-12">
-    <div class="notice"><strong>Local identities:</strong> <code>agent-local</code>, <code>supervisor-local</code>, and <code>boss-local</code>. Obtain tokens from <code>POST /api/v1/auth/token</code>. Production disables local token issuance.</div>
-  </section>
+<main><div class="grid">
+  <section class="panel span-12"><div class="notice"><strong>Execution boundary:</strong> <code>create_agent</code>, <code>deploy_staging</code>, <code>deploy_production</code>, and <code>spend_budget</code> only exist behind <code>POST /api/v1/foundry/actions/:action</code> with an active grant issued to the exact worker.</div></section>
+  <section class="panel span-12"><div class="stats" id="stats"></div><pre id="status" class="muted"></pre></section>
 
   <section class="panel span-8">
-    <h2>Control plane</h2><p class="muted">Emergency controls revoke active grants when external actions are stopped.</p>
-    <div class="stats" id="stats" style="margin-top:14px"></div>
-    <div class="controls" style="margin-top:14px">
-      <button class="danger" onclick="setControls({global_stop:true},'Global stop')">Global stop</button>
-      <button class="safe" onclick="setControls({global_stop:false},'Resume')">Resume</button>
-      <button onclick="setControls({spending_frozen:true},'Freeze spending')">Freeze spending</button>
-      <button onclick="setControls({spending_frozen:false},'Unfreeze spending')">Unfreeze spending</button>
-      <button onclick="setControls({agent_creation_disabled:true},'Disable agent creation')">Disable agent creation</button>
-      <button onclick="setControls({external_actions_disabled:true},'Disable external actions')">Disable external actions</button>
+    <h2>Emergency controls</h2><p class="muted">Controls are rechecked immediately before every Foundry side effect.</p>
+    <div class="controls" style="margin-top:12px">
+      <button class="danger" onclick="setControls({global_stop:true},'Global stop')">Global stop</button><button class="safe" onclick="setControls({global_stop:false},'Resume')">Resume</button>
+      <button onclick="setControls({spending_frozen:true},'Freeze spending')">Freeze spending</button><button onclick="setControls({spending_frozen:false},'Unfreeze spending')">Unfreeze spending</button>
+      <button onclick="setControls({agent_creation_disabled:true},'Disable agent creation')">Disable creation</button><button onclick="setControls({agent_creation_disabled:false},'Enable agent creation')">Enable creation</button>
+      <button onclick="setControls({external_actions_disabled:true},'Disable external actions')">Disable external</button><button onclick="setControls({external_actions_disabled:false},'Enable external actions')">Enable external</button>
     </div>
-    <pre id="status" class="muted"></pre>
   </section>
-
-  <section class="panel span-4">
-    <h2>Constitution</h2>
-    <div id="constitution" class="row muted">Load the dashboard to inspect active policy.</div>
-    <button onclick="verifyLedger()">Verify evidence ledger</button>
-    <pre id="ledger"></pre>
-  </section>
+  <section class="panel span-4"><h2>Boundary verification</h2><div id="boundary" class="muted">Not loaded.</div><button style="margin-top:10px" onclick="verifyAll()">Verify ledgers</button><pre id="ledger"></pre></section>
 
   <section class="panel span-6">
-    <h2>Submit worker package</h2><p class="muted">Use a worker token. All fields become part of the signed review package.</p>
+    <h2>1. Submit worker package</h2>
     <div class="form" style="margin-top:12px">
       <label>Mission ID<input id="missionId" placeholder="mission_..."></label>
-      <label>Requested action<input id="requestedAction" value="deploy_staging"></label>
+      <label>Requested action<select id="requestedAction"><option>create_agent</option><option>deploy_staging</option><option>deploy_production</option><option>spend_budget</option></select></label>
       <label>Risk tier<select id="riskTier"><option>0</option><option selected>1</option><option>2</option><option>3</option></select></label>
       <label>Estimated cost USD<input id="cost" type="number" min="0" step="0.01" value="0"></label>
       <label class="full">Artifact SHA-256<input id="artifactHash" value="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"></label>
-      <label class="full">Evidence IDs, comma separated<input id="evidenceIds" placeholder="evidence_1,evidence_2"></label>
-      <label class="full">Rollback plan<textarea id="rollback">Restore the prior release and verify the health endpoint.</textarea></label>
+      <label class="full">Evidence IDs<input id="evidenceIds" placeholder="evidence_1,evidence_2"></label>
+      <label class="full">Rollback plan<textarea id="rollback">Restore the prior durable resource and verify the boundary report remains valid.</textarea></label>
       <button class="full" onclick="submitPackage()">Submit to Supervisor</button>
     </div>
   </section>
-
   <section class="panel span-6">
-    <h2>Review package</h2><p class="muted">Switch tokens between Supervisor and Boss identities before each review.</p>
+    <h2>2. Supervisor / Boss review</h2>
     <div class="form" style="margin-top:12px">
       <label class="full">Package ID<input id="reviewPackageId" placeholder="govpkg_..."></label>
-      <label>Review stage<select id="reviewStage"><option value="supervisor">Supervisor</option><option value="boss">Boss</option></select></label>
-      <label>Decision<select id="decision"><option value="approved">approved</option><option value="remediation_required">remediation_required</option><option value="escalation_required">escalation_required</option><option value="authorize">authorize</option><option value="deny">deny</option><option value="quarantine">quarantine</option><option value="human_exception">human_exception</option></select></label>
-      <label class="full">Reason<textarea id="reviewReason">Evidence, tests, risk, cost, and rollback requirements were evaluated.</textarea></label>
+      <label>Stage<select id="reviewStage"><option value="supervisor">Supervisor</option><option value="boss">Boss</option></select></label>
+      <label>Decision<select id="decision"><option>approved</option><option>remediation_required</option><option>escalation_required</option><option>authorize</option><option>deny</option><option>quarantine</option><option>human_exception</option></select></label>
+      <label class="full">Reason<textarea id="reviewReason">Evidence, tests, artifact identity, risk, cost, rollback, and Constitution authority were independently evaluated.</textarea></label>
       <button class="full" onclick="reviewPackage()">Submit signed review</button>
     </div>
   </section>
 
-  <section class="panel span-8"><h2>Governance packages</h2><div id="packages" class="muted">No data loaded.</div></section>
-  <section class="panel span-4"><h2>Capability grants</h2><div id="grants" class="muted">No data loaded.</div></section>
-</div>
-</main>
+  <section class="panel span-12">
+    <h2>3. Execute grant-gated Foundry action</h2><p class="muted">Use the worker token that owns the grant. The action payload cannot change the capability authorized by that grant.</p>
+    <div class="form" style="margin-top:12px">
+      <label>Action<select id="foundryAction" onchange="loadTemplate()"><option>create_agent</option><option>deploy_staging</option><option>deploy_production</option><option>spend_budget</option></select></label>
+      <label>Grant ID<input id="grantId" placeholder="grant_..."></label>
+      <label class="full">Action payload JSON<textarea id="actionPayload"></textarea></label>
+      <button class="full" onclick="executeFoundry()">Execute through capability gateway</button>
+    </div>
+  </section>
+
+  <section class="panel span-6"><h2>Governance packages</h2><div id="packages" class="scroll muted">No data.</div></section>
+  <section class="panel span-6"><h2>Capability grants</h2><div id="grants" class="scroll muted">No data.</div></section>
+  <section class="panel span-4"><h2>Foundry action runs</h2><div id="runs" class="scroll muted">No data.</div></section>
+  <section class="panel span-4"><h2>Child agents</h2><div id="agents" class="scroll muted">No data.</div></section>
+  <section class="panel span-4"><h2>Deployments & spend</h2><div id="resources" class="scroll muted">No data.</div></section>
+</div></main>
 <script>
-const $=id=>document.getElementById(id);let dashboard=null;
-function token(){return $('token').value.trim()||sessionStorage.getItem('cyvxGovernanceToken')||''}
-function saveToken(){sessionStorage.setItem('cyvxGovernanceToken',$('token').value.trim());show('Token saved for this browser session.','success')}
-async function api(path,options={}){const headers={'content-type':'application/json',...(options.headers||{})};if(token())headers.authorization=`Bearer ${token()}`;const response=await fetch(path,{...options,headers});const body=await response.json().catch(()=>({message:'Invalid JSON response'}));if(!response.ok)throw new Error(`${body.error||response.status}: ${body.message||'Request failed'}${body.details?'\n'+JSON.stringify(body.details,null,2):''}`);return body}
-function show(message,kind='muted'){$('status').className=kind;$('status').textContent=message}
-function esc(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]))}
-function pill(status){return `<span class="pill ${esc(status)}">${esc(status)}</span>`}
-async function refreshAll(){try{const body=await api('/api/v1/governance/dashboard');dashboard=body.dashboard;render();show('Dashboard refreshed.','success')}catch(error){show(error.message,'error')}}
-function render(){const d=dashboard;if(!d)return;const c=d.controls;$('stats').innerHTML=`<div class="stat"><span class="muted">Global stop</span><strong>${c.global_stop?'ON':'OFF'}</strong></div><div class="stat"><span class="muted">Monthly spend</span><strong>$${Number(d.monthly_spend_usd).toFixed(2)}</strong></div><div class="stat"><span class="muted">Active reservations</span><strong>$${Number(d.active_grant_reservations_usd).toFixed(2)}</strong></div><div class="stat"><span class="muted">Packages</span><strong>${d.packages.length}</strong></div>`;const p=d.constitution.policy;$('constitution').innerHTML=`<p><strong>Version ${esc(p.version)}</strong></p><p>Max autonomous risk: ${esc(p.max_autonomous_risk_tier)}</p><p>Per-action limit: $${esc(p.maximum_action_cost_usd)}</p><p>Monthly limit: $${esc(p.maximum_monthly_cost_usd)}</p><p>Policy hash:</p><code>${esc(d.constitution.policy_hash)}</code>`;$('packages').innerHTML=d.packages.length?d.packages.map(pkg=>`<div class="row"><div>${pill(pkg.status)} <strong>${esc(pkg.requested_action)}</strong></div><div class="muted">${esc(pkg.id)} · mission ${esc(pkg.mission_id)} · tier ${esc(pkg.risk_tier)} · $${Number(pkg.estimated_cost_usd).toFixed(2)}</div><div class="package-actions"><button onclick="selectPackage('${esc(pkg.id)}')">Review</button></div></div>`).join(''):'No packages.';$('grants').innerHTML=d.grants.length?d.grants.map(g=>`<div class="row"><div>${pill(g.status)} <strong>${esc(g.capability)}</strong></div><div class="muted">${esc(g.id)}</div><div>Max $${Number(g.maximum_cost_usd).toFixed(2)}</div></div>`).join(''):'No grants.'}
-function selectPackage(id){$('reviewPackageId').value=id;window.scrollTo({top:$('reviewPackageId').getBoundingClientRect().top+window.scrollY-120,behavior:'smooth'})}
-async function setControls(update,label){try{await api('/api/v1/governance/controls',{method:'POST',body:JSON.stringify({...update,reason:label})});await refreshAll()}catch(error){show(error.message,'error')}}
-async function submitPackage(){try{const body={mission_id:$('missionId').value.trim(),requested_action:$('requestedAction').value.trim(),risk_tier:Number($('riskTier').value),estimated_cost_usd:Number($('cost').value),artifact_sha256:$('artifactHash').value.trim(),evidence_ids:$('evidenceIds').value.split(',').map(v=>v.trim()).filter(Boolean),tests:[{name:'worker acceptance suite',status:'passed',evidence_id:$('evidenceIds').value.split(',')[0]?.trim()||null}],rollback_plan:{procedure:$('rollback').value.trim(),verification:'health and acceptance checks pass'},declared_risks:[]};const result=await api('/api/v1/governance/packages',{method:'POST',body:JSON.stringify(body)});$('reviewPackageId').value=result.package.id;show(`Submitted ${result.package.id}`,'success');await refreshAll()}catch(error){show(error.message,'error')}}
-async function reviewPackage(){try{const stage=$('reviewStage').value;const path=`/api/v1/governance/packages/${encodeURIComponent($('reviewPackageId').value.trim())}/${stage}-review`;const result=await api(path,{method:'POST',body:JSON.stringify({decision:$('decision').value,reason:$('reviewReason').value.trim()})});show(`${stage} review complete: ${result.package.status}`,'success');await refreshAll()}catch(error){show(error.message,'error')}}
-async function verifyLedger(){try{const body=await api('/api/v1/governance/ledger/verify');$('ledger').className=body.report.ok?'success':'error';$('ledger').textContent=JSON.stringify(body.report,null,2)}catch(error){$('ledger').className='error';$('ledger').textContent=error.message}}
-$('token').value=sessionStorage.getItem('cyvxGovernanceToken')||'';if(token())refreshAll();
+const $=id=>document.getElementById(id);let governance=null,foundry=null;
+const templates={create_agent:{name:'Landing Page Optimizer',mission:'Improve visitor-to-qualified-lead conversion',capabilities:['analytics','copywriting'],permissions:{repository_write:true,deploy_requires_grant:true},budget:{monthly_usd:5}},deploy_staging:{source_path:'artifacts/release',app_id:'cyvx-app',actual_cost_usd:0},deploy_production:{source_path:'artifacts/release',app_id:'cyvx-app',actual_cost_usd:0},spend_budget:{amount_usd:5,currency:'USD',vendor:'Compute Provider',purpose:'Approved infrastructure',idempotency_key:'invoice-2026-0001'}};
+function token(){return $('token').value.trim()||sessionStorage.getItem('cyvxGovernanceToken')||''}function saveToken(){sessionStorage.setItem('cyvxGovernanceToken',$('token').value.trim());show('Token saved.','success')}
+async function api(route,options={}){const headers={'content-type':'application/json',...(options.headers||{})};if(token())headers.authorization=`Bearer ${token()}`;const response=await fetch(route,{...options,headers});const body=await response.json().catch(()=>({message:'Invalid JSON response'}));if(!response.ok)throw new Error(`${body.error||response.status}: ${body.message||'Request failed'}${body.details?'\n'+JSON.stringify(body.details,null,2):''}`);return body}
+function show(message,kind='muted'){$('status').className=kind;$('status').textContent=message}function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}function pill(s){return `<span class="pill ${esc(s)}">${esc(s)}</span>`}
+function loadTemplate(){$('actionPayload').value=JSON.stringify(templates[$('foundryAction').value],null,2)}
+async function refreshAll(){try{const body=await api('/api/v1/governance/dashboard');governance=body.dashboard;foundry=body.foundry;render();show('Governance and Foundry refreshed.','success')}catch(e){show(e.message,'error')}}
+function render(){if(!governance||!foundry)return;const c=governance.controls,b=foundry.boundary,$s=$('stats');$s.innerHTML=`<div class="stat"><span class="muted">Global stop</span><strong>${c.global_stop?'ON':'OFF'}</strong></div><div class="stat"><span class="muted">Monthly spend</span><strong>$${Number(governance.monthly_spend_usd).toFixed(2)}</strong></div><div class="stat"><span class="muted">Active grants</span><strong>${governance.grants.filter(g=>g.status==='active').length}</strong></div><div class="stat"><span class="muted">Agents</span><strong>${foundry.counts.agents}</strong></div><div class="stat"><span class="muted">Deployments</span><strong>${foundry.counts.deployments}</strong></div><div class="stat"><span class="muted">Boundary</span><strong>${b.ok?'PASS':'FAIL'}</strong></div>`;$('boundary').innerHTML=`${pill(b.ok?'succeeded':'failed')}<div class="row">${b.checks.map(x=>`${esc(x.name)}: ${x.orphaned_or_unconsumed}`).join('<br>')}</div>`;$('packages').innerHTML=governance.packages.map(p=>`<div class="row">${pill(p.status)} <strong>${esc(p.requested_action)}</strong><div class="muted">${esc(p.id)} · ${esc(p.mission_id)}</div><button onclick="selectPackage('${esc(p.id)}')">Select</button></div>`).join('')||'No packages.';$('grants').innerHTML=governance.grants.map(g=>`<div class="row">${pill(g.status)} <strong>${esc(g.capability)}</strong><div class="muted">${esc(g.id)} · max $${Number(g.maximum_cost_usd).toFixed(2)}</div><button onclick="selectGrant('${esc(g.id)}','${esc(g.capability)}')">Use</button></div>`).join('')||'No grants.';$('runs').innerHTML=foundry.action_runs.map(r=>`<div class="row">${pill(r.status)} <strong>${esc(r.action)}</strong><div class="muted">${esc(r.id)} · attempts ${r.attempts}</div></div>`).join('')||'No action runs.';$('agents').innerHTML=foundry.agents.map(a=>`<div class="row">${pill(a.status)} <strong>${esc(a.name)}</strong><div class="muted">${esc(a.id)} · parent ${esc(a.parent_agent_id)}</div></div>`).join('')||'No child agents.';const deployments=foundry.deployments.map(d=>`<div class="row">${pill(d.status)} <strong>${esc(d.environment)} / ${esc(d.app_id)}</strong><div class="muted">${esc(d.release_id)}</div></div>`).join('');const spends=foundry.spend_receipts.map(s=>`<div class="row">${pill(s.provider_status)} <strong>$${Number(s.amount_usd).toFixed(2)} ${esc(s.vendor)}</strong><div class="muted">${esc(s.external_reference)}</div></div>`).join('');$('resources').innerHTML=deployments+spends||'No deployments or spend receipts.'}
+function selectPackage(id){$('reviewPackageId').value=id}function selectGrant(id,action){$('grantId').value=id;$('foundryAction').value=action;loadTemplate();window.scrollTo({top:$('grantId').getBoundingClientRect().top+window.scrollY-150,behavior:'smooth'})}
+async function setControls(update,label){try{await api('/api/v1/governance/controls',{method:'POST',body:JSON.stringify({...update,reason:label})});await refreshAll()}catch(e){show(e.message,'error')}}
+async function submitPackage(){try{const body={mission_id:$('missionId').value.trim(),requested_action:$('requestedAction').value,risk_tier:Number($('riskTier').value),estimated_cost_usd:Number($('cost').value),artifact_sha256:$('artifactHash').value.trim(),evidence_ids:$('evidenceIds').value.split(',').map(v=>v.trim()).filter(Boolean),tests:[{name:'worker acceptance suite',status:'passed',evidence_id:$('evidenceIds').value.split(',')[0]?.trim()||null}],rollback_plan:{procedure:$('rollback').value.trim(),verification:'boundary and health checks pass'},declared_risks:[]};const x=await api('/api/v1/governance/packages',{method:'POST',body:JSON.stringify(body)});$('reviewPackageId').value=x.package.id;show(`Submitted ${x.package.id}`,'success');await refreshAll()}catch(e){show(e.message,'error')}}
+async function reviewPackage(){try{const stage=$('reviewStage').value;const x=await api(`/api/v1/governance/packages/${encodeURIComponent($('reviewPackageId').value.trim())}/${stage}-review`,{method:'POST',body:JSON.stringify({decision:$('decision').value,reason:$('reviewReason').value.trim()})});show(`${stage} decision: ${x.package.status}`,'success');await refreshAll()}catch(e){show(e.message,'error')}}
+async function executeFoundry(){try{const action=$('foundryAction').value,payload=JSON.parse($('actionPayload').value||'{}');payload.grant_id=$('grantId').value.trim();const x=await api(`/api/v1/foundry/actions/${encodeURIComponent(action)}`,{method:'POST',body:JSON.stringify(payload)});show(JSON.stringify(x.execution,null,2),'success');await refreshAll()}catch(e){show(e.message,'error')}}
+async function verifyAll(){try{const [ledger,boundary]=await Promise.all([api('/api/v1/governance/ledger/verify'),api('/api/v1/foundry/boundary/verify')]);$('ledger').className=ledger.report.ok&&boundary.report.ok?'success':'error';$('ledger').textContent=JSON.stringify({governance_ledger:ledger.report,foundry_boundary:boundary.report},null,2)}catch(e){$('ledger').className='error';$('ledger').textContent=e.message}}
+$('token').value=sessionStorage.getItem('cyvxGovernanceToken')||'';loadTemplate();if(token())refreshAll();
 </script>
-</body>
-</html>
+</body></html>

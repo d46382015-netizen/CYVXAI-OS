@@ -7,6 +7,7 @@ const { spawnSync } = require("node:child_process");
 
 const root = path.resolve(__dirname, "..");
 const required = [
+  "api/runtime-v7.js",
   "core/ventures/production-audit-venture.js",
   "core/integrations/supabase-persistence-adapter.js",
   "scripts/run-first-governed-venture.js",
@@ -43,6 +44,8 @@ if (tests.status !== 0) process.exit(tests.status || 1);
 
 const venture = fs.readFileSync(path.join(root, "scripts", "run-first-governed-venture.js"), "utf8");
 const workflow = fs.readFileSync(path.join(root, ".github", "workflows", "cyvx-production-activation.yml"), "utf8");
+const runtime = fs.readFileSync(path.join(root, "api", "runtime-v7.js"), "utf8");
+const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const checks = {
   child_creation_grant: /requestedAction:\s*"create_agent"/.test(venture),
   staging_grant: /requestedAction:\s*"deploy_staging"/.test(venture),
@@ -51,7 +54,11 @@ const checks = {
   production_gate: /evaluateProductionGate/.test(venture),
   protected_environment: /environment:\s*production/.test(workflow),
   schema_deployment: /CYVX_ACTIVATION_APPLY_SCHEMA:\s*'true'/.test(workflow),
-  evidence_artifact: /production-activation-latest\.json/.test(workflow)
+  evidence_artifact: /production-activation-latest\.json/.test(workflow),
+  canonical_unified_start: packageJson.scripts.start === "node ./api/runtime-v7.js",
+  mission_worker_created: /publicRuntime\.missions\.createWorker/.test(runtime),
+  mission_worker_started: /missionWorker\.start\(\)/.test(runtime),
+  mission_worker_stopped: /missionWorker\.stop\(\)/.test(runtime)
 };
 if (!Object.values(checks).every(Boolean)) fail("ACTIVATION_CONTRACT_INCOMPLETE", { checks });
 
@@ -62,5 +69,6 @@ process.stdout.write(`${JSON.stringify({
   checks,
   first_venture: "production-audit-v1",
   autonomous_stage: "staging_validation",
-  production_requires_external_demand_evidence: true
+  production_requires_external_demand_evidence: true,
+  unified_runtime_worker: true
 })}\n`);

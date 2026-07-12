@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CYVX Autonomous Governance</title>
+<style>
+:root{color-scheme:dark;--bg:#090d14;--panel:#121927;--line:#273249;--text:#edf3ff;--muted:#9aa8bd;--ok:#48d597;--warn:#ffbf5b;--bad:#ff6f7d;--accent:#75a7ff}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#090d14,#0d1320);color:var(--text);font:14px/1.45 system-ui,sans-serif}header{padding:24px;display:flex;gap:18px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);position:sticky;top:0;background:#090d14ee;backdrop-filter:blur(12px);z-index:4}h1,h2,h3,p{margin:0}h1{font-size:22px}.muted{color:var(--muted)}main{max-width:1400px;margin:auto;padding:20px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 12px 35px #0004}.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-6{grid-column:span 6}.span-4{grid-column:span 4}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{padding:14px;border:1px solid var(--line);border-radius:12px}.stat strong{font-size:22px;display:block}.controls,.actions{display:flex;gap:8px;flex-wrap:wrap}button,input,select,textarea{background:#0b111d;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px;font:inherit}input,select,textarea{width:100%}textarea{min-height:88px;resize:vertical}button{cursor:pointer;font-weight:700}button:hover{border-color:var(--accent)}button.danger{border-color:#8e3441;color:#ffbac2}button.safe{border-color:#247b59;color:#9cf5cc}.form{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.full{grid-column:1/-1}.row{padding:12px 0;border-top:1px solid var(--line)}.row:first-child{border-top:0}.pill{display:inline-flex;padding:3px 8px;border-radius:999px;background:#202a3d;color:#dce8ff;font-size:12px}.pill.authorized,.pill.consumed{background:#153c30;color:#93efc8}.pill.blocked,.pill.denied,.pill.rejected,.pill.quarantined{background:#4b2028;color:#ffc0c7}.pill.awaiting_supervisor,.pill.awaiting_boss,.pill.remediation_required,.pill.human_exception{background:#4a3816;color:#ffd990}code{color:#bcd2ff;word-break:break-all}.notice{padding:10px;border-left:3px solid var(--warn);background:#241d11;border-radius:7px}.error{color:#ffafb8;white-space:pre-wrap}.success{color:#8ee8bd;white-space:pre-wrap}details summary{cursor:pointer}.token{max-width:560px}.package-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}@media(max-width:900px){.span-8,.span-6,.span-4{grid-column:span 12}.stats{grid-template-columns:repeat(2,1fr)}header{align-items:flex-start;flex-direction:column}.form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>CYVX Autonomous Governance</h1><p class="muted">Worker → Supervisor → Boss → deterministic policy gate → scoped capability grant</p></div>
+  <div class="actions token"><input id="token" type="password" placeholder="Bearer token"><button onclick="saveToken()">Save token</button><button onclick="refreshAll()">Refresh</button></div>
+</header>
+<main>
+<div class="grid">
+  <section class="panel span-12">
+    <div class="notice"><strong>Local identities:</strong> <code>agent-local</code>, <code>supervisor-local</code>, and <code>boss-local</code>. Obtain tokens from <code>POST /api/v1/auth/token</code>. Production disables local token issuance.</div>
+  </section>
+
+  <section class="panel span-8">
+    <h2>Control plane</h2><p class="muted">Emergency controls revoke active grants when external actions are stopped.</p>
+    <div class="stats" id="stats" style="margin-top:14px"></div>
+    <div class="controls" style="margin-top:14px">
+      <button class="danger" onclick="setControls({global_stop:true},'Global stop')">Global stop</button>
+      <button class="safe" onclick="setControls({global_stop:false},'Resume')">Resume</button>
+      <button onclick="setControls({spending_frozen:true},'Freeze spending')">Freeze spending</button>
+      <button onclick="setControls({spending_frozen:false},'Unfreeze spending')">Unfreeze spending</button>
+      <button onclick="setControls({agent_creation_disabled:true},'Disable agent creation')">Disable agent creation</button>
+      <button onclick="setControls({external_actions_disabled:true},'Disable external actions')">Disable external actions</button>
+    </div>
+    <pre id="status" class="muted"></pre>
+  </section>
+
+  <section class="panel span-4">
+    <h2>Constitution</h2>
+    <div id="constitution" class="row muted">Load the dashboard to inspect active policy.</div>
+    <button onclick="verifyLedger()">Verify evidence ledger</button>
+    <pre id="ledger"></pre>
+  </section>
+
+  <section class="panel span-6">
+    <h2>Submit worker package</h2><p class="muted">Use a worker token. All fields become part of the signed review package.</p>
+    <div class="form" style="margin-top:12px">
+      <label>Mission ID<input id="missionId" placeholder="mission_..."></label>
+      <label>Requested action<input id="requestedAction" value="deploy_staging"></label>
+      <label>Risk tier<select id="riskTier"><option>0</option><option selected>1</option><option>2</option><option>3</option></select></label>
+      <label>Estimated cost USD<input id="cost" type="number" min="0" step="0.01" value="0"></label>
+      <label class="full">Artifact SHA-256<input id="artifactHash" value="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"></label>
+      <label class="full">Evidence IDs, comma separated<input id="evidenceIds" placeholder="evidence_1,evidence_2"></label>
+      <label class="full">Rollback plan<textarea id="rollback">Restore the prior release and verify the health endpoint.</textarea></label>
+      <button class="full" onclick="submitPackage()">Submit to Supervisor</button>
+    </div>
+  </section>
+
+  <section class="panel span-6">
+    <h2>Review package</h2><p class="muted">Switch tokens between Supervisor and Boss identities before each review.</p>
+    <div class="form" style="margin-top:12px">
+      <label class="full">Package ID<input id="reviewPackageId" placeholder="govpkg_..."></label>
+      <label>Review stage<select id="reviewStage"><option value="supervisor">Supervisor</option><option value="boss">Boss</option></select></label>
+      <label>Decision<select id="decision"><option value="approved">approved</option><option value="remediation_required">remediation_required</option><option value="escalation_required">escalation_required</option><option value="authorize">authorize</option><option value="deny">deny</option><option value="quarantine">quarantine</option><option value="human_exception">human_exception</option></select></label>
+      <label class="full">Reason<textarea id="reviewReason">Evidence, tests, risk, cost, and rollback requirements were evaluated.</textarea></label>
+      <button class="full" onclick="reviewPackage()">Submit signed review</button>
+    </div>
+  </section>
+
+  <section class="panel span-8"><h2>Governance packages</h2><div id="packages" class="muted">No data loaded.</div></section>
+  <section class="panel span-4"><h2>Capability grants</h2><div id="grants" class="muted">No data loaded.</div></section>
+</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);let dashboard=null;
+function token(){return $('token').value.trim()||sessionStorage.getItem('cyvxGovernanceToken')||''}
+function saveToken(){sessionStorage.setItem('cyvxGovernanceToken',$('token').value.trim());show('Token saved for this browser session.','success')}
+async function api(path,options={}){const headers={'content-type':'application/json',...(options.headers||{})};if(token())headers.authorization=`Bearer ${token()}`;const response=await fetch(path,{...options,headers});const body=await response.json().catch(()=>({message:'Invalid JSON response'}));if(!response.ok)throw new Error(`${body.error||response.status}: ${body.message||'Request failed'}${body.details?'\n'+JSON.stringify(body.details,null,2):''}`);return body}
+function show(message,kind='muted'){$('status').className=kind;$('status').textContent=message}
+function esc(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]))}
+function pill(status){return `<span class="pill ${esc(status)}">${esc(status)}</span>`}
+async function refreshAll(){try{const body=await api('/api/v1/governance/dashboard');dashboard=body.dashboard;render();show('Dashboard refreshed.','success')}catch(error){show(error.message,'error')}}
+function render(){const d=dashboard;if(!d)return;const c=d.controls;$('stats').innerHTML=`<div class="stat"><span class="muted">Global stop</span><strong>${c.global_stop?'ON':'OFF'}</strong></div><div class="stat"><span class="muted">Monthly spend</span><strong>$${Number(d.monthly_spend_usd).toFixed(2)}</strong></div><div class="stat"><span class="muted">Active reservations</span><strong>$${Number(d.active_grant_reservations_usd).toFixed(2)}</strong></div><div class="stat"><span class="muted">Packages</span><strong>${d.packages.length}</strong></div>`;const p=d.constitution.policy;$('constitution').innerHTML=`<p><strong>Version ${esc(p.version)}</strong></p><p>Max autonomous risk: ${esc(p.max_autonomous_risk_tier)}</p><p>Per-action limit: $${esc(p.maximum_action_cost_usd)}</p><p>Monthly limit: $${esc(p.maximum_monthly_cost_usd)}</p><p>Policy hash:</p><code>${esc(d.constitution.policy_hash)}</code>`;$('packages').innerHTML=d.packages.length?d.packages.map(pkg=>`<div class="row"><div>${pill(pkg.status)} <strong>${esc(pkg.requested_action)}</strong></div><div class="muted">${esc(pkg.id)} · mission ${esc(pkg.mission_id)} · tier ${esc(pkg.risk_tier)} · $${Number(pkg.estimated_cost_usd).toFixed(2)}</div><div class="package-actions"><button onclick="selectPackage('${esc(pkg.id)}')">Review</button></div></div>`).join(''):'No packages.';$('grants').innerHTML=d.grants.length?d.grants.map(g=>`<div class="row"><div>${pill(g.status)} <strong>${esc(g.capability)}</strong></div><div class="muted">${esc(g.id)}</div><div>Max $${Number(g.maximum_cost_usd).toFixed(2)}</div></div>`).join(''):'No grants.'}
+function selectPackage(id){$('reviewPackageId').value=id;window.scrollTo({top:$('reviewPackageId').getBoundingClientRect().top+window.scrollY-120,behavior:'smooth'})}
+async function setControls(update,label){try{await api('/api/v1/governance/controls',{method:'POST',body:JSON.stringify({...update,reason:label})});await refreshAll()}catch(error){show(error.message,'error')}}
+async function submitPackage(){try{const body={mission_id:$('missionId').value.trim(),requested_action:$('requestedAction').value.trim(),risk_tier:Number($('riskTier').value),estimated_cost_usd:Number($('cost').value),artifact_sha256:$('artifactHash').value.trim(),evidence_ids:$('evidenceIds').value.split(',').map(v=>v.trim()).filter(Boolean),tests:[{name:'worker acceptance suite',status:'passed',evidence_id:$('evidenceIds').value.split(',')[0]?.trim()||null}],rollback_plan:{procedure:$('rollback').value.trim(),verification:'health and acceptance checks pass'},declared_risks:[]};const result=await api('/api/v1/governance/packages',{method:'POST',body:JSON.stringify(body)});$('reviewPackageId').value=result.package.id;show(`Submitted ${result.package.id}`,'success');await refreshAll()}catch(error){show(error.message,'error')}}
+async function reviewPackage(){try{const stage=$('reviewStage').value;const path=`/api/v1/governance/packages/${encodeURIComponent($('reviewPackageId').value.trim())}/${stage}-review`;const result=await api(path,{method:'POST',body:JSON.stringify({decision:$('decision').value,reason:$('reviewReason').value.trim()})});show(`${stage} review complete: ${result.package.status}`,'success');await refreshAll()}catch(error){show(error.message,'error')}}
+async function verifyLedger(){try{const body=await api('/api/v1/governance/ledger/verify');$('ledger').className=body.report.ok?'success':'error';$('ledger').textContent=JSON.stringify(body.report,null,2)}catch(error){$('ledger').className='error';$('ledger').textContent=error.message}}
+$('token').value=sessionStorage.getItem('cyvxGovernanceToken')||'';if(token())refreshAll();
+</script>
+</body>
+</html>

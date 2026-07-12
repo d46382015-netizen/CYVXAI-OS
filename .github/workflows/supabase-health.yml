@@ -1,0 +1,35 @@
+name: Supabase Health
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 9 * * *'
+  push:
+    branches:
+      - main
+    paths:
+      - 'config/public-runtime.json'
+      - 'core/integrations/supabase-*.js'
+      - 'api/governance-public.js'
+      - 'scripts/verify-supabase.js'
+      - 'test/supabase-public-config.test.js'
+      - 'package.json'
+      - 'package-lock.json'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-live-project:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify runtime and live Supabase project
+        run: npm run verify:supabase:live

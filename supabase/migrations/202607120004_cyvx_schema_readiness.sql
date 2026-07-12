@@ -43,6 +43,50 @@ begin
 end;
 $$;
 
+create or replace function public.cyvx_guard_membership_change()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare actor_role text;
+begin
+  if auth.role() = 'service_role' then
+    if tg_op = 'DELETE' then return old; end if;
+    return new;
+  end if;
+
+  select m.role into actor_role
+  from public.organization_members m
+  where m.organization_id = old.organization_id
+    and m.user_id = auth.uid()
+    and m.active;
+
+  if actor_role is null then
+    raise exception 'active organization membership is required' using errcode = '42501';
+  end if;
+
+  if tg_op = 'UPDATE' then
+    if new.organization_id is distinct from old.organization_id or new.user_id is distinct from old.user_id then
+      raise exception 'membership organization and user identity are immutable' using errcode = '42501';
+    end if;
+    if (old.role = 'owner' or new.role = 'owner') and actor_role <> 'owner' then
+      raise exception 'only an owner may create, modify, or demote an owner membership' using errcode = '42501';
+    end if;
+    return new;
+  end if;
+
+  if tg_op = 'DELETE' and old.role = 'owner' and actor_role <> 'owner' then
+    raise exception 'only an owner may remove an owner membership' using errcode = '42501';
+  end if;
+  return old;
+end;
+$$;
+
+create trigger organization_members_privilege_guard
+before update or delete on public.organization_members
+for each row execute function public.cyvx_guard_membership_change();
+
 create or replace function public.cyvx_schema_status()
 returns jsonb
 language sql
@@ -53,7 +97,8 @@ as $$
   with required_tables(name) as (
     values
       ('organizations'),('organization_members'),('agents'),('missions'),('mission_assignments'),
-      ('mission_events'),('artifacts'),('evidence_records'),('governance_packages'),
+      ('mission_events'),('artifacts'),('evidence_records'),('governance_principals'),
+      ('governance_constitutions'),('governance_controls'),('governance_packages'),
       ('governance_reviews'),('governance_capability_grants'),('governance_budget_ledger'),
       ('governance_events'),('foundry_action_runs'),('foundry_deployments'),
       ('foundry_spend_receipts'),('outcomes')
@@ -78,8 +123,9 @@ as $$
     from required_constraints r
   ), required_triggers(name) as (
     values
-      ('organization_members_last_owner'),('agents_creation_grant'),
-      ('foundry_runs_grant_binding'),('deployments_grant_binding'),('spend_grant_binding'),
+      ('organization_members_last_owner'),('organization_members_privilege_guard'),
+      ('agents_creation_grant'),('foundry_runs_grant_binding'),
+      ('deployments_grant_binding'),('spend_grant_binding'),
       ('artifacts_append_only'),('evidence_append_only'),('governance_events_append_only')
   ), trigger_checks as (
     select r.name,
@@ -125,6 +171,7 @@ revoke all on function public.cyvx_set_updated_at() from public, anon, authentic
 revoke all on function public.cyvx_reject_mutation() from public, anon, authenticated;
 revoke all on function public.cyvx_preserve_organization_id() from public, anon, authenticated;
 revoke all on function public.cyvx_protect_last_owner() from public, anon, authenticated;
+revoke all on function public.cyvx_guard_membership_change() from public, anon, authenticated;
 revoke all on function public.cyvx_validate_agent_creation_grant() from public, anon, authenticated;
 revoke all on function public.cyvx_validate_foundry_grant_binding() from public, anon, authenticated;
 revoke all on function public.cyvx_current_org_claim() from public;

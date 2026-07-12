@@ -9,6 +9,11 @@ const { SupabaseServiceRuntime, randomPassword } = require("../core/integrations
 const root = path.resolve(__dirname, "..");
 const secretFile = path.resolve(process.env.CYVX_BOOTSTRAP_SECRET_FILE || path.join(root, ".cyvx", "secrets", "supabase-bootstrap.json"));
 
+function normalizeSingle(value) {
+  if (Array.isArray(value)) return value[0] || null;
+  return value || null;
+}
+
 function readStoredCredentials() {
   try {
     const value = JSON.parse(fs.readFileSync(secretFile, "utf8"));
@@ -72,8 +77,9 @@ async function bootstrap(options = {}) {
     }, { onConflict: "organization_id" });
     if (controls.error) throw controls.error;
   } else {
-    organization = created.data;
+    organization = normalizeSingle(created.data);
   }
+  if (!organization || !organization.id) throw new Error("Organization bootstrap did not return an organization");
 
   if (generatedPassword || stored.owner_email !== ownerEmail) {
     writeStoredCredentials({
@@ -115,4 +121,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { bootstrap, readStoredCredentials, writeStoredCredentials, secretFile };
+module.exports = { bootstrap, normalizeSingle, readStoredCredentials, writeStoredCredentials, secretFile };

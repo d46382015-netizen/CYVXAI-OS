@@ -1,6 +1,6 @@
 {
   "name": "cyvx",
-  "version": "8.2.0",
+  "version": "8.1.0",
   "private": true,
   "type": "commonjs",
   "description": "CYVXAI operating system with durable mission execution, governed agent creation, cloud evidence, and production activation",

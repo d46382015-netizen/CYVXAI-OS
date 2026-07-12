@@ -667,8 +667,13 @@ create trigger governance_events_append_only before update or delete on public.g
 create trigger spend_receipts_append_only before update or delete on public.foundry_spend_receipts for each row execute function public.cyvx_reject_mutation();
 create trigger outcomes_append_only before update or delete on public.outcomes for each row execute function public.cyvx_reject_mutation();
 
-revoke all on all tables in schema public from anon;
-revoke all on all tables in schema public from authenticated;
+revoke all on public.cyvx_schema_migrations, public.organizations, public.organization_members,
+  public.agents, public.missions, public.mission_assignments, public.mission_events,
+  public.artifacts, public.evidence_records, public.governance_principals,
+  public.governance_constitutions, public.governance_controls, public.governance_packages,
+  public.governance_reviews, public.governance_capability_grants, public.governance_budget_ledger,
+  public.governance_events, public.foundry_action_runs, public.foundry_deployments,
+  public.foundry_spend_receipts, public.outcomes from anon, authenticated;
 grant select on public.organizations, public.organization_members, public.agents, public.missions,
   public.mission_assignments, public.mission_events, public.artifacts, public.evidence_records,
   public.governance_principals, public.governance_constitutions, public.governance_controls,

@@ -77,6 +77,32 @@ class SupabasePersistenceAdapter {
     return data;
   }
 
+  async registerChildAgent(agent) {
+    await this.assertReady();
+    requireFields(agent, [
+      "id", "organization_id", "parent_agent_id", "creation_grant_id", "creation_mission_id", "name", "spec_hash"
+    ], "childAgent");
+    const row = {
+      status: "active",
+      lineage_depth: 1,
+      agent_role: "worker",
+      genome: {},
+      capabilities: [],
+      permissions: {},
+      budget: {},
+      ...agent
+    };
+    if (row.lineage_depth < 1) throw new TypeError("Child agent lineage_depth must be at least 1");
+    const data = unwrap(await this.privileged().from("agents").insert(row).select().single(), "register child agent");
+    this.logger.write("info", "supabase.child_agent_registered", {
+      organization_id: row.organization_id,
+      agent_id: row.id,
+      parent_agent_id: row.parent_agent_id,
+      grant_id: row.creation_grant_id
+    });
+    return data;
+  }
+
   async createMission(accessToken, mission) {
     await this.assertReady();
     requireFields(mission, ["id", "organization_id", "title", "objective"], "mission");
@@ -91,6 +117,20 @@ class SupabasePersistenceAdapter {
       ...mission
     };
     return unwrap(await this.scoped(accessToken).from("missions").insert(row).select().single(), "create mission");
+  }
+
+  async updateMission(accessToken, organizationId, missionId, patch) {
+    await this.assertReady();
+    requireFields({ organizationId, missionId }, ["organizationId", "missionId"], "missionUpdate");
+    const allowed = new Set(["title", "objective", "state", "risk_tier", "inputs", "expected_outputs", "acceptance_tests", "required_evidence", "budget", "deadline", "completed_at"]);
+    const update = {};
+    for (const [key, value] of Object.entries(patch || {})) {
+      if (!allowed.has(key)) throw new TypeError(`missionUpdate.${key} is not mutable through the adapter`);
+      update[key] = value;
+    }
+    if (!Object.keys(update).length) throw new TypeError("missionUpdate requires at least one allowed field");
+    return unwrap(await this.scoped(accessToken).from("missions").update(update)
+      .eq("organization_id", organizationId).eq("id", missionId).select().single(), "update mission");
   }
 
   async assignAgent(accessToken, assignment) {

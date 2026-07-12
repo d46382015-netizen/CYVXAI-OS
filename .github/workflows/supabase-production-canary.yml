@@ -1,0 +1,50 @@
+name: Supabase Production Canary
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type CANARY to run the governed production canary
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-production-canary
+  cancel-in-progress: false
+
+jobs:
+  governed-canary:
+    if: inputs.confirmation == 'CANARY'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    env:
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      CYVX_OWNER_EMAIL: ${{ secrets.CYVX_OWNER_EMAIL }}
+      CYVX_OWNER_PASSWORD: ${{ secrets.CYVX_OWNER_PASSWORD }}
+      CYVX_ORG_NAME: CYVX
+      CYVX_ORG_SLUG: cyvx
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Require protected credentials
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -n "${SUPABASE_SECRET_KEY:-}" || { echo 'SUPABASE_SECRET_KEY is missing'; exit 1; }
+          test -n "${CYVX_OWNER_EMAIL:-}" || { echo 'CYVX_OWNER_EMAIL is missing'; exit 1; }
+          test -n "${CYVX_OWNER_PASSWORD:-}" || { echo 'CYVX_OWNER_PASSWORD is missing'; exit 1; }
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify runtime and production schema
+        run: |
+          npm run verify:supabase:agents
+          npm run verify:supabase:schema:live
+      - name: Run governed production canary
+        run: npm run supabase:canary

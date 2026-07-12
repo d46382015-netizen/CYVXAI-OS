@@ -1,0 +1,56 @@
+{
+  "schema": "cyvx-production",
+  "version": 202607120004,
+  "project_ref": "yokpfcbdvszdavohibkh",
+  "artifact_bucket": "cyvx-artifacts",
+  "organization_roles": ["owner", "admin", "supervisor", "boss", "operator", "viewer"],
+  "tables": [
+    "organizations",
+    "organization_members",
+    "agents",
+    "missions",
+    "mission_assignments",
+    "mission_events",
+    "artifacts",
+    "evidence_records",
+    "governance_principals",
+    "governance_constitutions",
+    "governance_controls",
+    "governance_packages",
+    "governance_reviews",
+    "governance_capability_grants",
+    "governance_budget_ledger",
+    "governance_events",
+    "foundry_action_runs",
+    "foundry_deployments",
+    "foundry_spend_receipts",
+    "outcomes"
+  ],
+  "agent_insert_tables": ["mission_events", "artifacts", "evidence_records", "outcomes"],
+  "service_only_write_tables": [
+    "governance_packages",
+    "governance_reviews",
+    "governance_capability_grants",
+    "governance_budget_ledger",
+    "governance_events",
+    "foundry_action_runs",
+    "foundry_deployments",
+    "foundry_spend_receipts"
+  ],
+  "append_only_tables": [
+    "mission_events",
+    "artifacts",
+    "evidence_records",
+    "governance_reviews",
+    "governance_budget_ledger",
+    "governance_events",
+    "foundry_spend_receipts",
+    "outcomes"
+  ],
+  "required_grant_capabilities": [
+    "create_agent",
+    "deploy_staging",
+    "deploy_production",
+    "spend_budget"
+  ]
+}

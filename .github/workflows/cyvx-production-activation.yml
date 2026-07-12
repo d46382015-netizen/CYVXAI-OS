@@ -1,0 +1,58 @@
+name: CYVX Production Activation
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type ACTIVATE to deploy schema, run canary, and stage the first governed venture
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cyvx-production-activation
+  cancel-in-progress: false
+
+jobs:
+  activate:
+    if: inputs.confirmation == 'ACTIVATE'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      CYVX_OWNER_EMAIL: ${{ secrets.CYVX_OWNER_EMAIL }}
+      CYVX_OWNER_PASSWORD: ${{ secrets.CYVX_OWNER_PASSWORD }}
+      CYVX_OWNER_NAME: Dakota Jonsgaard
+      CYVX_ORG_NAME: CYVX
+      CYVX_ORG_SLUG: cyvx
+      CYVX_ACTIVATION_APPLY_SCHEMA: 'true'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Require protected production credentials
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for name in SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD SUPABASE_SECRET_KEY CYVX_OWNER_EMAIL CYVX_OWNER_PASSWORD; do
+            test -n "${!name:-}" || { echo "$name is required" >&2; exit 1; }
+          done
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Run complete governed activation
+        run: npm run production:activate
+      - name: Upload redacted activation evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: cyvx-production-activation-evidence
+          path: .cyvx/evidence/production-activation-latest.json
+          if-no-files-found: error
+          retention-days: 90

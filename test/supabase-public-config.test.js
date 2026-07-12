@@ -7,7 +7,12 @@ const os = require("node:os");
 const path = require("node:path");
 const test = require("node:test");
 const { SupabasePublicConfig } = require("../core/integrations/supabase-public-config");
-const { SupabaseRuntime, parseCookies, serializeCookie } = require("../core/integrations/supabase-runtime");
+const {
+  SupabaseRuntime,
+  EXPECTED_SCHEMA_VERSION,
+  parseCookies,
+  serializeCookie
+} = require("../core/integrations/supabase-runtime");
 const { createPublicGovernanceHandler } = require("../api/governance-public");
 
 function temporaryRepo(config) {
@@ -19,9 +24,29 @@ function temporaryRepo(config) {
 
 function fakeSupabase(overrides = {}) {
   return {
-    status() { return { provider: "supabase", ready: true, project_url: "https://project-ref.supabase.co" }; },
-    async refreshSession(req) { req.supabaseStatus = this.status(); return { ready: true, refreshed: false, user: null }; },
+    status() {
+      return {
+        provider: "supabase",
+        ready: true,
+        project_url: "https://project-ref.supabase.co",
+        expected_schema_version: EXPECTED_SCHEMA_VERSION,
+        cloud_writes_ready: true
+      };
+    },
+    async refreshSession(req) {
+      req.supabaseStatus = this.status();
+      return { ready: true, refreshed: false, user: null };
+    },
     async probe() { return { ok: true, status: "reachable", http_status: 200 }; },
+    async schemaStatus() {
+      return {
+        ok: true,
+        ready: true,
+        status: "ready",
+        expected_version: EXPECTED_SCHEMA_VERSION,
+        applied_version: EXPECTED_SCHEMA_VERSION
+      };
+    },
     ...overrides
   };
 }
@@ -76,7 +101,7 @@ test("server client is created with non-persistent server auth", () => {
   const runtime = new SupabaseRuntime({ repoRoot: root, env: {} });
   const client = runtime.createClient();
   assert.ok(client.auth);
-  assert.ok(client.from("todos"));
+  assert.ok(client.from("missions"));
 });
 
 test("cookie parser and serializer preserve SSR session data", () => {
@@ -110,7 +135,67 @@ test("connectivity probe validates the Supabase auth endpoint without exposing t
   assert.equal(Object.prototype.hasOwnProperty.call(report, "publishable_key"), false);
 });
 
-test("public config and status endpoints are no-cache and other routes receive session middleware", async () => {
+test("schema readiness calls the production RPC and unlocks cloud writes only at the expected version", async () => {
+  const root = temporaryRepo({ supabase: { publishable_key: "sb_publishable_abcdefghijklmnopqrstuvwxyz123456", url: "https://project-ref.supabase.co" } });
+  const requests = [];
+  const runtime = new SupabaseRuntime({
+    repoRoot: root,
+    env: {},
+    schemaCacheMs: 60000,
+    fetch: async (url, options) => {
+      requests.push({ url, options });
+      return {
+        ok: true,
+        status: 200,
+        async json() {
+          return {
+            schema: "cyvx-production",
+            ready: true,
+            applied_version: EXPECTED_SCHEMA_VERSION,
+            expected_version: EXPECTED_SCHEMA_VERSION,
+            tables_ready: true,
+            constraints_ready: true,
+            triggers_ready: true,
+            storage_bucket_ready: true,
+            storage_policies_ready: true
+          };
+        }
+      };
+    }
+  });
+
+  assert.equal(runtime.status().cloud_writes_ready, false);
+  const first = await runtime.schemaStatus({ force: true });
+  assert.equal(first.ready, true);
+  assert.equal(first.applied_version, EXPECTED_SCHEMA_VERSION);
+  assert.equal(requests[0].url, "https://project-ref.supabase.co/rest/v1/rpc/cyvx_schema_status");
+  assert.equal(requests[0].options.method, "POST");
+  assert.equal(runtime.status().cloud_writes_ready, true);
+  await runtime.assertCloudWritesReady({ force: false });
+  assert.equal(requests.length, 1);
+});
+
+test("cloud writes fail closed when the schema RPC is absent or stale", async () => {
+  const root = temporaryRepo({ supabase: { publishable_key: "sb_publishable_abcdefghijklmnopqrstuvwxyz123456", url: "https://project-ref.supabase.co" } });
+  const runtime = new SupabaseRuntime({
+    repoRoot: root,
+    env: {},
+    fetch: async () => ({
+      ok: false,
+      status: 404,
+      async json() { return { message: "function not found" }; }
+    })
+  });
+  const report = await runtime.schemaStatus({ force: true });
+  assert.equal(report.ready, false);
+  assert.equal(report.status, "migration_required");
+  await assert.rejects(
+    runtime.assertCloudWritesReady(),
+    (error) => error.code === "SUPABASE_SCHEMA_NOT_READY" && error.status === 503
+  );
+});
+
+test("public config, runtime status, and schema status are no-cache; other routes receive session middleware", async () => {
   let delegated = false;
   let refreshed = false;
   const supabase = fakeSupabase({
@@ -145,7 +230,12 @@ test("public config and status endpoints are no-cache and other routes receive s
 
     const statusResponse = await fetch(`http://127.0.0.1:${address.port}/api/v1/runtime/supabase/status`);
     const statusBody = await statusResponse.json();
-    assert.equal(statusBody.supabase.ready, true);
+    assert.equal(statusBody.supabase.cloud_writes_ready, true);
+
+    const schemaResponse = await fetch(`http://127.0.0.1:${address.port}/api/v1/runtime/supabase/schema-status`);
+    const schemaBody = await schemaResponse.json();
+    assert.equal(schemaResponse.status, 200);
+    assert.equal(schemaBody.cloud_writes_ready, true);
 
     const fallback = await fetch(`http://127.0.0.1:${address.port}/healthz`);
     assert.equal(fallback.status, 204);
@@ -154,7 +244,7 @@ test("public config and status endpoints are no-cache and other routes receive s
   });
 });
 
-test("live probe endpoint requires authentication", async () => {
+test("protected probe requires authentication and both connectivity and schema readiness", async () => {
   const handler = createPublicGovernanceHandler({
     baseHandle(req, res) { res.statusCode = 204; res.end(); },
     publicConfig: { resolve() { return { provider: "supabase", ready: true, missing: [], client: {} }; } },
@@ -179,6 +269,8 @@ test("live probe endpoint requires authentication", async () => {
     });
     const body = await accepted.json();
     assert.equal(accepted.status, 200);
-    assert.equal(body.report.status, "reachable");
+    assert.equal(body.cloud_writes_ready, true);
+    assert.equal(body.report.connectivity.status, "reachable");
+    assert.equal(body.report.schema.applied_version, EXPECTED_SCHEMA_VERSION);
   });
 });

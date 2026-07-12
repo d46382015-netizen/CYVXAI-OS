@@ -32,13 +32,13 @@ end;
 $$;
 
 select public.cyvx_add_constraint('agents', 'agents_parent_same_org_fk',
-  'foreign key (organization_id, parent_agent_id) references public.agents(organization_id, id) on delete set null');
+  'foreign key (organization_id, parent_agent_id) references public.agents(organization_id, id) on delete restrict');
 select public.cyvx_add_constraint('agents', 'agents_creation_mission_same_org_fk',
   'foreign key (organization_id, creation_mission_id) references public.missions(organization_id, id) on delete restrict');
 select public.cyvx_add_constraint('agents', 'agents_creation_grant_same_org_fk',
   'foreign key (organization_id, creation_grant_id) references public.governance_capability_grants(organization_id, id) on delete restrict');
 select public.cyvx_add_constraint('missions', 'missions_owner_agent_same_org_fk',
-  'foreign key (organization_id, owner_agent_id) references public.agents(organization_id, id) on delete set null');
+  'foreign key (organization_id, owner_agent_id) references public.agents(organization_id, id) on delete restrict');
 select public.cyvx_add_constraint('mission_assignments', 'assignments_mission_same_org_fk',
   'foreign key (organization_id, mission_id) references public.missions(organization_id, id) on delete cascade');
 select public.cyvx_add_constraint('mission_assignments', 'assignments_agent_same_org_fk',
@@ -46,17 +46,17 @@ select public.cyvx_add_constraint('mission_assignments', 'assignments_agent_same
 select public.cyvx_add_constraint('mission_events', 'mission_events_mission_same_org_fk',
   'foreign key (organization_id, mission_id) references public.missions(organization_id, id) on delete cascade');
 select public.cyvx_add_constraint('mission_events', 'mission_events_agent_same_org_fk',
-  'foreign key (organization_id, agent_id) references public.agents(organization_id, id) on delete set null');
+  'foreign key (organization_id, agent_id) references public.agents(organization_id, id) on delete restrict');
 select public.cyvx_add_constraint('artifacts', 'artifacts_mission_same_org_fk',
   'foreign key (organization_id, mission_id) references public.missions(organization_id, id) on delete cascade');
 select public.cyvx_add_constraint('artifacts', 'artifacts_agent_same_org_fk',
-  'foreign key (organization_id, agent_id) references public.agents(organization_id, id) on delete set null');
+  'foreign key (organization_id, agent_id) references public.agents(organization_id, id) on delete restrict');
 select public.cyvx_add_constraint('evidence_records', 'evidence_mission_same_org_fk',
   'foreign key (organization_id, mission_id) references public.missions(organization_id, id) on delete cascade');
 select public.cyvx_add_constraint('evidence_records', 'evidence_agent_same_org_fk',
-  'foreign key (organization_id, agent_id) references public.agents(organization_id, id) on delete set null');
+  'foreign key (organization_id, agent_id) references public.agents(organization_id, id) on delete restrict');
 select public.cyvx_add_constraint('evidence_records', 'evidence_artifact_same_org_fk',
-  'foreign key (organization_id, artifact_id) references public.artifacts(organization_id, id) on delete set null');
+  'foreign key (organization_id, artifact_id) references public.artifacts(organization_id, id) on delete restrict');
 select public.cyvx_add_constraint('governance_packages', 'packages_mission_same_org_fk',
   'foreign key (organization_id, mission_id) references public.missions(organization_id, id) on delete restrict');
 select public.cyvx_add_constraint('governance_packages', 'packages_worker_same_org_fk',
@@ -74,9 +74,9 @@ select public.cyvx_add_constraint('governance_budget_ledger', 'budget_package_sa
 select public.cyvx_add_constraint('governance_budget_ledger', 'budget_grant_same_org_fk',
   'foreign key (organization_id, grant_id) references public.governance_capability_grants(organization_id, id) on delete restrict');
 select public.cyvx_add_constraint('governance_events', 'events_package_same_org_fk',
-  'foreign key (organization_id, package_id) references public.governance_packages(organization_id, id) on delete set null');
+  'foreign key (organization_id, package_id) references public.governance_packages(organization_id, id) on delete restrict');
 select public.cyvx_add_constraint('governance_events', 'events_mission_same_org_fk',
-  'foreign key (organization_id, mission_id) references public.missions(organization_id, id) on delete set null');
+  'foreign key (organization_id, mission_id) references public.missions(organization_id, id) on delete restrict');
 select public.cyvx_add_constraint('foundry_action_runs', 'runs_grant_same_org_fk',
   'foreign key (organization_id, grant_id) references public.governance_capability_grants(organization_id, id) on delete restrict');
 select public.cyvx_add_constraint('foundry_action_runs', 'runs_package_same_org_fk',
@@ -100,9 +100,9 @@ select public.cyvx_add_constraint('foundry_spend_receipts', 'spend_worker_same_o
 select public.cyvx_add_constraint('outcomes', 'outcomes_mission_same_org_fk',
   'foreign key (organization_id, mission_id) references public.missions(organization_id, id) on delete cascade');
 select public.cyvx_add_constraint('outcomes', 'outcomes_agent_same_org_fk',
-  'foreign key (organization_id, agent_id) references public.agents(organization_id, id) on delete set null');
+  'foreign key (organization_id, agent_id) references public.agents(organization_id, id) on delete restrict');
 select public.cyvx_add_constraint('outcomes', 'outcomes_evidence_same_org_fk',
-  'foreign key (organization_id, evidence_id) references public.evidence_records(organization_id, id) on delete set null');
+  'foreign key (organization_id, evidence_id) references public.evidence_records(organization_id, id) on delete restrict');
 
 create or replace function public.cyvx_preserve_organization_id()
 returns trigger

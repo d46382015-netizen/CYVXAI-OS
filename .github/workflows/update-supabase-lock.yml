@@ -1,4 +1,4 @@
-name: Update Supabase lockfile
+name: Verify Supabase integration
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  lock-and-test:
+  verify-and-lock:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -22,11 +22,11 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-      - name: Install and lock Supabase packages
-        run: npm install --save-exact @supabase/supabase-js @supabase/ssr --no-audit --no-fund
-      - name: Validate Supabase runtime
-        run: node --test ./test/supabase-public-config.test.js
-      - name: Commit deterministic dependency lock
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify configured Supabase project live
+        run: npm run verify:supabase:live
+      - name: Commit deterministic dependency lock if needed
         shell: bash
         run: |
           set -Eeuo pipefail

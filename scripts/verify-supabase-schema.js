@@ -38,7 +38,6 @@ const requiredTokens = [
   "cyvx_artifacts_select",
   "cyvx_artifacts_insert"
 ];
-
 for (const token of requiredTokens) {
   if (!sql.includes(token)) fail("REQUIRED_SCHEMA_PRIMITIVE_MISSING", { token });
 }
@@ -47,11 +46,19 @@ for (const table of contract.tables) {
   if (!sql.includes(`public.${table}`)) fail("CONTRACT_TABLE_MISSING", { table });
 }
 
+const appendOnlyTriggers = {
+  mission_events: "mission_events_append_only",
+  artifacts: "artifacts_append_only",
+  evidence_records: "evidence_append_only",
+  governance_reviews: "reviews_append_only",
+  governance_budget_ledger: "budget_append_only",
+  governance_events: "governance_events_append_only",
+  foundry_spend_receipts: "spend_receipts_append_only",
+  outcomes: "outcomes_append_only"
+};
 for (const table of contract.append_only_tables) {
-  const expected = table === "evidence_records" ? "evidence_append_only"
-    : table === "foundry_spend_receipts" ? "spend_receipts_append_only"
-      : `${table}_append_only`;
-  if (!sql.includes(expected)) fail("APPEND_ONLY_TRIGGER_MISSING", { table, expected });
+  const expected = appendOnlyTriggers[table];
+  if (!expected || !sql.includes(expected)) fail("APPEND_ONLY_TRIGGER_MISSING", { table, expected });
 }
 
 for (const capability of contract.required_grant_capabilities) {
@@ -78,8 +85,13 @@ if (Number(contract.version) !== Number(EXPECTED_SCHEMA_VERSION)) {
 
 for (const table of contract.service_only_write_tables) {
   const escaped = table.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const directWritePolicy = new RegExp(`create\\s+policy[\\s\\S]{0,120}on\\s+public\\.${escaped}[\\s\\S]{0,100}for\\s+(insert|update|delete|all)\\s+to\\s+authenticated`, "i");
+  const directWritePolicy = new RegExp(`create\\s+policy[\\s\\S]{0,160}on\\s+public\\.${escaped}[\\s\\S]{0,120}for\\s+(insert|update|delete|all)\\s+to\\s+authenticated`, "i");
   if (directWritePolicy.test(sql)) fail("SERVICE_ONLY_TABLE_HAS_DIRECT_WRITE_POLICY", { table });
+}
+
+const expectedMigrationVersion = String(contract.version);
+if (!sql.includes(`values (${expectedMigrationVersion}, 'cyvx_schema_readiness'`)) {
+  fail("READINESS_MIGRATION_VERSION_MISSING", { expected_version: contract.version });
 }
 
 async function main() {

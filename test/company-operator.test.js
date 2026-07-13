@@ -12,6 +12,7 @@ const { createCompanyOperatorRuntime, createCompanyOperatorHttpServer } = requir
 function fixture() {
   const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), "cyvx-company-operator-"));
   const runtime = createMissionRuntime({ dataRoot, allowLocalAuth: true });
+  runtime.logger = runtime.logger || runtime.store.logger;
   const operator = new CompanyOperator(runtime, {
     workspaceRoot: path.join(dataRoot, "companies"),
     intelligenceStatePath: path.join(dataRoot, "intelligence", "minnesota", "state.json"),

@@ -302,6 +302,8 @@ class CompanyOperator {
       throw new Error("CompanyOperator requires a CYVX mission runtime");
     }
     this.runtime = runtime;
+    this.logger = runtime.logger || (runtime.store && runtime.store.logger) || { write() {} };
+    runtime.logger = this.logger;
     this.db = runtime.db;
     this.workspaceRoot = path.resolve(options.workspaceRoot || process.env.CYVX_COMPANY_ROOT || path.join(runtime.dataRoot, "companies"));
     this.intelligenceStatePath = path.resolve(options.intelligenceStatePath || process.env.CYVX_MN_STATE_FILE || path.join(runtime.dataRoot, "intelligence", "minnesota", "state.json"));
@@ -588,11 +590,12 @@ class CompanyOperator {
           Number(result.actual_cost_cents || 0), JSON.stringify(result.output || {}), evidence.id,
           completedAt, completedAt, action.id,
         );
+        const qualifiedOpportunities = result.metrics && result.metrics.qualified_opportunities;
         this.db.prepare(`UPDATE operator_companies SET spent_cents=spent_cents+?,last_tick_at=?,updated_at=?,
           qualified_opportunities=CASE WHEN ? IS NULL THEN qualified_opportunities ELSE ? END WHERE id=?`).run(
           Number(result.actual_cost_cents || 0), completedAt, completedAt,
-          result.metrics && result.metrics.qualified_opportunities === undefined ? null : Number(result.metrics.qualified_opportunities),
-          result.metrics && result.metrics.qualified_opportunities === undefined ? 0 : Number(result.metrics.qualified_opportunities),
+          qualifiedOpportunities === undefined ? null : Number(qualifiedOpportunities),
+          qualifiedOpportunities === undefined ? 0 : Number(qualifiedOpportunities),
           company.id,
         );
         this.db.exec("COMMIT");

@@ -68,7 +68,12 @@
     "agency:tick": "node scripts/cyvx-agency-daemon.js",
     "agency:daemon": "node scripts/cyvx-agency-daemon.js start",
     "wiki:generate": "node --check ./scripts/generate-wiki-v2.js && node ./scripts/generate-wiki-v2.js ./dist/wiki",
-    "wiki:publish": "bash ./scripts/publish-wiki.sh"
+    "wiki:publish": "bash ./scripts/publish-wiki.sh",
+    "start:mn": "node ./scripts/start-minnesota-vertical.js",
+    "test:intel:mn": "node --test ./test/minnesota-intelligence.test.js",
+    "verify:intel:mn": "node --check ./services/intelligence/minnesota/index.js && node --check ./services/intelligence/minnesota/server.js && node --check ./scripts/start-minnesota-vertical.js && node --test ./test/minnesota-intelligence.test.js",
+    "intel:mn": "node ./services/intelligence/minnesota/server.js",
+    "intel:mn:refresh": "node ./scripts/refresh-minnesota-intelligence.js"
   },
   "engines": {
     "node": ">=22"

@@ -1,0 +1,43 @@
+name: Apply Company Operator Source Fix
+
+on:
+  pull_request:
+    paths:
+      - "scripts/apply-company-operator-fix.js"
+      - ".github/workflows/company-operator-source-fix.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: company-operator-source-fix-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out pull request branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Apply deterministic source correction
+        run: node scripts/apply-company-operator-fix.js
+
+      - name: Commit corrected operator source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if git diff --quiet -- services/operator/index.js; then
+            echo "Source already corrected"
+            exit 0
+          fi
+          git config user.name "CYVX Production Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add services/operator/index.js
+          git commit -m "Fix operator metric and logger boundaries"
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"

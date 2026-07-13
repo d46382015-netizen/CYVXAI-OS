@@ -31,7 +31,7 @@ jobs:
   verify:
     name: Contract, runtime, evidence, budget, lead, and HTTP verification
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 8
     env:
       NODE_ENV: test
       CYVX_ALLOW_INSECURE_LOCAL: "true"
@@ -51,7 +51,10 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Verify operator syntax and lifecycle
-        run: npm run operator:verify
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout --signal=TERM --kill-after=10s 90s npm run operator:verify 2>&1 | tee /tmp/company-operator-test.log
 
       - name: Verify production startup contract
         shell: bash
@@ -77,6 +80,7 @@ jobs:
         with:
           name: company-operator-verification
           path: |
+            /tmp/company-operator-test.log
             /tmp/company-operator.log
             /tmp/company-operator-health.json
             /tmp/cyvx-company-operator-ci/logs/*.jsonl*

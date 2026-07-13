@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "jurisdiction": "US-MN",
+  "verified_on": "2026-07-12",
+  "sources": [
+    {
+      "id": "mn_osp_vendor_opportunities",
+      "official_url": "https://mn.gov/admin/osp/vendors/solicitations-and-contract-opportunities/",
+      "role": "State procurement opportunity index"
+    },
+    {
+      "id": "mn_osp_goods_services",
+      "official_url": "https://mn.gov/admin/osp/vendors/solicitations-and-contract-opportunities/goods-and-services-solicitation-opportunities/",
+      "role": "Goods and services opportunity gateway"
+    },
+    {
+      "id": "mn_osp_professional_technical",
+      "official_url": "https://mn.gov/admin/osp/vendors/solicitations-and-contract-opportunities/professional-and-technical-solicitation-postings/",
+      "role": "Professional and technical opportunity gateway"
+    },
+    {
+      "id": "mn_admin_construction",
+      "official_url": "https://mn.gov/admin/business/vendor-info/construction-projects/solicitations-announcements/",
+      "role": "Construction solicitations and announcements"
+    },
+    {
+      "id": "mn_mndot_consultant",
+      "official_url": "https://www.dot.state.mn.us/consult/index.html",
+      "role": "MnDOT consultant opportunities"
+    },
+    {
+      "id": "mn_osp_expiring_contracts",
+      "official_url": "https://mn.gov/admin/osp/vendors/solicitations-and-contract-opportunities/contracts-expiring-in-7-months/",
+      "role": "Forward renewal and recompete signal"
+    },
+    {
+      "id": "mn_osp_equity_vendor_directory",
+      "official_url": "https://mn.gov/admin/osp/government/procuregoodsandgeneralservices/tgedvo-directory/",
+      "role": "Certified vendor and NAICS intelligence"
+    },
+    {
+      "id": "mn_sos_business_search",
+      "official_url": "https://mblsportal.sos.mn.gov/Business/Search",
+      "role": "Business registration verification"
+    },
+    {
+      "id": "mn_swift_supplier_portal",
+      "official_url": "https://guest.supplier.systems.state.mn.us/",
+      "role": "Formal solicitation and supplier portal"
+    }
+  ]
+}

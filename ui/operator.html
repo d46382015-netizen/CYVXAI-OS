@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CYVX Autonomous Company Operator</title>
+  <style>
+    :root{color-scheme:dark;--bg:#06101d;--panel:#0c1c2d;--panel2:#10263c;--line:#27445e;--text:#edf7ff;--muted:#9cb3c6;--gold:#e8bd55;--good:#54d69b;--warn:#ffbf69;--bad:#ff7272}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top right,#153754 0,#06101d 42%);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}button,input,textarea,select{font:inherit}button{cursor:pointer}.shell{max-width:1480px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin:8px 0 18px}.eyebrow{color:var(--gold);font-weight:900;letter-spacing:.12em;font-size:.72rem}.top h1{margin:.25rem 0;font-size:clamp(1.8rem,5vw,3.8rem);line-height:.95}.top p{margin:.5rem 0;color:var(--muted);max-width:760px}.health{padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(12,28,45,.8);white-space:nowrap}.grid{display:grid;grid-template-columns:minmax(300px,400px) 1fr;gap:16px}.panel{background:rgba(12,28,45,.94);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 18px 50px rgba(0,0,0,.24)}.panel h2,.panel h3{margin:.2rem 0 .8rem}.stack{display:grid;gap:12px}.field{display:grid;gap:6px}.field label{color:var(--muted);font-size:.85rem;font-weight:700}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#071726;color:var(--text)}textarea{min-height:90px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.button{border:0;border-radius:10px;padding:12px 15px;background:var(--gold);color:#06101d;font-weight:900}.button.secondary{background:#183550;color:var(--text);border:1px solid var(--line)}.button.danger{background:#5a2530;color:#ffdbe0}.button.small{padding:8px 10px;font-size:.85rem}.companies{display:grid;gap:9px;max-height:430px;overflow:auto}.company{padding:12px;border:1px solid var(--line);border-radius:12px;background:#081827;cursor:pointer}.company.active{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}.company strong{display:block}.muted{color:var(--muted)}.status{display:inline-flex;padding:4px 8px;border-radius:999px;background:#17344d;font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em}.status.completed{background:#164b3a;color:#bfffe1}.status.awaiting_approval{background:#4b3915;color:#ffe0a0}.status.paused,.status.failed,.status.stopped{background:#512630;color:#ffd4d9}.cards{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin:12px 0}.metric{padding:14px;border:1px solid var(--line);border-radius:13px;background:#081827}.metric span{display:block;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em}.metric strong{font-size:1.5rem}.progress{height:11px;border-radius:999px;background:#06101d;overflow:hidden;border:1px solid var(--line)}.progress div{height:100%;background:var(--gold);transition:width .25s}.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.details{min-height:540px}.empty{padding:40px 20px;text-align:center;color:var(--muted)}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em}.scroll{overflow:auto}.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8rem;word-break:break-all}.notice{padding:12px;border-radius:10px;background:#142d43;border:1px solid var(--line);margin:10px 0}.notice.good{border-color:#2c805e}.notice.bad{border-color:#8f404a}.split{display:grid;grid-template-columns:1fr 1fr;gap:12px}.auth{display:none;margin-bottom:16px}.auth.show{display:block}.tabs{display:flex;gap:6px;overflow:auto;margin:12px 0}.tab{background:#10263c;color:var(--muted);border:1px solid var(--line);padding:8px 10px;border-radius:8px}.tab.active{color:#07111f;background:var(--gold);border-color:var(--gold)}.tab-pane{display:none}.tab-pane.active{display:block}@media(max-width:980px){.grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}.top{display:block}.health{display:inline-block;margin-top:10px}}@media(max-width:560px){.shell{padding:10px}.row,.split{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}.panel{border-radius:13px;padding:13px}th:nth-child(3),td:nth-child(3){display:none}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <div><div class="eyebrow">CYVX VENTURE OS</div><h1>Autonomous Company Operator</h1><p>Define the outcome. CYVX activates owned business infrastructure, executes governed actions, records proof, measures economics, and learns what works.</p></div>
+      <div id="health" class="health">Connecting…</div>
+    </header>
+
+    <section id="auth" class="panel auth">
+      <h2>Operator authentication</h2>
+      <p class="muted">Production requires a CYVX bearer token. Local development authenticates automatically.</p>
+      <div class="row"><input id="token" type="password" placeholder="Bearer token"><button id="save-token" class="button">Connect</button></div>
+    </section>
+
+    <section class="grid">
+      <aside class="stack">
+        <section class="panel">
+          <h2>Create an operated company</h2>
+          <form id="create-form" class="stack">
+            <div class="field"><label>Company name</label><input name="name" maxlength="160" required placeholder="CYVX Bid & Revenue Sprint"></div>
+            <div class="field"><label>What the company does</label><textarea name="description" maxlength="1200" required placeholder="Evidence-backed bid intelligence and proposal execution for service businesses."></textarea></div>
+            <div class="field"><label>Target customer</label><input name="target_customer" maxlength="500" required placeholder="Minnesota facilities and commercial service contractors"></div>
+            <div class="field"><label>Commercial offer</label><textarea name="offer" maxlength="1000" required placeholder="Find, qualify, and convert high-fit contract opportunities into submission-ready proposal systems."></textarea></div>
+            <div class="row"><div class="field"><label>Price in dollars</label><input name="price" type="number" min="0" step="0.01" value="1500"></div><div class="field"><label>Location</label><input name="location" value="Minnesota"></div></div>
+            <div class="field"><label>Keywords, comma-separated</label><input name="keywords" placeholder="facilities, janitorial, landscaping, proposals"></div>
+            <div class="row"><div class="field"><label>Outcome metric</label><select name="target_metric"><option value="lead_count">Qualified leads</option><option value="revenue_cents">Revenue</option><option value="qualified_opportunities">Qualified opportunities</option></select></div><div class="field"><label>Target value</label><input name="target_value" type="number" min="0" value="1" required></div></div>
+            <div class="row"><div class="field"><label>Maximum budget, dollars</label><input name="max_budget" type="number" min="0" step="0.01" value="0"></div><div class="field"><label>Approval threshold, dollars</label><input name="approval_threshold" type="number" min="0" step="0.01" value="0"></div></div>
+            <div class="field"><label>Deadline</label><input name="deadline" type="datetime-local"></div>
+            <button class="button">Create outcome contract</button>
+          </form>
+          <div id="create-result"></div>
+        </section>
+        <section class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2>Companies</h2><button id="refresh" class="button secondary small">Refresh</button></div>
+          <div id="companies" class="companies"><div class="empty">No companies loaded.</div></div>
+        </section>
+      </aside>
+
+      <section id="details" class="panel details"><div class="empty"><h2>Select or create a company</h2><p>The full outcome contract, mission, action portfolio, evidence, metrics, leads, and learning record will appear here.</p></div></section>
+    </section>
+  </main>
+
+<script>
+(() => {
+  const state = { token: sessionStorage.getItem('cyvx_operator_token') || '', companies: [], selected: null, tab: 'actions' };
+  const $ = (id) => document.getElementById(id);
+  const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
+  const money = (cents) => `$${(Number(cents || 0) / 100).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+  const date = (value) => value ? new Date(value).toLocaleString() : '—';
+  const notice = (text, good=true) => `<div class="notice ${good?'good':'bad'}">${escapeHtml(text)}</div>`;
+
+  async function request(path, options={}) {
+    const headers = {...(options.headers || {})};
+    if (state.token) headers.authorization = `Bearer ${state.token}`;
+    if (options.body && !headers['content-type']) headers['content-type'] = 'application/json';
+    const response = await fetch(path, {...options, headers});
+    const payload = await response.json().catch(() => ({ok:false,message:`HTTP ${response.status}`}));
+    if (!response.ok || payload.ok === false) {
+      const error = new Error(payload.message || payload.error || `HTTP ${response.status}`);
+      error.payload = payload;
+      throw error;
+    }
+    return payload;
+  }
+
+  async function authenticateLocal() {
+    if (state.token) return true;
+    try {
+      const response = await fetch('/api/v1/operator/auth/token', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({organization_id:'default',user_id:'admin-local'})});
+      if (!response.ok) return false;
+      const payload = await response.json();
+      if (!payload.token) return false;
+      state.token = payload.token;
+      sessionStorage.setItem('cyvx_operator_token', state.token);
+      return true;
+    } catch { return false; }
+  }
+
+  async function health() {
+    try {
+      const payload = await request('/healthz');
+      $('health').textContent = `${payload.health.active} active • ${payload.health.companies} total`;
+    } catch (error) { $('health').textContent = 'Operator unavailable'; }
+  }
+
+  function renderCompanies() {
+    if (!state.companies.length) { $('companies').innerHTML = '<div class="empty">No operated companies yet.</div>'; return; }
+    $('companies').innerHTML = state.companies.map((company) => `<article class="company ${state.selected===company.id?'active':''}" data-company="${company.id}"><strong>${escapeHtml(company.name)}</strong><span class="status ${company.status}">${escapeHtml(company.status.replaceAll('_',' '))}</span><div class="muted">${company.counters.leads_count} leads • ${money(company.counters.revenue_cents)} revenue</div></article>`).join('');
+  }
+
+  async function loadCompanies(selectId) {
+    const payload = await request('/api/v1/operator/companies');
+    state.companies = payload.companies;
+    renderCompanies();
+    const id = selectId || state.selected || (state.companies[0] && state.companies[0].id);
+    if (id) await loadCompany(id);
+  }
+
+  function tabButtons() {
+    return ['actions','evidence','metrics','ticks','contract'].map((tab) => `<button class="tab ${state.tab===tab?'active':''}" data-tab="${tab}">${tab}</button>`).join('');
+  }
+
+  function renderCompany(data) {
+    const c = data.company, contract = data.contract, p = data.progress, mission = data.mission;
+    const actions = data.actions || [], evidence = data.evidence || [], metrics = data.metrics || [], ticks = data.ticks || [];
+    const canApprove = c.status === 'awaiting_approval';
+    const canRun = c.status === 'active';
+    const control = c.status === 'active' ? 'pause' : c.status === 'paused' ? 'resume' : null;
+    $('details').innerHTML = `
+      <div style="display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap"><div><div class="eyebrow">${escapeHtml(c.activation_status)}</div><h2>${escapeHtml(c.name)}</h2><p class="muted">${escapeHtml(c.description)}</p></div><span class="status ${c.status}">${escapeHtml(c.status.replaceAll('_',' '))}</span></div>
+      <div class="cards"><div class="metric"><span>Leads</span><strong>${c.counters.leads_count}</strong></div><div class="metric"><span>Revenue</span><strong>${money(c.counters.revenue_cents)}</strong></div><div class="metric"><span>Spend</span><strong>${money(c.counters.spent_cents)}</strong></div><div class="metric"><span>Opportunities</span><strong>${c.counters.qualified_opportunities}</strong></div></div>
+      <div class="notice"><strong>Outcome:</strong> ${escapeHtml(contract.objective)}<div class="muted">${escapeHtml(p.metric)}: ${p.actual} ${escapeHtml(p.comparator)} ${p.target}</div><div class="progress"><div style="width:${Math.round(p.ratio*100)}%"></div></div></div>
+      <div class="toolbar">${canApprove?'<button class="button" data-command="approve">Approve contract</button>':''}${canRun?'<button class="button" data-command="run">Run to idle</button><button class="button secondary" data-command="tick">Execute one action</button>':''}${control?`<button class="button secondary" data-control="${control}">${control}</button>`:''}${['active','paused','awaiting_approval'].includes(c.status)?'<button class="button danger" data-control="stop">Stop</button>':''}<a class="button secondary" href="${escapeHtml(c.public_path)}" target="_blank" rel="noopener">Open company page</a></div>
+      <div class="split"><div class="notice"><strong>Mission:</strong> ${escapeHtml(mission.title)}<div class="muted">${escapeHtml(mission.status)} • ${escapeHtml(mission.risk_level)} risk</div></div><div class="notice"><strong>Next best action:</strong> ${escapeHtml(data.next_best_action.title)}<div class="muted">${escapeHtml(data.next_best_action.type)}</div></div></div>
+      <form id="metric-form" class="panel" style="padding:12px;margin:12px 0"><h3>Record economic outcome</h3><div class="row"><select name="name"><option value="revenue_cents">Revenue, dollars</option><option value="lead_count">Lead count</option><option value="qualified_opportunities">Qualified opportunities</option><option value="spent_cents">Spend, dollars</option></select><input name="value" type="number" min="0" step="0.01" required placeholder="Value"></div><button class="button small">Record metric</button></form>
+      <div class="tabs">${tabButtons()}</div>
+      <section class="tab-pane ${state.tab==='actions'?'active':''}" data-pane="actions"><div class="scroll"><table><thead><tr><th>#</th><th>Action</th><th>Capability</th><th>Status</th><th>Evidence</th></tr></thead><tbody>${actions.map((a)=>`<tr><td>${a.sequence}</td><td><strong>${escapeHtml(a.title)}</strong><div class="muted">${escapeHtml(a.type)}</div></td><td>${escapeHtml(a.capability)}</td><td><span class="status ${a.status}">${escapeHtml(a.status)}</span>${a.status==='awaiting_approval'?` <button class="button small" data-action-approval="${a.id}">Approve</button>`:''}${a.error?`<div class="muted">${escapeHtml(a.error)}</div>`:''}</td><td class="code">${escapeHtml(a.evidence_id||'—')}</td></tr>`).join('')}</tbody></table></div></section>
+      <section class="tab-pane ${state.tab==='evidence'?'active':''}" data-pane="evidence"><div class="scroll"><table><thead><tr><th>Sequence</th><th>Evidence</th><th>Hash</th><th>Verified</th></tr></thead><tbody>${evidence.map((e)=>`<tr><td>${e.sequence}</td><td><strong>${escapeHtml(e.title)}</strong><div class="muted">${escapeHtml(e.type)}</div></td><td class="code">${escapeHtml(e.chain_hash)}</td><td>${e.verified?'yes':'no'}</td></tr>`).join('')}</tbody></table></div></section>
+      <section class="tab-pane ${state.tab==='metrics'?'active':''}" data-pane="metrics"><div class="scroll"><table><thead><tr><th>Metric</th><th>Value</th><th>Source</th><th>Recorded</th></tr></thead><tbody>${metrics.map((m)=>`<tr><td>${escapeHtml(m.name)}</td><td>${m.value} ${escapeHtml(m.unit)}</td><td>${escapeHtml(m.source)}</td><td>${date(m.recorded_at)}</td></tr>`).join('')}</tbody></table></div></section>
+      <section class="tab-pane ${state.tab==='ticks'?'active':''}" data-pane="ticks"><div class="scroll"><table><thead><tr><th>Status</th><th>Summary</th><th>Action</th><th>Time</th></tr></thead><tbody>${ticks.map((t)=>`<tr><td><span class="status ${t.status}">${escapeHtml(t.status)}</span></td><td>${escapeHtml(t.summary)}</td><td class="code">${escapeHtml(t.action_id||'—')}</td><td>${date(t.completed_at)}</td></tr>`).join('')}</tbody></table></div></section>
+      <section class="tab-pane ${state.tab==='contract'?'active':''}" data-pane="contract"><div class="split"><div class="notice"><strong>Budget ceiling</strong><div>${money(contract.max_budget_cents)}</div><div class="muted">Approval above ${money(contract.approval_threshold_cents)}</div></div><div class="notice"><strong>Deadline</strong><div>${date(contract.deadline)}</div><div class="muted">${escapeHtml(contract.status)}</div></div></div><h3>Allowed capabilities</h3><p>${contract.payload.allowed_capabilities.map(escapeHtml).join(' • ')}</p><h3>Prohibited actions</h3><p>${contract.payload.prohibited_actions.map(escapeHtml).join(' • ')}</p><h3>Owned workspace</h3><p class="code">${escapeHtml(c.workspace_path)}</p></section>`;
+    bindDetails(data);
+  }
+
+  async function loadCompany(id) {
+    state.selected = id;
+    renderCompanies();
+    try { const payload = await request(`/api/v1/operator/companies/${id}`); renderCompany(payload.operator); }
+    catch (error) { $('details').innerHTML = notice(error.message, false); }
+  }
+
+  function bindDetails(data) {
+    $('details').querySelectorAll('[data-tab]').forEach((button) => button.addEventListener('click', () => { state.tab = button.dataset.tab; renderCompany(data); }));
+    $('details').querySelectorAll('[data-command]').forEach((button) => button.addEventListener('click', async () => {
+      button.disabled = true;
+      try {
+        if (button.dataset.command === 'approve') await request(`/api/v1/operator/companies/${state.selected}/approve`, {method:'POST',body:JSON.stringify({decision_reason:'Approved in CYVX operator console'})});
+        if (button.dataset.command === 'run') await request(`/api/v1/operator/companies/${state.selected}/run`, {method:'POST',body:JSON.stringify({maximum_ticks:20})});
+        if (button.dataset.command === 'tick') await request(`/api/v1/operator/companies/${state.selected}/tick`, {method:'POST',body:'{}'});
+        await loadCompanies(state.selected);
+      } catch (error) { alert(error.message); } finally { button.disabled = false; }
+    }));
+    $('details').querySelectorAll('[data-control]').forEach((button) => button.addEventListener('click', async () => {
+      if (button.dataset.control === 'stop' && !confirm('Stop this company operator?')) return;
+      try { await request(`/api/v1/operator/companies/${state.selected}/control`, {method:'POST',body:JSON.stringify({command:button.dataset.control})}); await loadCompanies(state.selected); }
+      catch (error) { alert(error.message); }
+    }));
+    $('details').querySelectorAll('[data-action-approval]').forEach((button) => button.addEventListener('click', async () => {
+      try { await request(`/api/v1/operator/actions/${button.dataset.actionApproval}/approval`, {method:'POST',body:JSON.stringify({decision:'approved',decision_reason:'Approved in operator console'})}); await loadCompany(state.selected); }
+      catch (error) { alert(error.message); }
+    }));
+    const metricForm = $('metric-form');
+    if (metricForm) metricForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = Object.fromEntries(new FormData(metricForm));
+      let value = Number(form.value);
+      if (form.name.endsWith('_cents')) value = Math.round(value * 100);
+      try { await request(`/api/v1/operator/companies/${state.selected}/metrics`, {method:'POST',body:JSON.stringify({name:form.name,value,unit:form.name.endsWith('_cents')?'cents':'count',source:'operator_console'})}); await loadCompanies(state.selected); }
+      catch (error) { alert(error.message); }
+    });
+  }
+
+  $('create-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const button = event.submitter; button.disabled = true;
+    const data = Object.fromEntries(new FormData(event.target));
+    const targetMetric = data.target_metric;
+    let targetValue = Number(data.target_value);
+    if (targetMetric.endsWith('_cents')) targetValue = Math.round(targetValue * 100);
+    const payload = {
+      name:data.name, description:data.description, target_customer:data.target_customer, offer:data.offer,
+      price_cents:Math.round(Number(data.price||0)*100), location:data.location,
+      keywords:String(data.keywords||'').split(',').map(v=>v.trim()).filter(Boolean),
+      outcome_contract:{
+        objective:`Achieve ${targetValue} ${targetMetric} for ${data.name}`,
+        target_metric:targetMetric, comparator:'>=', target_value:targetValue,
+        target_unit:targetMetric.endsWith('_cents')?'cents':'count',
+        max_budget_cents:Math.round(Number(data.max_budget||0)*100),
+        approval_threshold_cents:Math.round(Number(data.approval_threshold||0)*100),
+        deadline:data.deadline?new Date(data.deadline).toISOString():null,
+        risk_level:'medium'
+      }
+    };
+    try {
+      const result = await request('/api/v1/operator/companies',{method:'POST',body:JSON.stringify(payload)});
+      $('create-result').innerHTML = notice('Outcome contract created. Approval is required before execution.');
+      event.target.reset();
+      await loadCompanies(result.operator.company.id);
+    } catch (error) { $('create-result').innerHTML = notice(error.message,false); }
+    finally { button.disabled = false; }
+  });
+
+  $('companies').addEventListener('click', (event) => { const card = event.target.closest('[data-company]'); if (card) loadCompany(card.dataset.company); });
+  $('refresh').addEventListener('click', () => loadCompanies().catch((error)=>alert(error.message)));
+  $('save-token').addEventListener('click', async () => {
+    state.token = $('token').value.trim(); sessionStorage.setItem('cyvx_operator_token',state.token);
+    try { await loadCompanies(); $('auth').classList.remove('show'); } catch (error) { $('auth').classList.add('show'); alert(error.message); }
+  });
+
+  (async () => {
+    await health();
+    const authenticated = await authenticateLocal();
+    if (!authenticated && !state.token) $('auth').classList.add('show');
+    try { await loadCompanies(); }
+    catch (error) { $('auth').classList.add('show'); $('details').innerHTML = notice(error.message,false); }
+    setInterval(health,15000);
+  })();
+})();
+</script>
+</body>
+</html>

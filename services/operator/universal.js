@@ -991,7 +991,7 @@ class UniversalOperator {
 
   evaluateContract(entity, contract) {
     const actual = this.metricValue(entity, contract.target_metric);
-    if (compare(actual, contract.comparator, Number(contract.target_value))) return { terminal: true, outcome: "achieved", reason: `Target achieved: ${contract.target_metric} ${actual} ${contract.comparator} ${contract.target_value}`, actual };
+    if (entity.activation_status === "learned" && compare(actual, contract.comparator, Number(contract.target_value))) return { terminal: true, outcome: "achieved", reason: `Target achieved: ${contract.target_metric} ${actual} ${contract.comparator} ${contract.target_value}`, actual };
     if (contract.deadline && Date.now() >= Date.parse(contract.deadline)) return { terminal: true, outcome: "expired", reason: `Outcome contract deadline reached at ${contract.deadline}`, actual };
     const spent = Number(parseJson(entity.counters, initialCounters()).spent_cents || 0);
     if (spent >= Number(contract.max_budget_cents) && Number(contract.max_budget_cents) > 0) return { terminal: true, outcome: "budget_exhausted", reason: `Maximum budget of ${contract.max_budget_cents} cents reached`, actual };

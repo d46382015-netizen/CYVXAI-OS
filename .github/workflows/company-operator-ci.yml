@@ -3,6 +3,7 @@ name: CYVX Universal and Revenue Operator
 on:
   pull_request:
     paths:
+      - "api/public.js"
       - "services/operator/**"
       - "services/revenue/**"
       - "scripts/start-company-operator.js"
@@ -20,6 +21,7 @@ on:
   push:
     branches: [main]
     paths:
+      - "api/public.js"
       - "services/operator/**"
       - "services/revenue/**"
       - "scripts/start-company-operator.js"
@@ -62,6 +64,12 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
+      - name: Validate public and production source modules
+        shell: bash
+        run: |
+          set -o pipefail
+          node ./scripts/check-v7.js 2>&1 | tee /tmp/v7-source-validation.log
+
       - name: Verify universal, venture, and real revenue lifecycles
         shell: bash
         run: |
@@ -101,6 +109,7 @@ jobs:
         with:
           name: universal-revenue-operator-verification
           path: |
+            /tmp/v7-source-validation.log
             /tmp/universal-revenue-test.log
             /tmp/universal-revenue.log
             /tmp/universal-revenue-health.json

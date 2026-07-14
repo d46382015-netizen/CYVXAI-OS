@@ -10,6 +10,7 @@ const { createProductionGateway, buildReadiness } = require("./integrated-produc
 const { createSparkServer } = require("../spark/server");
 const { createMissionRuntime } = require("../runtime/missions");
 const { createUniversalOperatorRuntime } = require("../services/operator/universal-server");
+const { createUniversalOperatorRuntime } = require("../services/operator/universal-server");
 
 async function createPublicRuntime(options = {}) {
   const publicPort = positivePort(options.port || process.env.PORT || process.env.CYVX_PUBLIC_PORT || 3000, "public port");
@@ -53,6 +54,13 @@ async function createPublicRuntime(options = {}) {
     authSecret: options.authSecret,
     allowLocalAuth: options.allowLocalAuth,
     leaseMs: options.leaseMs,
+  });
+
+  const operatorRuntime = createUniversalOperatorRuntime({
+    runtime: missions,
+    nodeEnv: options.nodeEnv || process.env.NODE_ENV,
+    corsAllowlist: options.operatorCorsAllowlist || process.env.CYVX_OPERATOR_CORS_ALLOWLIST || process.env.APP_BASE_URL || "",
+    publicBaseUrl: options.publicBaseUrl || process.env.CYVX_PUBLIC_BASE_URL || process.env.APP_BASE_URL || "",
   });
 
   const operatorRuntime = createUniversalOperatorRuntime({
@@ -153,6 +161,12 @@ function isMissionRoute(pathname) {
     pathname.startsWith("/api/v1/auth") ||
     pathname.startsWith("/api/v1/runtime") ||
     pathname.startsWith("/api/v1/organization");
+}
+
+function isOperatorRoute(pathname) {
+  return pathname === "/operator" || pathname === "/universal" || pathname === "/revenue" || pathname === "/operator/revenue" ||
+    pathname.startsWith("/e/") || pathname.startsWith("/c/") || pathname.startsWith("/v/") ||
+    pathname.startsWith("/api/v1/operator") || pathname.startsWith("/api/v2/operator") || pathname.startsWith("/api/v3/revenue");
 }
 
 function isOperatorRoute(pathname) {
@@ -361,6 +375,6 @@ if (require.main === module) {
 }
 
 module.exports = {
-  assertDistinctPorts, canonicalSparkApiPath, createPublicRuntime, isAllowedPublicSparkApi, isMissionRoute, isOperatorRoute,
+  assertDistinctPorts, canonicalSparkApiPath, createPublicRuntime, isAllowedPublicSparkApi, isMissionRoute, isOperatorRoute, isOperatorRoute,
   publicHealth, publicStatus, rewriteOsPath, rewriteSparkPath,
 };

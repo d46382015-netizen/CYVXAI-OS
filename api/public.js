@@ -62,12 +62,7 @@ async function createPublicRuntime(options = {}) {
     publicBaseUrl: options.publicBaseUrl || process.env.CYVX_PUBLIC_BASE_URL || process.env.APP_BASE_URL || "",
   });
 
-  const operatorRuntime = createUniversalOperatorRuntime({
-    runtime: missions,
-    nodeEnv: options.nodeEnv || process.env.NODE_ENV,
-    corsAllowlist: options.operatorCorsAllowlist || process.env.CYVX_OPERATOR_CORS_ALLOWLIST || process.env.APP_BASE_URL || "",
-    publicBaseUrl: options.publicBaseUrl || process.env.CYVX_PUBLIC_BASE_URL || process.env.APP_BASE_URL || "",
-  });
+
 
   const publicServer = http.createServer(async (req, res) => {
     const url = new URL(req.url, "http://cyvx.public");
@@ -168,11 +163,7 @@ function isOperatorRoute(pathname) {
     pathname.startsWith("/api/v1/operator") || pathname.startsWith("/api/v2/operator") || pathname.startsWith("/api/v3/revenue");
 }
 
-function isOperatorRoute(pathname) {
-  return pathname === "/operator" || pathname === "/universal" || pathname === "/revenue" || pathname === "/operator/revenue" ||
-    pathname.startsWith("/e/") || pathname.startsWith("/c/") || pathname.startsWith("/v/") ||
-    pathname.startsWith("/api/v1/operator") || pathname.startsWith("/api/v2/operator") || pathname.startsWith("/api/v3/revenue");
-}
+
 
 function isSparkStaticRoute(pathname) {
   return pathname === "/" || pathname === "/spark" || pathname.startsWith("/spark/assets/") ||

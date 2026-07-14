@@ -10,7 +10,6 @@ const { createProductionGateway, buildReadiness } = require("./integrated-produc
 const { createSparkServer } = require("../spark/server");
 const { createMissionRuntime } = require("../runtime/missions");
 const { createUniversalOperatorRuntime } = require("../services/operator/universal-server");
-const { createUniversalOperatorRuntime } = require("../services/operator/universal-server");
 
 async function createPublicRuntime(options = {}) {
   const publicPort = positivePort(options.port || process.env.PORT || process.env.CYVX_PUBLIC_PORT || 3000, "public port");

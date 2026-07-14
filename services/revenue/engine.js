@@ -767,7 +767,7 @@ class VentureRevenueEngine {
     if (auth) this.assertRole(auth, ["admin", "approver", "agent", "viewer"]);
     const venture = auth ? this.requireVenture(ventureId, auth.organization_id) : this.db.prepare("SELECT * FROM revenue_ventures WHERE id=?").get(ventureId);
     if (!venture) throw new RuntimeError("NOT_FOUND", "Revenue venture not found.", 404);
-    const rows = this.db.prepare("SELECT * FROM revenue_events WHERE venture_id=? ORDER BY created_at,id").all(ventureId);
+    const rows = this.db.prepare("SELECT rowid AS ledger_sequence,* FROM revenue_events WHERE venture_id=? ORDER BY rowid").all(ventureId);
     let previous = "GENESIS";
     const errors = [];
     for (const row of rows) {
@@ -827,7 +827,7 @@ class VentureRevenueEngine {
   }
 
   event(ventureId, organizationId, type, subjectId, actor, payload) {
-    const previous = this.db.prepare("SELECT event_hash FROM revenue_events WHERE venture_id=? ORDER BY created_at DESC,id DESC LIMIT 1").get(ventureId);
+    const previous = this.db.prepare("SELECT event_hash FROM revenue_events WHERE venture_id=? ORDER BY rowid DESC LIMIT 1").get(ventureId);
     const record = { id: id("revenue_event"), organization_id: organizationId, venture_id: ventureId, type, subject_id: subjectId || null, actor: String(actor || "system"), payload: payload || {}, previous_hash: previous && previous.event_hash || "GENESIS", created_at: now() };
     const eventHash = sha256(canonical(record));
     this.db.prepare("INSERT INTO revenue_events(id,organization_id,venture_id,type,subject_id,actor,payload,previous_hash,event_hash,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)")

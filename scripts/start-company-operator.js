@@ -56,14 +56,18 @@ async function main() {
       ok: true,
       event: "universal_operator.started",
       operator: `http://${host}:${operatorAddress.port}/operator`,
+      revenue: `http://${host}:${operatorAddress.port}/revenue`,
       mission_runtime: `http://${missionHost}:${missionAddress.port}/missions`,
       health: `http://${host}:${operatorAddress.port}/healthz`,
       entity_api: `http://${host}:${operatorAddress.port}/api/v2/operator/entities`,
+      revenue_api: `http://${host}:${operatorAddress.port}/api/v3/revenue/ventures`,
       legacy_company_api: `http://${host}:${operatorAddress.port}/api/v1/operator/companies`,
       auto_tick: autoTick,
       tick_interval_ms: tickIntervalMs,
       data_root: runtime.dataRoot,
       platform_state: operatorRuntime.operator.platformStatePath,
+      revenue_workspace: operatorRuntime.revenue.workspaceRoot,
+      providers: operatorRuntime.revenue.health().providers,
     }, null, 2)}\n`);
   } catch (error) {
     await close("startup_failure");

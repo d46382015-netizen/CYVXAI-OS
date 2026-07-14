@@ -139,17 +139,15 @@ apply(path.resolve(__dirname, "../.github/workflows/deploy-public.yml"), [
   ],
 ]);
 
-apply(path.resolve(__dirname, "../render.yaml"), [
-  [
-    '      - key: CYVX_EMAIL_REPLY_TO\n        sync: false\n      - key: RESEND_API_KEY\n        sync: false',
-    '      - key: CYVX_EMAIL_REPLY_TO\n        sync: false\n      - key: CYVX_BUSINESS_POSTAL_ADDRESS\n        sync: false\n      - key: RESEND_API_KEY\n        sync: false',
-    "staging postal address",
-  ],
-  [
-    '      - key: CYVX_EMAIL_REPLY_TO\n        sync: false\n      - key: RESEND_API_KEY\n        sync: false',
-    '      - key: CYVX_EMAIL_REPLY_TO\n        sync: false\n      - key: CYVX_BUSINESS_POSTAL_ADDRESS\n        sync: false\n      - key: RESEND_API_KEY\n        sync: false',
-    "production postal address",
-  ],
-]);
+const renderFile = path.resolve(__dirname, "../render.yaml");
+let renderSource = fs.readFileSync(renderFile, "utf8");
+const renderSearch = '      - key: CYVX_EMAIL_REPLY_TO\n        sync: false\n      - key: RESEND_API_KEY\n        sync: false';
+const renderReplacement = '      - key: CYVX_EMAIL_REPLY_TO\n        sync: false\n      - key: CYVX_BUSINESS_POSTAL_ADDRESS\n        sync: false\n      - key: RESEND_API_KEY\n        sync: false';
+if (!renderSource.includes(renderReplacement)) {
+  const count = renderSource.split(renderSearch).length - 1;
+  if (count !== 2) throw new Error(`Render postal address variables: expected two matches, found ${count}`);
+  renderSource = renderSource.split(renderSearch).join(renderReplacement);
+  fs.writeFileSync(renderFile, renderSource);
+}
 
 process.stdout.write(`${JSON.stringify({ ok: true })}\n`);

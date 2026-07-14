@@ -6,11 +6,11 @@ const path = require("node:path");
 
 function apply(file, replacements) {
   let source = fs.readFileSync(file, "utf8");
-  for (const [search, replacement, label] of replacements) {
-    if (source.includes(replacement)) continue;
+  for (const [search, replacement, label, expected = 1] of replacements) {
     const count = source.split(search).length - 1;
-    if (count !== 1) throw new Error(`${label}: expected one match, found ${count}`);
-    source = source.replace(search, replacement);
+    if (count === 0 && source.includes(replacement)) continue;
+    if (count !== expected) throw new Error(`${label}: expected ${expected} match(es), found ${count}`);
+    source = expected === 1 ? source.replace(search, replacement) : source.split(search).join(replacement);
   }
   fs.writeFileSync(file, source);
 }
@@ -34,12 +34,8 @@ apply(path.resolve(__dirname, "../api/public.js"), [
   [
     '        const health = publicHealth(cyvx, spark.runtime, missions);',
     '        const health = publicHealth(cyvx, spark.runtime, missions, operatorRuntime);',
-    "health includes operator first occurrence",
-  ],
-  [
-    '        const health = publicHealth(cyvx, spark.runtime, missions);',
-    '        const health = publicHealth(cyvx, spark.runtime, missions, operatorRuntime);',
-    "readiness includes operator second occurrence",
+    "health and readiness include operator",
+    2,
   ],
   [
     '        return sendJson(res, 200, publicStatus(cyvx, spark.runtime, missions));',
@@ -125,12 +121,8 @@ apply(path.resolve(__dirname, "../.github/workflows/deploy-public.yml"), [
   [
     '      - spark/**\n      - ui/**',
     '      - spark/**\n      - services/operator/**\n      - services/revenue/**\n      - runtime/missions/**\n      - ui/**',
-    "push deployment paths",
-  ],
-  [
-    '      - spark/**\n      - ui/**',
-    '      - spark/**\n      - services/operator/**\n      - services/revenue/**\n      - runtime/missions/**\n      - ui/**',
-    "pull request deployment paths",
+    "public deployment paths",
+    2,
   ],
   [
     '          curl -fsS "$BASE/os" | grep \'CYVX\'\n          curl -fsS "$BASE/healthz" | node -e',
@@ -139,15 +131,13 @@ apply(path.resolve(__dirname, "../.github/workflows/deploy-public.yml"), [
   ],
 ]);
 
-const renderFile = path.resolve(__dirname, "../render.yaml");
-let renderSource = fs.readFileSync(renderFile, "utf8");
-const renderSearch = '      - key: CYVX_EMAIL_REPLY_TO\n        sync: false\n      - key: RESEND_API_KEY\n        sync: false';
-const renderReplacement = '      - key: CYVX_EMAIL_REPLY_TO\n        sync: false\n      - key: CYVX_BUSINESS_POSTAL_ADDRESS\n        sync: false\n      - key: RESEND_API_KEY\n        sync: false';
-if (!renderSource.includes(renderReplacement)) {
-  const count = renderSource.split(renderSearch).length - 1;
-  if (count !== 2) throw new Error(`Render postal address variables: expected two matches, found ${count}`);
-  renderSource = renderSource.split(renderSearch).join(renderReplacement);
-  fs.writeFileSync(renderFile, renderSource);
-}
+apply(path.resolve(__dirname, "../render.yaml"), [
+  [
+    '      - key: CYVX_EMAIL_REPLY_TO\n        sync: false\n      - key: RESEND_API_KEY\n        sync: false',
+    '      - key: CYVX_EMAIL_REPLY_TO\n        sync: false\n      - key: CYVX_BUSINESS_POSTAL_ADDRESS\n        sync: false\n      - key: RESEND_API_KEY\n        sync: false',
+    "Render postal address variables",
+    2,
+  ],
+]);
 
 process.stdout.write(`${JSON.stringify({ ok: true })}\n`);

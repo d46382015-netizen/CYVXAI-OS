@@ -32,12 +32,13 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          if git diff --quiet -- api/public.js start.sh .github/workflows/deploy-public.yml render.yaml; then
-            echo "Public revenue integration already applied"
+          git restore .github/workflows/deploy-public.yml
+          if git diff --quiet -- api/public.js start.sh render.yaml; then
+            echo "Public revenue runtime already integrated"
             exit 0
           fi
           git config user.name "CYVX Production Bot"
           git config user.email "actions@users.noreply.github.com"
-          git add api/public.js start.sh .github/workflows/deploy-public.yml render.yaml
+          git add api/public.js start.sh render.yaml
           git commit -m "Expose venture revenue through public runtime"
           git push origin "HEAD:${{ github.event.pull_request.head.ref }}"

@@ -9,6 +9,7 @@ const path = require("node:path");
 const { createProductionGateway, buildReadiness } = require("./integrated-production");
 const { createSparkServer } = require("../spark/server");
 const { createMissionRuntime } = require("../runtime/missions");
+const { createUniversalOperatorRuntime } = require("../services/operator/universal-server");
 
 async function createPublicRuntime(options = {}) {
   const publicPort = positivePort(options.port || process.env.PORT || process.env.CYVX_PUBLIC_PORT || 3000, "public port");
@@ -54,23 +55,33 @@ async function createPublicRuntime(options = {}) {
     leaseMs: options.leaseMs,
   });
 
+  const operatorRuntime = createUniversalOperatorRuntime({
+    runtime: missions,
+    nodeEnv: options.nodeEnv || process.env.NODE_ENV,
+    corsAllowlist: options.operatorCorsAllowlist || process.env.CYVX_OPERATOR_CORS_ALLOWLIST || process.env.APP_BASE_URL || "",
+    publicBaseUrl: options.publicBaseUrl || process.env.CYVX_PUBLIC_BASE_URL || process.env.APP_BASE_URL || "",
+  });
+
+
+
   const publicServer = http.createServer(async (req, res) => {
     const url = new URL(req.url, "http://cyvx.public");
     setPublicHeaders(res);
     try {
       if (isMissionRoute(url.pathname)) return missions.handle(req, res, url);
+      if (isOperatorRoute(url.pathname)) return operatorRuntime.handle(req, res, url);
       cyvx.integrations.edge.require(req, url);
 
       if (req.method === "GET" && (url.pathname === "/healthz" || url.pathname === "/health")) {
-        const health = publicHealth(cyvx, spark.runtime, missions);
+        const health = publicHealth(cyvx, spark.runtime, missions, operatorRuntime);
         return sendJson(res, health.ok ? 200 : 503, health);
       }
       if (req.method === "GET" && url.pathname === "/readyz") {
-        const health = publicHealth(cyvx, spark.runtime, missions);
+        const health = publicHealth(cyvx, spark.runtime, missions, operatorRuntime);
         return sendJson(res, health.ready ? 200 : 503, health);
       }
       if (req.method === "GET" && url.pathname === "/api/public/status") {
-        return sendJson(res, 200, publicStatus(cyvx, spark.runtime, missions));
+        return sendJson(res, 200, publicStatus(cyvx, spark.runtime, missions, operatorRuntime));
       }
       if (req.method === "GET" && url.pathname === "/api/public/worlds") {
         const snapshot = spark.runtime.snapshot();
@@ -117,6 +128,7 @@ async function createPublicRuntime(options = {}) {
     cyvx,
     spark,
     missions,
+    operatorRuntime,
     sparkInternalKey,
     integrations: cyvx.integrations,
     ports: { publicPort, cyvxGatewayPort, cyvxApiPort, sparkPort, legacyGatewayPort: cyvx.legacyGatewayPort },
@@ -144,6 +156,14 @@ function isMissionRoute(pathname) {
     pathname.startsWith("/api/v1/runtime") ||
     pathname.startsWith("/api/v1/organization");
 }
+
+function isOperatorRoute(pathname) {
+  return pathname === "/operator" || pathname === "/universal" || pathname === "/revenue" || pathname === "/operator/revenue" ||
+    pathname.startsWith("/e/") || pathname.startsWith("/c/") || pathname.startsWith("/v/") ||
+    pathname.startsWith("/api/v1/operator") || pathname.startsWith("/api/v2/operator") || pathname.startsWith("/api/v3/revenue");
+}
+
+
 
 function isSparkStaticRoute(pathname) {
   return pathname === "/" || pathname === "/spark" || pathname.startsWith("/spark/assets/") ||
@@ -179,7 +199,7 @@ function rewriteOsPath(url) {
   return pathname + url.search;
 }
 
-function publicHealth(cyvx, sparkRuntime, missionRuntime) {
+function publicHealth(cyvx, sparkRuntime, missionRuntime, operatorRuntime) {
   let sparkHealth;
   try {
     const health = sparkRuntime.health();
@@ -193,20 +213,25 @@ function publicHealth(cyvx, sparkRuntime, missionRuntime) {
     cyvxHealthy = status && status.status !== "error";
   } catch { cyvxHealthy = false; }
   const mission = missionRuntime ? missionRuntime.readiness() : { ok: false, ready: false, dependencies: {} };
+  let operator = { universal: { ok: false }, revenue: { database: false } };
+  try { operator = operatorRuntime ? operatorRuntime.health() : operator; } catch (error) { operator = { universal: { ok: false, error: error.message }, revenue: { database: false } }; }
   const sparkHealthy = sparkHealth.status === "ok";
   const integrationsHealthy = !integrations.required || integrations.ready;
-  const ok = cyvxHealthy && sparkHealthy && integrationsHealthy && Boolean(mission.dependencies.database && mission.dependencies.database.ready);
+  const operatorHealthy = Boolean(operator.universal && operator.universal.ok && operator.revenue && operator.revenue.database);
+  const ok = cyvxHealthy && sparkHealthy && integrationsHealthy && operatorHealthy && Boolean(mission.dependencies.database && mission.dependencies.database.ready);
   const ready = ok && mission.ready;
   return {
     ok,
     ready,
     status: ready ? "ok" : "degraded",
-    service: "Spark + CYVX + Mission Runtime",
-    version: "8.1.0-runtime",
+    service: "Spark + CYVX + Mission + Universal + Revenue Runtime",
+    version: "8.3.0-runtime",
     services: {
       spark: sparkHealth,
       cyvx: { status: cyvxHealthy ? "ok" : "degraded" },
       missions: mission,
+      universal_operator: operator.universal,
+      revenue_operator: operator.revenue,
       github: { configured: github.ready },
       integrations: { configured: integrations.ready, required: integrations.required, failed: integrations.checks.filter((item) => item.required && !item.ok).map((item) => item.key) },
     },
@@ -214,17 +239,20 @@ function publicHealth(cyvx, sparkRuntime, missionRuntime) {
   };
 }
 
-function publicStatus(cyvx, sparkRuntime, missionRuntime) {
+function publicStatus(cyvx, sparkRuntime, missionRuntime, operatorRuntime) {
   const snapshot = sparkRuntime.snapshot();
   const github = buildReadiness(cyvx);
   const integrations = cyvx.integrations ? cyvx.integrations.snapshot() : { ready: true, required: false, providers: {} };
+  const operator = operatorRuntime ? operatorRuntime.health() : null;
   return {
     ok: true,
-    powered_by: "Spark + CYVX + Mission Runtime",
-    version: "8.1.0-runtime",
+    powered_by: "Spark + CYVX + Mission + Universal + Revenue Runtime",
+    version: "8.3.0-runtime",
     metrics: snapshot.metrics,
     capabilities: snapshot.capabilities.map((capability) => ({ key: capability.key, description: capability.description, risk: capability.risk, requires_approval: capability.requires_approval })),
     mission_runtime: missionRuntime ? missionRuntime.readiness() : null,
+    universal_operator: operator && operator.universal || null,
+    revenue_operator: operator && operator.revenue || null,
     github: { configured: github.ready, webhook_ready: github.webhook_ready, app_auth_ready: github.app_auth_ready, oauth_ready: github.oauth_ready },
     integrations: {
       ready: integrations.ready,
@@ -236,7 +264,7 @@ function publicStatus(cyvx, sparkRuntime, missionRuntime) {
       ai_observability: Boolean(integrations.providers.ai_observability && integrations.providers.ai_observability.configured),
       error_tracking: Boolean(integrations.providers.error_tracking && integrations.providers.error_tracking.configured),
     },
-    links: { spark: "/", cyvx_os: "/os", missions: "/missions", health: "/healthz", readiness: "/readyz", worlds: "/api/public/worlds" },
+    links: { spark: "/", cyvx_os: "/os", missions: "/missions", operator: "/operator", revenue: "/revenue", health: "/healthz", readiness: "/readyz", worlds: "/api/public/worlds" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -322,7 +350,7 @@ if (require.main === module) {
     runtime = created;
     return runtime.listen();
   }).then(() => {
-    process.stdout.write(`${JSON.stringify({ event: "cyvx.public.ready", ports: runtime.ports, powered_by: "Spark + CYVX + Mission Runtime" })}\n`);
+    process.stdout.write(`${JSON.stringify({ event: "cyvx.public.ready", ports: runtime.ports, powered_by: "Spark + CYVX + Mission + Universal + Revenue Runtime" })}\n`);
     const shutdown = async (signal) => {
       process.stdout.write(`${JSON.stringify({ event: "cyvx.public.shutdown", signal })}\n`);
       await runtime.close();
@@ -337,6 +365,6 @@ if (require.main === module) {
 }
 
 module.exports = {
-  assertDistinctPorts, canonicalSparkApiPath, createPublicRuntime, isAllowedPublicSparkApi, isMissionRoute,
+  assertDistinctPorts, canonicalSparkApiPath, createPublicRuntime, isAllowedPublicSparkApi, isMissionRoute, isOperatorRoute, isOperatorRoute,
   publicHealth, publicStatus, rewriteOsPath, rewriteSparkPath,
 };

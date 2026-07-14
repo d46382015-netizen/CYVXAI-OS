@@ -8,6 +8,9 @@ on:
       - api/production.js
       - api/index.js
       - spark/**
+      - services/operator/**
+      - services/revenue/**
+      - runtime/missions/**
       - ui/**
       - start.sh
       - package.json
@@ -20,6 +23,9 @@ on:
       - api/production.js
       - api/index.js
       - spark/**
+      - services/operator/**
+      - services/revenue/**
+      - runtime/missions/**
       - ui/**
       - start.sh
       - package.json
@@ -55,6 +61,7 @@ jobs:
         run: |
           npm run verify
           npm run spark:verify
+          npm run revenue:verify
           node --check api/public.js
           node --check spark/ui/app.js
 
@@ -82,8 +89,11 @@ jobs:
           set -Eeuo pipefail
           curl -fsS "$BASE/" | grep 'What do you want to make real?'
           curl -fsS "$BASE/os" | grep 'CYVX'
-          curl -fsS "$BASE/healthz" | node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync(0,"utf8"));if(!x.ok||x.services.spark.status!=="ok")process.exit(1)'
-          curl -fsS "$BASE/api/public/status" | node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync(0,"utf8"));if(!x.ok||!x.metrics)process.exit(1)'
+          curl -fsS "$BASE/operator" | grep 'CYVX Universal Operator'
+          curl -fsS "$BASE/revenue" | grep 'Venture Revenue Engine'
+          curl -fsS "$BASE/api/v3/revenue/health" | grep 'cyvx-venture-revenue-engine'
+          curl -fsS "$BASE/healthz" | node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync(0,"utf8"));if(!x.ok||x.services.spark.status!=="ok"||!x.services.universal_operator.ok||!x.services.revenue_operator.database)process.exit(1)'
+          curl -fsS "$BASE/api/public/status" | node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync(0,"utf8"));if(!x.ok||!x.metrics||!x.universal_operator||!x.revenue_operator)process.exit(1)'
 
           CREATED="$(curl -fsS -X POST "$BASE/api/v1/sparks" \
             -H 'content-type: application/json' \

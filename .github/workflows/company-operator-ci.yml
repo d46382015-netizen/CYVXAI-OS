@@ -1,27 +1,36 @@
-name: CYVX Universal Operator
+name: CYVX Universal and Revenue Operator
 
 on:
   pull_request:
     paths:
+      - "api/public.js"
       - "services/operator/**"
+      - "services/revenue/**"
       - "scripts/start-company-operator.js"
       - "ui/operator.html"
       - "ui/universal-operator.html"
+      - "ui/revenue-engine.html"
       - "test/company-operator.test.js"
       - "test/universal-operator.test.js"
+      - "test/venture-revenue-engine.test.js"
       - "docs/AUTONOMOUS_COMPANY_OPERATOR.md"
       - "docs/UNIVERSAL_OPERATOR.md"
+      - "docs/VENTURE_REVENUE_ENGINE.md"
       - "package.json"
       - ".github/workflows/company-operator-ci.yml"
   push:
     branches: [main]
     paths:
+      - "api/public.js"
       - "services/operator/**"
+      - "services/revenue/**"
       - "scripts/start-company-operator.js"
       - "ui/operator.html"
       - "ui/universal-operator.html"
+      - "ui/revenue-engine.html"
       - "test/company-operator.test.js"
       - "test/universal-operator.test.js"
+      - "test/venture-revenue-engine.test.js"
       - "package.json"
   workflow_dispatch:
 
@@ -29,19 +38,19 @@ permissions:
   contents: read
 
 concurrency:
-  group: universal-operator-${{ github.ref }}
+  group: universal-revenue-operator-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   verify:
-    name: Entity, mission, RealityOS, evidence, adapter, and HTTP verification
+    name: Entity, demand, CRM, payment, fulfillment, evidence, and HTTP verification
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     env:
       NODE_ENV: test
       CYVX_ALLOW_INSECURE_LOCAL: "true"
       CYVX_AUTH_SECRET: "operator-ci-secret-longer-than-thirty-two-characters"
-      CYVX_DATA_ROOT: /tmp/cyvx-universal-operator-ci
+      CYVX_DATA_ROOT: /tmp/cyvx-universal-revenue-ci
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
@@ -55,41 +64,56 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Verify universal and venture operator lifecycles
+      - name: Validate public and production source modules
         shell: bash
         run: |
           set -o pipefail
-          timeout --signal=TERM --kill-after=10s 180s npm run operator:verify 2>&1 | tee /tmp/universal-operator-test.log
+          node ./scripts/check-v7.js 2>&1 | tee /tmp/v7-source-validation.log
 
-      - name: Verify unified production startup contract
+      - name: Verify universal, venture, and real revenue lifecycles
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout --signal=TERM --kill-after=10s 240s npm run operator:verify 2>&1 | tee /tmp/universal-revenue-test.log
+
+      - name: Verify unified startup and fail-closed providers
         shell: bash
         run: |
           set -Eeuo pipefail
           rm -rf "$CYVX_DATA_ROOT"
-          CYVX_OPERATOR_PORT=3020 CYVX_MISSION_PORT=3030 npm run operator > /tmp/universal-operator.log 2>&1 &
+          CYVX_OPERATOR_PORT=3020 CYVX_MISSION_PORT=3030 npm run operator > /tmp/universal-revenue.log 2>&1 &
           PID=$!
           cleanup() { kill "$PID" 2>/dev/null || true; }
           trap cleanup EXIT
           for _ in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:3020/healthz >/tmp/universal-operator-health.json; then
+            if curl -fsS http://127.0.0.1:3020/healthz >/tmp/universal-revenue-health.json; then
               break
             fi
             sleep 1
           done
-          node -e 'const x=require("/tmp/universal-operator-health.json");if(!x.ok||!x.universal||!x.universal.database||!x.universal.legacy_company_compatibility)process.exit(1)'
+          node -e 'const x=require("/tmp/universal-revenue-health.json");if(!x.ok||!x.universal||!x.revenue||!x.revenue.database||!x.universal.legacy_company_compatibility)process.exit(1)'
           curl -fsS http://127.0.0.1:3020/operator | grep -q "CYVX Universal Operator"
+          curl -fsS http://127.0.0.1:3020/revenue | grep -q "Venture Revenue Engine"
           curl -fsS http://127.0.0.1:3020/api/v2/operator/entity-types | grep -q '"production"'
+          curl -fsS http://127.0.0.1:3020/api/v3/revenue/health | grep -q '"cyvx-venture-revenue-engine"'
+          node - <<'NODE'
+          const x = require('/tmp/universal-revenue-health.json');
+          if (x.revenue.providers.email.configured) throw new Error('CI unexpectedly has email credentials');
+          if (x.revenue.providers.stripe.configured) throw new Error('CI unexpectedly has Stripe credentials');
+          if (x.revenue.verified_revenue_cents !== 0) throw new Error('CI must not manufacture revenue');
+          NODE
 
       - name: Upload diagnostic evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: universal-operator-verification
+          name: universal-revenue-operator-verification
           path: |
-            /tmp/universal-operator-test.log
-            /tmp/universal-operator.log
-            /tmp/universal-operator-health.json
-            /tmp/cyvx-universal-operator-ci/logs/*.jsonl*
-            /tmp/cyvx-universal-operator-ci/platform-state.json
+            /tmp/v7-source-validation.log
+            /tmp/universal-revenue-test.log
+            /tmp/universal-revenue.log
+            /tmp/universal-revenue-health.json
+            /tmp/cyvx-universal-revenue-ci/logs/*.jsonl*
+            /tmp/cyvx-universal-revenue-ci/platform-state.json
           if-no-files-found: ignore
           retention-days: 14

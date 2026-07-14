@@ -101,6 +101,8 @@ services:
         sync: false
       - key: CYVX_EMAIL_REPLY_TO
         sync: false
+      - key: CYVX_BUSINESS_POSTAL_ADDRESS
+        sync: false
       - key: RESEND_API_KEY
         sync: false
 
@@ -219,6 +221,8 @@ services:
       - key: CYVX_EMAIL_FROM
         sync: false
       - key: CYVX_EMAIL_REPLY_TO
+        sync: false
+      - key: CYVX_BUSINESS_POSTAL_ADDRESS
         sync: false
       - key: RESEND_API_KEY
         sync: false

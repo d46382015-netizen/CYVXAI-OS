@@ -48,6 +48,10 @@ mkdir -p "$CYVX_DATA_ROOT" "$SPARK_ARTIFACT_ROOT" "$(dirname "$SPARK_LOG")"
 
 echo "Public Spark: http://${CYVX_PUBLIC_HOST}:${PUBLIC_PORT}/"
 echo "CYVX OS:      http://${CYVX_PUBLIC_HOST}:${PUBLIC_PORT}/os"
+echo "Operator:     http://${CYVX_PUBLIC_HOST}:${PUBLIC_PORT}/operator"
+echo "Revenue:      http://${CYVX_PUBLIC_HOST}:${PUBLIC_PORT}/revenue"
+echo "Operator:     http://${CYVX_PUBLIC_HOST}:${PUBLIC_PORT}/operator"
+echo "Revenue:      http://${CYVX_PUBLIC_HOST}:${PUBLIC_PORT}/revenue"
 echo "Health:       http://${CYVX_PUBLIC_HOST}:${PUBLIC_PORT}/healthz"
 
 exec node ./api/public.js

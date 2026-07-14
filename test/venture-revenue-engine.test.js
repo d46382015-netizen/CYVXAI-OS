@@ -25,7 +25,7 @@ class TestStripeProvider {
   configured() { return true; }
   webhookConfigured() { return true; }
   snapshot() { return { configured: true, webhook_configured: true, enabled: true, metrics: { sessions_created: this.sessions.length } }; }
-  async createCheckoutSession(input) { this.sessions.push(input); return { id: `cs_test_${this.sessions.length}`, url: `https://checkout.stripe.test/${this.sessions.length}`, payment_status: "unpaid", expires_at: new Date(Date.now() + 3600000).toISOString() }; }
+  async createCheckoutSession(input) { if (!this.configured()) throw Object.assign(new Error("Stripe is not configured"), { code: "STRIPE_UNCONFIGURED", status: 503 }); this.sessions.push(input); return { id: `cs_test_${this.sessions.length}`, url: `https://checkout.stripe.test/${this.sessions.length}`, payment_status: "unpaid", expires_at: new Date(Date.now() + 3600000).toISOString() }; }
   parseWebhook(rawBody) { const event = JSON.parse(rawBody); this.events.push(event); return event; }
 }
 

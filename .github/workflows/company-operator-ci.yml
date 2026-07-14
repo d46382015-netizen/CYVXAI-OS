@@ -1,4 +1,4 @@
-name: Autonomous Company Operator
+name: CYVX Universal Operator
 
 on:
   pull_request:
@@ -6,8 +6,11 @@ on:
       - "services/operator/**"
       - "scripts/start-company-operator.js"
       - "ui/operator.html"
+      - "ui/universal-operator.html"
       - "test/company-operator.test.js"
+      - "test/universal-operator.test.js"
       - "docs/AUTONOMOUS_COMPANY_OPERATOR.md"
+      - "docs/UNIVERSAL_OPERATOR.md"
       - "package.json"
       - ".github/workflows/company-operator-ci.yml"
   push:
@@ -16,7 +19,9 @@ on:
       - "services/operator/**"
       - "scripts/start-company-operator.js"
       - "ui/operator.html"
+      - "ui/universal-operator.html"
       - "test/company-operator.test.js"
+      - "test/universal-operator.test.js"
       - "package.json"
   workflow_dispatch:
 
@@ -24,19 +29,19 @@ permissions:
   contents: read
 
 concurrency:
-  group: company-operator-${{ github.ref }}
+  group: universal-operator-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   verify:
-    name: Contract, runtime, evidence, budget, lead, and HTTP verification
+    name: Entity, mission, RealityOS, evidence, adapter, and HTTP verification
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     env:
       NODE_ENV: test
       CYVX_ALLOW_INSECURE_LOCAL: "true"
       CYVX_AUTH_SECRET: "operator-ci-secret-longer-than-thirty-two-characters"
-      CYVX_DATA_ROOT: /tmp/cyvx-company-operator-ci
+      CYVX_DATA_ROOT: /tmp/cyvx-universal-operator-ci
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
@@ -50,39 +55,41 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Verify operator syntax and lifecycle
+      - name: Verify universal and venture operator lifecycles
         shell: bash
         run: |
           set -o pipefail
-          timeout --signal=TERM --kill-after=10s 90s npm run operator:verify 2>&1 | tee /tmp/company-operator-test.log
+          timeout --signal=TERM --kill-after=10s 180s npm run operator:verify 2>&1 | tee /tmp/universal-operator-test.log
 
-      - name: Verify production startup contract
+      - name: Verify unified production startup contract
         shell: bash
         run: |
           set -Eeuo pipefail
           rm -rf "$CYVX_DATA_ROOT"
-          CYVX_OPERATOR_PORT=3020 CYVX_MISSION_PORT=3030 npm run operator > /tmp/company-operator.log 2>&1 &
+          CYVX_OPERATOR_PORT=3020 CYVX_MISSION_PORT=3030 npm run operator > /tmp/universal-operator.log 2>&1 &
           PID=$!
           cleanup() { kill "$PID" 2>/dev/null || true; }
           trap cleanup EXIT
           for _ in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:3020/healthz >/tmp/company-operator-health.json; then
+            if curl -fsS http://127.0.0.1:3020/healthz >/tmp/universal-operator-health.json; then
               break
             fi
             sleep 1
           done
-          node -e 'const x=require("/tmp/company-operator-health.json");if(!x.ok||!x.health||!x.health.database)process.exit(1)'
-          curl -fsS http://127.0.0.1:3020/operator | grep -q "Autonomous Company Operator"
+          node -e 'const x=require("/tmp/universal-operator-health.json");if(!x.ok||!x.universal||!x.universal.database||!x.universal.legacy_company_compatibility)process.exit(1)'
+          curl -fsS http://127.0.0.1:3020/operator | grep -q "CYVX Universal Operator"
+          curl -fsS http://127.0.0.1:3020/api/v2/operator/entity-types | grep -q '"production"'
 
-      - name: Upload diagnostic log
+      - name: Upload diagnostic evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: company-operator-verification
+          name: universal-operator-verification
           path: |
-            /tmp/company-operator-test.log
-            /tmp/company-operator.log
-            /tmp/company-operator-health.json
-            /tmp/cyvx-company-operator-ci/logs/*.jsonl*
+            /tmp/universal-operator-test.log
+            /tmp/universal-operator.log
+            /tmp/universal-operator-health.json
+            /tmp/cyvx-universal-operator-ci/logs/*.jsonl*
+            /tmp/cyvx-universal-operator-ci/platform-state.json
           if-no-files-found: ignore
           retention-days: 14

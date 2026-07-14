@@ -1,9 +1,9 @@
 {
   "name": "cyvx",
-  "version": "8.1.0",
+  "version": "8.2.0",
   "private": true,
   "type": "commonjs",
-  "description": "CYVXAI operating system with durable mission execution, governed agent creation, cloud evidence, production activation, and autonomous company operation",
+  "description": "CYVXAI universal outcome operator with durable missions, governed agents, RealityOS entities, evidence, learning, production activation, and compatible venture operation",
   "scripts": {
     "start": "node ./api/runtime-v7.js",
     "dev": "CYVX_ALLOW_INSECURE_LOCAL=true node ./api/runtime-v7.js",
@@ -76,8 +76,11 @@
     "intel:mn:refresh": "node ./scripts/refresh-minnesota-intelligence.js",
     "operator": "node ./scripts/start-company-operator.js",
     "operator:start": "node ./scripts/start-company-operator.js",
-    "operator:test": "node --test ./test/company-operator.test.js",
-    "operator:verify": "node --check ./services/operator/index.js && node --check ./services/operator/server.js && node --check ./scripts/start-company-operator.js && node --test ./test/company-operator.test.js"
+    "operator:test": "node --test ./test/company-operator.test.js ./test/universal-operator.test.js",
+    "operator:verify": "node --check ./services/operator/index.js && node --check ./services/operator/server.js && node --check ./services/operator/universal.js && node --check ./services/operator/universal-server.js && node --check ./scripts/start-company-operator.js && node --test ./test/company-operator.test.js ./test/universal-operator.test.js",
+    "universal": "node ./scripts/start-company-operator.js",
+    "universal:test": "node --test ./test/universal-operator.test.js",
+    "universal:verify": "node --check ./services/operator/universal.js && node --check ./services/operator/universal-server.js && node --test ./test/universal-operator.test.js"
   },
   "engines": {
     "node": ">=22"

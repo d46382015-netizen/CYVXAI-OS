@@ -255,7 +255,7 @@ class VentureRevenueEngine {
       const workspace = safePath(this.workspaceRoot, path.join(this.workspaceRoot, entity.organization_id, ventureId));
       const offer = String(profile.offer || profile.operating_system || entity.description || "Outcome-focused operating service").slice(0, 2000);
       const customer = String(profile.target_customer || profile.subject || "Customers with a measurable operating constraint").slice(0, 1000);
-      const price = integer(profile.price_cents || 0, "price_cents", 0, 100_000_000);
+      const price = integer(profile.price_cents || profile.metadata && profile.metadata.price_cents || 0, "price_cents", 0, 100_000_000);
       this.db.prepare(`INSERT INTO revenue_ventures(id,organization_id,entity_id,mission_id,slug,name,market,ideal_customer,problem,offer_name,offer_summary,deliverables,price_cents,currency,location,booking_url,public_base_url,status,workspace_path,created_at,updated_at)
         VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(
         ventureId, entity.organization_id, entity.id, entity.mission_id, entity.slug, entity.name,
@@ -296,7 +296,7 @@ class VentureRevenueEngine {
       channels: array(input.channels || ["owned website", "referrals", "approved email"], "channels", 50, 300),
       operating_system: `Acquire, qualify, close, fulfill, retain, and measure customers for ${offerName}.`,
       outcome_contract: {
-        objective: `Collect at least ${(revenueTarget / 100).toFixed(2)} ${String(input.currency || "usd").toUpperCase()} in verified customer revenue for ${name}.`,
+        objective: `Collect at least ${(revenueTarget / 100).toFixed(2)} ${String(input.currency || "usd").toUpperCase()} in customer revenue supported by provider verification or owner payment evidence for ${name}.`,
         target_metric: "revenue_cents",
         comparator: ">=",
         target_value: revenueTarget,
@@ -791,7 +791,9 @@ class VentureRevenueEngine {
       active: Number(this.db.prepare("SELECT count(*) AS count FROM revenue_ventures WHERE status='active'").get().count),
       real_prospects: Number(this.db.prepare("SELECT count(*) AS count FROM revenue_prospects").get().count),
       real_clients: Number(this.db.prepare("SELECT count(*) AS count FROM revenue_clients").get().count),
-      verified_revenue_cents: Math.round(Number(this.db.prepare("SELECT coalesce(sum(amount_cents),0) AS total FROM revenue_payments WHERE status='paid'").get().total)),
+      recorded_revenue_cents: Math.round(Number(this.db.prepare("SELECT coalesce(sum(amount_cents),0) AS total FROM revenue_payments WHERE status='paid'").get().total)),
+      verified_revenue_cents: Math.round(Number(this.db.prepare("SELECT coalesce(sum(amount_cents),0) AS total FROM revenue_payments WHERE status='paid' AND verification='provider_verified'").get().total)),
+      owner_attested_revenue_cents: Math.round(Number(this.db.prepare("SELECT coalesce(sum(amount_cents),0) AS total FROM revenue_payments WHERE status='paid' AND verification='owner_attested'").get().total)),
       providers: { email: this.email.snapshot(), stripe: this.stripe.snapshot() },
       workspace_root: this.workspaceRoot,
       public_base_url_configured: Boolean(this.publicBaseUrl),

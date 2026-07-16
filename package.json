@@ -24,7 +24,7 @@
     "test:foundry": "node --test ./test/agent-foundry-grants.test.js",
     "test:supabase": "node --test ./test/supabase-public-config.test.js ./test/supabase-agent-runtime.test.js ./test/production-activation-first-venture.test.js",
     "test:activation": "node --test ./test/production-activation-first-venture.test.js",
-    "test:ops": "node --test ./test/runtime-supervisor.test.js ./test/ops-overview.test.js ./test/production-baseline.test.js ./test/backup-recovery.test.js ./test/integration-security.test.js ./test/integration-providers.test.js ./test/integration-hub.test.js ./test/mission-runtime.test.js ./test/mission-recovery.test.js ./test/mission-backup-restore.test.js ./test/repository-intelligence.test.js ./test/topology-consolidation.test.js",
+    "test:ops": "node --test ./test/runtime-supervisor.test.js ./test/ops-overview.test.js ./test/production-baseline.test.js ./test/backup-recovery.test.js ./test/integration-security.test.js ./test/integration-providers.test.js ./test/integration-hub.test.js ./test/mission-runtime.test.js ./test/mission-recovery.test.js ./test/mission-backup-restore.test.js ./test/repository-intelligence.test.js ./test/topology-consolidation.test.js ./test/topology-approval-policy.test.js",
     "test:integrations": "node --test ./test/integration-security.test.js ./test/integration-providers.test.js ./test/integration-hub.test.js ./test/mission-public-gateway.test.js",
     "test:ui": "node --test ./test/ui-contract.test.js ./test/mission-runtime.test.js",
     "verify": "bash ./scripts/verify.sh",
@@ -96,8 +96,8 @@
     "topology:verify-run": "node ./scripts/topology-consolidation.js verify-run",
     "topology:runs": "node ./scripts/topology-consolidation.js runs",
     "topology:serve": "node ./scripts/start-topology-consolidation.js",
-    "topology:test": "node --test ./test/topology-consolidation.test.js",
-    "topology:verify": "node --check ./services/topology-consolidation/index.js && node --check ./services/topology-consolidation/server.js && node --check ./scripts/topology-consolidation.js && node --check ./scripts/start-topology-consolidation.js && node --check ./scripts/verify-topology-consolidation.js && node ./scripts/verify-topology-consolidation.js && node --test ./test/topology-consolidation.test.js"
+    "topology:test": "node --test ./test/topology-consolidation.test.js ./test/topology-approval-policy.test.js",
+    "topology:verify": "node --check ./services/topology-consolidation/index.js && node --check ./services/topology-consolidation/server.js && node --check ./services/topology-consolidation/approval-policy.js && node --check ./scripts/topology-consolidation.js && node --check ./scripts/start-topology-consolidation.js && node --check ./scripts/verify-topology-consolidation.js && node ./scripts/verify-topology-consolidation.js && node --test ./test/topology-consolidation.test.js ./test/topology-approval-policy.test.js"
   },
   "engines": {
     "node": ">=22"

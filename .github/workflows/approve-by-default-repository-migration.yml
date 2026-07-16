@@ -67,6 +67,17 @@ jobs:
         run: |
           set -o pipefail
           npm run policy:audit 2>&1 | tee /tmp/approve-by-default-audit.json
+      - name: Package fully verified repository state
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tar \
+            --exclude=.git \
+            --exclude=node_modules \
+            --exclude=dist \
+            --exclude=coverage \
+            -czf /tmp/approve-by-default-repository.tar.gz .
+          sha256sum /tmp/approve-by-default-repository.tar.gz | tee /tmp/approve-by-default-repository.sha256
       - name: Commit verified migration
         shell: bash
         run: |
@@ -91,7 +102,7 @@ jobs:
           {
             echo "Automated approve-by-default migration failed in run $GITHUB_RUN_ID."
             echo
-            for file in /tmp/policy-install.log /tmp/policy-migration.log /tmp/policy-tests.log /tmp/approve-by-default-audit.json /tmp/policy-push.log; do
+            for file in /tmp/policy-install.log /tmp/policy-migration.log /tmp/policy-tests.log /tmp/approve-by-default-audit.json /tmp/approve-by-default-repository.sha256 /tmp/policy-push.log; do
               if [ -f "$file" ]; then
                 echo "## $(basename "$file")"
                 echo '```text'
@@ -101,7 +112,7 @@ jobs:
             done
           } > /tmp/policy-failure.md
           gh issue create --title "Approve-by-default migration failure $GITHUB_RUN_ID" --body-file /tmp/policy-failure.md
-      - name: Retain migration proof
+      - name: Retain migration proof and verified repository
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -109,6 +120,8 @@ jobs:
           path: |
             artifacts/policy-migration/applied.json
             /tmp/approve-by-default-audit.json
+            /tmp/approve-by-default-repository.tar.gz
+            /tmp/approve-by-default-repository.sha256
             /tmp/policy-install.log
             /tmp/policy-migration.log
             /tmp/policy-tests.log

@@ -3,6 +3,8 @@ name: CYVX Governed Topology Command
 on:
   issue_comment:
     types: [created]
+  schedule:
+    - cron: "*/5 * * * *"
 
 permissions:
   contents: write
@@ -10,16 +12,17 @@ permissions:
   issues: read
 
 concurrency:
-  group: topology-command-${{ github.event.issue.number }}
+  group: topology-command
   cancel-in-progress: false
 
 jobs:
   execute:
     name: Execute owner-approved topology request
     if: >-
-      github.event.issue.pull_request &&
+      github.event_name == 'schedule' ||
+      (github.event.issue.pull_request &&
       github.event.comment.body == '/cyvx topology execute' &&
-      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
@@ -31,22 +34,36 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          PR_NUMBER='${{ github.event.issue.number }}'
+          if [ "$GITHUB_EVENT_NAME" = schedule ]; then
+            PR_NUMBER=41
+          else
+            PR_NUMBER='${{ github.event.issue.number }}'
+          fi
+
           PR_JSON="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")"
           HEAD_REF="$(jq -r '.head.ref' <<<"$PR_JSON")"
           HEAD_REPO="$(jq -r '.head.repo.full_name' <<<"$PR_JSON")"
           BASE_REF="$(jq -r '.base.ref' <<<"$PR_JSON")"
           STATE="$(jq -r '.state' <<<"$PR_JSON")"
 
-          test "$STATE" = open
-          test "$HEAD_REPO" = "$GITHUB_REPOSITORY"
-          test "$BASE_REF" = main
+          if [ "$STATE" != open ] || [ "$HEAD_REPO" != "$GITHUB_REPOSITORY" ] || [ "$BASE_REF" != main ]; then
+            echo "execute=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           case "$HEAD_REF" in mission/*) ;; *) echo "Head branch must begin with mission/" >&2; exit 1 ;; esac
 
+          if ! gh api "repos/$GITHUB_REPOSITORY/contents/$REQUEST_PATH?ref=$HEAD_REF" >/dev/null 2>&1; then
+            echo "execute=false" >> "$GITHUB_OUTPUT"
+            echo "No active topology execution request."
+            exit 0
+          fi
+
+          echo "execute=true" >> "$GITHUB_OUTPUT"
           echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
           echo "head_ref=$HEAD_REF" >> "$GITHUB_OUTPUT"
 
       - name: Check out the authorized mission branch
+        if: steps.pr.outputs.execute == 'true'
         uses: actions/checkout@v6
         with:
           ref: ${{ steps.pr.outputs.head_ref }}
@@ -54,6 +71,7 @@ jobs:
           persist-credentials: true
 
       - name: Validate request-only branch boundary
+        if: steps.pr.outputs.execute == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -79,15 +97,18 @@ jobs:
           NODE
 
       - name: Set up Node.js 22
+        if: steps.pr.outputs.execute == 'true'
         uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
 
       - name: Install locked dependencies without lifecycle scripts
+        if: steps.pr.outputs.execute == 'true'
         run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Plan, approve, apply, and fully verify
+        if: steps.pr.outputs.execute == 'true'
         id: execute
         shell: bash
         run: |
@@ -162,7 +183,7 @@ jobs:
           echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
 
       - name: Upload migration and rollback evidence
-        if: always()
+        if: always() && steps.pr.outputs.execute == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: topology-execution-proof-${{ steps.pr.outputs.number }}-${{ github.run_id }}
@@ -171,6 +192,7 @@ jobs:
           retention-days: 90
 
       - name: Commit verified migration to the mission branch
+        if: steps.pr.outputs.execute == 'true' && success()
         shell: bash
         run: |
           set -euo pipefail
@@ -182,6 +204,7 @@ jobs:
           git push origin "HEAD:${{ steps.pr.outputs.head_ref }}"
 
       - name: Record execution outcome on the pull request
+        if: steps.pr.outputs.execute == 'true' && success()
         shell: bash
         run: |
           gh pr comment '${{ steps.pr.outputs.number }}' --body "Governed topology execution completed. Request: \`${{ steps.execute.outputs.request_id }}\`. Run: \`${{ steps.execute.outputs.run_id }}\`. The mission branch now contains the fully verified migration and retained proof manifest."

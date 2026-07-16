@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "CYVXAI-OS Production Repository Contract",
   "minimum_node_major": 22,
   "source_roots": ["api", "core", "runtime", "services", "scripts", "cli", "ui", "spark", "status"],
@@ -26,11 +26,12 @@
     "backup:verify",
     "verify:governance",
     "operator:verify",
-    "revenue:verify"
+    "revenue:verify",
+    "repo:intelligence:verify"
   ],
   "targets": {
     "max_top_level_directories": 20,
-    "max_unclassified_directories": 3,
+    "max_unclassified_directories": 0,
     "minimum_tests": 20,
     "minimum_workflows": 5,
     "minimum_documents": 15,
@@ -50,17 +51,17 @@
     "learning": 0.7
   },
   "categories": {
-    "product_surfaces": ["apps", "spark", "ui"],
+    "product_surfaces": ["apps", "public", "saas", "spark", "ui"],
     "runtime_and_api": ["api", "core", "runtime", "scheduler", "services", "status"],
-    "platform_and_control": ["control", "platform", "packages", "infrastructure", "operations", "observability", "security"],
-    "data_and_intelligence": ["data", "ml", "internet", "evaluations", "evidence", "economics"],
-    "delivery": ["cli", "scripts", "test", "tools", "supabase"],
+    "platform_and_control": ["control", "infrastructure", "observability", "operations", "ops", "packages", "platform", "security"],
+    "data_and_intelligence": ["data", "economics", "evaluations", "evidence", "internet", "ml"],
+    "delivery": ["cli", "config", "scripts", "supabase", "test", "tools"],
     "research_and_domain": ["brand", "civilization", "formal", "futures", "legal", "physics", "science", "thermodynamics"],
-    "documentation": ["docs", "artifacts"]
+    "documentation": ["artifacts", "docs"]
   },
   "ignored_top_level": ["dist"],
   "secret_scan_roots": [".github", "api", "config", "runtime", "scripts", "services"],
-  "proof_paths": ["evidence", "artifacts", "observability", "operations"],
+  "proof_paths": ["artifacts", "evidence", "observability", "ops"],
   "capabilities": [
     {
       "id": "mission-runtime",
@@ -95,7 +96,7 @@
     {
       "id": "production-operations",
       "title": "Production Operations",
-      "paths": ["observability", "operations", ".github/workflows"],
+      "paths": ["observability", "ops", ".github/workflows"],
       "required_scripts": ["verify:production-baseline", "backup:verify", "uptime"]
     },
     {
@@ -103,6 +104,12 @@
       "title": "Public and Mobile Interface",
       "paths": ["api/public.js", "ui", "spark"],
       "required_scripts": ["public", "public:test", "spark:verify"]
+    },
+    {
+      "id": "repository-evolution",
+      "title": "Repository Evolution Control Plane",
+      "paths": ["services/repository-intelligence", "config/repository-contract.json", ".github/workflows/repository-intelligence.yml"],
+      "required_scripts": ["repo:intelligence", "repo:intelligence:serve", "repo:intelligence:verify"]
     }
   ]
 }

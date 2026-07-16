@@ -6,6 +6,11 @@ on:
       - mission/research-leaves-consolidation-stage-1
     paths:
       - .github/workflows/execute-research-leaves-stage.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/execute-research-leaves-stage.yml
 
 permissions:
   contents: write

@@ -1,0 +1,180 @@
+name: CYVX Governed Topology After CI
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: topology-after-ci-research-leaves-stage-1
+  cancel-in-progress: false
+
+jobs:
+  execute:
+    name: Execute verified research-leaves request
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'mission/research-leaves-consolidation-stage-1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REQUEST_PATH: .cyvx/topology-execution.json
+      MISSION_BRANCH: mission/research-leaves-consolidation-stage-1
+      PROOF_DIR: ${{ runner.temp }}/topology-execution-proof
+    steps:
+      - name: Confirm the authorized request remains active
+        id: request
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh api "repos/$GITHUB_REPOSITORY/contents/$REQUEST_PATH?ref=$MISSION_BRANCH" >/dev/null 2>&1; then
+            echo "execute=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "execute=true" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the authorized mission branch
+        if: steps.request.outputs.execute == 'true'
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.MISSION_BRANCH }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Validate the request-only boundary
+        if: steps.request.outputs.execute == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          test -f "$REQUEST_PATH"
+          MERGE_BASE="$(git merge-base origin/main HEAD)"
+          mapfile -t CHANGED < <(git diff --name-only "$MERGE_BASE" HEAD)
+          if [ "${#CHANGED[@]}" -ne 1 ] || [ "${CHANGED[0]}" != "$REQUEST_PATH" ]; then
+            printf 'Mission branch must differ from main only by %s. Detected:\n' "$REQUEST_PATH" >&2
+            printf ' - %s\n' "${CHANGED[@]}" >&2
+            exit 1
+          fi
+          node <<'NODE'
+          const fs = require('fs');
+          const request = JSON.parse(fs.readFileSync('.cyvx/topology-execution.json', 'utf8'));
+          if (request.schema_version !== 1) throw new Error('schema_version must equal 1');
+          if (request.stage_id !== 'research-leaves') throw new Error('Only research-leaves is authorized');
+          if (request.expected_active_moves !== 6) throw new Error('Exactly six moves are required');
+          if (request.verify_mode !== 'full') throw new Error('Full verification is required');
+          if (request.request_id !== 'research-leaves-stage-1') throw new Error('Request id is invalid');
+          NODE
+
+      - name: Set up Node.js 22
+        if: steps.request.outputs.execute == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        if: steps.request.outputs.execute == 'true'
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Generate exact plan and execute with full rollback protection
+        if: steps.request.outputs.execute == 'true'
+        id: execute
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PROOF_DIR"
+          cp "$REQUEST_PATH" "$PROOF_DIR/request.json"
+
+          node ./scripts/topology-consolidation.js scan --json > "$PROOF_DIR/scan.json"
+          node ./scripts/topology-consolidation.js plan research-leaves --json > "$PROOF_DIR/plan.json"
+          DIGEST="$(node -e 'const fs=require("fs");const p=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(!p.ok||p.summary.blocked_moves!==0||p.summary.active_moves!==6)process.exit(2);process.stdout.write(p.approval.digest)' "$PROOF_DIR/plan.json")"
+          printf '%s\n' "$DIGEST" > "$PROOF_DIR/approved-digest.txt"
+
+          set +e
+          node ./scripts/topology-consolidation.js apply research-leaves --approve "$DIGEST" --verify full --json > "$PROOF_DIR/apply.json" 2> "$PROOF_DIR/apply-error.json"
+          APPLY_STATUS=$?
+          set -e
+
+          if [ -d "$HOME/.cyvx/topology-consolidation" ]; then
+            cp -a "$HOME/.cyvx/topology-consolidation" "$PROOF_DIR/state-store"
+          fi
+          if [ "$APPLY_STATUS" -ne 0 ]; then
+            cat "$PROOF_DIR/apply-error.json" >&2
+            exit "$APPLY_STATUS"
+          fi
+
+          RUN_ID="$(node -e 'const fs=require("fs");const p=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(p.status!=="applied"||!p.run_id)process.exit(3);process.stdout.write(p.run_id)' "$PROOF_DIR/apply.json")"
+          printf '%s\n' "$RUN_ID" > "$PROOF_DIR/run-id.txt"
+          node ./scripts/topology-consolidation.js verify-run "$RUN_ID" --json > "$PROOF_DIR/verification.json"
+          node -e 'const fs=require("fs");const p=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(!p.ok)process.exit(4)' "$PROOF_DIR/verification.json"
+
+          for link in physics science thermodynamics formal futures civilization; do
+            test -L "$link"
+            test -d "research/$link"
+          done
+          npm run topology:verify
+          npm run repo:intelligence:verify
+          git diff --check
+
+          mkdir -p artifacts/topology/research-leaves-stage-1
+          PROOF_DIR="$PROOF_DIR" SOURCE_SHA="$GITHUB_SHA" WORKFLOW_RUN_ID="$GITHUB_RUN_ID" node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const crypto = require('crypto');
+          const proofDir = process.env.PROOF_DIR;
+          const read = (name) => JSON.parse(fs.readFileSync(path.join(proofDir, name), 'utf8'));
+          const document = {
+            schema_version: 1,
+            mission: 'CYVX governed topology consolidation',
+            request_id: 'research-leaves-stage-1',
+            source_commit: process.env.SOURCE_SHA,
+            workflow_run_id: process.env.WORKFLOW_RUN_ID,
+            generated_at: new Date().toISOString(),
+            request: read('request.json'),
+            plan: read('plan.json'),
+            apply: read('apply.json'),
+            verification: read('verification.json')
+          };
+          document.proof = {
+            algorithm: 'sha256',
+            digest: crypto.createHash('sha256').update(JSON.stringify(document)).digest('hex')
+          };
+          fs.writeFileSync('artifacts/topology/research-leaves-stage-1/proof.json', `${JSON.stringify(document, null, 2)}\n`);
+          NODE
+
+          rm -f "$REQUEST_PATH"
+          git status --short > "$PROOF_DIR/git-status.txt"
+          test -s "$PROOF_DIR/git-status.txt"
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Upload complete migration and rollback evidence
+        if: always() && steps.request.outputs.execute == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-leaves-stage-1-proof-${{ github.run_id }}
+          path: ${{ runner.temp }}/topology-execution-proof
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Commit only the fully verified migration
+        if: steps.request.outputs.execute == 'true' && success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "Execute governed research-leaves topology consolidation"
+          git push origin "HEAD:$MISSION_BRANCH"
+
+      - name: Record the completed run
+        if: steps.request.outputs.execute == 'true' && success()
+        shell: bash
+        run: |
+          gh pr comment 41 --body "Governed research-leaves consolidation completed after authoritative CI. Run: \`${{ steps.execute.outputs.run_id }}\`. The branch now contains six compatibility aliases, the consolidated research tree, rewritten references, and the committed proof manifest."

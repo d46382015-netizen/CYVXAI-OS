@@ -5,12 +5,12 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const test = require("node:test");
-const { rewriteContent, mapRepositoryPath, reverseMapRepositoryPath } = require("../services/topology-consolidation/path-aware-rewrite");
+const { rewriteContent, shouldRewriteFile, mapRepositoryPath, reverseMapRepositoryPath } = require("../services/topology-consolidation/path-aware-rewrite");
 const executionOperator = require("../scripts/execute-authorized-topology-request");
 
 const moves = [{ source: "futures", target: "research/futures" }];
 
-test("path-aware rewriting changes imports and explicit paths but preserves semantic labels", () => {
+test("module rewriting changes resolved imports but preserves semantic and compatibility strings", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "cyvx-path-rewrite-"));
   try {
     fs.mkdirSync(path.join(root, "core"), { recursive: true });
@@ -30,9 +30,8 @@ test("path-aware rewriting changes imports and explicit paths but preserves sema
     const rewritten = rewriteContent(root, "core/example.js", "core/example.js", source, moves);
     assert.match(rewritten, /require\("\.\.\/research\/futures\/trajectory_engine"\)/);
     assert.match(rewritten, /watches: \["futures", "alternatives"\]/);
-    assert.match(rewritten, /"research\/futures\/trajectory_engine\.js"/);
-    assert.match(rewritten, /"\.\/research\/futures\/trajectory_engine\.js"/);
-    assert.doesNotMatch(rewritten, /watches: \["research\/futures"/);
+    assert.match(rewritten, /manifest = "futures\/trajectory_engine\.js"/);
+    assert.match(rewritten, /relative = "\.\/futures\/trajectory_engine\.js"/);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
@@ -52,6 +51,13 @@ test("a moved importer rebases relative imports to unmoved repository roots", ()
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
+});
+
+test("production rewrite selection includes only physically moved code modules", () => {
+  assert.equal(shouldRewriteFile("futures/validator.js", "research/futures/validator.js"), true);
+  assert.equal(shouldRewriteFile("test/fixture.js", "test/fixture.js"), false);
+  assert.equal(shouldRewriteFile("docs/futures.md", "research/futures.md"), false);
+  assert.equal(shouldRewriteFile("core/controller.js", "core/controller.js"), false);
 });
 
 test("forward and reverse path mapping are exact", () => {

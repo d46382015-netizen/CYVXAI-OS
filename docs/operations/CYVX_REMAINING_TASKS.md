@@ -18,12 +18,14 @@ http://127.0.0.1:3014/repo-intelligence
 
 ## Source of truth
 
-- Contract: `config/repository-contract.json`
-- Latest machine proof: `~/.cyvx/repository-intelligence/latest.json`
-- Latest human report: `~/.cyvx/repository-intelligence/latest.md`
-- Measured history: `~/.cyvx/repository-intelligence/history.jsonl`
-- Operational log: `~/.cyvx/repository-intelligence/repository-intelligence.jsonl`
-- CI proof: `CYVX Repository Intelligence` workflow artifact
+| Purpose | Location |
+|---|---|
+| Production contract | `config/repository-contract.json` |
+| Latest machine proof | `~/.cyvx/repository-intelligence/latest.json` |
+| Latest human report | `~/.cyvx/repository-intelligence/latest.md` |
+| Measured history | `~/.cyvx/repository-intelligence/history.jsonl` |
+| Operational log | `~/.cyvx/repository-intelligence/repository-intelligence.jsonl` |
+| CI proof | `CYVX Repository Intelligence` workflow artifact |
 
 ## Execution policy
 

@@ -1,0 +1,80 @@
+name: Approve-by-Default Repository Migration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/apply-approve-by-default-migration.js"
+      - ".github/workflows/approve-by-default-repository-migration.yml"
+  workflow_dispatch:
+
+permissions: write-all
+
+concurrency:
+  group: approve-by-default-repository-migration
+  cancel-in-progress: false
+
+jobs:
+  migrate-verify-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NODE_ENV: test
+      CYVX_ENV: test
+      CYVX_ALLOW_INSECURE_LOCAL: "true"
+      CYVX_DATA_ROOT: /tmp/cyvx-policy-migration
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Apply repository-wide approval and permission policy
+        run: node ./scripts/apply-approve-by-default-migration.js
+      - name: Validate migrated JavaScript
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node --check core/security/production_guard.js
+          node --check core/integrations/feature_flags.js
+          node --check core/integrations/posthog_client.js
+          node --check core/integrations/stripe_billing.js
+          node --check core/integrations/transactional_email.js
+          node --check core/integrations/supabase_queue.js
+          node --check core/integrations/integration_hub.js
+          node --check core/production/backup_scheduler.js
+          node --check services/revenue/providers.js
+          node --check scripts/audit-approve-by-default.js
+      - name: Run approval policy regression tests
+        run: npm run policy:test
+      - name: Audit operational defaults and all workflow permissions
+        run: npm run policy:audit | tee /tmp/approve-by-default-audit.json
+      - name: Commit verified migration
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo "Repository policy is already current."
+            exit 0
+          fi
+          git commit -m "Apply approve-by-default policy and complete workflow permissions"
+          git push origin HEAD:main
+      - name: Retain migration proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: approve-by-default-migration-${{ github.run_id }}
+          path: |
+            artifacts/policy-migration/applied.json
+            /tmp/approve-by-default-audit.json
+          if-no-files-found: ignore
+          retention-days: 90

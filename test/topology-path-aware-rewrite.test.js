@@ -6,6 +6,7 @@ const os = require("node:os");
 const path = require("node:path");
 const test = require("node:test");
 const { rewriteContent, mapRepositoryPath, reverseMapRepositoryPath } = require("../services/topology-consolidation/path-aware-rewrite");
+const executionOperator = require("../scripts/execute-authorized-topology-request");
 
 const moves = [{ source: "futures", target: "research/futures" }];
 
@@ -41,4 +42,8 @@ test("forward and reverse path mapping are exact", () => {
   assert.equal(mapRepositoryPath("futures/trajectory_engine.js", moves), "research/futures/trajectory_engine.js");
   assert.equal(reverseMapRepositoryPath("research/futures/trajectory_engine.js", moves), "futures/trajectory_engine.js");
   assert.equal(mapRepositoryPath("core/futures-analysis.js", moves), "core/futures-analysis.js");
+});
+
+test("the governed execution operator is loadable without executing", () => {
+  assert.equal(typeof executionOperator.main, "function");
 });

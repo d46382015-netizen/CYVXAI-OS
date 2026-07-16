@@ -38,6 +38,22 @@ test("path-aware rewriting changes imports and explicit paths but preserves sema
   }
 });
 
+test("a moved importer rebases relative imports to unmoved repository roots", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "cyvx-import-rebase-"));
+  try {
+    fs.mkdirSync(path.join(root, "core", "lib"), { recursive: true });
+    fs.mkdirSync(path.join(root, "research", "futures"), { recursive: true });
+    fs.writeFileSync(path.join(root, "core", "lib", "cyxv.js"), "module.exports = {};\n");
+    fs.symlinkSync(path.join("research", "futures"), path.join(root, "futures"), "dir");
+
+    const source = 'const { validate } = require("../core/lib/cyxv");\n';
+    const rewritten = rewriteContent(root, "futures/validator.js", "research/futures/validator.js", source, moves);
+    assert.equal(rewritten, 'const { validate } = require("../../core/lib/cyxv");\n');
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("forward and reverse path mapping are exact", () => {
   assert.equal(mapRepositoryPath("futures/trajectory_engine.js", moves), "research/futures/trajectory_engine.js");
   assert.equal(reverseMapRepositoryPath("research/futures/trajectory_engine.js", moves), "futures/trajectory_engine.js");

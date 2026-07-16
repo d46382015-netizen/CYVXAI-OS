@@ -51,6 +51,50 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
+      - name: Commit redacted fail-closed receipt
+        if: failure()
+        shell: bash
+        env:
+          PROOF_DIR: ${{ runner.temp }}/topology-execution-proof
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/topology/research-leaves-stage-1
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const proofDir = process.env.PROOF_DIR;
+          const readJson = (name) => {
+            try { return JSON.parse(fs.readFileSync(path.join(proofDir, name), 'utf8')); }
+            catch { return null; }
+          };
+          const readText = (name) => {
+            try { return fs.readFileSync(path.join(proofDir, name), 'utf8').trim(); }
+            catch { return null; }
+          };
+          const failure = readJson('operator-error.json');
+          const rollback = failure && failure.rollback;
+          const receipt = {
+            schema_version: 1,
+            status: 'failed_closed',
+            request_id: 'research-leaves-stage-1',
+            workflow_run_id: process.env.GITHUB_RUN_ID,
+            source_commit: process.env.GITHUB_SHA,
+            generated_at: new Date().toISOString(),
+            topology_run_id: readText('run-id.txt'),
+            error: failure && failure.error ? String(failure.error).slice(0, 1000) : 'unknown execution failure',
+            rollback_verified: Boolean(rollback && rollback.rollback && rollback.rollback.verified),
+            rollback_expected_digest: rollback && rollback.rollback ? rollback.rollback.expected_tree_digest || null : null,
+            rollback_actual_digest: rollback && rollback.rollback ? rollback.rollback.actual_tree_digest || null : null
+          };
+          fs.writeFileSync('artifacts/topology/research-leaves-stage-1/failure.json', `${JSON.stringify(receipt, null, 2)}\n`);
+          NODE
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/topology/research-leaves-stage-1/failure.json
+          git diff --cached --check
+          git commit -m "Record fail-closed research-leaves execution"
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
+
       - name: Commit only the fully verified migration
         if: steps.execute.outputs.executed == 'true'
         shell: bash

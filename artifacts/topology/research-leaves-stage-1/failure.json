@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "failed_closed",
+  "request_id": "research-leaves-stage-1",
+  "workflow_run_id": "29540648583",
+  "source_commit": "011620b3ecaa9c6ed920fcce325f92e52a64bf8f",
+  "generated_at": "2026-07-16T22:50:27.277Z",
+  "topology_run_id": "research-leaves-2026-07-16T22-50-23-825Z-f9cad5f9",
+  "error": "Full production verification failed after path-aware rewriting",
+  "rollback_verified": true,
+  "rollback_expected_digest": "5e3f44bb7887226f3a4f71c59bc27dfc5452baa6994cc3064fc073f78177f6b2",
+  "rollback_actual_digest": "5e3f44bb7887226f3a4f71c59bc27dfc5452baa6994cc3064fc073f78177f6b2"
+}

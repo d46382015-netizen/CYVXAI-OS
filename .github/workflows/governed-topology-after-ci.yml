@@ -7,7 +7,8 @@ on:
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
+  issues: write
 
 concurrency:
   group: topology-after-ci-research-leaves-stage-1

@@ -68,7 +68,7 @@ function rewriteContent(root, originalRelativePath, currentRelativePath, text, m
     output = output.replace(pattern, (full, quote, specifier) => {
       const resolved = resolveSpecifier(root, originalRelativePath, specifier);
       const mapped = resolved && mapRepositoryPath(resolved, moves);
-      if (!mapped || mapped === resolved) return full;
+      if (!mapped) return full;
       let next = normalizePath(path.relative(path.dirname(currentRelativePath), mapped));
       if (!next.startsWith(".")) next = `./${next}`;
       if (!path.extname(specifier)) {

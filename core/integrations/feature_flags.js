@@ -4,16 +4,16 @@ const { truthy } = require("../security/production_guard");
 
 const DEFAULT_FLAGS = Object.freeze({
   "autonomy.enabled": { type: "boolean", value: true, safety: "kill-switch" },
-  "external_tools.enabled": { type: "boolean", value: false, safety: "deny-by-default" },
-  "paid_operations.enabled": { type: "boolean", value: false, safety: "deny-by-default" },
-  "signup.enabled": { type: "boolean", value: false, safety: "deny-by-default" },
+  "external_tools.enabled": { type: "boolean", value: true, safety: "approve-by-default" },
+  "paid_operations.enabled": { type: "boolean", value: true, safety: "approve-by-default" },
+  "signup.enabled": { type: "boolean", value: true, safety: "approve-by-default" },
   "background_execution.enabled": { type: "boolean", value: true, safety: "kill-switch" },
   "webhook_processing.enabled": { type: "boolean", value: true, safety: "kill-switch" },
   "maintenance.enabled": { type: "boolean", value: false, safety: "operational" },
   "read_only.enabled": { type: "boolean", value: false, safety: "operational" },
-  "billing.enabled": { type: "boolean", value: false, safety: "deny-by-default" },
+  "billing.enabled": { type: "boolean", value: true, safety: "approve-by-default" },
   "analytics.enabled": { type: "boolean", value: false, safety: "privacy" },
-  "email.enabled": { type: "boolean", value: false, safety: "deny-by-default" },
+  "email.enabled": { type: "boolean", value: true, safety: "approve-by-default" },
   "ai.provider": { type: "string", value: "anthropic", safety: "routing" },
 });
 
@@ -23,6 +23,7 @@ class FeatureFlagService {
     this.data = options.dataClient || null;
     this.environment = String(options.environment || this.env.CYVX_ENV || this.env.NODE_ENV || "development");
     this.required = options.required ?? truthy(this.env.CYVX_REQUIRE_FEATURE_FLAGS);
+    this.approveByDefault = options.approveByDefault ?? truthy(this.env.CYVX_APPROVE_BY_DEFAULT ?? "true");
     this.refreshMs = positive(options.refreshMs || this.env.CYVX_FEATURE_FLAG_REFRESH_MS, 30_000);
     this.defaults = mergeDefaults(DEFAULT_FLAGS, parseJson(this.env.CYVX_FEATURE_FLAGS_JSON, {}));
     this.rows = [];
@@ -73,12 +74,18 @@ class FeatureFlagService {
     const tenantId = context.tenantId || context.tenant_id || null;
     const row = this.#find(flagKey, tenantId);
     if (row) {
-      if (!row.enabled) return detail(flagKey, defaultValue, "DISABLED", "database", row);
+      if (!row.enabled) {
+        const deniedValue = row.flag_type === "boolean" || typeof defaultValue === "boolean" ? false : defaultValue;
+        return detail(flagKey, deniedValue, "EXPLICIT_DENY", "database", row);
+      }
       const converted = convert(row.flag_value, row.flag_type, defaultValue);
       return detail(flagKey, converted, "TARGETING_MATCH", row.tenant_id ? "tenant" : "environment", row);
     }
     const configured = this.defaults[flagKey];
     if (configured) return detail(flagKey, configured.value, "DEFAULT", "configuration", configured);
+    if (this.approveByDefault && typeof defaultValue === "boolean") {
+      return detail(flagKey, true, "APPROVE_BY_DEFAULT", "policy", null);
+    }
     return detail(flagKey, defaultValue, "FLAG_NOT_FOUND", "caller", null);
   }
 
@@ -119,6 +126,7 @@ class FeatureFlagService {
     return {
       configured: this.configured(),
       required: this.required,
+      approve_by_default: this.approveByDefault,
       environment: this.environment,
       scheduled: Boolean(this.timer),
       refresh_ms: this.refreshMs,
@@ -138,7 +146,7 @@ class FeatureFlagService {
 class OpenFeatureProviderAdapter {
   constructor(service) {
     this.service = service;
-    this.metadata = { name: "CYVXManagedFeatureFlags", version: "1.0.0" };
+    this.metadata = { name: "CYVXManagedFeatureFlags", version: "1.1.0" };
     this.runsOn = "server";
   }
 

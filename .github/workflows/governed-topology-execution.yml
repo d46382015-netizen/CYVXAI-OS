@@ -1,0 +1,172 @@
+name: CYVX Governed Topology Execution
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  contents: write
+
+concurrency:
+  group: topology-execution-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  execute:
+    name: Execute approved topology request
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.head_ref, 'mission/')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      REQUEST_PATH: .cyvx/topology-execution.json
+      PROOF_DIR: ${{ runner.temp }}/topology-execution-proof
+    steps:
+      - name: Check out the same-repository mission branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Validate request-only execution boundary
+        id: request
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+
+          if [ ! -f "$REQUEST_PATH" ]; then
+            echo "execute=false" >> "$GITHUB_OUTPUT"
+            echo "No active topology execution request."
+            exit 0
+          fi
+
+          MERGE_BASE="$(git merge-base origin/main HEAD)"
+          mapfile -t CHANGED < <(git diff --name-only "$MERGE_BASE" HEAD)
+          if [ "${#CHANGED[@]}" -ne 1 ] || [ "${CHANGED[0]}" != "$REQUEST_PATH" ]; then
+            printf 'Execution branch must differ from main only by %s. Detected:\n' "$REQUEST_PATH" >&2
+            printf ' - %s\n' "${CHANGED[@]}" >&2
+            exit 1
+          fi
+
+          node <<'NODE'
+          const fs = require('fs');
+          const request = JSON.parse(fs.readFileSync('.cyvx/topology-execution.json', 'utf8'));
+          if (request.schema_version !== 1) throw new Error('schema_version must equal 1');
+          if (!/^[a-z0-9-]+$/.test(String(request.stage_id || ''))) throw new Error('stage_id is invalid');
+          if (!Number.isInteger(request.expected_active_moves) || request.expected_active_moves < 1) throw new Error('expected_active_moves must be a positive integer');
+          if (request.verify_mode !== 'full') throw new Error('physical consolidation requires verify_mode=full');
+          if (!/^[a-z0-9-]+$/.test(String(request.request_id || ''))) throw new Error('request_id is invalid');
+          NODE
+
+          echo "execute=true" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node.js 22
+        if: steps.request.outputs.execute == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies without lifecycle scripts
+        if: steps.request.outputs.execute == 'true'
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Plan, approve, apply, and fully verify
+        if: steps.request.outputs.execute == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PROOF_DIR"
+          cp "$REQUEST_PATH" "$PROOF_DIR/request.json"
+
+          STAGE_ID="$(node -p "require('./$REQUEST_PATH').stage_id")"
+          EXPECTED_MOVES="$(node -p "require('./$REQUEST_PATH').expected_active_moves")"
+          REQUEST_ID="$(node -p "require('./$REQUEST_PATH').request_id")"
+
+          node ./scripts/topology-consolidation.js scan --json > "$PROOF_DIR/scan.json"
+          node ./scripts/topology-consolidation.js plan "$STAGE_ID" --json > "$PROOF_DIR/plan.json"
+
+          DIGEST="$(node -e 'const fs=require("fs");const p=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));const expected=Number(process.argv[2]);if(!p.ok||p.summary.blocked_moves!==0||p.summary.active_moves!==expected)process.exit(2);process.stdout.write(p.approval.digest)' "$PROOF_DIR/plan.json" "$EXPECTED_MOVES")"
+          printf '%s\n' "$DIGEST" > "$PROOF_DIR/approved-digest.txt"
+
+          set +e
+          node ./scripts/topology-consolidation.js apply "$STAGE_ID" --approve "$DIGEST" --verify full --json > "$PROOF_DIR/apply.json" 2> "$PROOF_DIR/apply-error.json"
+          APPLY_STATUS=$?
+          set -e
+
+          if [ -d "$HOME/.cyvx/topology-consolidation" ]; then
+            cp -a "$HOME/.cyvx/topology-consolidation" "$PROOF_DIR/state-store"
+          fi
+
+          if [ "$APPLY_STATUS" -ne 0 ]; then
+            cat "$PROOF_DIR/apply-error.json" >&2
+            exit "$APPLY_STATUS"
+          fi
+
+          RUN_ID="$(node -e 'const fs=require("fs");const p=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(p.status!=="applied"||!p.run_id)process.exit(3);process.stdout.write(p.run_id)' "$PROOF_DIR/apply.json")"
+          printf '%s\n' "$RUN_ID" > "$PROOF_DIR/run-id.txt"
+          node ./scripts/topology-consolidation.js verify-run "$RUN_ID" --json > "$PROOF_DIR/verification.json"
+          node -e 'const fs=require("fs");const p=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(!p.ok)process.exit(4)' "$PROOF_DIR/verification.json"
+
+          npm run topology:verify
+          npm run repo:intelligence:verify
+          git diff --check
+
+          mkdir -p "artifacts/topology/$REQUEST_ID"
+          PROOF_DIR="$PROOF_DIR" REQUEST_ID="$REQUEST_ID" SOURCE_SHA="$GITHUB_SHA" WORKFLOW_RUN_ID="$GITHUB_RUN_ID" node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const crypto = require('crypto');
+          const proofDir = process.env.PROOF_DIR;
+          const read = (name) => JSON.parse(fs.readFileSync(path.join(proofDir, name), 'utf8'));
+          const document = {
+            schema_version: 1,
+            mission: 'CYVX governed topology consolidation',
+            request_id: process.env.REQUEST_ID,
+            source_commit: process.env.SOURCE_SHA,
+            workflow_run_id: process.env.WORKFLOW_RUN_ID,
+            generated_at: new Date().toISOString(),
+            request: read('request.json'),
+            plan: read('plan.json'),
+            apply: read('apply.json'),
+            verification: read('verification.json')
+          };
+          document.proof = {
+            algorithm: 'sha256',
+            digest: crypto.createHash('sha256').update(JSON.stringify(document)).digest('hex')
+          };
+          fs.writeFileSync(`artifacts/topology/${process.env.REQUEST_ID}/proof.json`, `${JSON.stringify(document, null, 2)}\n`);
+          NODE
+
+          rm -f "$REQUEST_PATH"
+          git status --short > "$PROOF_DIR/git-status.txt"
+          test -s "$PROOF_DIR/git-status.txt"
+
+      - name: Upload migration and rollback evidence
+        if: always() && steps.request.outputs.execute == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: topology-execution-proof-${{ github.event.pull_request.number }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/topology-execution-proof
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Commit verified migration to the mission branch
+        if: steps.request.outputs.execute == 'true' && success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "Execute governed topology consolidation request"
+          git push origin "HEAD:${GITHUB_HEAD_REF}"

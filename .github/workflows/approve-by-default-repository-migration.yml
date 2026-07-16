@@ -78,19 +78,20 @@ jobs:
             --exclude=coverage \
             -czf /tmp/approve-by-default-repository.tar.gz .
           sha256sum /tmp/approve-by-default-repository.tar.gz | tee /tmp/approve-by-default-repository.sha256
-      - name: Commit verified migration
+      - name: Commit verified non-workflow policy files
         shell: bash
         run: |
           set -Eeuo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
+          git reset -- .github/workflows
           git diff --cached --check
           if git diff --cached --quiet; then
-            echo "Repository policy is already current."
+            echo "Non-workflow policy files are already current."
             exit 0
           fi
-          git commit -m "Apply approve-by-default policy and complete workflow permissions"
+          git commit -m "Apply approve-by-default operational policy"
           git push origin HEAD:main 2>&1 | tee /tmp/policy-push.log
       - name: Report migration failure
         if: failure()

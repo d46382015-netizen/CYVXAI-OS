@@ -3,7 +3,7 @@
   "version": "8.3.0",
   "private": true,
   "type": "commonjs",
-  "description": "CYVXAI universal outcome, venture revenue, and repository evolution operator with durable missions, verified evidence, governed execution, and capability learning",
+  "description": "CYVXAI universal outcome, venture revenue, repository evolution, and governed topology operator with durable missions, verified evidence, governed execution, and capability learning",
   "scripts": {
     "start": "node ./api/runtime-v7.js",
     "dev": "CYVX_ALLOW_INSECURE_LOCAL=true node ./api/runtime-v7.js",
@@ -24,7 +24,7 @@
     "test:foundry": "node --test ./test/agent-foundry-grants.test.js",
     "test:supabase": "node --test ./test/supabase-public-config.test.js ./test/supabase-agent-runtime.test.js ./test/production-activation-first-venture.test.js",
     "test:activation": "node --test ./test/production-activation-first-venture.test.js",
-    "test:ops": "node --test ./test/runtime-supervisor.test.js ./test/ops-overview.test.js ./test/production-baseline.test.js ./test/backup-recovery.test.js ./test/integration-security.test.js ./test/integration-providers.test.js ./test/integration-hub.test.js ./test/mission-runtime.test.js ./test/mission-recovery.test.js ./test/mission-backup-restore.test.js ./test/repository-intelligence.test.js",
+    "test:ops": "node --test ./test/runtime-supervisor.test.js ./test/ops-overview.test.js ./test/production-baseline.test.js ./test/backup-recovery.test.js ./test/integration-security.test.js ./test/integration-providers.test.js ./test/integration-hub.test.js ./test/mission-runtime.test.js ./test/mission-recovery.test.js ./test/mission-backup-restore.test.js ./test/repository-intelligence.test.js ./test/topology-consolidation.test.js",
     "test:integrations": "node --test ./test/integration-security.test.js ./test/integration-providers.test.js ./test/integration-hub.test.js ./test/mission-public-gateway.test.js",
     "test:ui": "node --test ./test/ui-contract.test.js ./test/mission-runtime.test.js",
     "verify": "bash ./scripts/verify.sh",
@@ -45,7 +45,7 @@
     "supabase:local:reset": "supabase db reset",
     "supabase:local:stop": "supabase stop --no-backup",
     "verify:integrations": "node ./scripts/verify-integrations-v8.js && npm run test:integrations",
-    "verify:production-baseline": "npm run doctor && node ./scripts/verify-production-baseline.js && npm run verify:integrations && node --check ./api/runtime-v7.js && node --check ./api/integrated-production.js && node --check ./status/server.js && npm test && npm run build && npm run backup:verify && npm run cloudflare:plan && npm run repo:intelligence:verify",
+    "verify:production-baseline": "npm run doctor && node ./scripts/verify-production-baseline.js && npm run verify:integrations && node --check ./api/runtime-v7.js && node --check ./api/integrated-production.js && node --check ./status/server.js && npm test && npm run build && npm run backup:verify && npm run cloudflare:plan && npm run repo:intelligence:verify && npm run topology:verify",
     "github:test": "node --test ./test/github-control-plane.test.js ./test/github-control-plane-advanced.test.js",
     "spark": "node ./spark/server.js",
     "spark:start": "bash ./spark/start.sh",
@@ -88,7 +88,16 @@
     "repo:intelligence:check": "node ./scripts/scan-repository-intelligence.js --check",
     "repo:intelligence:serve": "node ./scripts/start-repository-intelligence.js",
     "repo:intelligence:test": "node --test ./test/repository-intelligence.test.js",
-    "repo:intelligence:verify": "node --check ./services/repository-intelligence/index.js && node --check ./services/repository-intelligence/server.js && node --check ./scripts/scan-repository-intelligence.js && node --check ./scripts/start-repository-intelligence.js && node --check ./scripts/verify-repository-intelligence.js && node ./scripts/verify-repository-intelligence.js && node --test ./test/repository-intelligence.test.js"
+    "repo:intelligence:verify": "node --check ./services/repository-intelligence/index.js && node --check ./services/repository-intelligence/server.js && node --check ./scripts/scan-repository-intelligence.js && node --check ./scripts/start-repository-intelligence.js && node --check ./scripts/verify-repository-intelligence.js && node ./scripts/verify-repository-intelligence.js && node --test ./test/repository-intelligence.test.js",
+    "topology:scan": "node ./scripts/topology-consolidation.js scan",
+    "topology:plan": "node ./scripts/topology-consolidation.js plan",
+    "topology:apply": "node ./scripts/topology-consolidation.js apply",
+    "topology:rollback": "node ./scripts/topology-consolidation.js rollback",
+    "topology:verify-run": "node ./scripts/topology-consolidation.js verify-run",
+    "topology:runs": "node ./scripts/topology-consolidation.js runs",
+    "topology:serve": "node ./scripts/start-topology-consolidation.js",
+    "topology:test": "node --test ./test/topology-consolidation.test.js",
+    "topology:verify": "node --check ./services/topology-consolidation/index.js && node --check ./services/topology-consolidation/server.js && node --check ./scripts/topology-consolidation.js && node --check ./scripts/start-topology-consolidation.js && node --check ./scripts/verify-topology-consolidation.js && node ./scripts/verify-topology-consolidation.js && node --test ./test/topology-consolidation.test.js"
   },
   "engines": {
     "node": ">=22"

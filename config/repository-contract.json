@@ -1,8 +1,8 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "name": "CYVXAI-OS Production Repository Contract",
   "minimum_node_major": 22,
-  "source_roots": ["api", "core", "runtime", "services", "scripts", "cli", "ui", "spark", "status"],
+  "source_roots": ["api", "core", "runtime", "services", "scripts", "cli", "ui", "spark", "status", "research", "domains"],
   "required_paths": [
     "package.json",
     "README.md",
@@ -12,9 +12,12 @@
     "runtime/missions",
     "services/operator",
     "services/revenue",
+    "services/topology-consolidation",
+    "config/topology-consolidation.json",
     "scripts",
     "test",
     "docs",
+    "docs/operations/TOPOLOGY_CONSOLIDATION.md",
     ".github/workflows"
   ],
   "required_scripts": [
@@ -27,7 +30,8 @@
     "verify:governance",
     "operator:verify",
     "revenue:verify",
-    "repo:intelligence:verify"
+    "repo:intelligence:verify",
+    "topology:verify"
   ],
   "targets": {
     "max_top_level_directories": 20,
@@ -56,7 +60,7 @@
     "platform_and_control": ["control", "infrastructure", "observability", "operations", "ops", "packages", "platform", "security"],
     "data_and_intelligence": ["data", "economics", "evaluations", "evidence", "internet", "ml"],
     "delivery": ["cli", "config", "scripts", "supabase", "test", "tools"],
-    "research_and_domain": ["brand", "civilization", "formal", "futures", "legal", "physics", "science", "thermodynamics"],
+    "research_and_domain": ["brand", "civilization", "domains", "formal", "futures", "legal", "physics", "research", "science", "thermodynamics"],
     "documentation": ["artifacts", "docs"]
   },
   "ignored_top_level": ["dist"],
@@ -110,6 +114,12 @@
       "title": "Repository Evolution Control Plane",
       "paths": ["services/repository-intelligence", "config/repository-contract.json", ".github/workflows/repository-intelligence.yml"],
       "required_scripts": ["repo:intelligence", "repo:intelligence:serve", "repo:intelligence:verify"]
+    },
+    {
+      "id": "topology-consolidation",
+      "title": "Governed Topology Consolidation",
+      "paths": ["services/topology-consolidation", "config/topology-consolidation.json", "docs/operations/TOPOLOGY_CONSOLIDATION.md", ".github/workflows/topology-consolidation.yml"],
+      "required_scripts": ["topology:scan", "topology:plan", "topology:serve", "topology:verify"]
     }
   ]
 }

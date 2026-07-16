@@ -1,8 +1,14 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "CYVXAI-OS Governed Topology Consolidation",
   "alias_strategy": "symlink",
   "verification_timeout_ms": 1200000,
+  "approval_policy": {
+    "mode": "approve_by_default",
+    "auto_approve_risks": ["low"],
+    "require_explicit_digest_risks": ["medium", "high"],
+    "auto_verify_mode": "full"
+  },
   "exclude": [".git", "node_modules", "dist", "coverage", ".next", ".cache", "vendor"],
   "text_extensions": [".cjs", ".css", ".html", ".js", ".json", ".md", ".mjs", ".sh", ".sql", ".ts", ".tsx", ".yaml", ".yml"],
   "protected_roots": ["api", "core", "runtime", "services", "scripts", "cli", "ui", "spark", "status", "config", "test", "docs", "supabase", "data", ".github"],
@@ -11,10 +17,11 @@
     "full": ["npm run verify:production-baseline"]
   },
   "stop_conditions": [
-    "Stop when the working tree is dirty or the approved plan digest no longer matches.",
+    "Stop when the working tree is dirty or the generated plan digest no longer matches.",
     "Stop when a destination exists, a protected root is selected, or an alias cannot be created.",
     "Stop and automatically roll back when any verification command fails.",
-    "Do not commit, deploy, purchase, change credentials, or remove compatibility aliases automatically."
+    "Require explicit digest approval for medium-risk and high-risk stages.",
+    "Do not deploy, purchase, change credentials, or remove compatibility aliases automatically."
   ],
   "stages": [
     {

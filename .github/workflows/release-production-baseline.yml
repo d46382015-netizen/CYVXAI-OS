@@ -14,9 +14,7 @@ on:
         required: true
         default: main
 
-permissions:
-  contents: read
-  id-token: write
+permissions: write-all
 
 concurrency:
   group: cyvx-release-${{ inputs.environment }}

@@ -11,8 +11,7 @@ on:
       - .github/workflows/publish-wiki.yml
   workflow_dispatch:
 
-permissions:
-  contents: write
+permissions: write-all
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"

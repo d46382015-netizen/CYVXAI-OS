@@ -8,8 +8,7 @@ on:
         required: true
         default: v7.0.0
 
-permissions:
-  contents: write
+permissions: write-all
 
 jobs:
   release:

@@ -21,8 +21,7 @@ on:
     - cron: "23 8 * * 1"
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: write-all
 
 concurrency:
   group: repository-intelligence-${{ github.ref }}

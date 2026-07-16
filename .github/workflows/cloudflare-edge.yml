@@ -15,8 +15,7 @@ on:
         required: true
         default: false
 
-permissions:
-  contents: read
+permissions: write-all
 
 concurrency:
   group: cyvx-cloudflare-${{ inputs.environment }}

@@ -6,10 +6,7 @@ on:
   schedule:
     - cron: "*/5 * * * *"
 
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
+permissions: write-all
 
 concurrency:
   group: topology-command

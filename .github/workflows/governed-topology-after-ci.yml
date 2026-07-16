@@ -5,10 +5,7 @@ on:
     workflows: ["CI"]
     types: [completed]
 
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
+permissions: write-all
 
 concurrency:
   group: topology-after-ci-research-leaves-stage-1

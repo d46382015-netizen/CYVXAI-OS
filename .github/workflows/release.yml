@@ -5,8 +5,7 @@ on:
     tags:
       - "v*"
 
-permissions:
-  contents: write
+permissions: write-all
 
 jobs:
   package:
@@ -40,4 +39,3 @@ jobs:
             cyvx-dist.tar.gz
             dist/build-manifest.json
           generate_release_notes: true
-

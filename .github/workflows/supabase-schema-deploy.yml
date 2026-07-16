@@ -8,8 +8,7 @@ on:
         required: true
         type: string
 
-permissions:
-  contents: read
+permissions: write-all
 
 env:
   SUPABASE_PROJECT_ID: yokpfcbdvszdavohibkh

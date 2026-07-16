@@ -34,8 +34,7 @@ on:
       - "package.json"
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: write-all
 
 concurrency:
   group: universal-revenue-operator-${{ github.ref }}

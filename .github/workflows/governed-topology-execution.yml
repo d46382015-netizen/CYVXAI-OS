@@ -7,8 +7,7 @@ on:
     paths:
       - .cyvx/topology-execution.json
 
-permissions:
-  contents: write
+permissions: write-all
 
 concurrency:
   group: topology-execution

@@ -10,8 +10,7 @@ on:
       - "apps/cyvx-flash-relay/**"
       - ".github/workflows/cyvx-flash-relay.yml"
 
-permissions:
-  contents: read
+permissions: write-all
 
 jobs:
   verify:

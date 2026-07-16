@@ -25,8 +25,7 @@ on:
       - 'package.json'
       - 'package-lock.json'
 
-permissions:
-  contents: read
+permissions: write-all
 
 jobs:
   verify-live-project:

@@ -10,8 +10,7 @@ on:
         default: staging
         options: [staging, production]
 
-permissions:
-  contents: read
+permissions: write-all
 
 concurrency:
   group: cyvx-database-migration-${{ inputs.environment }}

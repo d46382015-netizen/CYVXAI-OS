@@ -5,8 +5,7 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: read
+permissions: write-all
 
 concurrency:
   group: cyvx-v7-build-${{ github.ref }}

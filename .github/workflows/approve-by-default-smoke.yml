@@ -14,8 +14,7 @@ on:
       - .github/workflows/approve-by-default-smoke.yml
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: write-all
 
 concurrency:
   group: approve-by-default-${{ github.ref }}

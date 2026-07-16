@@ -5,8 +5,7 @@ on:
     - cron: "*/5 * * * *"
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: write-all
 
 concurrency:
   group: cyvx-uptime-monitor

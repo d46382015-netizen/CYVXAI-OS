@@ -15,9 +15,7 @@ on:
         required: true
         default: false
 
-permissions:
-  contents: read
-  id-token: write
+permissions: write-all
 
 concurrency:
   group: cyvx-workload-identity-${{ inputs.environment }}

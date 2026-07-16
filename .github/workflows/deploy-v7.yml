@@ -8,8 +8,7 @@ on:
     paths: ["api/**", "core/ops/**", "core/production/**", "spark/**", "ui/**", "scripts/**", "package*.json", "render.yaml", ".github/workflows/deploy-v7.yml"]
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: write-all
 
 concurrency:
   group: deploy-v7-${{ github.ref }}

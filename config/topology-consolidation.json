@@ -1,0 +1,82 @@
+{
+  "version": "1.0.0",
+  "name": "CYVXAI-OS Governed Topology Consolidation",
+  "alias_strategy": "symlink",
+  "verification_timeout_ms": 1200000,
+  "exclude": [".git", "node_modules", "dist", "coverage", ".next", ".cache", "vendor"],
+  "text_extensions": [".cjs", ".css", ".html", ".js", ".json", ".md", ".mjs", ".sh", ".sql", ".ts", ".tsx", ".yaml", ".yml"],
+  "protected_roots": ["api", "core", "runtime", "services", "scripts", "cli", "ui", "spark", "status", "config", "test", "docs", "supabase", "data", ".github"],
+  "verification": {
+    "quick": ["npm run topology:verify", "npm run repo:intelligence:verify"],
+    "full": ["npm run verify:production-baseline"]
+  },
+  "stop_conditions": [
+    "Stop when the working tree is dirty or the approved plan digest no longer matches.",
+    "Stop when a destination exists, a protected root is selected, or an alias cannot be created.",
+    "Stop and automatically roll back when any verification command fails.",
+    "Do not commit, deploy, purchase, change credentials, or remove compatibility aliases automatically."
+  ],
+  "stages": [
+    {
+      "id": "research-leaves",
+      "title": "Consolidate research leaves",
+      "description": "Move isolated research and theory domains beneath research/ while retaining old paths as compatibility aliases.",
+      "risk": "low",
+      "moves": [
+        { "source": "physics", "target": "research/physics" },
+        { "source": "science", "target": "research/science" },
+        { "source": "thermodynamics", "target": "research/thermodynamics" },
+        { "source": "formal", "target": "research/formal" },
+        { "source": "futures", "target": "research/futures" },
+        { "source": "civilization", "target": "research/civilization" }
+      ]
+    },
+    {
+      "id": "domain-assets",
+      "title": "Consolidate domain assets",
+      "description": "Move business identity and legal domain assets beneath domains/ after research leaves are stable.",
+      "risk": "medium",
+      "moves": [
+        { "source": "brand", "target": "domains/brand" },
+        { "source": "legal", "target": "domains/legal" }
+      ]
+    },
+    {
+      "id": "operations-unification",
+      "title": "Unify operations planes",
+      "description": "Consolidate infrastructure, operations, observability, security, evidence, and retained artifacts beneath ops/.",
+      "risk": "high",
+      "moves": [
+        { "source": "infrastructure", "target": "ops/infrastructure" },
+        { "source": "operations", "target": "ops/operations" },
+        { "source": "observability", "target": "ops/observability" },
+        { "source": "security", "target": "ops/security" },
+        { "source": "evidence", "target": "ops/evidence" },
+        { "source": "artifacts", "target": "ops/artifacts" }
+      ]
+    },
+    {
+      "id": "product-platform",
+      "title": "Consolidate product and control surfaces",
+      "description": "Move optional product surfaces beneath apps/ and the legacy control plane beneath platform/.",
+      "risk": "high",
+      "moves": [
+        { "source": "public", "target": "apps/public" },
+        { "source": "saas", "target": "apps/saas" },
+        { "source": "control", "target": "platform/control" }
+      ]
+    },
+    {
+      "id": "intelligence-proof",
+      "title": "Consolidate intelligence and economic modules",
+      "description": "Move optional intelligence, internet, evaluation, and economics domains beneath services/ after all earlier stages prove stable.",
+      "risk": "high",
+      "moves": [
+        { "source": "ml", "target": "services/intelligence/ml" },
+        { "source": "internet", "target": "services/internet" },
+        { "source": "evaluations", "target": "services/evaluations" },
+        { "source": "economics", "target": "services/economics" }
+      ]
+    }
+  ]
+}

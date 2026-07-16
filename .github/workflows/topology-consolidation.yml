@@ -1,0 +1,62 @@
+name: CYVX Governed Topology Consolidation
+
+on:
+  pull_request:
+    paths:
+      - "config/topology-consolidation.json"
+      - "services/topology-consolidation/**"
+      - "scripts/topology-consolidation.js"
+      - "scripts/start-topology-consolidation.js"
+      - "scripts/verify-topology-consolidation.js"
+      - "test/topology-consolidation.test.js"
+      - "docs/operations/TOPOLOGY_CONSOLIDATION.md"
+      - "config/repository-contract.json"
+      - "package.json"
+      - ".github/workflows/topology-consolidation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "config/topology-consolidation.json"
+      - "services/topology-consolidation/**"
+      - "scripts/topology-consolidation.js"
+      - "scripts/start-topology-consolidation.js"
+      - "scripts/verify-topology-consolidation.js"
+      - "test/topology-consolidation.test.js"
+      - "config/repository-contract.json"
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: topology-consolidation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Verify governed migration engine
+        run: npm run topology:verify
+      - name: Generate retained research-stage plan
+        run: |
+          mkdir -p /tmp/cyvx-topology-proof
+          node ./scripts/topology-consolidation.js scan --json > /tmp/cyvx-topology-proof/scan.json
+          node ./scripts/topology-consolidation.js plan research-leaves --json > /tmp/cyvx-topology-proof/plan.json
+      - name: Verify repository evolution integration
+        run: npm run repo:intelligence:verify
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: topology-consolidation-proof
+          path: /tmp/cyvx-topology-proof
+          if-no-files-found: error
+          retention-days: 30

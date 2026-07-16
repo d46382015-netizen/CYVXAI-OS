@@ -1,0 +1,33 @@
+name: Repository Policy Export
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/repository-policy-export.yml"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - name: Package repository snapshot
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tar --exclude=.git -czf "$RUNNER_TEMP/cyvxai-os-main.tar.gz" .
+      - name: Upload repository snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyvxai-os-policy-snapshot
+          path: ${{ runner.temp }}/cyvxai-os-main.tar.gz
+          if-no-files-found: error
+          retention-days: 1

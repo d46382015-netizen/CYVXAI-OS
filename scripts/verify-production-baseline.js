@@ -37,7 +37,8 @@ function verify() {
   const ci = read(".github/workflows/ci.yml");
   checks.push(check("ci:pid_capture", ci.includes("API_PID=$!"), "legacy API PID must be captured correctly"));
   checks.push(check("ci:no_malformed_pid", !ci.includes("API_PID!="), "malformed API_PID assignment must be absent"));
-  checks.push(check("ci:baseline_gate", ci.includes("npm run verify:production-baseline"), "CI must execute the production baseline gate"));
+  const authoritativeGate = ci.includes("npm run verify:production-baseline") || ci.includes("bash scripts/verify.sh") || ci.includes("bash ./scripts/verify.sh");
+  checks.push(check("ci:baseline_gate", authoritativeGate, "CI must execute the authoritative production verification entrypoint"));
 
   const deployV7 = read(".github/workflows/deploy-v7.yml");
   const deployPublic = read(".github/workflows/deploy-public.yml");

@@ -1,0 +1,45 @@
+name: Approve-by-Default Smoke
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - core/integrations/feature_flags.js
+      - test/feature-flags-default-policy.test.js
+      - .github/workflows/approve-by-default-smoke.yml
+  pull_request:
+    paths:
+      - core/integrations/feature_flags.js
+      - test/feature-flags-default-policy.test.js
+      - .github/workflows/approve-by-default-smoke.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: approve-by-default-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  policy-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NODE_ENV: test
+      CYVX_ENV: test
+      CYVX_APPROVE_BY_DEFAULT: "true"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Validate policy source
+        run: node --check core/integrations/feature_flags.js
+
+      - name: Verify approve-by-default behavior
+        run: node --test test/feature-flags-default-policy.test.js

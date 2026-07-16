@@ -2,6 +2,7 @@
 
 const crypto = require("node:crypto");
 const { TransactionalEmail } = require("../../core/integrations/transactional_email");
+const { approvedByDefault } = require("../../core/security/production_guard");
 
 class RevenueEmailProvider {
   constructor(options = {}) {
@@ -34,7 +35,7 @@ class StripeRevenueProvider {
     this.fetch = options.fetch || globalThis.fetch;
     this.secretKey = String(options.secretKey || this.env.STRIPE_SECRET_KEY || "").trim();
     this.webhookSecret = String(options.webhookSecret || this.env.CYVX_STRIPE_WEBHOOK_SECRET || "").trim();
-    this.enabled = options.enabled ?? truthy(this.env.CYVX_BILLING_ENABLED);
+    this.enabled = options.enabled ?? approvedByDefault(this.env.CYVX_BILLING_ENABLED);
     this.toleranceSeconds = positive(options.toleranceSeconds || this.env.CYVX_STRIPE_WEBHOOK_TOLERANCE_SECONDS, 300);
     this.metrics = { sessions_created: 0, webhooks_verified: 0, failures: 0, last_error: null };
   }

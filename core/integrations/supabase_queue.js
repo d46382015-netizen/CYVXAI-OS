@@ -1,7 +1,7 @@
 "use strict";
 
 const crypto = require("node:crypto");
-const { truthy } = require("../security/production_guard");
+const { approvedByDefault, truthy } = require("../security/production_guard");
 
 class SupabaseQueueClient {
   constructor(options = {}) {
@@ -100,7 +100,7 @@ class QueueWorker {
     if (!options.queue) throw new Error("A queue client is required.");
     this.queue = options.queue;
     this.telemetry = options.telemetry || null;
-    this.enabled = options.enabled ?? truthy(process.env.CYVX_QUEUE_WORKER);
+    this.enabled = options.enabled ?? approvedByDefault(process.env.CYVX_QUEUE_WORKER);
     this.intervalMs = positive(options.intervalMs || process.env.CYVX_QUEUE_POLL_MS, 3000);
     this.maxAttempts = positive(options.maxAttempts || process.env.CYVX_QUEUE_MAX_ATTEMPTS, 5);
     this.handlers = new Map();

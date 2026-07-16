@@ -1,7 +1,7 @@
 "use strict";
 
 const crypto = require("node:crypto");
-const { truthy } = require("../security/production_guard");
+const { approvedByDefault, truthy } = require("../security/production_guard");
 
 const ALLOWED_PROPERTIES = new Set([
   "source", "feature", "plan", "result", "status", "provider", "model",
@@ -16,7 +16,7 @@ class PostHogClient {
     this.apiKey = String(options.apiKey || this.env.POSTHOG_API_KEY || "").trim();
     this.host = String(options.host || this.env.POSTHOG_HOST || "https://us.i.posthog.com").replace(/\/$/, "");
     this.salt = String(options.salt || this.env.CYVX_ANALYTICS_SALT || "");
-    this.enabled = options.enabled ?? truthy(this.env.CYVX_PRODUCT_ANALYTICS_ENABLED);
+    this.enabled = options.enabled ?? approvedByDefault(this.env.CYVX_PRODUCT_ANALYTICS_ENABLED);
     this.required = options.required ?? truthy(this.env.CYVX_REQUIRE_PRODUCT_ANALYTICS);
     this.environment = String(options.environment || this.env.CYVX_ENV || this.env.NODE_ENV || "development");
     this.release = String(options.release || this.env.CYVX_RELEASE_SHA || "unknown");

@@ -1,7 +1,7 @@
 "use strict";
 
 const crypto = require("node:crypto");
-const { truthy } = require("../security/production_guard");
+const { approvedByDefault, truthy } = require("../security/production_guard");
 
 class StripeBilling {
   constructor(options = {}) {
@@ -12,7 +12,7 @@ class StripeBilling {
     this.secretKey = String(options.secretKey || this.env.STRIPE_SECRET_KEY || "").trim();
     this.pricePlans = parseJson(options.pricePlans || this.env.CYVX_STRIPE_PRICE_PLANS, {});
     this.toleranceSeconds = positive(options.toleranceSeconds || this.env.CYVX_STRIPE_WEBHOOK_TOLERANCE_SECONDS, 300);
-    this.enabled = options.enabled ?? truthy(this.env.CYVX_BILLING_ENABLED);
+    this.enabled = options.enabled ?? approvedByDefault(this.env.CYVX_BILLING_ENABLED);
     this.required = options.required ?? truthy(this.env.CYVX_REQUIRE_BILLING);
     this.metrics = { received: 0, verified: 0, rejected: 0, queued: 0, processed: 0, ignored: 0, failures: 0, last_event_at: null, last_error: null };
   }

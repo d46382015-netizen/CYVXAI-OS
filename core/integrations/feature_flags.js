@@ -12,7 +12,7 @@ const DEFAULT_FLAGS = Object.freeze({
   "maintenance.enabled": { type: "boolean", value: false, safety: "operational" },
   "read_only.enabled": { type: "boolean", value: false, safety: "operational" },
   "billing.enabled": { type: "boolean", value: true, safety: "approve-by-default" },
-  "analytics.enabled": { type: "boolean", value: false, safety: "privacy" },
+  "analytics.enabled": { type: "boolean", value: true, safety: "approve-by-default" },
   "email.enabled": { type: "boolean", value: true, safety: "approve-by-default" },
   "ai.provider": { type: "string", value: "anthropic", safety: "routing" },
 });

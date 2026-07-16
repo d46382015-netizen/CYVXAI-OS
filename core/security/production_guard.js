@@ -217,6 +217,15 @@ function truthy(value) {
   return ["1", "true", "yes", "on"].includes(String(value || "").trim().toLowerCase());
 }
 
+function booleanSetting(value, fallback = false) {
+  if (value === undefined || value === null || String(value).trim() === "") return Boolean(fallback);
+  return truthy(value);
+}
+
+function approvedByDefault(value) {
+  return booleanSetting(value, true);
+}
+
 function backupStorageUrl(env) {
   return env.CYVX_BACKUP_STORAGE_URL || (env.SUPABASE_URL ? `${String(env.SUPABASE_URL).replace(/\/$/, "")}/storage/v1` : "");
 }
@@ -237,7 +246,9 @@ function inferEmailProvider(env) {
 }
 
 module.exports = {
+  approvedByDefault,
   assertProductionSecurity,
+  booleanSetting,
   authorizeRequest,
   backupStorageToken,
   backupStorageUrl,

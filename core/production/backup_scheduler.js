@@ -4,14 +4,15 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { createBackup, pruneRemoteBackups } = require("./backup_manager");
+const { approvedByDefault } = require("../security/production_guard");
 
 class BackupScheduler {
   constructor(options = {}) {
     this.env = options.env || process.env;
     this.telemetry = options.telemetry || null;
     this.dataRoot = path.resolve(options.dataRoot || this.env.CYVX_DATA_ROOT || path.join(os.homedir(), ".cyvx"));
-    this.enabled = options.enabled ?? truthy(this.env.CYVX_BACKUP_ENABLED);
-    this.upload = options.upload ?? truthy(this.env.CYVX_BACKUP_UPLOAD || this.env.CYVX_BACKUP_ENABLED);
+    this.enabled = options.enabled ?? approvedByDefault(this.env.CYVX_BACKUP_ENABLED);
+    this.upload = options.upload ?? approvedByDefault(this.env.CYVX_BACKUP_UPLOAD ?? this.env.CYVX_BACKUP_ENABLED);
     this.intervalMs = positive(options.intervalMs || this.env.CYVX_BACKUP_INTERVAL_MS, 6 * 60 * 60 * 1000);
     this.initialDelayMs = positive(options.initialDelayMs || this.env.CYVX_BACKUP_INITIAL_DELAY_MS, 30_000);
     this.localRetention = positive(options.localRetention || this.env.CYVX_BACKUP_LOCAL_RETENTION, 8);

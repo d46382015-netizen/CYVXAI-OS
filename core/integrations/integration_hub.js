@@ -4,7 +4,7 @@ const { AuthorizationPolicy } = require("../security/authorization_policy");
 const { EdgeGuard } = require("../security/edge_guard");
 const { IdentityGateway } = require("../security/identity_gateway");
 const { WorkloadIdentity } = require("../security/workload_identity");
-const { truthy } = require("../security/production_guard");
+const { approvedByDefault, truthy } = require("../security/production_guard");
 const { AITrace } = require("../observability/ai_trace");
 const { FeatureFlagService } = require("./feature_flags");
 const { PostHogClient } = require("./posthog_client");
@@ -32,7 +32,7 @@ class IntegrationHub {
     this.sentry = options.sentry || new SentryTransport({ env: this.env, fetch: options.fetch, required: this.requirements.error_tracking });
     this.billing = options.billing || new StripeBilling({ env: this.env, dataClient: this.data, queue: this.queue, required: this.requirements.billing });
     this.workloadIdentity = options.workloadIdentity || new WorkloadIdentity({ env: this.env, fetch: options.fetch });
-    this.worker = options.worker || new QueueWorker({ queue: this.queue, telemetry: this.telemetry, enabled: truthy(this.env.CYVX_QUEUE_WORKER) });
+    this.worker = options.worker || new QueueWorker({ queue: this.queue, telemetry: this.telemetry, enabled: approvedByDefault(this.env.CYVX_QUEUE_WORKER) });
     this.started = false;
     this.#registerHandlers();
   }

@@ -1,6 +1,6 @@
 "use strict";
 
-const { truthy } = require("../security/production_guard");
+const { approvedByDefault, truthy } = require("../security/production_guard");
 
 class TransactionalEmail {
   constructor(options = {}) {
@@ -11,7 +11,7 @@ class TransactionalEmail {
     this.replyTo = String(options.replyTo || this.env.CYVX_EMAIL_REPLY_TO || "").trim();
     this.resendKey = String(options.resendKey || this.env.RESEND_API_KEY || "").trim();
     this.postmarkToken = String(options.postmarkToken || this.env.POSTMARK_SERVER_TOKEN || "").trim();
-    this.enabled = options.enabled ?? truthy(this.env.CYVX_EMAIL_ENABLED);
+    this.enabled = options.enabled ?? approvedByDefault(this.env.CYVX_EMAIL_ENABLED);
     this.required = options.required ?? truthy(this.env.CYVX_REQUIRE_EMAIL);
     this.metrics = { attempted: 0, delivered: 0, dropped: 0, failures: 0, last_delivery_at: null, last_error: null };
   }

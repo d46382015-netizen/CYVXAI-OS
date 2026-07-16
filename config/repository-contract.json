@@ -1,0 +1,108 @@
+{
+  "version": "1.0.0",
+  "name": "CYVXAI-OS Production Repository Contract",
+  "minimum_node_major": 22,
+  "source_roots": ["api", "core", "runtime", "services", "scripts", "cli", "ui", "spark", "status"],
+  "required_paths": [
+    "package.json",
+    "README.md",
+    "api",
+    "core",
+    "cli",
+    "runtime/missions",
+    "services/operator",
+    "services/revenue",
+    "scripts",
+    "test",
+    "docs",
+    ".github/workflows"
+  ],
+  "required_scripts": [
+    "start",
+    "doctor",
+    "test",
+    "build",
+    "verify",
+    "backup:verify",
+    "verify:governance",
+    "operator:verify",
+    "revenue:verify"
+  ],
+  "targets": {
+    "max_top_level_directories": 20,
+    "max_unclassified_directories": 3,
+    "minimum_tests": 20,
+    "minimum_workflows": 5,
+    "minimum_documents": 15,
+    "minimum_test_to_source_ratio": 0.03,
+    "mission_task_limit": 7
+  },
+  "weights": {
+    "architecture": 1.2,
+    "runtime": 1.2,
+    "verification": 1.3,
+    "security": 1.4,
+    "automation": 1.0,
+    "documentation": 0.7,
+    "product": 1.2,
+    "maintainability": 0.8,
+    "evidence": 1.0,
+    "learning": 0.7
+  },
+  "categories": {
+    "product_surfaces": ["apps", "spark", "ui"],
+    "runtime_and_api": ["api", "core", "runtime", "scheduler", "services", "status"],
+    "platform_and_control": ["control", "platform", "packages", "infrastructure", "operations", "observability", "security"],
+    "data_and_intelligence": ["data", "ml", "internet", "evaluations", "evidence", "economics"],
+    "delivery": ["cli", "scripts", "test", "tools", "supabase"],
+    "research_and_domain": ["brand", "civilization", "formal", "futures", "legal", "physics", "science", "thermodynamics"],
+    "documentation": ["docs", "artifacts"]
+  },
+  "ignored_top_level": ["dist"],
+  "secret_scan_roots": [".github", "api", "config", "runtime", "scripts", "services"],
+  "proof_paths": ["evidence", "artifacts", "observability", "operations"],
+  "capabilities": [
+    {
+      "id": "mission-runtime",
+      "title": "Durable Mission Runtime",
+      "paths": ["runtime/missions", "core/missions"],
+      "required_scripts": ["worker", "db:migrate"]
+    },
+    {
+      "id": "governance-foundry",
+      "title": "Governance and Agent Foundry",
+      "paths": ["core/governance", "docs/operations"],
+      "required_scripts": ["verify:governance", "verify:foundry"]
+    },
+    {
+      "id": "universal-operator",
+      "title": "Universal Entity Operator",
+      "paths": ["services/operator", "ui/universal-operator.html"],
+      "required_scripts": ["operator", "operator:verify"]
+    },
+    {
+      "id": "revenue-engine",
+      "title": "Verified Revenue Engine",
+      "paths": ["services/revenue", "ui/revenue-engine.html"],
+      "required_scripts": ["revenue", "revenue:verify"]
+    },
+    {
+      "id": "intelligence-fabric",
+      "title": "Intelligence Fabric",
+      "paths": ["services/intelligence", "docs/architecture"],
+      "required_scripts": ["strategy"]
+    },
+    {
+      "id": "production-operations",
+      "title": "Production Operations",
+      "paths": ["observability", "operations", ".github/workflows"],
+      "required_scripts": ["verify:production-baseline", "backup:verify", "uptime"]
+    },
+    {
+      "id": "public-interface",
+      "title": "Public and Mobile Interface",
+      "paths": ["api/public.js", "ui", "spark"],
+      "required_scripts": ["public", "public:test", "spark:verify"]
+    }
+  ]
+}

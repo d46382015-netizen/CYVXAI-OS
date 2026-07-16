@@ -8,6 +8,7 @@ const test = require("node:test");
 const { Telemetry } = require("../core/observability/telemetry");
 const { assertProductionSecurity, authorizeRequest, inspectProductionSecurity } = require("../core/security/production_guard");
 const { ManagedDataPlane } = require("../core/storage/managed_data_plane");
+const { verify: verifyProductionBaseline } = require("../scripts/verify-production-baseline");
 
 const SECURE_ENV = {
   NODE_ENV: "production",
@@ -70,4 +71,11 @@ test("managed PostgreSQL data plane reports required missing configuration as un
   assert.equal(health.configured, false);
   assert.equal(health.healthy, false);
   assert.equal(health.required, true);
+});
+
+test("production baseline accepts the authoritative CI verification entrypoint", () => {
+  const result = verifyProductionBaseline();
+  assert.equal(result.ok, true);
+  assert.equal(result.failed.length, 0);
+  assert.equal(result.checks.find((item) => item.key === "ci:baseline_gate").ok, true);
 });

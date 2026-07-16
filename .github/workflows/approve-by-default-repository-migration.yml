@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "scripts/apply-approve-by-default-migration.js"
+      - "scripts/run-approve-by-default-migration.js"
       - ".github/workflows/approve-by-default-repository-migration.yml"
   workflow_dispatch:
 
@@ -41,7 +42,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          node ./scripts/apply-approve-by-default-migration.js 2>&1 | tee /tmp/policy-migration.log
+          node ./scripts/run-approve-by-default-migration.js 2>&1 | tee /tmp/policy-migration.log
       - name: Validate migrated JavaScript
         shell: bash
         run: |

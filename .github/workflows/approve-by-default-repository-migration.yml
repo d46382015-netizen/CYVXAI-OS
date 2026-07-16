@@ -33,9 +33,15 @@ jobs:
           node-version: 24
           cache: npm
       - name: Install locked dependencies
-        run: npm ci --ignore-scripts --no-audit --no-fund
+        shell: bash
+        run: |
+          set -o pipefail
+          npm ci --ignore-scripts --no-audit --no-fund 2>&1 | tee /tmp/policy-install.log
       - name: Apply repository-wide approval and permission policy
-        run: node ./scripts/apply-approve-by-default-migration.js
+        shell: bash
+        run: |
+          set -o pipefail
+          node ./scripts/apply-approve-by-default-migration.js 2>&1 | tee /tmp/policy-migration.log
       - name: Validate migrated JavaScript
         shell: bash
         run: |
@@ -51,9 +57,15 @@ jobs:
           node --check services/revenue/providers.js
           node --check scripts/audit-approve-by-default.js
       - name: Run approval policy regression tests
-        run: npm run policy:test
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run policy:test 2>&1 | tee /tmp/policy-tests.log
       - name: Audit operational defaults and all workflow permissions
-        run: npm run policy:audit | tee /tmp/approve-by-default-audit.json
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run policy:audit 2>&1 | tee /tmp/approve-by-default-audit.json
       - name: Commit verified migration
         shell: bash
         run: |
@@ -67,7 +79,27 @@ jobs:
             exit 0
           fi
           git commit -m "Apply approve-by-default policy and complete workflow permissions"
-          git push origin HEAD:main
+          git push origin HEAD:main 2>&1 | tee /tmp/policy-push.log
+      - name: Report migration failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          {
+            echo "Automated approve-by-default migration failed in run $GITHUB_RUN_ID."
+            echo
+            for file in /tmp/policy-install.log /tmp/policy-migration.log /tmp/policy-tests.log /tmp/approve-by-default-audit.json /tmp/policy-push.log; do
+              if [ -f "$file" ]; then
+                echo "## $(basename "$file")"
+                echo '```text'
+                tail -n 120 "$file"
+                echo '```'
+              fi
+            done
+          } > /tmp/policy-failure.md
+          gh issue create --title "Approve-by-default migration failure $GITHUB_RUN_ID" --body-file /tmp/policy-failure.md
       - name: Retain migration proof
         if: always()
         uses: actions/upload-artifact@v4
@@ -76,5 +108,9 @@ jobs:
           path: |
             artifacts/policy-migration/applied.json
             /tmp/approve-by-default-audit.json
+            /tmp/policy-install.log
+            /tmp/policy-migration.log
+            /tmp/policy-tests.log
+            /tmp/policy-push.log
           if-no-files-found: ignore
           retention-days: 90

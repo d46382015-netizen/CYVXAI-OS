@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "request_id": "research-leaves-stage-1",
+  "stage_id": "research-leaves",
+  "expected_active_moves": 6,
+  "verify_mode": "full",
+  "requested_at": "2026-07-16T21:52:00Z",
+  "authority": "Dakota Lee Jonsgaard",
+  "objective": "Execute the first real low-risk topology-consolidation stage with exact plan approval, compatibility aliases, automated reference rewriting, full production verification, retained rollback evidence, and automatic rollback on failure."
+}

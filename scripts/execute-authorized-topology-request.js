@@ -7,6 +7,7 @@ const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const { hashTree, stableStringify: topologyStableStringify } = require("../services/topology-consolidation");
 const { restoreAndRewrite } = require("../services/topology-consolidation/path-aware-rewrite");
+const { restoreCommittedTree } = require("../services/topology-consolidation/transaction-recovery");
 
 const ROOT = process.cwd();
 const REQUEST_PATH = path.join(ROOT, ".cyvx", "topology-execution.json");
@@ -48,14 +49,18 @@ function main() {
 
   const statePath = runStatePath(activeRunId);
   const state = restoreAndRewrite({ root: ROOT, statePath, proofDir: PROOF_DIR, config: CONFIG, moves: MOVES });
+  const migrationPaths = captureStatusPaths();
+  writeJson(path.join(PROOF_DIR, "migration-paths.json"), { paths: [...migrationPaths].sort() });
+
   const fullVerification = runCaptured("npm", ["run", "verify:production-baseline"], { timeout: 1200000 });
   state.verification = [fullVerification];
   writeJson(statePath, state);
   writeJson(path.join(PROOF_DIR, "full-verification.json"), fullVerification);
   fs.writeFileSync(path.join(PROOF_DIR, "full-verification.stdout.log"), fullVerification.stdout, { mode: 0o600 });
   fs.writeFileSync(path.join(PROOF_DIR, "full-verification.stderr.log"), fullVerification.stderr, { mode: 0o600 });
-  if (fullVerification.status !== 0) fail("Full production verification failed after path-aware rewriting", { verification: fullVerification });
+  if (fullVerification.status !== 0) fail("Full production verification failed after moved-module rewriting", { verification: fullVerification });
 
+  cleanupVerificationNoise(migrationPaths);
   state.status = "applied";
   state.completed_at = new Date().toISOString();
   state.after_tree_digest = hashTree(ROOT, CONFIG);
@@ -111,6 +116,24 @@ function verifyAliases() {
   }
 }
 
+function captureStatusPaths() {
+  const output = runText("git", ["status", "--porcelain", "--untracked-files=all"]);
+  return new Set(output.split(/\r?\n/).filter(Boolean).map((line) => line.slice(3).split(" -> ").pop()));
+}
+
+function cleanupVerificationNoise(allowedPaths) {
+  run("git", ["clean", "-fdX", "-e", "node_modules/"]);
+  const current = captureStatusPaths();
+  for (const relativePath of current) {
+    if (allowedPaths.has(relativePath)) continue;
+    const tracked = spawnSync("git", ["ls-files", "--error-unmatch", "--", relativePath], { cwd: ROOT, encoding: "utf8" }).status === 0;
+    if (tracked) run("git", ["checkout", "--", relativePath]);
+    else fs.rmSync(path.join(ROOT, relativePath), { recursive: true, force: true });
+  }
+  const unexpected = [...captureStatusPaths()].filter((relativePath) => !allowedPaths.has(relativePath));
+  if (unexpected.length) fail("Verification left unexpected repository changes", { unexpected: unexpected.slice(0, 100) });
+}
+
 function runCaptured(command, args, options = {}) {
   const started = Date.now();
   const result = spawnSync(command, args, { cwd: ROOT, encoding: "utf8", env: { ...process.env, CYVX_TOPOLOGY_VERIFICATION: "1" }, maxBuffer: 64 * 1024 * 1024, timeout: options.timeout || 1200000 });
@@ -136,17 +159,27 @@ function fail(message, fields = {}) { const error = new Error(message); Object.a
 if (require.main === module) {
   try { main(); }
   catch (error) {
+    let engineRollback = null;
     let rollback = null;
     if (activeRunId) {
-      try { rollback = topologyJson(["rollback", activeRunId, "--json"]); }
-      catch (rollbackError) { rollback = { ok: false, error: rollbackError.message }; }
+      try { engineRollback = topologyJson(["rollback", activeRunId, "--json"]); }
+      catch (rollbackError) { engineRollback = { ok: false, error: rollbackError.message }; }
+      rollback = engineRollback;
+      if (!(rollback && rollback.rollback && rollback.rollback.verified)) {
+        try {
+          rollback = restoreCommittedTree({ root: ROOT, statePath: runStatePath(activeRunId), config: CONFIG });
+          appendHistory(rollback);
+        } catch (recoveryError) {
+          rollback = { ok: false, error: recoveryError.message, state: recoveryError.state || null };
+        }
+      }
     }
     fs.mkdirSync(PROOF_DIR, { recursive: true, mode: 0o700 });
     copyStateStore();
-    writeJson(path.join(PROOF_DIR, "operator-error.json"), { ok: false, error: error.message, fields: Object.fromEntries(Object.entries(error).filter(([key]) => !["stack", "message"].includes(key))), rollback });
+    writeJson(path.join(PROOF_DIR, "operator-error.json"), { ok: false, error: error.message, fields: Object.fromEntries(Object.entries(error).filter(([key]) => !["stack", "message"].includes(key))), engine_rollback: engineRollback, rollback });
     console.error(JSON.stringify({ ok: false, error: error.message, rollback_verified: Boolean(rollback && rollback.rollback && rollback.rollback.verified) }, null, 2));
     process.exitCode = 1;
   }
 }
 
-module.exports = { main };
+module.exports = { main, captureStatusPaths, cleanupVerificationNoise };

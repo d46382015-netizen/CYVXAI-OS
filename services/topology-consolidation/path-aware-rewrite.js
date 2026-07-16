@@ -6,12 +6,12 @@ const path = require("node:path");
 const { hashTree } = require("./index");
 
 const MODULE_EXTENSIONS = ["", ".js", ".cjs", ".mjs", ".json", ".ts", ".tsx"];
+const CODE_EXTENSIONS = new Set([".cjs", ".js", ".mjs", ".ts", ".tsx"]);
 const SPECIFIER_PATTERNS = [
   /\brequire\s*\(\s*(["'`])([^"'`]+)\1\s*\)/g,
   /\bimport\s*\(\s*(["'`])([^"'`]+)\1\s*\)/g,
   /\b(?:import|export)\s+(?:[^"'`]*?\s+from\s+)?(["'`])([^"'`]+)\1/g,
 ];
-const TEXT_EXTENSIONS = new Set([".cjs", ".css", ".html", ".js", ".json", ".md", ".mjs", ".sh", ".sql", ".ts", ".tsx", ".yaml", ".yml"]);
 const EXCLUDES = new Set([".git", "node_modules", "dist", "coverage", ".next", ".cache", "vendor"]);
 
 function restoreAndRewrite(options) {
@@ -32,10 +32,10 @@ function restoreAndRewrite(options) {
   }
 
   const records = [];
-  for (const currentPath of walkTextFiles(root)) {
-    if (currentPath === "config/topology-consolidation.json") continue;
-    const absolute = path.join(root, currentPath);
+  for (const currentPath of walkCodeFiles(root)) {
     const originalPath = reverseMapRepositoryPath(currentPath, moves);
+    if (!shouldRewriteFile(originalPath, currentPath)) continue;
+    const absolute = path.join(root, currentPath);
     const before = fs.readFileSync(absolute, "utf8");
     const after = rewriteContent(root, originalPath, currentPath, before, moves);
     if (after === before) continue;
@@ -57,8 +57,18 @@ function restoreAndRewrite(options) {
   state.status = "verifying";
   state.after_tree_digest = hashTree(root, config);
   writeJson(statePath, state);
-  writeJson(path.join(proofDir, "safe-rewrite-manifest.json"), { rewritten_files: records });
+  writeJson(path.join(proofDir, "safe-rewrite-manifest.json"), {
+    policy: "moved-modules-only",
+    compatibility_references_retained: true,
+    rewritten_files: records,
+  });
   return state;
+}
+
+function shouldRewriteFile(originalRelativePath, currentRelativePath) {
+  if (originalRelativePath === currentRelativePath) return false;
+  if (originalRelativePath.startsWith("test/") || originalRelativePath.includes("/test/")) return false;
+  return CODE_EXTENSIONS.has(path.extname(currentRelativePath).toLowerCase());
 }
 
 function rewriteContent(root, originalRelativePath, currentRelativePath, text, moves) {
@@ -76,12 +86,6 @@ function rewriteContent(root, originalRelativePath, currentRelativePath, text, m
       }
       return full.replace(`${quote}${specifier}${quote}`, `${quote}${next}${quote}`);
     });
-  }
-
-  for (const move of moves) {
-    const escaped = escapeRegex(move.source);
-    output = output.replace(new RegExp(`(^|[^A-Za-z0-9_./-])${escaped}\/`, "gm"), (_, prefix) => `${prefix}${move.target}/`);
-    output = output.replace(new RegExp(`(^|[\\s"'\`(=:])\\./${escaped}\/`, "gm"), (_, prefix) => `${prefix}./${move.target}/`);
   }
   return output;
 }
@@ -118,7 +122,7 @@ function reverseMapRepositoryPath(relativePath, moves) {
   return normalized;
 }
 
-function walkTextFiles(root) {
+function walkCodeFiles(root) {
   const results = [];
   const stack = [root];
   while (stack.length) {
@@ -130,7 +134,7 @@ function walkTextFiles(root) {
       if (entry.isDirectory()) stack.push(absolute);
       else if (entry.isFile()) {
         const relative = normalizePath(path.relative(root, absolute));
-        if (TEXT_EXTENSIONS.has(path.extname(relative).toLowerCase()) || ["Dockerfile", "Procfile", "LICENSE"].includes(path.basename(relative))) results.push(relative);
+        if (CODE_EXTENSIONS.has(path.extname(relative).toLowerCase())) results.push(relative);
       }
     }
   }
@@ -140,11 +144,11 @@ function walkTextFiles(root) {
 function readJson(filePath) { return JSON.parse(fs.readFileSync(filePath, "utf8")); }
 function writeJson(filePath, value) { fs.mkdirSync(path.dirname(filePath), { recursive: true, mode: 0o700 }); fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`, { mode: 0o600 }); }
 function normalizePath(value) { return String(value).split(path.sep).join("/").replace(/^\.\//, ""); }
-function escapeRegex(value) { return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
 function digest(value) { return crypto.createHash("sha256").update(value).digest("hex"); }
 
 module.exports = {
   restoreAndRewrite,
+  shouldRewriteFile,
   rewriteContent,
   resolveSpecifier,
   mapRepositoryPath,

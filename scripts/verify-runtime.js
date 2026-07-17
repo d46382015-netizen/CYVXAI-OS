@@ -24,6 +24,7 @@ const verificationEnvironment = {
 
 const specifications = [
   { name: "runtime_doctor", command: "bash", args: ["scripts/doctor.sh"], category: "static" },
+  { name: "source_integrity", command: process.execPath, args: ["scripts/audit-source-integrity.js"], category: "static" },
   { name: "shell_syntax", command: "bash", args: ["-n", "run.sh", "scripts/doctor.sh", "scripts/backup.sh", "scripts/restore.sh", "scripts/evidence-verify.sh", "scripts/test-integration.sh"], category: "static" },
   { name: "unit_and_regression_tests", command: "npm", args: ["test"], category: "unit" },
   { name: "real_http_integration", command: "bash", args: ["scripts/test-integration.sh"], category: "integration" },

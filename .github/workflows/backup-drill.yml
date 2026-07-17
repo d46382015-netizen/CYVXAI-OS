@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: "17 4 1 * *"
   workflow_dispatch:
+    inputs:
+      require_remote:
+        description: Fail unless remote backup credentials are configured
+        type: boolean
+        required: true
+        default: true
 
 permissions: write-all
 
@@ -23,21 +29,38 @@ jobs:
       CYVX_BACKUP_PREFIX: production
       CYVX_BACKUP_ENCRYPTION_KEY: ${{ secrets.CYVX_BACKUP_ENCRYPTION_KEY }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v5
         with:
           node-version: 24
-      - name: Validate required recovery secrets
+
+      - name: Audit remote backup readiness
+        id: readiness
         shell: bash
         run: |
           set -Eeuo pipefail
-          for name in CYVX_BACKUP_STORAGE_URL CYVX_BACKUP_STORAGE_TOKEN CYVX_BACKUP_BUCKET CYVX_BACKUP_ENCRYPTION_KEY; do
-            if [ -z "${!name:-}" ]; then
-              echo "::error::$name is required for the restore drill"
-              exit 1
-            fi
-          done
+          node ./scripts/check-provider-readiness.js \
+            --scope backup \
+            --output /tmp/cyvx-backup-readiness.json
+          ready="$(node -e 'const x=require("/tmp/cyvx-backup-readiness.json");process.stdout.write(String(x.ok))')"
+          echo "configured=$ready" >> "$GITHUB_OUTPUT"
+          if [ "$ready" != "true" ]; then
+            echo "### Remote backup drill not configured" >> "$GITHUB_STEP_SUMMARY"
+            echo "The scheduled run will still prove local encrypted backup and restore behavior." >> "$GITHUB_STEP_SUMMARY"
+            node -e 'const x=require("/tmp/cyvx-backup-readiness.json");for(const p of x.providers)for(const k of [...p.missing_required,...p.missing_one_of])console.log(`- Missing: \`${k}\``)' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Require remote configuration for strict manual runs
+        if: github.event_name == 'workflow_dispatch' && inputs.require_remote && steps.readiness.outputs.configured != 'true'
+        run: |
+          echo "::error::Remote backup credentials are required for this manual restore drill."
+          exit 1
+
+      - name: Run local cryptographic recovery regression
+        run: node ./scripts/backup-v7.js --self-test | tee /tmp/cyvx-local-recovery-proof.json
+
       - name: Download, authenticate, decrypt, and restore latest backup
+        if: steps.readiness.outputs.configured == 'true'
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -48,18 +71,19 @@ jobs:
             --force | tee /tmp/cyvx-restore-drill.json
           test -s /tmp/cyvx-restore-drill.json
           test "$(find /tmp/cyvx-production-restore-drill -type f | wc -l)" -gt 0
-      - name: Run local cryptographic recovery regression
-        run: node ./scripts/backup-v7.js --self-test | tee /tmp/cyvx-local-recovery-proof.json
-      - name: Retain recovery evidence
+
+      - name: Retain recovery and readiness evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cyvx-backup-restore-drill-${{ github.run_id }}
           path: |
+            /tmp/cyvx-backup-readiness.json
             /tmp/cyvx-restore-drill.json
             /tmp/cyvx-local-recovery-proof.json
           if-no-files-found: ignore
           retention-days: 90
+
       - name: Destroy restored production data
         if: always()
         run: rm -rf /tmp/cyvx-production-restore-drill /tmp/*.cyvxbak

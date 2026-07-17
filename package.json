@@ -45,7 +45,7 @@
     "supabase:local:reset": "supabase db reset",
     "supabase:local:stop": "supabase stop --no-backup",
     "verify:integrations": "node ./scripts/verify-integrations-v8.js && npm run test:integrations",
-    "verify:production-baseline": "npm run doctor && node ./scripts/verify-production-baseline.js && npm run verify:integrations && node --check ./api/runtime-v7.js && node --check ./api/integrated-production.js && node --check ./status/server.js && npm test && npm run build && npm run backup:verify && npm run cloudflare:plan && npm run repo:intelligence:verify && npm run topology:verify && npm run policy:audit",
+    "verify:production-baseline": "npm run source:audit && npm run doctor && node ./scripts/verify-production-baseline.js && npm run verify:integrations && node --check ./api/runtime-v7.js && node --check ./api/integrated-production.js && node --check ./status/server.js && npm test && npm run build && npm run backup:verify && npm run cloudflare:plan && npm run repo:intelligence:verify && npm run topology:verify && npm run policy:audit",
     "github:test": "node --test ./test/github-control-plane.test.js ./test/github-control-plane-advanced.test.js",
     "spark": "node ./spark/server.js",
     "spark:start": "bash ./spark/start.sh",
@@ -99,7 +99,10 @@
     "topology:test": "node --test ./test/topology-consolidation.test.js ./test/topology-approval-policy.test.js",
     "topology:verify": "node --check ./services/topology-consolidation/index.js && node --check ./services/topology-consolidation/server.js && node --check ./services/topology-consolidation/approval-policy.js && node --check ./scripts/topology-consolidation.js && node --check ./scripts/start-topology-consolidation.js && node --check ./scripts/verify-topology-consolidation.js && node ./scripts/verify-topology-consolidation.js && node --test ./test/topology-consolidation.test.js ./test/topology-approval-policy.test.js",
     "policy:test": "node --test ./test/approve-by-default-operational-policy.test.js ./test/feature-flags-default-policy.test.js ./test/topology-approval-policy.test.js",
-    "policy:audit": "node ./scripts/audit-approve-by-default.js"
+    "policy:audit": "node ./scripts/audit-approve-by-default.js",
+    "source:audit": "node ./scripts/audit-source-integrity.js",
+    "provider:readiness": "node ./scripts/check-provider-readiness.js",
+    "test:source-integrity": "node --test ./test/source-integrity.test.js"
   },
   "engines": {
     "node": ">=22"

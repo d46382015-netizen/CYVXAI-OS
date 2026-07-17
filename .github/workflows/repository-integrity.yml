@@ -1,0 +1,151 @@
+name: Repository Integrity Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "api/**"
+      - "apps/**"
+      - "core/**"
+      - "runtime/**"
+      - "services/**"
+      - "scripts/**"
+      - "spark/**"
+      - "test/**"
+      - "config/repository-contract.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/**"
+  pull_request:
+    paths:
+      - "api/**"
+      - "apps/**"
+      - "core/**"
+      - "runtime/**"
+      - "services/**"
+      - "scripts/**"
+      - "spark/**"
+      - "test/**"
+      - "config/repository-contract.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/**"
+  schedule:
+    - cron: "29 7 * * 2"
+  workflow_dispatch:
+
+permissions: write-all
+
+concurrency:
+  group: repository-integrity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NODE_ENV: test
+      CYVX_ENV: test
+      CYVX_ALLOW_INSECURE_LOCAL: "true"
+      CYVX_DATA_ROOT: /tmp/cyvx-repository-integrity
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        shell: bash
+        run: |
+          set -o pipefail
+          npm ci --ignore-scripts --no-audit --no-fund 2>&1 | tee /tmp/repository-install.log
+
+      - name: Prove source, platform, provider, and recovery integrity
+        shell: bash
+        run: |
+          set -o pipefail
+          {
+            npm run source:audit
+            npm run test:source-integrity
+            node --test ./test/platform.test.js
+            npm run wiki:generate
+            npm run backup:verify
+            npm run provider:readiness
+            node ./scripts/verify-production-baseline.js
+            npm run repo:intelligence:verify
+            npm run policy:audit
+          } 2>&1 | tee /tmp/repository-integrity.log
+
+      - name: Create machine-readable proof
+        if: success()
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs = require("node:fs");
+          const crypto = require("node:crypto");
+          const proof = {
+            ok: true,
+            commit: process.env.GITHUB_SHA,
+            run_id: process.env.GITHUB_RUN_ID,
+            source_integrity: "passed",
+            platform_regression: "passed",
+            provider_readiness: "reported",
+            backup_recovery: "passed",
+            repository_contract: "passed",
+            policy_audit: "passed",
+            verified_at: new Date().toISOString(),
+          };
+          proof.sha256 = crypto.createHash("sha256").update(JSON.stringify(proof)).digest("hex");
+          fs.writeFileSync("/tmp/repository-integrity-proof.json", JSON.stringify(proof, null, 2) + "\n");
+          NODE
+
+      - name: Report actionable failure
+        if: failure() && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          title="Repository integrity failure"
+          existing="$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number // empty')"
+          {
+            echo "Integrity verification failed for commit \`$GITHUB_SHA\` in run \`$GITHUB_RUN_ID\`."
+            echo
+            echo '```text'
+            tail -n 180 /tmp/repository-install.log /tmp/repository-integrity.log 2>/dev/null || true
+            echo '```'
+          } > /tmp/repository-integrity-failure.md
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file /tmp/repository-integrity-failure.md
+          else
+            gh issue create --title "$title" --body-file /tmp/repository-integrity-failure.md
+          fi
+
+      - name: Resolve prior integrity failure
+        if: success() && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          existing="$(gh issue list --state open --search 'Repository integrity failure in:title' --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "Resolved by commit \`$GITHUB_SHA\`; repository integrity verification passed in run \`$GITHUB_RUN_ID\`."
+            gh issue close "$existing" --reason completed
+          fi
+
+      - name: Retain proof and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repository-integrity-${{ github.run_id }}
+          path: |
+            /tmp/repository-integrity-proof.json
+            /tmp/repository-install.log
+            /tmp/repository-integrity.log
+          if-no-files-found: ignore
+          retention-days: 30

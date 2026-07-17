@@ -2,8 +2,14 @@ name: CYVX Uptime and Incident Monitor
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/15 * * * *"
   workflow_dispatch:
+    inputs:
+      require_targets:
+        description: Fail unless at least one uptime target is configured
+        type: boolean
+        required: true
+        default: true
 
 permissions: write-all
 
@@ -18,20 +24,60 @@ jobs:
     env:
       CYVX_STAGING_URL: ${{ secrets.CYVX_STAGING_URL }}
       CYVX_PRODUCTION_URL: ${{ secrets.CYVX_PRODUCTION_URL }}
+      CYVX_UPTIME_TARGETS: ${{ secrets.CYVX_UPTIME_TARGETS }}
       CYVX_INCIDENT_WEBHOOK_URL: ${{ secrets.CYVX_INCIDENT_WEBHOOK_URL }}
       CYVX_UPTIME_OUTPUT: /tmp/cyvx-uptime-report.json
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v5
         with:
           node-version: 24
+
+      - name: Validate uptime monitor source
+        run: node --check ./scripts/uptime-check-v7.js
+
+      - name: Audit uptime provider readiness
+        id: readiness
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node ./scripts/check-provider-readiness.js \
+            --scope uptime \
+            --output /tmp/cyvx-uptime-readiness.json
+          ready="$(node -e 'const x=require("/tmp/cyvx-uptime-readiness.json");process.stdout.write(String(x.ok))')"
+          echo "configured=$ready" >> "$GITHUB_OUTPUT"
+          if [ "$ready" != "true" ]; then
+            node - <<'NODE'
+          const fs = require("node:fs");
+          fs.writeFileSync(process.env.CYVX_UPTIME_OUTPUT, JSON.stringify({
+            ok: true,
+            skipped: true,
+            reason: "uptime_targets_not_configured",
+            checked_at: new Date().toISOString(),
+            results: [],
+          }, null, 2) + "\n");
+          NODE
+            echo "### Uptime targets not configured" >> "$GITHUB_STEP_SUMMARY"
+            echo "Scheduled monitoring was skipped without converting configuration absence into a repository failure." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Require targets for strict manual runs
+        if: github.event_name == 'workflow_dispatch' && inputs.require_targets && steps.readiness.outputs.configured != 'true'
+        run: |
+          echo "::error::Configure CYVX_PRODUCTION_URL, CYVX_STAGING_URL, or CYVX_UPTIME_TARGETS."
+          exit 1
+
       - name: Check staging and production health
+        if: steps.readiness.outputs.configured == 'true'
         run: node ./scripts/uptime-check-v7.js
-      - name: Retain uptime evidence
+
+      - name: Retain uptime and readiness evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cyvx-uptime-${{ github.run_id }}
-          path: /tmp/cyvx-uptime-report.json
+          path: |
+            /tmp/cyvx-uptime-report.json
+            /tmp/cyvx-uptime-readiness.json
           if-no-files-found: ignore
           retention-days: 30

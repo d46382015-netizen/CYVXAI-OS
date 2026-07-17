@@ -1,0 +1,69 @@
+name: External Provider Readiness
+
+on:
+  schedule:
+    - cron: "41 8 * * 1"
+  workflow_dispatch:
+
+permissions: write-all
+
+concurrency:
+  group: cyvx-provider-readiness
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CYVX_BACKUP_STORAGE_URL: ${{ secrets.CYVX_BACKUP_STORAGE_URL }}
+      CYVX_BACKUP_STORAGE_TOKEN: ${{ secrets.CYVX_BACKUP_STORAGE_TOKEN }}
+      CYVX_BACKUP_BUCKET: ${{ secrets.CYVX_BACKUP_BUCKET }}
+      CYVX_BACKUP_ENCRYPTION_KEY: ${{ secrets.CYVX_BACKUP_ENCRYPTION_KEY }}
+      CYVX_PRODUCTION_URL: ${{ secrets.CYVX_PRODUCTION_URL }}
+      CYVX_STAGING_URL: ${{ secrets.CYVX_STAGING_URL }}
+      CYVX_UPTIME_TARGETS: ${{ secrets.CYVX_UPTIME_TARGETS }}
+      CYVX_INCIDENT_WEBHOOK_URL: ${{ secrets.CYVX_INCIDENT_WEBHOOK_URL }}
+      CYVX_STAGING_RENDER_DEPLOY_HOOK_URL: ${{ secrets.CYVX_STAGING_RENDER_DEPLOY_HOOK_URL }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      CYVX_EDGE_ORIGIN_SECRET: ${{ secrets.CYVX_EDGE_ORIGIN_SECRET }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      CYVX_OWNER_EMAIL: ${{ secrets.CYVX_OWNER_EMAIL }}
+      CYVX_OWNER_PASSWORD: ${{ secrets.CYVX_OWNER_PASSWORD }}
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      CYVX_STRIPE_WEBHOOK_SECRET: ${{ secrets.CYVX_STRIPE_WEBHOOK_SECRET }}
+      CYVX_EMAIL_FROM: ${{ secrets.CYVX_EMAIL_FROM }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      POSTMARK_SERVER_TOKEN: ${{ secrets.POSTMARK_SERVER_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Generate redacted readiness report
+        run: node ./scripts/check-provider-readiness.js --output /tmp/cyvx-provider-readiness.json
+
+      - name: Publish readiness summary
+        shell: bash
+        run: |
+          node - <<'NODE' >> "$GITHUB_STEP_SUMMARY"
+          const report = require("/tmp/cyvx-provider-readiness.json");
+          console.log("# CYVX external provider readiness\n");
+          for (const provider of report.providers) {
+            console.log(`- ${provider.ready ? "✅" : "⚠️"} **${provider.provider}**`);
+            for (const key of provider.missing_required) console.log(`  - Missing: \`${key}\``);
+            if (provider.missing_one_of.length) console.log(`  - Configure one of: ${provider.missing_one_of.map((key) => `\`${key}\``).join(", ")}`);
+          }
+          NODE
+
+      - name: Retain redacted readiness evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyvx-provider-readiness-${{ github.run_id }}
+          path: /tmp/cyvx-provider-readiness.json
+          if-no-files-found: error
+          retention-days: 30

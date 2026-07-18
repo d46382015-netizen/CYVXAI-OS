@@ -3,9 +3,9 @@ name: Deploy CYVX v7
 on:
   push:
     branches: [main]
-    paths: ["api/**", "core/ops/**", "core/production/**", "spark/**", "ui/**", "scripts/**", "package*.json", "render.yaml", ".github/workflows/deploy-v7.yml"]
+    paths: ["api/**", "core/ops/**", "core/production/**", "services/content-growth/**", "spark/**", "ui/**", "scripts/**", "test/field-manual*.test.js", "config/field-manual.example.env", "package*.json", "render.yaml", ".github/workflows/deploy-v7.yml"]
   pull_request:
-    paths: ["api/**", "core/ops/**", "core/production/**", "spark/**", "ui/**", "scripts/**", "package*.json", "render.yaml", ".github/workflows/deploy-v7.yml"]
+    paths: ["api/**", "core/ops/**", "core/production/**", "services/content-growth/**", "spark/**", "ui/**", "scripts/**", "test/field-manual*.test.js", "config/field-manual.example.env", "package*.json", "render.yaml", ".github/workflows/deploy-v7.yml"]
   workflow_dispatch:
 
 permissions: write-all
@@ -42,6 +42,7 @@ jobs:
           done
           curl -fsS http://127.0.0.1:3200/ | grep 'What do you want to make real?'
           curl -fsS http://127.0.0.1:3200/api/public/status
+          curl -fsS http://127.0.0.1:3200/field-manual/health | grep 'cyvx-field-manual'
           curl -fsS http://127.0.0.1:3204/api/control-plane
 
   deploy-staging:
@@ -59,3 +60,85 @@ jobs:
             exit 0
           fi
           curl --fail --silent --show-error --request POST "$CYVX_STAGING_RENDER_DEPLOY_HOOK_URL"
+
+  smoke-field-manual:
+    name: Prove public Field Manual acquisition path
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [verify, deploy-staging]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CYVX_STAGING_URL: ${{ secrets.CYVX_STAGING_URL }}
+      CYVX_MANYCHAT_WEBHOOK_SECRET: ${{ secrets.CYVX_MANYCHAT_WEBHOOK_SECRET }}
+    steps:
+      - name: Wait for public Field Manual deployment
+        id: readiness
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [ -z "$CYVX_STAGING_URL" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "### Field Manual public smoke skipped" >> "$GITHUB_STEP_SUMMARY"
+            echo "Configure the CYVX_STAGING_URL repository secret to enable deployment proof." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          base="${CYVX_STAGING_URL%/}/field-manual"
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error "$base/health" > /tmp/field-manual-health.json; then
+              node -e 'const x=require("/tmp/field-manual-health.json");if(!x.ok||x.service!=="cyvx-field-manual")process.exit(1)'
+              echo "configured=true" >> "$GITHUB_OUTPUT"
+              echo "base=$base" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Field Manual did not become healthy at $base within ten minutes."
+          exit 1
+
+      - name: Capture one end-to-end MANUAL test lead
+        if: steps.readiness.outputs.configured == 'true'
+        shell: bash
+        env:
+          FIELD_BASE: ${{ steps.readiness.outputs.base }}
+        run: |
+          set -Eeuo pipefail
+          email="field-manual-smoke+${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}@example.com"
+          payload="$(printf '{\"email\":\"%s\",\"first_name\":\"CYVX Smoke\",\"keyword\":\"MANUAL\",\"post_id\":\"POST_001\",\"consent\":false}' "$email")"
+          if [ -n "$CYVX_MANYCHAT_WEBHOOK_SECRET" ]; then
+            status="$(curl --silent --show-error --output /tmp/field-manual-lead.json --write-out '%{http_code}' \
+              --request POST "$FIELD_BASE/api/v1/webhooks/manychat" \
+              --header 'content-type: application/json' \
+              --header "x-cyvx-webhook-secret: $CYVX_MANYCHAT_WEBHOOK_SECRET" \
+              --data "$payload")"
+            test "$status" = "200"
+          else
+            status="$(curl --silent --show-error --output /tmp/field-manual-lead.json --write-out '%{http_code}' \
+              --request POST "$FIELD_BASE/api/v1/leads" \
+              --header 'content-type: application/json' \
+              --data "$payload")"
+            test "$status" = "201"
+          fi
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const body = JSON.parse(fs.readFileSync('/tmp/field-manual-lead.json', 'utf8'));
+          if (!body.ok || !body.accepted || body.intent_tag !== 'GENERAL_OPERATOR' || body.source !== 'POST_001') throw new Error('MANUAL lead routing failed');
+          if (body.asset !== 'CYVX_Operator_Readiness_Assessment.pdf') throw new Error('Unexpected lead magnet');
+          fs.writeFileSync('/tmp/field-manual-asset.txt', body.asset);
+          NODE
+          asset="$(cat /tmp/field-manual-asset.txt)"
+          curl --fail --silent --show-error "$FIELD_BASE/downloads/$asset" --output /tmp/CYVX_Operator_Readiness_Assessment.pdf
+          test "$(head -c 4 /tmp/CYVX_Operator_Readiness_Assessment.pdf)" = "%PDF"
+          echo "### Field Manual public smoke passed" >> "$GITHUB_STEP_SUMMARY"
+          echo "A unique MANUAL lead was captured and its PDF asset was downloaded successfully." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Retain public acquisition evidence
+        if: always() && steps.readiness.outputs.configured == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: field-manual-public-smoke-${{ github.run_id }}
+          path: |
+            /tmp/field-manual-health.json
+            /tmp/field-manual-lead.json
+            /tmp/CYVX_Operator_Readiness_Assessment.pdf
+          if-no-files-found: error
+          retention-days: 30

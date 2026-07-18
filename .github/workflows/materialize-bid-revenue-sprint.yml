@@ -1,9 +1,6 @@
 name: Materialize CYVX Bid Revenue Sprint
 
 on:
-  push:
-    branches:
-      - feat/bid-revenue-sprint-operator
   pull_request:
     branches:
       - main
@@ -12,8 +9,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: materialize-bid-revenue-sprint-${{ github.ref }}
-  cancel-in-progress: false
+  group: materialize-bid-revenue-sprint-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   materialize:
@@ -54,18 +51,14 @@ jobs:
           set -o pipefail
           npm run bid:sprint:verify 2>&1 | tee /tmp/bid-sprint-test-output.log
 
-      - name: Persist verification failure diagnostics
+      - name: Upload verification diagnostics
         if: failure() && steps.verify.outcome == 'failure'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p artifacts/ci
-          cp /tmp/bid-sprint-test-output.log artifacts/ci/bid-sprint-test-failure.log
-          git config user.name 'CYVX Production Builder'
-          git config user.email 'actions@users.noreply.github.com'
-          git add artifacts/ci/bid-sprint-test-failure.log
-          git commit -m 'Record bid sprint verification failure diagnostics' || true
-          git push origin HEAD:feat/bid-revenue-sprint-operator
+        uses: actions/upload-artifact@v4
+        with:
+          name: bid-sprint-verification-${{ github.run_id }}
+          path: /tmp/bid-sprint-test-output.log
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Commit verified production operator
         if: success()

@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
-      CYVX_STAGING_URL: ${{ secrets.CYVX_STAGING_URL || 'https://cyvx-staging.onrender.com' }}
+      CYVX_STAGING_URL: ${{ secrets.CYVX_STAGING_URL }}
       CYVX_MANYCHAT_WEBHOOK_SECRET: ${{ secrets.CYVX_MANYCHAT_WEBHOOK_SECRET }}
     steps:
       - uses: actions/checkout@v5
@@ -81,18 +81,13 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          if [ -z "$CYVX_STAGING_URL" ]; then
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "### Field Manual public smoke skipped" >> "$GITHUB_STEP_SUMMARY"
-            echo "Configure the CYVX_STAGING_URL repository secret to enable deployment proof." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
+          CYVX_STAGING_URL="${CYVX_STAGING_URL:-https://cyvx-staging.onrender.com}"
           base="${CYVX_STAGING_URL%/}/field-manual"
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+          echo "base=$base" >> "$GITHUB_OUTPUT"
           for attempt in $(seq 1 60); do
             if curl --fail --silent --show-error "$base/health" > /tmp/field-manual-health.json; then
               node -e 'const x=require("/tmp/field-manual-health.json");if(!x.ok||x.service!=="cyvx-field-manual")process.exit(1)'
-              echo "configured=true" >> "$GITHUB_OUTPUT"
-              echo "base=$base" >> "$GITHUB_OUTPUT"
               exit 0
             fi
             sleep 10

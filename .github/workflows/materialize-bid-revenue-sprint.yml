@@ -39,6 +39,14 @@ jobs:
               .github/payloads/bid-sprint.part02 | base64 --decode > /tmp/cyvx-bid-sprint.tgz
           echo 'b617aac61a8c33059916721254c49e5f4288420e9c2f45723b2e9bacedfe7391  /tmp/cyvx-bid-sprint.tgz' | sha256sum --check --strict
           tar -xzf /tmp/cyvx-bid-sprint.tgz -C .
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('services/revenue/bid-sprint.js')
+          source = path.read_text()
+          source = source.replace('qualified: Number(graph.metrics.qualified || 0),', 'qualified: Number(graph.metrics.qualified_leads || 0),')
+          source = source.replace('won: Number(graph.metrics.won || 0),', 'won: Number(graph.metrics.won_deals || 0),')
+          path.write_text(source)
+          PY
           chmod +x scripts/bootstrap-bid-revenue-sprint.js scripts/start-company-operator.js
 
       - name: Install locked dependencies

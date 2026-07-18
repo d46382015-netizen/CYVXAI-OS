@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
-      CYVX_STAGING_URL: ${{ secrets.CYVX_STAGING_URL }}
+      CYVX_STAGING_URL: ${{ secrets.CYVX_STAGING_URL || 'https://cyvxai-os.onrender.com' }}
       CYVX_MANYCHAT_WEBHOOK_SECRET: ${{ secrets.CYVX_MANYCHAT_WEBHOOK_SECRET }}
     steps:
       - uses: actions/checkout@v5

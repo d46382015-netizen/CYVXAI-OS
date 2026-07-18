@@ -11,6 +11,8 @@ const { assertProductionSecurity } = require("../core/security/production_guard"
 const { ManagedDataPlane } = require("../core/storage/managed_data_plane");
 const { buildOverview } = require("../core/ops/overview");
 const { close, createServer, listen } = require("../core/ops/http_server");
+const { createFieldManualServer } = require("../services/content-growth/server");
+const { mountFieldManual, resolveFieldManualPublicBaseUrl } = require("../services/content-growth/gateway");
 
 async function createRuntimeV7(options = {}) {
   const startedAt = Date.now();
@@ -24,6 +26,29 @@ async function createRuntimeV7(options = {}) {
   const startupSpan = telemetry.startSpan("runtime.create", { production: security.production });
   try {
     const publicRuntime = await createPublicRuntime({ ...(options.public || {}), telemetry, env, fetch: options.fetch });
+    const operationsPort = Number(options.operationsPort || env.CYVX_CONTROL_PORT || publicRuntime.ports.publicPort + 4);
+    const fieldManualPort = Number(options.fieldManualPort || env.CYVX_FIELD_INTERNAL_PORT || publicRuntime.ports.publicPort + 5);
+    assertAvailablePort(fieldManualPort, [...Object.values(publicRuntime.ports), operationsPort]);
+    const fieldManual = createFieldManualServer({
+      host: "127.0.0.1",
+      port: fieldManualPort,
+      publicBaseUrl: resolveFieldManualPublicBaseUrl(env, options.fieldManualPublicBaseUrl),
+      dataDirectory: options.fieldManualDataDirectory || env.CYVX_FIELD_DATA_DIR || path.join(dataRoot, "field-manual"),
+      manychatSecret: env.CYVX_MANYCHAT_WEBHOOK_SECRET || "",
+      adminToken: env.CYVX_FIELD_ADMIN_TOKEN || "",
+      lemonSecret: env.LEMONSQUEEZY_WEBHOOK_SECRET || "",
+      checkoutUrl: env.LEMONSQUEEZY_CHECKOUT_URL || "",
+      kitApiKey: env.KIT_API_KEY || "",
+      kitTagIds: {
+        GENERAL_OPERATOR: env.KIT_TAG_GENERAL_OPERATOR,
+        SECURITY: env.KIT_TAG_SECURITY,
+        MOBILE_BUILD: env.KIT_TAG_MOBILE_BUILD,
+      },
+      fetchImpl: options.fetch,
+      logger: options.fieldManualLogger || console,
+    });
+    mountFieldManual(publicRuntime.publicServer, fieldManualPort);
+
     const missionWorker = options.missionWorker || publicRuntime.missions.createWorker({
       workerId: options.missionWorkerId || env.CYVX_WORKER_ID || "worker-main",
       pollMs: Number(options.missionWorkerPollMs || env.CYVX_WORKER_POLL_MS || 100),
@@ -46,7 +71,6 @@ async function createRuntimeV7(options = {}) {
       github: buildReadiness(publicRuntime.cyvx),
       startedAt,
     });
-    const operationsPort = Number(options.operationsPort || env.CYVX_CONTROL_PORT || publicRuntime.ports.publicPort + 4);
     const operations = createServer(overview);
 
     function startMissionWorker() {
@@ -71,6 +95,8 @@ async function createRuntimeV7(options = {}) {
     startupSpan.end("ok");
     return {
       publicRuntime,
+      fieldManual,
+      fieldManualPort,
       integrations,
       autonomy,
       backup,
@@ -83,14 +109,22 @@ async function createRuntimeV7(options = {}) {
       get missionWorkerError() { return missionWorkerError; },
       overview,
       async listen() {
-        const span = telemetry.startSpan("runtime.listen", { public_port: publicRuntime.ports.publicPort, control_port: operationsPort });
+        const span = telemetry.startSpan("runtime.listen", {
+          public_port: publicRuntime.ports.publicPort,
+          control_port: operationsPort,
+          field_manual_port: fieldManualPort,
+        });
         startMissionWorker();
+        let fieldManualStarted = false;
         try {
+          await fieldManual.start();
+          fieldManualStarted = true;
           await publicRuntime.listen();
           await listen(operations, operationsPort);
         } catch (error) {
           await stopMissionWorker();
           await publicRuntime.close().catch(() => undefined);
+          if (fieldManualStarted) await fieldManual.close().catch(() => undefined);
           span.end("error", { error: error.message });
           throw error;
         }
@@ -100,6 +134,7 @@ async function createRuntimeV7(options = {}) {
         telemetry.log("info", "cyvx.runtime.v8.ready", {
           public_port: publicRuntime.ports.publicPort,
           control_port: operationsPort,
+          field_manual: { internal_port: fieldManualPort, public_path: "/field-manual" },
           mission_worker: { worker_id: missionWorker.workerId, ready: !missionWorkerError },
           backup: backup.snapshot(),
           managed_data: managedData.snapshot(),
@@ -115,7 +150,7 @@ async function createRuntimeV7(options = {}) {
         backup.stop();
         autonomy.stop();
         await stopMissionWorker();
-        await Promise.all([close(operations), publicRuntime.close()]);
+        await Promise.all([close(operations), publicRuntime.close(), fieldManual.close()]);
         telemetry.log("info", "cyvx.runtime.v8.closed");
       },
     };
@@ -126,12 +161,19 @@ async function createRuntimeV7(options = {}) {
   }
 }
 
+function assertAvailablePort(port, reservedPorts) {
+  if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("Field Manual internal port must be a valid TCP port");
+  const reserved = new Set(reservedPorts.map(Number).filter(Number.isInteger));
+  if (reserved.has(port)) throw new Error("Field Manual internal port must be distinct from public, control, CYVX, and Spark ports");
+}
+
 async function main() {
   const runtime = await createRuntimeV7();
   await runtime.listen();
   runtime.telemetry.log("info", "cyvx.runtime.v8.started", {
     public: runtime.publicRuntime.ports.publicPort,
     control: runtime.operationsPort,
+    field_manual: { internal_port: runtime.fieldManualPort, public_path: "/field-manual" },
     mission_worker: { worker_id: runtime.missionWorker.workerId, ready: !runtime.missionWorkerError },
     autonomy: runtime.autonomy.snapshot(),
     backup: runtime.backup.snapshot(),
@@ -155,4 +197,4 @@ if (require.main === module) main().catch((error) => {
   process.exit(1);
 });
 
-module.exports = { createRuntimeV7 };
+module.exports = { createRuntimeV7, assertAvailablePort };

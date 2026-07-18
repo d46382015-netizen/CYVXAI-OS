@@ -1,19 +1,13 @@
 {
   "schema_version": 1,
-  "status": "failed",
-  "public_base_url": "https://cyvxai-os.onrender.com/field-manual",
-  "deployment_origin": "https://cyvxai-os.onrender.com",
+  "status": "skipped",
+  "public_base_url": null,
   "route": null,
-  "commit_sha": "313659818ecb0d61fd78162844faa8631f3d2cd0",
-  "workflow_run_id": "29659489818",
+  "commit_sha": "6b74173635868cac6bb8948182cc0f129e26367e",
+  "workflow_run_id": "29659990613",
   "workflow_run_attempt": 1,
-  "verified_at": "2026-07-18T20:32:45.545Z",
-  "health": {
-    "ok": false,
-    "service": null,
-    "version": "6.0.0",
-    "providers": null
-  },
+  "verified_at": "2026-07-18T20:40:27.763Z",
+  "health": null,
   "lead": null,
   "pdf_verified": false
 }

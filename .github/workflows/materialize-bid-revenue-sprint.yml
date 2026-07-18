@@ -1,0 +1,75 @@
+name: Materialize CYVX Bid Revenue Sprint
+
+on:
+  push:
+    branches:
+      - feat/bid-revenue-sprint-operator
+    paths:
+      - .github/workflows/materialize-bid-revenue-sprint.yml
+      - .github/payloads/bid-sprint.part00
+      - .github/payloads/bid-sprint.part01
+      - .github/payloads/bid-sprint.part02
+
+permissions:
+  contents: write
+
+concurrency:
+  group: materialize-bid-revenue-sprint
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/bid-revenue-sprint-operator
+          fetch-depth: 0
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Verify and extract production payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .github/payloads/bid-sprint.part00 \
+              .github/payloads/bid-sprint.part01 \
+              .github/payloads/bid-sprint.part02 | base64 --decode > /tmp/cyvx-bid-sprint.tgz
+          echo 'b617aac61a8c33059916721254c49e5f4288420e9c2f45723b2e9bacedfe7391  /tmp/cyvx-bid-sprint.tgz' | sha256sum --check --strict
+          tar -xzf /tmp/cyvx-bid-sprint.tgz -C .
+          chmod +x scripts/bootstrap-bid-revenue-sprint.js scripts/start-company-operator.js
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Verify Bid Revenue Sprint
+        run: npm run bid:sprint:verify
+
+      - name: Commit verified production operator
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'CYVX Production Builder'
+          git config user.email 'actions@users.noreply.github.com'
+          git rm -r .github/payloads/bid-sprint.part00 \
+                    .github/payloads/bid-sprint.part01 \
+                    .github/payloads/bid-sprint.part02 \
+                    .github/workflows/materialize-bid-revenue-sprint.yml
+          git add package.json \
+                  services/revenue/bid-sprint.js \
+                  services/operator/universal-server.js \
+                  scripts/bootstrap-bid-revenue-sprint.js \
+                  scripts/start-company-operator.js \
+                  test/bid-revenue-sprint.test.js \
+                  ui/bid-revenue-sprint.html \
+                  docs/BID_REVENUE_SPRINT.md
+          git diff --cached --check
+          git commit -m 'Build production CYVX Bid and Revenue Sprint operator'
+          git push origin HEAD:feat/bid-revenue-sprint-operator

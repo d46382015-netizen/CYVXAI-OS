@@ -45,6 +45,7 @@ jobs:
           source = path.read_text()
           source = source.replace('qualified: Number(graph.metrics.qualified || 0),', 'qualified: Number(graph.metrics.qualified_leads || 0),')
           source = source.replace('won: Number(graph.metrics.won || 0),', 'won: Number(graph.metrics.won_deals || 0),')
+          source = source.replace('} else if (!graph.deals.some((deal) => ["proposal", "negotiation"].includes(deal.stage))) {', '} else if (metrics.verified_revenue_cents < metrics.target_revenue_cents && !graph.deals.some((deal) => ["proposal", "negotiation"].includes(deal.stage))) {')
           path.write_text(source)
           PY
           chmod +x scripts/bootstrap-bid-revenue-sprint.js scripts/start-company-operator.js

@@ -9,6 +9,7 @@ const { createCompanyOperatorRuntime, readBody, sendJson, match } = require("./s
 const { UniversalOperator, UNIVERSAL_ENTITY_TYPES } = require("./universal");
 const { VentureRevenueEngine } = require("../revenue/engine");
 const { createRevenueHttpRuntime } = require("../revenue/server");
+const { BidRevenueSprintOperator, createBidRevenueSprintHttpRuntime } = require("../revenue/bid-sprint");
 
 function securityHeaders(res, production) {
   res.setHeader("x-content-type-options", "nosniff");
@@ -45,11 +46,15 @@ function createUniversalOperatorRuntime(options = {}) {
   const revenueRuntime = createRevenueHttpRuntime({
     ...options, runtime, engine: revenue, authenticate, sendJson, readBody, match,
   });
+  const bidSprint = options.bidSprint || new BidRevenueSprintOperator(runtime, { ...options, universal: operator, revenue });
+  const bidSprintRuntime = createBidRevenueSprintHttpRuntime({
+    ...options, runtime, operator: bidSprint, authenticate, sendJson, readBody, match,
+  });
 
   async function handle(req, res, suppliedUrl) {
     const url = suppliedUrl || new URL(req.url, "http://cyvx-universal.local");
     const correlationId = String(req.headers["x-correlation-id"] || crypto.randomUUID()).slice(0, 128);
-    const universalPath = url.pathname === "/operator" || url.pathname === "/universal" || url.pathname.startsWith("/api/v2/operator/") || url.pathname.startsWith("/e/") || revenueRuntime.route(url.pathname) || ["/healthz", "/readyz"].includes(url.pathname);
+    const universalPath = url.pathname === "/operator" || url.pathname === "/universal" || url.pathname.startsWith("/api/v2/operator/") || url.pathname.startsWith("/e/") || revenueRuntime.route(url.pathname) || bidSprintRuntime.route(url.pathname) || ["/healthz", "/readyz"].includes(url.pathname);
     if (!universalPath) return legacyRuntime.handle(req, res, url);
 
     securityHeaders(res, production);
@@ -66,6 +71,7 @@ function createUniversalOperatorRuntime(options = {}) {
       if (req.method === "OPTIONS") { res.statusCode = 204; return res.end(); }
 
       if (await revenueRuntime.handle(req, res, url, { correlationId })) return;
+      if (await bidSprintRuntime.handle(req, res, url, { correlationId })) return;
 
       if (req.method === "GET" && ["/operator", "/universal"].includes(url.pathname)) {
         if (!fs.existsSync(uiFile)) throw new RuntimeError("UI_NOT_FOUND", "Universal operator UI is unavailable", 404);
@@ -76,14 +82,15 @@ function createUniversalOperatorRuntime(options = {}) {
         return res.end(body);
       }
       if (req.method === "GET" && url.pathname === "/healthz") {
-        return sendJson(res, 200, { ok: true, universal: operator.health(), venture_adapter: legacyRuntime.operator.health(), revenue: revenue.health() }, correlationId);
+        return sendJson(res, 200, { ok: true, universal: operator.health(), venture_adapter: legacyRuntime.operator.health(), revenue: revenue.health(), bid_revenue_sprint: bidSprint.health() }, correlationId);
       }
       if (req.method === "GET" && url.pathname === "/readyz") {
         const mission = runtime.readiness();
         const health = operator.health();
         const revenueHealth = revenue.health();
-        const ready = health.ok && revenueHealth.database && mission.dependencies.database.ready;
-        return sendJson(res, ready ? 200 : 503, { ok: ready, universal: health, revenue: revenueHealth, mission_runtime: mission }, correlationId);
+        const bidSprintHealth = bidSprint.health();
+        const ready = health.ok && revenueHealth.database && bidSprintHealth.database && mission.dependencies.database.ready;
+        return sendJson(res, ready ? 200 : 503, { ok: ready, universal: health, revenue: revenueHealth, bid_revenue_sprint: bidSprintHealth, mission_runtime: mission }, correlationId);
       }
       if (req.method === "GET" && url.pathname === "/api/v2/operator/entity-types") {
         return sendJson(res, 200, { ok: true, entity_types: UNIVERSAL_ENTITY_TYPES }, correlationId);
@@ -143,7 +150,7 @@ function createUniversalOperatorRuntime(options = {}) {
       }
       if (req.method === "GET" && url.pathname === "/api/v2/operator/export") {
         const entities = operator.listEntities(auth).map((entity) => operator.getEntity(entity.id, auth));
-        return sendJson(res, 200, { ok: true, export: { schema_version: 3, generated_at: now(), organization_id: auth.organization_id, entities, relationships: operator.listRelationships(auth), platform: operator.platform.snapshot(), revenue: revenue.listVentures(auth).map((venture) => revenue.getVenture(venture.id, auth)) } }, correlationId);
+        return sendJson(res, 200, { ok: true, export: { schema_version: 4, generated_at: now(), organization_id: auth.organization_id, entities, relationships: operator.listRelationships(auth), platform: operator.platform.snapshot(), revenue: revenue.listVentures(auth).map((venture) => revenue.getVenture(venture.id, auth)), bid_revenue_sprints: bidSprint.listSprints(auth).map((sprint) => bidSprint.getSprint(sprint.id, auth)) } }, correlationId);
       }
       throw new RuntimeError("NOT_FOUND", "Route not found", 404);
     } catch (error) {
@@ -160,7 +167,7 @@ function createUniversalOperatorRuntime(options = {}) {
     }
   }
 
-  return { runtime, operator, legacyRuntime, revenue, revenueRuntime, handle, health: () => ({ universal: operator.health(), revenue: revenue.health() }) };
+  return { runtime, operator, legacyRuntime, revenue, revenueRuntime, bidSprint, bidSprintRuntime, handle, health: () => ({ universal: operator.health(), revenue: revenue.health(), bid_revenue_sprint: bidSprint.health() }) };
 }
 
 function createUniversalOperatorHttpServer(operatorRuntime) {

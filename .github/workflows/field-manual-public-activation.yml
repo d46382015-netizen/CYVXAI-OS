@@ -1,0 +1,169 @@
+name: Field Manual Public Activation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/field-manual-public-activation.yml"
+  workflow_dispatch:
+    inputs:
+      public_base_url:
+        description: Public CYVX base URL without /field-manual
+        required: false
+        default: https://cyvxai-os.onrender.com
+
+permissions: write-all
+
+concurrency:
+  group: field-manual-public-activation
+  cancel-in-progress: true
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CONFIGURED_STAGING_URL: ${{ secrets.CYVX_STAGING_URL }}
+      INPUT_PUBLIC_BASE_URL: ${{ inputs.public_base_url }}
+      CYVX_MANYCHAT_WEBHOOK_SECRET: ${{ secrets.CYVX_MANYCHAT_WEBHOOK_SECRET }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Resolve public HTTPS endpoint
+        id: endpoint
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          public_base="${INPUT_PUBLIC_BASE_URL:-${CONFIGURED_STAGING_URL:-https://cyvxai-os.onrender.com}}"
+          public_base="${public_base%/}"
+          case "$public_base" in
+            https://*) ;;
+            *) echo "::error::Public base URL must use HTTPS"; exit 1 ;;
+          esac
+          echo "public_base=$public_base" >> "$GITHUB_OUTPUT"
+          echo "field_base=$public_base/field-manual" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for Render deployment
+        id: readiness
+        shell: bash
+        env:
+          FIELD_BASE: ${{ steps.endpoint.outputs.field_base }}
+        run: |
+          set -Eeuo pipefail
+          for attempt in $(seq 1 75); do
+            status="$(curl --silent --show-error --output /tmp/field-manual-health.json --write-out '%{http_code}' "$FIELD_BASE/health" || true)"
+            if [ "$status" = "200" ] && node -e 'const x=require("/tmp/field-manual-health.json");if(!x.ok||x.service!=="cyvx-field-manual")process.exit(1)'; then
+              echo "ready=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "ready=false" >> "$GITHUB_OUTPUT"
+          echo "::error::Field Manual did not become healthy at $FIELD_BASE within 12.5 minutes"
+          exit 1
+
+      - name: Capture MANUAL lead and verify lead magnet
+        id: capture
+        shell: bash
+        env:
+          FIELD_BASE: ${{ steps.endpoint.outputs.field_base }}
+        run: |
+          set -Eeuo pipefail
+          email="field-manual-activation+${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}@example.com"
+          payload="$(printf '{\"email\":\"%s\",\"first_name\":\"CYVX Activation\",\"keyword\":\"MANUAL\",\"post_id\":\"POST_001\",\"consent\":false}' "$email")"
+          if [ -n "$CYVX_MANYCHAT_WEBHOOK_SECRET" ]; then
+            route="manychat_authenticated"
+            status="$(curl --silent --show-error --output /tmp/field-manual-lead.json --write-out '%{http_code}' \
+              --request POST "$FIELD_BASE/api/v1/webhooks/manychat" \
+              --header 'content-type: application/json' \
+              --header "x-cyvx-webhook-secret: $CYVX_MANYCHAT_WEBHOOK_SECRET" \
+              --data "$payload")"
+            test "$status" = "200"
+          else
+            route="public_lead_fallback"
+            status="$(curl --silent --show-error --output /tmp/field-manual-lead.json --write-out '%{http_code}' \
+              --request POST "$FIELD_BASE/api/v1/leads" \
+              --header 'content-type: application/json' \
+              --data "$payload")"
+            test "$status" = "201"
+          fi
+          echo "route=$route" >> "$GITHUB_OUTPUT"
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const lead = JSON.parse(fs.readFileSync('/tmp/field-manual-lead.json', 'utf8'));
+          if (!lead.ok || !lead.accepted) throw new Error('Lead was not accepted');
+          if (lead.intent_tag !== 'GENERAL_OPERATOR') throw new Error('Wrong intent tag');
+          if (lead.source !== 'POST_001') throw new Error('Wrong source post');
+          if (lead.asset !== 'CYVX_Operator_Readiness_Assessment.pdf') throw new Error('Wrong lead magnet');
+          fs.writeFileSync('/tmp/field-manual-asset.txt', lead.asset);
+          NODE
+          asset="$(cat /tmp/field-manual-asset.txt)"
+          curl --fail --silent --show-error "$FIELD_BASE/downloads/$asset" --output /tmp/CYVX_Operator_Readiness_Assessment.pdf
+          test "$(head -c 4 /tmp/CYVX_Operator_Readiness_Assessment.pdf)" = "%PDF"
+
+      - name: Write activation receipt
+        if: always()
+        shell: bash
+        env:
+          PUBLIC_BASE: ${{ steps.endpoint.outputs.public_base }}
+          FIELD_BASE: ${{ steps.endpoint.outputs.field_base }}
+          FIELD_READY: ${{ steps.readiness.outputs.ready }}
+          FIELD_ROUTE: ${{ steps.capture.outputs.route }}
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/field-manual
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const readJson = (file) => { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return null; } };
+          const health = readJson('/tmp/field-manual-health.json');
+          const lead = readJson('/tmp/field-manual-lead.json');
+          const pdfVerified = fs.existsSync('/tmp/CYVX_Operator_Readiness_Assessment.pdf') && fs.readFileSync('/tmp/CYVX_Operator_Readiness_Assessment.pdf').subarray(0, 4).toString('utf8') === '%PDF';
+          const passed = process.env.FIELD_READY === 'true' && lead && lead.ok === true && lead.accepted === true && pdfVerified;
+          const receipt = {
+            schema_version: 1,
+            status: passed ? 'passed' : 'failed',
+            public_base_url: process.env.FIELD_BASE || null,
+            deployment_origin: process.env.PUBLIC_BASE || null,
+            route: process.env.FIELD_ROUTE || null,
+            commit_sha: process.env.GITHUB_SHA,
+            workflow_run_id: process.env.GITHUB_RUN_ID,
+            workflow_run_attempt: Number(process.env.GITHUB_RUN_ATTEMPT || 1),
+            verified_at: new Date().toISOString(),
+            health: health ? { ok: health.ok === true, service: health.service || null, version: health.version || null, providers: health.providers || null } : null,
+            lead: lead ? {
+              accepted: lead.accepted === true,
+              duplicate: lead.duplicate === true,
+              lead_id: lead.lead_id || null,
+              intent_tag: lead.intent_tag || null,
+              source: lead.source || null,
+              asset: lead.asset || null,
+              kit: lead.kit ? { skipped: lead.kit.skipped === true, failed: lead.kit.failed === true, reason: lead.kit.reason || null, tag_id: lead.kit.tag_id || null } : null,
+            } : null,
+            pdf_verified: pdfVerified,
+          };
+          fs.writeFileSync('artifacts/field-manual/public-activation.json', JSON.stringify(receipt, null, 2) + '\n');
+          NODE
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/field-manual/public-activation.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Record Field Manual public activation result [skip ci]"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+
+      - name: Retain activation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: field-manual-public-activation-${{ github.run_id }}
+          path: |
+            /tmp/field-manual-health.json
+            /tmp/field-manual-lead.json
+            /tmp/CYVX_Operator_Readiness_Assessment.pdf
+            artifacts/field-manual/public-activation.json
+          if-no-files-found: warn
+          retention-days: 30

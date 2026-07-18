@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "skipped",
+  "public_base_url": null,
+  "route": null,
+  "commit_sha": "07edd19886c902600a1774fe0d2e78e07da61c65",
+  "workflow_run_id": "29659218928",
+  "workflow_run_attempt": 1,
+  "verified_at": "2026-07-18T20:12:32.303Z",
+  "health": null,
+  "lead": null,
+  "pdf_verified": false
+}

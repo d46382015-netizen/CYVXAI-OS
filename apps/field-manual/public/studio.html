@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CYVX Field Manual Studio</title><link rel="stylesheet" href="/styles.css"></head>
+<body>
+<header class="site-header"><div class="shell nav"><div class="brand">CYVX FIELD MANUAL<small>PRODUCTION STUDIO</small></div><nav class="nav-links"><a href="/">Landing page</a><a class="button small" id="download-png">Download PNG</a></nav></div></header>
+<main class="shell studio-layout">
+  <aside class="studio-panel">
+    <div class="eyebrow">Publication renderer</div><h1>Export any approved slide as a 1080 × 1350 PNG.</h1>
+    <label for="post-select">Module</label><select id="post-select"></select>
+    <div class="studio-actions">
+      <button class="button" id="download-current">Download current PNG</button>
+      <button class="button secondary" id="download-svg">Download source SVG</button>
+      <button class="button secondary" id="copy-caption">Copy caption</button>
+      <button class="button secondary" id="copy-reel">Copy reel script</button>
+    </div>
+    <p id="studio-status" class="form-message" role="status"></p>
+    <p style="color:#829087;font-size:12px;line-height:1.6">The studio uses approved repository copy. PNG conversion happens in your browser; no post content is sent to a third party.</p>
+  </aside>
+  <section>
+    <div class="canvas-wrap"><img id="slide-preview" alt="Current Field Manual slide"></div>
+    <div class="slide-nav"><button id="previous">← Previous</button><strong id="slide-count">1 / 7</strong><button id="next">Next →</button></div>
+  </section>
+</main>
+<script src="/studio.js" defer></script>
+</body></html>

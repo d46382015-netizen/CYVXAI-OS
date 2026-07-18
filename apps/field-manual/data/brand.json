@@ -1,0 +1,128 @@
+{
+  "name": "CYVX FIELD MANUAL",
+  "short_name": "FIELD MANUAL",
+  "tagline": "Build. Secure. Sell. Own.",
+  "promise": "Cinematic visual playbooks that turn complex modern systems into executable action.",
+  "voice": {
+    "traits": [
+      "direct",
+      "precise",
+      "credible",
+      "ambitious",
+      "evidence-first"
+    ],
+    "rules": [
+      "Lead with a concrete outcome.",
+      "Use plain language and numbered actions.",
+      "Separate verified facts from estimates.",
+      "Never promise guaranteed income, returns, security, or legal outcomes.",
+      "End with a measurable verification step."
+    ]
+  },
+  "logo": {
+    "wordmark": "CYVX FIELD MANUAL",
+    "monogram": "CFM",
+    "clear_space": "One monogram width on all sides",
+    "minimum_width_px": 160
+  },
+  "typography": {
+    "display": "Arial Black, Inter, system-ui, sans-serif",
+    "body": "Inter, ui-sans-serif, system-ui, sans-serif",
+    "mono": "JetBrains Mono, ui-monospace, SFMono-Regular, monospace"
+  },
+  "colors": {
+    "ink": "#050706",
+    "panel": "#0C100E",
+    "paper": "#F3F6F4",
+    "muted": "#9BA7A0",
+    "line": "#243029",
+    "secure": "#7CFF3A",
+    "build": "#3B82F6",
+    "sell": "#FF8A26",
+    "operate": "#A855F7",
+    "own": "#F3C44E",
+    "capital": "#10D98B",
+    "web3": "#22D3EE"
+  },
+  "pillars": [
+    {
+      "id": "secure",
+      "name": "SECURE",
+      "color": "#7CFF3A",
+      "promise": "Protect identity, devices, networks, and operations."
+    },
+    {
+      "id": "build",
+      "name": "BUILD",
+      "color": "#3B82F6",
+      "promise": "Ship software, AI, automation, and infrastructure."
+    },
+    {
+      "id": "sell",
+      "name": "SELL",
+      "color": "#FF8A26",
+      "promise": "Create offers, acquire customers, and prove value."
+    },
+    {
+      "id": "operate",
+      "name": "OPERATE",
+      "color": "#A855F7",
+      "promise": "Turn work into repeatable systems and measurable execution."
+    },
+    {
+      "id": "own",
+      "name": "OWN",
+      "color": "#F3C44E",
+      "promise": "Build and evaluate durable business and digital assets."
+    },
+    {
+      "id": "capital",
+      "name": "CAPITAL",
+      "color": "#10D98B",
+      "promise": "Control cash flow, pricing, reserves, and funding readiness."
+    },
+    {
+      "id": "web3",
+      "name": "WEB3",
+      "color": "#22D3EE",
+      "promise": "Use blockchain systems with security and evidence."
+    }
+  ],
+  "formats": {
+    "carousel": {
+      "width": 1080,
+      "height": 1350,
+      "slides": "6–8"
+    },
+    "reel": {
+      "width": 1080,
+      "height": 1920,
+      "target_seconds": "45–75"
+    },
+    "story": {
+      "width": 1080,
+      "height": 1920
+    }
+  },
+  "content_contract": {
+    "required_fields": [
+      "title",
+      "hook",
+      "outcome",
+      "slides",
+      "caption",
+      "reel_script",
+      "cta",
+      "image_prompt"
+    ],
+    "required_slide_types": [
+      "cover",
+      "context",
+      "steps",
+      "verify",
+      "cta"
+    ],
+    "minimum_slides": 6,
+    "maximum_slides": 8
+  }
+}

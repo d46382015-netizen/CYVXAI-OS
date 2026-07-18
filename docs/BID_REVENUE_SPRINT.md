@@ -80,6 +80,8 @@ http://127.0.0.1:3020/bid-revenue-sprint
 
 The bootstrap command approves only bounded internal activation. It does not authorize external outreach, bid submission, contracts, purchases, or money movement.
 
+Bootstrap is idempotent: rerunning it returns the existing organization-scoped sprint instead of creating duplicate ventures, missions, assets, or targets. The server resumes durable operating cycles from SQLite after restart.
+
 ## Verify
 
 ```bash

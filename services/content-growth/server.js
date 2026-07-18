@@ -39,13 +39,32 @@ function createFieldManualServer(options = {}) {
   const store = options.store || createStore({ directory: config.dataDirectory });
   const allowLead = createRateLimiter({ windowMs: 60_000, max: 12 });
 
+  function readiness() {
+    return {
+      manychat_webhook: Boolean(config.manychatSecret),
+      kit_api: Boolean(config.kitApiKey),
+      kit_tags: {
+        GENERAL_OPERATOR: Boolean(config.kitTagIds.GENERAL_OPERATOR),
+        SECURITY: Boolean(config.kitTagIds.SECURITY),
+        MOBILE_BUILD: Boolean(config.kitTagIds.MOBILE_BUILD),
+      },
+      lemon_checkout: Boolean(config.checkoutUrl),
+      lemon_webhook: Boolean(config.lemonSecret),
+      admin_metrics: Boolean(config.adminToken),
+    };
+  }
+
   function absoluteDownload(asset) {
     const local = `/downloads/${encodeURIComponent(asset)}`;
     return config.publicBaseUrl ? `${config.publicBaseUrl.replace(/\/$/, "")}${local}` : local;
   }
 
   function requireAdmin(request, response) {
-    if (!config.adminToken || verifySharedSecret(request.headers["x-admin-token"], config.adminToken)) return true;
+    if (!config.adminToken) {
+      sendJson(response, 503, { ok: false, error: "Admin token is not configured" });
+      return false;
+    }
+    if (verifySharedSecret(request.headers["x-admin-token"], config.adminToken)) return true;
     sendJson(response, 401, { ok: false, error: "Unauthorized" });
     return false;
   }
@@ -108,7 +127,8 @@ function createFieldManualServer(options = {}) {
     try {
       const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
       if (request.method === "GET" && url.pathname === "/") return sendBuffer(response, 200, Buffer.from(landingHtml(config)), "text/html; charset=utf-8", { "Cache-Control": "public, max-age=300" });
-      if (request.method === "GET" && url.pathname === "/health") return sendJson(response, 200, { ok: true, service: "cyvx-field-manual", version: 1, triggers: Object.keys(TRIGGERS) });
+      if (request.method === "GET" && url.pathname === "/health") return sendJson(response, 200, { ok: true, service: "cyvx-field-manual", version: 1, triggers: Object.keys(TRIGGERS), providers: readiness() });
+      if (request.method === "GET" && url.pathname === "/api/v1/readiness") return sendJson(response, 200, { ok: true, providers: readiness() });
       if (request.method === "GET" && url.pathname === "/api/v1/config") return sendJson(response, 200, { ok: true, ...publicConfig(config) });
       if (request.method === "GET" && url.pathname === "/api/v1/posts") return sendJson(response, 200, { ok: true, posts: POSTS });
 
@@ -140,6 +160,7 @@ function createFieldManualServer(options = {}) {
       }
 
       if (request.method === "POST" && url.pathname === "/api/v1/webhooks/manychat") {
+        if (!config.manychatSecret) return sendJson(response, 503, { ok: false, error: "ManyChat webhook is not configured" });
         if (!verifySharedSecret(request.headers["x-cyvx-webhook-secret"], config.manychatSecret)) return sendJson(response, 401, { ok: false, error: "Invalid webhook secret" });
         const result = await captureLead(parseJson(await readRawBody(request)), "manychat");
         return sendJson(response, 200, { ok: true, ...result });
@@ -183,6 +204,7 @@ function createFieldManualServer(options = {}) {
     config,
     store,
     server,
+    readiness,
     start() {
       return new Promise((resolve, reject) => {
         server.once("error", reject);

@@ -4,17 +4,15 @@ on:
   push:
     branches:
       - feat/bid-revenue-sprint-operator
-    paths:
-      - .github/workflows/materialize-bid-revenue-sprint.yml
-      - .github/payloads/bid-sprint.part00
-      - .github/payloads/bid-sprint.part01
-      - .github/payloads/bid-sprint.part02
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
 
 concurrency:
-  group: materialize-bid-revenue-sprint
+  group: materialize-bid-revenue-sprint-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:

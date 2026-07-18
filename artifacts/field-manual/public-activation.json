@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "status": "skipped",
-  "public_base_url": null,
+  "status": "failed",
+  "public_base_url": "https://cyvx-staging.onrender.com/field-manual",
   "route": null,
-  "commit_sha": "0a8e252d3f56ef4410e48b0114e7374d8a2163be",
-  "workflow_run_id": "29660144700",
+  "commit_sha": "34ca75282d99cc55ee7bc47550b7ebdd87b56fd9",
+  "workflow_run_id": "29660289764",
   "workflow_run_attempt": 1,
-  "verified_at": "2026-07-18T20:45:05.805Z",
+  "verified_at": "2026-07-18T20:56:33.078Z",
   "health": null,
   "lead": null,
   "pdf_verified": false

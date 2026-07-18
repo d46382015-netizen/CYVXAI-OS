@@ -45,8 +45,9 @@ async function main() {
     if (autoTick) {
       timer = setInterval(() => {
         try {
-          const ticks = operatorRuntime.operator.runAllOnce();
-          if (ticks.length) process.stdout.write(`${JSON.stringify({ ok: true, event: "universal_operator.tick", ticks })}\n`);
+          const entityTicks = operatorRuntime.operator.runAllOnce();
+          const bidSprintTicks = operatorRuntime.bidSprint.runAllOnce();
+          if (entityTicks.length || bidSprintTicks.length) process.stdout.write(`${JSON.stringify({ ok: true, event: "universal_operator.tick", entity_ticks: entityTicks, bid_sprint_ticks: bidSprintTicks })}\n`);
         } catch (error) {
           process.stderr.write(`${JSON.stringify({ ok: false, event: "universal_operator.tick_failed", error: error.message })}\n`);
         }
@@ -57,16 +58,19 @@ async function main() {
       event: "universal_operator.started",
       operator: `http://${host}:${operatorAddress.port}/operator`,
       revenue: `http://${host}:${operatorAddress.port}/revenue`,
+      bid_revenue_sprint: `http://${host}:${operatorAddress.port}/bid-revenue-sprint`,
       mission_runtime: `http://${missionHost}:${missionAddress.port}/missions`,
       health: `http://${host}:${operatorAddress.port}/healthz`,
       entity_api: `http://${host}:${operatorAddress.port}/api/v2/operator/entities`,
       revenue_api: `http://${host}:${operatorAddress.port}/api/v3/revenue/ventures`,
+      bid_sprint_api: `http://${host}:${operatorAddress.port}/api/v4/bid-sprints`,
       legacy_company_api: `http://${host}:${operatorAddress.port}/api/v1/operator/companies`,
       auto_tick: autoTick,
       tick_interval_ms: tickIntervalMs,
       data_root: runtime.dataRoot,
       platform_state: operatorRuntime.operator.platformStatePath,
       revenue_workspace: operatorRuntime.revenue.workspaceRoot,
+      bid_sprint_workspace: operatorRuntime.bidSprint.workspaceRoot,
       providers: operatorRuntime.revenue.health().providers,
     }, null, 2)}\n`);
   } catch (error) {

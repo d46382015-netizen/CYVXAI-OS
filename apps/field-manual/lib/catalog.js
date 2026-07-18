@@ -11,7 +11,7 @@ function readJson(name) {
 
 function loadCatalog() {
   const brand = readJson("brand.json");
-  const posts = readJson("posts.json");
+  const posts = require(path.join(DATA_DIR, "posts.js"));
   return { brand, posts };
 }
 

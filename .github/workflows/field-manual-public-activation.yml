@@ -12,9 +12,7 @@ on:
         required: false
         default: https://cyvxai-os.onrender.com
 
-permissions:
-  contents: write
-  actions: write
+permissions: write-all
 
 concurrency:
   group: field-manual-public-activation

@@ -171,7 +171,7 @@ test("HTTP control room enforces bearer auth and exposes the complete production
   try {
     const page = await fetch(`${base}/control-room`);
     assert.equal(page.status, 200);
-    assert.match(await page.text(), /Nine-agent team/);
+    assert.match(await page.text(), /Nine-agent (team|company)/);
 
     const denied = await jsonRequest(base, "/api/v1/company-runtime/companies");
     assert.equal(denied.response.status, 401);

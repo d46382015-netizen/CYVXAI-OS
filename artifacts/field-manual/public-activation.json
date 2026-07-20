@@ -3,10 +3,10 @@
   "status": "failed",
   "public_base_url": "https://cyvx-staging.onrender.com/field-manual",
   "route": null,
-  "commit_sha": "77d45eaa9b390ed98d7174b786bf662d1558e715",
-  "workflow_run_id": "29711934762",
+  "commit_sha": "faa5d9c3fca43b81160d84786d62d9fcca021d78",
+  "workflow_run_id": "29715509869",
   "workflow_run_attempt": 1,
-  "verified_at": "2026-07-20T02:17:28.543Z",
+  "verified_at": "2026-07-20T04:01:27.733Z",
   "health": null,
   "lead": null,
   "pdf_verified": false

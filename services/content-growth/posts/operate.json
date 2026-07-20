@@ -1,0 +1,78 @@
+[
+  {
+    "pillar": "operate",
+    "slug": "one-person-company-os",
+    "title": "Build a One-Person Company OS",
+    "hook": "You do not need more hustle. You need fewer dropped decisions.",
+    "outcome": "A simple operating system connecting leads, work, cash, evidence, and learning.",
+    "difficulty": "Intermediate",
+    "time": "2–4 hr",
+    "cost": "$0",
+    "steps": [
+      "Create one source of truth for customers, offers, work, invoices, evidence, and next actions.",
+      "Define a weekly operating rhythm: sell, deliver, collect, support, review, improve.",
+      "Automate capture and reminders, not judgment-heavy decisions you have not standardized.",
+      "Use approval gates for messages, contracts, payments, purchases, and destructive actions.",
+      "Review the current constraint and one measurable next action every day."
+    ],
+    "cta": "Follow for the complete one-person operator stack.",
+    "disclaimer": "Automation should preserve accountability, security, consent, and recoverability."
+  },
+  {
+    "pillar": "operate",
+    "slug": "write-sop-in-20-minutes",
+    "title": "Write an SOP in 20 Minutes",
+    "hook": "A useful SOP is a tested path to an accepted outcome, not a wall of text.",
+    "outcome": "A reusable procedure with inputs, actions, checks, and recovery.",
+    "difficulty": "Beginner",
+    "time": "20 min",
+    "cost": "$0",
+    "steps": [
+      "Name the outcome, owner, trigger, inputs, tools, and definition of done.",
+      "Record the real process once while doing it. Capture decisions and failure points.",
+      "Rewrite it as numbered actions with one action per step.",
+      "Add validation after risky steps plus rollback or escalation instructions.",
+      "Have another person—or future you—run it and update unclear sections."
+    ],
+    "cta": "Comment SOP for the one-page template.",
+    "disclaimer": "Keep credentials and sensitive customer data out of general documentation."
+  },
+  {
+    "pillar": "operate",
+    "slug": "north-star-dashboard",
+    "title": "Build a Dashboard That Drives Action",
+    "hook": "Reporting everything can hide the one thing blocking growth.",
+    "outcome": "A weekly scorecard built around outcome, constraint, action, and learning.",
+    "difficulty": "Beginner",
+    "time": "45 min",
+    "cost": "$0",
+    "steps": [
+      "Choose one outcome metric that reflects real customer or business value.",
+      "Add three to five driver metrics you can influence this week.",
+      "Show target, actual, trend, source, owner, and data freshness.",
+      "Name the current constraint and the action expected to change it.",
+      "Record what happened, why, and what the next cycle will change."
+    ],
+    "cta": "Save this before building another vanity dashboard.",
+    "disclaimer": "Metrics can mislead when definitions or sources change. Keep a data dictionary."
+  },
+  {
+    "pillar": "operate",
+    "slug": "automate-weekly-review",
+    "title": "Automate Your Weekly Business Review",
+    "hook": "The review should arrive with evidence before motivation has a chance to disappear.",
+    "outcome": "A scheduled operating report with anomalies, decisions, and next actions.",
+    "difficulty": "Intermediate",
+    "time": "60–120 min",
+    "cost": "$0–$20/mo",
+    "steps": [
+      "Pull posted revenue, expenses, leads, deliveries, support issues, and key product usage from approved sources.",
+      "Calculate consistent metrics and flag missing or stale data instead of filling gaps.",
+      "Summarize wins, misses, anomalies, unresolved risks, and the largest constraint.",
+      "Generate proposed actions with owners and due dates, but require approval before external side effects.",
+      "Store each report so trends and decisions can be audited later."
+    ],
+    "cta": "Comment REVIEW for the report schema.",
+    "disclaimer": "Financial totals should state their coverage window and source limitations."
+  }
+]

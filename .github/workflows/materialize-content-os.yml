@@ -17,8 +17,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: materialize-content-os
-  cancel-in-progress: false
+  group: materialize-content-os-${{ github.event_name }}
+  cancel-in-progress: true
 
 jobs:
   materialize:
@@ -39,26 +39,38 @@ jobs:
           cache: npm
 
       - name: Install FFmpeg
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-      - name: Materialize and verify production slice
+      - name: Reconstruct checksum-verified payload
         shell: bash
         run: |
           set -Eeuo pipefail
+          wc -c .content-os-payload/part-*
           cat .content-os-payload/part-* | base64 --decode > /tmp/content-os.tgz
+          sha256sum /tmp/content-os.tgz
           echo '6980efac704748916dcf34d843e726f9b953f36d844f79e5f56a59a1d9c4b557  /tmp/content-os.tgz' | sha256sum -c -
-          tar -xzf /tmp/content-os.tgz
 
-          npm ci --no-audit --no-fund
+      - name: Extract production source
+        run: tar -xzf /tmp/content-os.tgz
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Validate source syntax
+        shell: bash
+        run: |
+          set -Eeuo pipefail
           node --check services/content-os/index.js
           node --check services/content-os/server.js
           node --check services/content-os/worker.js
           node --check scripts/verify-content-os.js
           bash -n scripts/content-os.sh
-          npm run content:test
-          npm run content:verify
+
+      - name: Run Content OS unit and state tests
+        run: npm run content:test
+
+      - name: Run real FFmpeg topic-to-measure proof
+        run: npm run content:verify
 
       - name: Replace transfer payload with verified source
         shell: bash

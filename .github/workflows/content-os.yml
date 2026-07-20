@@ -21,8 +21,7 @@ on:
       - 'package.json'
       - '.github/workflows/content-os.yml'
 
-permissions:
-  contents: read
+permissions: write-all
 
 concurrency:
   group: content-os-${{ github.ref }}

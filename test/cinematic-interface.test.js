@@ -10,7 +10,7 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const publicHtml = read("ui/public.html");
 const controlHtml = read("ui/index.html");
 const publicJs = read("ui/experience.js");
-const controlJs = read("ui/control.js");
+const controlJs = ["ui/control.js", "ui/control-core.js", "ui/control-mission-read.js", "ui/control-mission-execute.js", "ui/control-bootstrap.js"].map(read).join("\n");
 const publicExperience = read("api/public-experience.js");
 const runtimeEntrypoint = read("api/runtime-cinematic.js");
 

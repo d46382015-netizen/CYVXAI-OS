@@ -3,7 +3,7 @@
 const base = require("./catalog");
 const { PUBLICATION_COLORS, PUBLICATION_POSTS, validatePublicationPosts } = require("./publication-catalog");
 
-const COLORS = Object.freeze({ ...base.COLORS, ...PUBLICATION_COLORS });
+const COLORS = Object.freeze({ ...PUBLICATION_COLORS, ...base.COLORS });
 const POSTS = Object.freeze([...base.POSTS, ...PUBLICATION_POSTS]);
 
 function validateExpandedCatalog() {

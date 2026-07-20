@@ -1,0 +1,40 @@
+[
+  {
+    "pillar": "build",
+    "slug": "production-node-api",
+    "title": "Build a Production Node API Without a Framework",
+    "hook": "Frameworks help. Fundamentals keep the system alive when dependencies fail.",
+    "outcome": "A small authenticated JSON API with storage, validation, logs, and tests.",
+    "difficulty": "Intermediate",
+    "time": "2–3 hr",
+    "cost": "$0",
+    "steps": [
+      "Define the resource model, identifiers, error contract, and authorization boundary before writing routes.",
+      "Use Node's HTTP server, URL parser, and crypto modules. Limit body size and accept only expected content types.",
+      "Validate every field, normalize inputs, and use atomic file writes or a transactional database.",
+      "Return structured errors, correlation IDs, safe logs, health checks, and graceful shutdown.",
+      "Test valid requests, invalid input, unauthorized access, persistence, concurrency, and restart behavior."
+    ],
+    "cta": "Save this as your backend checklist.",
+    "disclaimer": "For public production workloads, add TLS at the edge, monitoring, backups, patching, and a reviewed authentication design."
+  },
+  {
+    "pillar": "build",
+    "slug": "mobile-first-command-dashboard",
+    "title": "Ship a Mobile-First Command Dashboard",
+    "hook": "A dashboard is not decoration. It is a decision surface.",
+    "outcome": "A responsive control panel that shows constraint, action, outcome, and evidence.",
+    "difficulty": "Intermediate",
+    "time": "2–5 hr",
+    "cost": "$0",
+    "steps": [
+      "Start with the decisions users must make, not the charts you want to draw.",
+      "Show current mission, primary constraint, next best action, target, actual, and evidence status above the fold.",
+      "Create touch-friendly actions with confirmation for irreversible operations.",
+      "Load real API data, handle empty and error states, and never fabricate metrics.",
+      "Track action completion, time-to-decision, errors, and outcome improvement."
+    ],
+    "cta": "Comment DASHBOARD for the interface contract.",
+    "disclaimer": "Operational dashboards should preserve authorization, auditability, and source-of-truth links."
+  }
+]

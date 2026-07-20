@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050608">
+  <meta name="description" content="CYVXAI-OS turns reality into governed missions, measured outcomes, reusable capabilities, and compounding growth.">
+  <title>CYVXAI-OS — Reality Into Outcomes</title>
+  <link rel="stylesheet" href="/experience.css?v=1">
+</head>
+<body>
+  <canvas id="realityField" aria-hidden="true"></canvas>
+  <div class="noise" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="wordmark" href="/" aria-label="CYVX home">
+      <span class="mark">C</span>
+      <span>CYVXAI-OS</span>
+    </a>
+    <nav aria-label="Primary navigation">
+      <button class="nav-link" data-action="proof">Proof</button>
+      <button class="nav-link" data-action="live-status">Live system</button>
+      <a class="nav-link" href="/field-manual">Field Manual</a>
+    </nav>
+    <a class="header-cta" href="/control">Enter control room <span>↗</span></a>
+  </header>
+
+  <main>
+    <section class="hero" id="top">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="live-dot"></span> Autonomous company operating system</p>
+        <h1><span>Reality</span><br>becomes<br><em>outcome.</em></h1>
+        <p class="lede">CYVX senses what is true, ranks leverage, governs execution, records proof, learns reusable capabilities, and starts the next growth cycle.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="/control">Operate CYVX <span>→</span></a>
+          <button class="button button-ghost" data-action="live-status">Read the live runtime</button>
+        </div>
+        <div class="micro-proof" aria-label="Runtime proof">
+          <span><b id="heroVersion">—</b> runtime</span>
+          <span><b id="heroServices">—</b> services</span>
+          <span><b id="heroCapabilities">—</b> capabilities</span>
+        </div>
+      </div>
+
+      <div class="hero-system" aria-label="CYVX operating layers">
+        <div class="system-halo halo-one"></div>
+        <div class="system-halo halo-two"></div>
+        <div class="system-core" data-tilt>
+          <div class="core-orbit orbit-a"><i></i></div>
+          <div class="core-orbit orbit-b"><i></i></div>
+          <div class="core-orbit orbit-c"><i></i></div>
+          <div class="core-label">
+            <small>CYVX CORE</small>
+            <strong>Ω</strong>
+            <span id="coreState">SYNCING</span>
+          </div>
+        </div>
+        <article class="floating-card card-reality" data-tilt>
+          <span>01 · REALITY</span>
+          <b>Truth model online</b>
+          <small id="realityState">Reading runtime…</small>
+        </article>
+        <article class="floating-card card-mission" data-tilt>
+          <span>02 · MISSION</span>
+          <b>Governed execution</b>
+          <small id="missionState">Reading worker…</small>
+        </article>
+        <article class="floating-card card-proof" data-tilt>
+          <span>03 · PROOF</span>
+          <b>Evidence ledger</b>
+          <small id="proofState">Awaiting telemetry…</small>
+        </article>
+      </div>
+    </section>
+
+    <section class="runtime-ribbon" aria-label="Live runtime status">
+      <div><span>Public gateway</span><b id="gatewayMetric">CHECKING</b></div>
+      <div><span>Mission worker</span><b id="workerMetric">CHECKING</b></div>
+      <div><span>Universal operator</span><b id="operatorMetric">CHECKING</b></div>
+      <div><span>Revenue database</span><b id="revenueMetric">CHECKING</b></div>
+      <button data-action="live-status">Inspect system <span>↗</span></button>
+    </section>
+
+    <section class="manifesto reveal">
+      <p class="section-index">01 / OPERATING LOOP</p>
+      <div>
+        <h2>Not another dashboard.<br><em>A company that moves.</em></h2>
+        <p>Every layer is connected to production runtime behavior. Signals become decisions. Decisions become approved work. Work becomes evidence. Evidence becomes learning. Learning becomes the next mission.</p>
+      </div>
+    </section>
+
+    <section class="loop reveal" id="proof">
+      <article><span>R</span><small>Reality</small><b>Observe what is true</b></article>
+      <i>→</i>
+      <article><span>M</span><small>Mission</small><b>Choose measurable leverage</b></article>
+      <i>→</i>
+      <article><span>X</span><small>Execute</small><b>Run governed work</b></article>
+      <i>→</i>
+      <article><span>O</span><small>Outcome</small><b>Record proof</b></article>
+      <i>→</i>
+      <article><span>G</span><small>Growth</small><b>Generate the next cycle</b></article>
+    </section>
+
+    <section class="interface-section reveal">
+      <div class="interface-copy">
+        <p class="section-index">02 / CONTROL ROOM</p>
+        <h2>See the company think.<br>Then make it act.</h2>
+        <p>The control room reads real service health, mission state, jobs, evidence, audits, and outcomes. Create a mission, approve it, run it to idle, verify proof, and export the record from one mobile-first surface.</p>
+        <div class="stacked-actions">
+          <a class="button button-primary" href="/control#new">Create a real mission <span>→</span></a>
+          <a class="button button-ghost" href="/missions">Open durable mission runtime</a>
+        </div>
+      </div>
+      <div class="interface-window" data-tilt>
+        <div class="window-bar"><span></span><span></span><span></span><b>CYVX / CONTROL</b><small id="windowClock">LIVE</small></div>
+        <div class="window-body">
+          <aside>
+            <strong>CYVX</strong>
+            <span class="active">Overview</span><span>Missions</span><span>Evidence</span><span>Agents</span>
+          </aside>
+          <div class="window-main">
+            <div class="window-top"><small>MISSION VELOCITY</small><b id="previewVelocity">—</b></div>
+            <div class="window-grid">
+              <article class="preview-core"><span>REALITY CORE</span><b>Ω</b><small id="previewReady">SYNCHRONIZING</small></article>
+              <article><span>ACTIVE MISSIONS</span><b id="previewMissions">—</b><small>durable state</small></article>
+              <article><span>CAPABILITIES</span><b id="previewCapabilities">—</b><small>production actions</small></article>
+              <article class="wide"><span>NEXT BEST ACTION</span><b>Run the highest-leverage measured mission.</b><div class="pulse-line"></div></article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="proof-section reveal">
+      <div class="proof-heading">
+        <p class="section-index">03 / PRODUCTION PROOF</p>
+        <h2>Beautiful enough to stop attention.<br><em>Real enough to survive it.</em></h2>
+      </div>
+      <div class="proof-grid" id="capabilityGrid">
+        <article><span>API</span><b>Loading live capabilities</b><small>The public runtime is being queried now.</small></article>
+      </div>
+    </section>
+
+    <section class="worlds-section reveal">
+      <div>
+        <p class="section-index">04 / OPERATING ASSETS</p>
+        <h2>Worlds created by the system.</h2>
+      </div>
+      <div class="world-grid" id="worldGrid"><p>No public worlds loaded yet.</p></div>
+      <a class="button button-ghost" href="/spark">Open Spark world factory</a>
+    </section>
+
+    <section class="final-cta reveal">
+      <p>THE NEXT COMPANY DOES NOT WAIT FOR A DASHBOARD.</p>
+      <h2>It senses.<br>It decides.<br><em>It compounds.</em></h2>
+      <div>
+        <a class="button button-primary" href="/control">Enter CYVX control room <span>→</span></a>
+        <a class="button button-ghost" href="/operator">Open universal operator</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>CYVXAI-OS © 2026 Dakota Lee Jonsgaard</span>
+    <span>Reality → Mission → Outcome → Learning → Growth</span>
+  </footer>
+
+  <dialog id="statusDialog">
+    <form method="dialog" class="dialog-shell">
+      <button class="dialog-close" aria-label="Close">×</button>
+      <p class="section-index">LIVE PRODUCTION RUNTIME</p>
+      <h2 id="dialogTitle">Reading CYVX…</h2>
+      <div id="statusDetails" class="status-details"></div>
+      <div class="dialog-actions">
+        <a class="button button-primary" href="/control">Open control room</a>
+        <button class="button button-ghost" value="cancel">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/experience.js?v=1" defer></script>
+</body>
+</html>

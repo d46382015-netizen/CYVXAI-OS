@@ -3,9 +3,9 @@ name: Deploy CYVX v7
 on:
   push:
     branches: [main]
-    paths: ["api/**", "core/ops/**", "core/production/**", "services/content-growth/**", "spark/**", "ui/**", "scripts/**", "test/field-manual*.test.js", "config/field-manual.example.env", "package*.json", "render.yaml", ".github/workflows/deploy-v7.yml"]
+    paths: ["api/**", "core/ops/**", "core/production/**", "services/company-runtime/**", "services/content-growth/**", "spark/**", "ui/**", "scripts/**", "test/company-experience.test.js", "test/canonical-company-gateway.test.js", "test/field-manual*.test.js", "config/field-manual.example.env", "package*.json", "render.yaml", ".github/workflows/deploy-v7.yml"]
   pull_request:
-    paths: ["api/**", "core/ops/**", "core/production/**", "services/content-growth/**", "spark/**", "ui/**", "scripts/**", "test/field-manual*.test.js", "config/field-manual.example.env", "package*.json", "render.yaml", ".github/workflows/deploy-v7.yml"]
+    paths: ["api/**", "core/ops/**", "core/production/**", "services/company-runtime/**", "services/content-growth/**", "spark/**", "ui/**", "scripts/**", "test/company-experience.test.js", "test/canonical-company-gateway.test.js", "test/field-manual*.test.js", "config/field-manual.example.env", "package*.json", "render.yaml", ".github/workflows/deploy-v7.yml"]
   workflow_dispatch:
 
 permissions: write-all
@@ -25,14 +25,16 @@ jobs:
           cache: npm
       - run: npm ci --no-audit --no-fund
       - run: npm run verify
-      - name: Prove public runtime
+      - name: Prove canonical public runtime
         env:
           PORT: "3200"
           CYVX_CONTROL_PORT: "3204"
           CYVX_DATA_ROOT: /tmp/cyvx-deploy-ci
           CYVX_REQUIRE_GITHUB_APP: "false"
           CYVX_AUTONOMY_INTERVAL_MS: "500"
+          CYVX_COMPANY_RUNTIME_AUTO_TICK: "false"
         run: |
+          set -Eeuo pipefail
           node api/runtime-v7.js > /tmp/cyvx-deploy.log 2>&1 &
           PID=$!
           trap 'kill $PID 2>/dev/null || true' EXIT
@@ -40,7 +42,9 @@ jobs:
             if curl -fsS http://127.0.0.1:3200/readyz >/dev/null && curl -fsS http://127.0.0.1:3204/readyz >/dev/null; then break; fi
             sleep 1
           done
-          curl -fsS http://127.0.0.1:3200/ | grep 'What do you want to make real?'
+          curl -fsS http://127.0.0.1:3200/ | grep 'Reality becomes'
+          curl -fsS http://127.0.0.1:3200/control-room | grep 'Autonomous Company Control Room'
+          curl -fsS http://127.0.0.1:3200/api/v1/company-runtime/public/status | grep 'cyvx-autonomous-company-runtime'
           curl -fsS http://127.0.0.1:3200/api/public/status
           curl -fsS http://127.0.0.1:3200/field-manual/health | grep 'cyvx-field-manual'
           curl -fsS http://127.0.0.1:3204/api/control-plane

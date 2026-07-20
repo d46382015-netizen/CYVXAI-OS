@@ -17,7 +17,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: materialize-content-os-${{ github.event_name }}
+  group: materialize-content-os
   cancel-in-progress: true
 
 jobs:
@@ -90,9 +90,8 @@ jobs:
         run: |
           set -Eeuo pipefail
           rm -rf .content-os-payload
-          rm -f .github/workflows/materialize-content-os.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
-          git commit -m 'Build Content OS topic-to-measure production slice'
+          git commit -m 'Build Content OS topic-to-measure production slice [skip ci]'
           git push origin HEAD:feature/content-os-production-slice

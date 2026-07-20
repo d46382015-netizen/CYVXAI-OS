@@ -1,0 +1,59 @@
+[
+  {
+    "pillar": "build",
+    "slug": "deploy-website-from-android",
+    "title": "Deploy a Website From Your Android Phone",
+    "hook": "A laptop is useful. It is not permission to start.",
+    "outcome": "A live, version-controlled website built from Termux or UserLAnd.",
+    "difficulty": "Beginner",
+    "time": "45–90 min",
+    "cost": "$0",
+    "steps": [
+      "Install Git and Node.js in Termux or UserLAnd. Create a project folder and initialize a repository.",
+      "Build a mobile-first static site with semantic HTML, responsive CSS, and a tested contact action.",
+      "Run a local server and inspect it in your phone browser. Test small-screen layout, links, forms, and loading speed.",
+      "Push the repository to GitHub using a token or SSH key stored securely.",
+      "Connect the repo to a static host, set the production domain, and verify HTTPS plus analytics."
+    ],
+    "cta": "Comment MOBILE for the one-command starter.",
+    "disclaimer": "Hosting and Git provider steps vary. Never commit access tokens, private keys, or customer data."
+  },
+  {
+    "pillar": "build",
+    "slug": "private-ai-assistant",
+    "title": "Build a Private AI Assistant",
+    "hook": "The valuable part is not the chatbot. It is the workflow, memory, and evidence around it.",
+    "outcome": "A local-first assistant that searches approved knowledge and logs its work.",
+    "difficulty": "Intermediate",
+    "time": "2–4 hr",
+    "cost": "$0+",
+    "steps": [
+      "Define one measurable mission, approved data sources, forbidden actions, and success criteria.",
+      "Run a local model or approved hosted model behind a small API. Keep provider keys server-side.",
+      "Index only authorized documents and return citations with every knowledge-grounded answer.",
+      "Add durable conversation state, audit logs, rate limits, input validation, and an explicit approval gate for side effects.",
+      "Test hallucination, prompt injection, data leakage, recovery after restart, and task completion accuracy."
+    ],
+    "cta": "Follow for the full local-first operator build.",
+    "disclaimer": "Model output can be wrong. Require verification and human approval for consequential actions."
+  },
+  {
+    "pillar": "build",
+    "slug": "five-minute-lead-automation",
+    "title": "Build a Five-Minute Lead Response System",
+    "hook": "The first useful response often wins before the best company even sees the lead.",
+    "outcome": "An automated intake, qualification, acknowledgement, and owner-alert workflow.",
+    "difficulty": "Intermediate",
+    "time": "90 min",
+    "cost": "$0–$20/mo",
+    "steps": [
+      "Create one intake form with name, contact method, service, location, urgency, budget range, and consent.",
+      "Validate and store submissions in a durable database with source, timestamp, and unique lead ID.",
+      "Send an immediate confirmation that states the next step without pretending a human reviewed it.",
+      "Score fit using explicit rules, then alert the owner with the lead facts and recommended action.",
+      "Measure response time, contact rate, appointment rate, close rate, and revenue by source."
+    ],
+    "cta": "Comment LEADS for the response workflow.",
+    "disclaimer": "Follow messaging consent rules and provider policies. Automation should not misrepresent itself as a human."
+  }
+]

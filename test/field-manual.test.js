@@ -8,6 +8,8 @@ const path = require("node:path");
 const test = require("node:test");
 const {
   POSTS,
+  PUBLICATION_POSTS,
+  EXPANDED_CATALOG_PROOF,
   TRIGGERS,
   createStore,
   validateEmail,
@@ -25,11 +27,39 @@ function tempDirectory() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "cyvx-field-manual-"));
 }
 
-test("catalog defines three launch posts with eight production slides", () => {
-  assert.equal(POSTS.length, 3);
-  assert.deepEqual(POSTS.map((post) => post.id), ["POST_001", "POST_002", "POST_003"]);
-  assert.ok(POSTS.every((post) => post.slides.length === 8));
+test("catalog defines 33 connected posts and 234 production slides", () => {
+  assert.equal(POSTS.length, 33);
+  assert.equal(PUBLICATION_POSTS.length, 30);
+  assert.deepEqual(POSTS.slice(0, 3).map((post) => post.id), ["POST_001", "POST_002", "POST_003"]);
+  assert.equal(POSTS.at(-1).id, "POST_033");
+  assert.ok(POSTS.slice(0, 3).every((post) => post.slides.length === 8));
+  assert.ok(PUBLICATION_POSTS.every((post) => post.slides.length === 7));
+  assert.equal(POSTS.reduce((total, post) => total + post.slides.length, 0), 234);
   assert.equal(Object.keys(TRIGGERS).length, 3);
+  assert.deepEqual(EXPANDED_CATALOG_PROOF, {
+    posts: 33,
+    slides: 234,
+    categories: ["BUILD", "CAPITAL", "OPERATE", "OWN", "SECURE", "SELL", "WEB3"],
+  });
+});
+
+test("publication modules preserve source provenance and complete publication packages", () => {
+  const ids = new Set();
+  const slugs = new Set();
+  for (const post of PUBLICATION_POSTS) {
+    assert.match(post.id, /^POST_\d{3}$/);
+    assert.match(post.source_id, /^CFM_\d{3}$/);
+    assert.match(post.source_sha256, /^[a-f0-9]{64}$/);
+    assert.equal(ids.has(post.id), false);
+    assert.equal(slugs.has(post.slug), false);
+    assert.equal(post.status, "approved");
+    assert.equal(post.channels.length, 6);
+    assert.match(post.caption, /Verification matters/);
+    assert.match(post.reel_script, /^HOOK:/);
+    assert.equal(post.publication.primary_metric, "saves_per_impression");
+    ids.add(post.id);
+    slugs.add(post.slug);
+  }
 });
 
 test("validation and trigger routing reject malformed input", () => {
@@ -39,20 +69,27 @@ test("validation and trigger routing reject malformed input", () => {
   assert.equal(resolveTrigger("unknown"), null);
 });
 
-test("carousel renderer produces exact vertical SVG assets", () => {
-  const svg = renderSlideSvg(POSTS[1], POSTS[1].slides[0], 0);
-  assert.match(svg, /width="1080" height="1350"/);
-  assert.match(svg, /#00FF66/);
-  assert.match(svg, /SECURE \/ 015/);
+test("carousel renderer produces exact vertical SVG assets across all pillars", () => {
+  const secureSvg = renderSlideSvg(POSTS[1], POSTS[1].slides[0], 0);
+  assert.match(secureSvg, /width="1080" height="1350"/);
+  assert.match(secureSvg, /#00FF66/);
+  assert.match(secureSvg, /SECURE \/ 015/);
+  const sellPost = POSTS.find((post) => post.category === "SELL");
+  const sellSvg = renderSlideSvg(sellPost, sellPost.slides[0], 0);
+  assert.match(sellSvg, /#FF8A26/);
+  assert.match(sellSvg, /CYVX FIELD MANUAL/);
 });
 
-test("asset build creates 24 slides, two PDFs, and one ZIP", () => {
+test("asset build creates 234 slides, two PDFs, and one ZIP", () => {
   const output = tempDirectory();
   const manifest = renderAllAssets(output);
-  assert.equal(manifest.files.length, 27);
+  assert.equal(manifest.posts.length, 33);
+  assert.equal(manifest.posts.reduce((total, post) => total + post.slides, 0), 234);
+  assert.equal(manifest.files.length, 237);
   assert.equal(fs.readFileSync(path.join(output, "downloads", "CYVX_Operator_Readiness_Assessment.pdf")).subarray(0, 4).toString("utf8"), "%PDF");
   const zip = fs.readFileSync(path.join(output, "downloads", "Mobile_Website_Starter_Files.zip"));
   assert.equal(zip.readUInt32LE(0), 0x04034b50);
+  for (const relative of manifest.files) assert.equal(fs.existsSync(path.join(output, relative)), true, relative);
 });
 
 test("durable store deduplicates leads and calculates operating telemetry", () => {
@@ -106,11 +143,20 @@ test("Kit v4 provider upserts subscriber and applies mapped interest tag", async
   assert.equal(calls[0].options.headers["X-Kit-Api-Key"], "kit-key");
 });
 
-test("HTTP runtime captures a lead and serves its real download", async (t) => {
+test("HTTP runtime exposes 33 posts, serves publication slides, captures a lead, and serves its download", async (t) => {
   const runtime = createFieldManualServer({ port: 0, dataDirectory: tempDirectory(), manychatSecret: "mc-secret", logger: { error() {} } });
   const address = await runtime.start();
   t.after(() => runtime.close());
   const base = `http://127.0.0.1:${address.port}`;
+
+  const postsResponse = await fetch(`${base}/api/v1/posts`);
+  assert.equal(postsResponse.status, 200);
+  const postsBody = await postsResponse.json();
+  assert.equal(postsBody.posts.length, 33);
+  const publicationSlide = await fetch(`${base}/api/v1/posts/POST_004/slides/1.svg`);
+  assert.equal(publicationSlide.status, 200);
+  assert.match(await publicationSlide.text(), /width="1080" height="1350"/);
+
   const response = await fetch(`${base}/api/v1/webhooks/manychat`, {
     method: "POST",
     headers: { "content-type": "application/json", "x-cyvx-webhook-secret": "mc-secret" },

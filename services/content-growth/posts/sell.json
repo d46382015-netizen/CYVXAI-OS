@@ -1,0 +1,97 @@
+[
+  {
+    "pillar": "sell",
+    "slug": "turn-skill-into-1000-offer",
+    "title": "Turn One Skill Into a $1,000 Offer",
+    "hook": "Customers do not buy your skill. They buy a lower-risk outcome.",
+    "outcome": "A fixed-scope offer with a measurable result, deadline, proof, and price.",
+    "difficulty": "Beginner",
+    "time": "45 min",
+    "cost": "$0",
+    "steps": [
+      "Choose one buyer with an expensive, urgent, observable problem.",
+      "Define the before state, promised deliverable, acceptance criteria, timeline, exclusions, and customer responsibilities.",
+      "Package the work as a named sprint instead of open-ended hourly labor.",
+      "Price from value, delivery cost, risk, and required margin. Do not copy a competitor's price blindly.",
+      "Create one proof asset and one simple call to action that lets a qualified buyer start."
+    ],
+    "cta": "Comment OFFER for the offer worksheet.",
+    "disclaimer": "Revenue is not guaranteed. Validate demand and use written scope, payment, refund, and acceptance terms."
+  },
+  {
+    "pillar": "sell",
+    "slug": "respond-to-leads-in-five-minutes",
+    "title": "Win the Five-Minute Window",
+    "hook": "A lead goes cold while businesses debate who should reply.",
+    "outcome": "A response playbook that acknowledges, qualifies, and schedules fast.",
+    "difficulty": "Beginner",
+    "time": "30 min",
+    "cost": "$0",
+    "steps": [
+      "Route every inbound source into one inbox or CRM.",
+      "Send an immediate acknowledgement with the exact next step and expected response time.",
+      "Ask only the minimum qualifying questions needed to decide fit.",
+      "Use two scheduling options or a booking link, then assign one accountable owner.",
+      "Track median response time, qualified conversations, appointments, proposals, and collected revenue."
+    ],
+    "cta": "Save this and measure your response time today.",
+    "disclaimer": "Respect consent, quiet hours, and channel rules. Automated messages must be truthful."
+  },
+  {
+    "pillar": "sell",
+    "slug": "build-simple-sales-pipeline",
+    "title": "Build a Sales Pipeline You Can Actually Trust",
+    "hook": "A giant lead count means nothing when nobody knows the next action.",
+    "outcome": "A stage-based pipeline with evidence and exit criteria.",
+    "difficulty": "Beginner",
+    "time": "60 min",
+    "cost": "$0",
+    "steps": [
+      "Use stages that represent buyer progress: new, qualified, discovery, proposal, decision, won, lost.",
+      "Define required evidence to enter and leave each stage. A sent message is not qualification.",
+      "Store value, probability, next action, owner, due date, source, and loss reason.",
+      "Review stalled deals weekly and close dead opportunities instead of hiding them.",
+      "Forecast from verified stage history and collected revenue, not optimism."
+    ],
+    "cta": "Comment PIPELINE for the schema.",
+    "disclaimer": "Forecasts are estimates. Separate booked, invoiced, and collected revenue."
+  },
+  {
+    "pillar": "sell",
+    "slug": "create-proof-asset",
+    "title": "Create Proof Before You Have Case Studies",
+    "hook": "You can prove competence without inventing customers or results.",
+    "outcome": "A transparent proof asset based on a real audit, teardown, benchmark, or internal build.",
+    "difficulty": "Beginner",
+    "time": "60–120 min",
+    "cost": "$0",
+    "steps": [
+      "Choose a problem your target buyer recognizes immediately.",
+      "Create a real before-and-after demonstration using your own system, public data, or permissioned material.",
+      "Show method, assumptions, limitations, timestamps, and measurable output.",
+      "Package the evidence into a one-page case file, short video, and reusable sales section.",
+      "Ask prospects whether the proof matches a problem they are actively trying to solve."
+    ],
+    "cta": "Share this with someone waiting for permission to start.",
+    "disclaimer": "Never fabricate clients, testimonials, savings, revenue, security results, or endorsements."
+  },
+  {
+    "pillar": "sell",
+    "slug": "convert-project-to-retainer",
+    "title": "Convert a Finished Project Into Recurring Revenue",
+    "hook": "The best time to propose continuity is after the initial outcome is visible.",
+    "outcome": "A recurring agreement tied to monitoring, maintenance, optimization, or response.",
+    "difficulty": "Intermediate",
+    "time": "45 min",
+    "cost": "$0",
+    "steps": [
+      "Complete the initial scope and document accepted outcomes first.",
+      "Identify what can degrade, recur, expand, or require ongoing attention.",
+      "Define a monthly service with specific cadence, deliverables, response times, boundaries, and reporting.",
+      "Price for capacity, tool cost, risk, and margin; do not hide mandatory work inside a vague subscription.",
+      "Present the recurring option with evidence from the completed project and a clear start date."
+    ],
+    "cta": "Comment RETAINER for the recurring-offer canvas.",
+    "disclaimer": "Use a written agreement and make cancellation, renewal, data handling, and service limits clear."
+  }
+]

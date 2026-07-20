@@ -2,7 +2,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { COLORS, POSTS, TRIGGERS } = require("./catalog");
+const { COLORS, POSTS, TRIGGERS } = require("./catalog-expanded");
 const { ensureDirectory } = require("./store");
 const { buildDownloadAsset } = require("./downloads");
 

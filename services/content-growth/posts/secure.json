@@ -1,0 +1,97 @@
+[
+  {
+    "pillar": "secure",
+    "slug": "build-private-wireguard-vpn",
+    "title": "Build Your Own Private VPN",
+    "hook": "Stop renting privacy. Route your devices through infrastructure you control.",
+    "outcome": "A private WireGuard tunnel for your phone and laptop.",
+    "difficulty": "Beginner",
+    "time": "20–35 min",
+    "cost": "$0–$6/mo",
+    "steps": [
+      "Create a small Ubuntu or Debian server from a reputable cloud provider. Record its public IP and enable automatic security updates.",
+      "Install WireGuard from the operating system package manager. Generate server and client keys locally; never paste private keys into a public chat.",
+      "Allow the WireGuard UDP port and SSH only from trusted sources. Enable IP forwarding and NAT so tunnel traffic can reach the internet.",
+      "Create one client profile per device. Import the profile into the official WireGuard app using a file or locally displayed QR code.",
+      "Connect, confirm your public IP changed, test DNS, and verify you can still reach required services. Revoke lost devices immediately."
+    ],
+    "cta": "Comment VPN for the deployment checklist.",
+    "disclaimer": "Educational infrastructure guidance. Provider interfaces and firewall commands vary. Keep a recovery console available before changing network rules."
+  },
+  {
+    "pillar": "secure",
+    "slug": "lock-down-android-15-minutes",
+    "title": "Lock Down Android in 15 Minutes",
+    "hook": "Your phone is the key to your money, identity, and business. Treat it like production infrastructure.",
+    "outcome": "A hardened Android baseline without rooting the device.",
+    "difficulty": "Beginner",
+    "time": "15 min",
+    "cost": "$0",
+    "steps": [
+      "Install system and Play system updates, then remove apps you no longer use.",
+      "Use a long PIN or password, disable lock-screen notification content, and shorten automatic lock time.",
+      "Turn on Find My Device, device encryption, SIM PIN, and carrier account PIN or port-out protection.",
+      "Review permission manager: location, microphone, camera, contacts, files, accessibility, notification access, and device admin.",
+      "Move important accounts to passkeys or an authenticator app and save recovery codes offline."
+    ],
+    "cta": "Save this and run the checklist tonight.",
+    "disclaimer": "Menu names vary by Android version and manufacturer. Do not remove accessibility or device-admin access from tools you intentionally rely on."
+  },
+  {
+    "pillar": "secure",
+    "slug": "replace-password-chaos",
+    "title": "Replace Password Chaos With Passkeys",
+    "hook": "One reused password can collapse your entire digital life.",
+    "outcome": "Unique credentials, passkeys, and recoverable multi-factor authentication.",
+    "difficulty": "Beginner",
+    "time": "25 min",
+    "cost": "$0–$4/mo",
+    "steps": [
+      "Choose a reputable password manager with encrypted sync and a documented recovery process.",
+      "Create one strong master password that is not reused anywhere else. Store the emergency recovery kit offline.",
+      "Change email, banking, cloud, social, and domain accounts first. Use generated unique passwords or passkeys.",
+      "Prefer authenticator apps or hardware security keys over SMS when the service supports them.",
+      "Audit breaches and old accounts quarterly. Delete unused accounts and rotate credentials after verified exposure."
+    ],
+    "cta": "Comment KEYS for the priority-account checklist.",
+    "disclaimer": "No credential system eliminates all risk. Protect the password-manager account and maintain tested recovery options."
+  },
+  {
+    "pillar": "secure",
+    "slug": "segment-home-business-network",
+    "title": "Separate Your Business From Your Smart TV",
+    "hook": "A cheap smart device should not share unrestricted access with your business systems.",
+    "outcome": "A segmented network with separate trust zones.",
+    "difficulty": "Intermediate",
+    "time": "45–90 min",
+    "cost": "Existing router or $50+",
+    "steps": [
+      "List devices by trust level: business, personal, guest, smart-home, and unknown.",
+      "Use guest networks or VLANs to isolate smart devices and visitors from business computers and storage.",
+      "Change router admin credentials, disable remote administration and WPS, then update firmware.",
+      "Allow only required traffic between zones. Business devices should not accept inbound connections from guest or smart-device networks.",
+      "Test isolation from each network and document how to reconnect essential devices."
+    ],
+    "cta": "Share this with somebody running a business from home.",
+    "disclaimer": "Advanced VLAN configuration depends on router capabilities. Preserve a backup of the current configuration before changing it."
+  },
+  {
+    "pillar": "secure",
+    "slug": "account-compromise-response",
+    "title": "What To Do After an Account Is Hacked",
+    "hook": "Speed matters, but random password changes can destroy evidence and miss the real entry point.",
+    "outcome": "A calm, evidence-preserving account recovery sequence.",
+    "difficulty": "Beginner",
+    "time": "30–90 min",
+    "cost": "$0",
+    "steps": [
+      "Use a known-clean device. Capture alerts, login history, forwarding rules, recovery changes, and suspicious transactions.",
+      "Secure the primary email account first. Change its password, revoke sessions, remove unknown recovery methods, and enable strong MFA.",
+      "Secure linked financial, cloud, social, and domain accounts. Contact providers through verified support channels.",
+      "Scan devices, remove unknown apps or browser extensions, and update operating systems.",
+      "Document the timeline, report financial fraud quickly, warn affected contacts, and continue monitoring."
+    ],
+    "cta": "Save this before you need it.",
+    "disclaimer": "For active financial loss, identity theft, or business compromise, contact the relevant provider and qualified incident-response or legal professionals."
+  }
+]

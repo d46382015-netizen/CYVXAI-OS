@@ -35,7 +35,10 @@ function writeManifest() {
     node: pkg.engines?.node || ">=22",
     entrypoints: {
       production: "api/runtime-v7.js",
+      public_composition: "api/public-company.js",
       public_core: "api/public.js",
+      company_gateway: "services/company-runtime/gateway.js",
+      company_ui: "services/company-runtime/ui.js",
       production_gateway: "api/production.js",
       legacy_api: "api/index.js",
       spark: "spark/server.js",
@@ -47,7 +50,7 @@ function writeManifest() {
       default_port_offset: 4,
       routes: ["/healthz", "/readyz", "/api/control-plane", "/api/overview", "/metrics"]
     },
-    public_routes: ["/", "/healthz", "/readyz", "/api/public/status", "/api/public/worlds", "/api/public/sparks/:id", "/api/v1/sparks", "/api/v1/sparks/:id/approval", "/api/v1/sparks/:id/execute", "/api/v1/worlds/:id/leads", "/w/:slug", "/os"]
+    public_routes: ["/", "/control", "/control-room", "/api/v1/company-runtime/public/status", "/api/v1/company-runtime/public/leads", "/healthz", "/readyz", "/api/public/status", "/api/public/worlds", "/api/public/sparks/:id", "/api/v1/sparks", "/api/v1/sparks/:id/approval", "/api/v1/sparks/:id/execute", "/api/v1/worlds/:id/leads", "/missions", "/spark", "/field-manual", "/w/:slug", "/os"]
   };
   fs.writeFileSync(path.join(DIST, "build-manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
 }

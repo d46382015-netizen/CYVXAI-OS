@@ -2,7 +2,7 @@
 
 const path = require("node:path");
 const os = require("node:os");
-const { createPublicRuntime } = require("./public");
+const { createPublicRuntime } = require("./public-company");
 const { buildReadiness } = require("./production");
 const { Telemetry } = require("../core/observability/telemetry");
 const { BackupScheduler } = require("../core/production/backup_scheduler");
@@ -135,6 +135,11 @@ async function createRuntimeV7(options = {}) {
           public_port: publicRuntime.ports.publicPort,
           control_port: operationsPort,
           field_manual: { internal_port: fieldManualPort, public_path: "/field-manual" },
+          company_runtime: {
+            public_site: "/",
+            control_room: "/control-room",
+            scheduler: publicRuntime.companyScheduler?.enabled || false,
+          },
           mission_worker: { worker_id: missionWorker.workerId, ready: !missionWorkerError },
           backup: backup.snapshot(),
           managed_data: managedData.snapshot(),
@@ -173,6 +178,8 @@ async function main() {
   runtime.telemetry.log("info", "cyvx.runtime.v8.started", {
     public: runtime.publicRuntime.ports.publicPort,
     control: runtime.operationsPort,
+    public_site: "/",
+    company_control_room: "/control-room",
     field_manual: { internal_port: runtime.fieldManualPort, public_path: "/field-manual" },
     mission_worker: { worker_id: runtime.missionWorker.workerId, ready: !runtime.missionWorkerError },
     autonomy: runtime.autonomy.snapshot(),

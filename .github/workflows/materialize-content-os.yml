@@ -41,13 +41,24 @@ jobs:
       - name: Install FFmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
+      - name: Verify transfer part 00
+        run: echo '625054e8c3ef8f5de03dc745aebfab857bbb1c02a433868a4fe0ecb5092924ed  .content-os-payload/part-00' | sha256sum -c -
+      - name: Verify transfer part 01
+        run: echo 'c1bf662c6dc624f06246b1c90e9b4312d47b8be8f25f2b22abd688cf4be42b18  .content-os-payload/part-01' | sha256sum -c -
+      - name: Verify transfer part 02
+        run: echo '1a04a4f48df04c28b9399962d5640f2f0dea0f97b106bf119fe9bd83ee5bf99c  .content-os-payload/part-02' | sha256sum -c -
+      - name: Verify transfer part 03
+        run: echo '17fa7653d2d78072b93c0e2651a846ce8bb389804baceed10ec11f07c814125d  .content-os-payload/part-03' | sha256sum -c -
+      - name: Verify transfer part 04
+        run: echo 'ffd81a4e8214b0290fae876f399f100fb9a0ce55a3e8fd67e63b13ee75e9b966  .content-os-payload/part-04' | sha256sum -c -
+      - name: Verify transfer part 05
+        run: echo '5ebc8ba86e5c43787f876a82bddf5dd92b0350c1fef0acaaa51474fea186e0b0  .content-os-payload/part-05' | sha256sum -c -
+
       - name: Reconstruct checksum-verified payload
         shell: bash
         run: |
           set -Eeuo pipefail
-          wc -c .content-os-payload/part-*
           cat .content-os-payload/part-* | base64 --decode > /tmp/content-os.tgz
-          sha256sum /tmp/content-os.tgz
           echo '6980efac704748916dcf34d843e726f9b953f36d844f79e5f56a59a1d9c4b557  /tmp/content-os.tgz' | sha256sum -c -
 
       - name: Extract production source

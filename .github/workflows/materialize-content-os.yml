@@ -1,6 +1,12 @@
 name: Materialize Content OS Slice
 
 on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.content-os-payload/**'
+      - '.github/workflows/materialize-content-os.yml'
   push:
     branches: [feature/content-os-production-slice]
     paths:
@@ -16,6 +22,7 @@ concurrency:
 
 jobs:
   materialize:
+    if: github.event_name == 'push' || github.head_ref == 'feature/content-os-production-slice'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

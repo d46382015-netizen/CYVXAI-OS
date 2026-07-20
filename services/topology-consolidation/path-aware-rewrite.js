@@ -13,6 +13,10 @@ const SPECIFIER_PATTERNS = [
 ];
 const TEXT_EXTENSIONS = new Set([".cjs", ".css", ".html", ".js", ".json", ".md", ".mjs", ".sh", ".sql", ".ts", ".tsx", ".yaml", ".yml"]);
 const EXCLUDES = new Set([".git", "node_modules", "dist", "coverage", ".next", ".cache", "vendor"]);
+const EXPLICIT_PATH_REWRITE_EXCLUDES = new Set([
+  "test/topology-consolidation.test.js",
+  "test/topology-path-aware-rewrite.test.js",
+]);
 
 function restoreAndRewrite(options) {
   const root = path.resolve(options.root);
@@ -78,12 +82,18 @@ function rewriteContent(root, originalRelativePath, currentRelativePath, text, m
     });
   }
 
-  for (const move of moves) {
-    const escaped = escapeRegex(move.source);
-    output = output.replace(new RegExp(`(^|[^A-Za-z0-9_./-])${escaped}\/`, "gm"), (_, prefix) => `${prefix}${move.target}/`);
-    output = output.replace(new RegExp(`(^|[\\s"'\`(=:])\\./${escaped}\/`, "gm"), (_, prefix) => `${prefix}./${move.target}/`);
+  if (shouldRewriteExplicitPaths(currentRelativePath)) {
+    for (const move of moves) {
+      const escaped = escapeRegex(move.source);
+      output = output.replace(new RegExp(`(^|[^A-Za-z0-9_./-])${escaped}\/`, "gm"), (_, prefix) => `${prefix}${move.target}/`);
+      output = output.replace(new RegExp(`(^|[\\s"'\`(=:])\\./${escaped}\/`, "gm"), (_, prefix) => `${prefix}./${move.target}/`);
+    }
   }
   return output;
+}
+
+function shouldRewriteExplicitPaths(relativePath) {
+  return !EXPLICIT_PATH_REWRITE_EXCLUDES.has(normalizePath(relativePath));
 }
 
 function resolveSpecifier(root, fromRelative, specifier) {
@@ -146,6 +156,7 @@ function digest(value) { return crypto.createHash("sha256").update(value).digest
 module.exports = {
   restoreAndRewrite,
   rewriteContent,
+  shouldRewriteExplicitPaths,
   resolveSpecifier,
   mapRepositoryPath,
   reverseMapRepositoryPath,

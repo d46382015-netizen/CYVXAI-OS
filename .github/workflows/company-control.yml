@@ -1,0 +1,91 @@
+name: CYVX Company Control Plane
+
+on:
+  pull_request:
+    paths:
+      - "services/operator/company-control-*.js"
+      - "scripts/start-company-operator.js"
+      - "scripts/verify-company-control.js"
+      - "ui/company-control.html"
+      - "test/company-control-plane.test.js"
+      - "docs/COMPANY_CONTROL_PLANE.md"
+      - ".github/workflows/company-control.yml"
+  push:
+    branches: [main]
+    paths:
+      - "services/operator/company-control-*.js"
+      - "scripts/start-company-operator.js"
+      - "scripts/verify-company-control.js"
+      - "ui/company-control.html"
+      - "test/company-control-plane.test.js"
+      - "docs/COMPANY_CONTROL_PLANE.md"
+      - ".github/workflows/company-control.yml"
+  workflow_dispatch:
+
+permissions: write-all
+
+concurrency:
+  group: company-control-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Verify company control production invariants
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/company-control
+          node scripts/verify-company-control.js 2>&1 | tee artifacts/company-control/verification.log
+      - name: Publish actionable failure to pull request
+        if: failure() && github.event_name == 'pull_request'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          {
+            echo '## Company control verification failure'
+            echo
+            echo 'The focused production gate failed. Redacted log tail:'
+            echo
+            echo '```text'
+            tail -n 120 artifacts/company-control/verification.log
+            echo '```'
+            echo
+            echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          } > /tmp/company-control-failure.md
+          gh pr comment "$PR_NUMBER" --body-file /tmp/company-control-failure.md
+      - name: Write machine-readable receipt
+        if: always()
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = 'artifacts/company-control/verification.json';
+          fs.mkdirSync('artifacts/company-control', { recursive: true });
+          fs.writeFileSync(path, JSON.stringify({
+            schema_version: 1,
+            commit_sha: process.env.GITHUB_SHA,
+            workflow_run_id: process.env.GITHUB_RUN_ID,
+            workflow_run_attempt: Number(process.env.GITHUB_RUN_ATTEMPT || 1),
+            verified_at: new Date().toISOString(),
+            log_present: fs.existsSync('artifacts/company-control/verification.log'),
+          }, null, 2) + '\n');
+          NODE
+      - name: Retain company control verification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: company-control-proof-${{ github.run_id }}
+          path: artifacts/company-control
+          if-no-files-found: error
+          retention-days: 30

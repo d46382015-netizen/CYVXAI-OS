@@ -8,7 +8,9 @@ const { spawnSync } = require("node:child_process");
 const ROOT = path.join(__dirname, "..");
 const NODE_FILES = [
   "api/runtime-v7.js",
+  "api/runtime-cinematic.js",
   "api/public.js",
+  "api/public-experience.js",
   "api/secure-production.js",
   "api/integrated-production.js",
   "api/integration_routes.js",
@@ -38,6 +40,12 @@ const NODE_FILES = [
   "scripts/oidc-smoke-v8.js",
 ];
 const BROWSER_FILES = [
+  "ui/experience.js",
+  "ui/control.js",
+  "ui/control-core.js",
+  "ui/control-mission-read.js",
+  "ui/control-mission-execute.js",
+  "ui/control-bootstrap.js",
   "spark/ui/app.js",
   "spark/ui/spark-client.js",
   "spark/ui/spark-render.js",
@@ -51,7 +59,7 @@ for (const file of NODE_FILES) check(file, path.join(ROOT, file));
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "cyvx-v8-"));
 try {
   for (const file of BROWSER_FILES) {
-    const moduleFile = path.join(temporary, `${path.basename(file, ".js")}.mjs`);
+    const moduleFile = path.join(temporary, `${file.replace(/[\\/]/g, "-").replace(/\.js$/, "")}.mjs`);
     fs.copyFileSync(path.join(ROOT, file), moduleFile);
     check(file, moduleFile);
   }

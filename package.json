@@ -110,6 +110,15 @@
     "policy:audit": "node ./scripts/audit-approve-by-default.js",
     "source:audit": "node ./scripts/audit-source-integrity.js",
     "provider:readiness": "node ./scripts/check-provider-readiness.js",
+    "content": "bash ./scripts/content-os.sh start",
+    "content:start": "bash ./scripts/content-os.sh start",
+    "content:server": "bash ./scripts/content-os.sh server",
+    "content:worker": "bash ./scripts/content-os.sh worker",
+    "content:once": "bash ./scripts/content-os.sh once",
+    "content:stop": "bash ./scripts/content-os.sh stop",
+    "content:status": "bash ./scripts/content-os.sh status",
+    "content:test": "node --test ./test/content-os.test.js",
+    "content:verify": "bash ./scripts/content-os.sh verify",
     "test:source-integrity": "node --test ./test/source-integrity.test.js"
   },
   "engines": {

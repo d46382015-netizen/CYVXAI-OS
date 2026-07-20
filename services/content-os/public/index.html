@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b0d12">
+  <title>CYVX Content OS</title>
+  <style>
+    :root{color-scheme:dark;--bg:#090b10;--panel:#11141c;--panel2:#171b25;--text:#f7f8fb;--muted:#aab0bf;--line:#2b3140;--accent:#8b5cf6;--accent2:#5b7cfa;--danger:#ef4444;--ok:#22c55e;--warn:#f59e0b}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#17122d 0,#090b10 42%);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);min-height:100vh}
+    button,input,textarea,select{font:inherit}.shell{max-width:1100px;margin:0 auto;padding:20px 14px 88px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.brand h1{font-size:clamp(1.5rem,5vw,2.35rem);margin:0}.brand p{margin:4px 0 0;color:var(--muted);font-size:.92rem}.badge{padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:rgba(17,20,28,.8);font-size:.78rem;color:var(--muted)}
+    .grid{display:grid;gap:14px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:14px}.card{background:rgba(17,20,28,.92);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 16px 46px rgba(0,0,0,.22)}.metric strong{display:block;font-size:1.5rem;margin-top:5px}.metric span{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}
+    .workspace{grid-template-columns:1fr}.card h2{margin:0 0 6px;font-size:1.08rem}.card .sub{margin:0 0 14px;color:var(--muted);font-size:.88rem}.form-grid{display:grid;gap:11px}.field label{display:block;color:#d9dce5;font-size:.82rem;margin:0 0 6px}.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);padding:12px 13px;outline:none}.field textarea{min-height:86px;resize:vertical}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}.actions{display:flex;gap:9px;flex-wrap:wrap}.btn{border:0;border-radius:12px;padding:12px 15px;font-weight:750;cursor:pointer}.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white}.btn.secondary{background:#222838;color:white;border:1px solid #343c50}.btn.danger{background:#3b1b20;color:#fecaca;border:1px solid #67262f}.btn:disabled{opacity:.55;cursor:not-allowed}
+    .list{display:grid;gap:10px}.item{border:1px solid var(--line);background:var(--panel2);border-radius:15px;padding:13px}.item-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.item h3{margin:0;font-size:1rem}.item p{color:var(--muted);font-size:.85rem;margin:7px 0 0}.status{font-size:.72rem;padding:6px 8px;border-radius:999px;background:#262b39;text-transform:uppercase;letter-spacing:.07em}.status.rendered,.status.measured{background:#123021;color:#9ef0b4}.status.failed{background:#3b1b20;color:#fecaca}.status.rendering{background:#3b2b12;color:#fde68a}.item-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.item-actions button,.item-actions a{font-size:.78rem;text-decoration:none;padding:8px 10px}.script{white-space:pre-wrap;font-size:.8rem;background:#0b0d12;padding:10px;border-radius:10px;border:1px solid #242938;max-height:170px;overflow:auto;margin-top:10px;color:#d8dbe4}.hidden{display:none!important}.empty{padding:20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1d2330;border:1px solid #384054;border-radius:12px;padding:11px 14px;z-index:20;box-shadow:0 12px 40px rgba(0,0,0,.45);max-width:92vw}.token-box{margin-bottom:14px}.measure-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.section-gap{margin-top:14px}video{width:100%;border-radius:14px;background:#000;max-height:520px}
+    @media(min-width:760px){.metrics{grid-template-columns:repeat(4,minmax(0,1fr))}.workspace{grid-template-columns:minmax(320px,.85fr) minmax(430px,1.15fr)}.form-grid.two{grid-template-columns:1fr 1fr}.measure-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.shell{padding:28px 22px 70px}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><h1>CYVX Content OS</h1><p>Topic → plan → render → measure → learn</p></div>
+      <div id="healthBadge" class="badge">Checking runtime…</div>
+    </header>
+
+    <section id="tokenBox" class="card token-box hidden">
+      <h2>Secure API access</h2><p class="sub">Enter the Content OS token for this session. It remains in session storage only.</p>
+      <div class="actions"><input id="apiToken" type="password" autocomplete="off" placeholder="CONTENT_OS_API_TOKEN" style="flex:1;min-width:220px"><button class="btn primary" id="saveToken">Unlock</button></div>
+    </section>
+
+    <section class="grid metrics">
+      <div class="card metric"><span>Total content</span><strong id="mTotal">0</strong></div>
+      <div class="card metric"><span>Rendered</span><strong id="mRendered">0</strong></div>
+      <div class="card metric"><span>Views</span><strong id="mViews">0</strong></div>
+      <div class="card metric"><span>Revenue</span><strong id="mRevenue">$0</strong></div>
+    </section>
+
+    <section class="grid workspace">
+      <div class="card">
+        <h2>Create production package</h2><p class="sub">One validated topic creates a script, six scenes, and a durable render job.</p>
+        <form id="createForm" class="form-grid">
+          <div class="field"><label for="topic">Topic</label><input id="topic" required minlength="3" maxlength="180" placeholder="How small businesses can automate lead follow-up"></div>
+          <div class="field"><label for="audience">Audience</label><input id="audience" maxlength="160" value="small business operators and creators"></div>
+          <div class="form-grid two">
+            <div class="field"><label for="objective">Objective</label><select id="objective"><option>teach a useful operating method</option><option>generate qualified leads</option><option>convert viewers into buyers</option><option>build trust and authority</option></select></div>
+            <div class="field"><label for="duration">Duration</label><select id="duration"><option value="30">30 seconds</option><option value="42" selected>42 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option></select></div>
+          </div>
+          <div class="field"><label for="cta">Call to action</label><textarea id="cta" maxlength="220">Save this, apply the loop, and follow CYVX for the next system.</textarea></div>
+          <button id="createButton" class="btn primary" type="submit">Create and queue render</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="item-head"><div><h2>Production queue</h2><p class="sub">Live durable state from SQLite. The worker owns render execution.</p></div><button id="refresh" class="btn secondary">Refresh</button></div>
+        <div id="contentList" class="list"><div class="empty">No content yet.</div></div>
+      </div>
+    </section>
+
+    <section id="detailCard" class="card section-gap hidden">
+      <div class="item-head"><div><h2 id="detailTitle">Content details</h2><p id="detailSub" class="sub"></p></div><button id="closeDetail" class="btn secondary">Close</button></div>
+      <video id="videoPreview" controls playsinline class="hidden"></video>
+      <div id="detailScript" class="script"></div>
+      <div class="actions section-gap"><button id="retryRender" class="btn secondary">Queue render</button><button id="openMeasure" class="btn primary">Record performance</button></div>
+    </section>
+
+    <section id="measureCard" class="card section-gap hidden">
+      <h2>Record performance</h2><p class="sub">Attach platform outcomes to the selected content item. Rates and revenue efficiency are calculated automatically.</p>
+      <form id="measureForm" class="form-grid">
+        <div class="field"><label for="platform">Platform</label><input id="platform" value="instagram" required></div>
+        <div class="form-grid measure-grid">
+          <div class="field"><label>Impressions</label><input id="impressions" type="number" min="0" value="0"></div>
+          <div class="field"><label>Views</label><input id="views" type="number" min="0" value="0"></div>
+          <div class="field"><label>Watch seconds</label><input id="watchSeconds" type="number" min="0" step="0.1" value="0"></div>
+          <div class="field"><label>Completions</label><input id="completions" type="number" min="0" value="0"></div>
+          <div class="field"><label>Clicks</label><input id="clicks" type="number" min="0" value="0"></div>
+          <div class="field"><label>Leads</label><input id="leads" type="number" min="0" value="0"></div>
+          <div class="field"><label>Conversions</label><input id="conversions" type="number" min="0" value="0"></div>
+          <div class="field"><label>Revenue ($)</label><input id="revenue" type="number" min="0" step="0.01" value="0"></div>
+        </div>
+        <div class="actions"><button class="btn primary" type="submit">Save measurement</button><button id="cancelMeasure" class="btn secondary" type="button">Cancel</button></div>
+      </form>
+    </section>
+  </main>
+  <div id="toast" class="toast hidden"></div>
+  <script>
+    const state={token:sessionStorage.getItem('contentOsToken')||'',selected:null,items:[]};
+    const $=(id)=>document.getElementById(id);
+    const money=(value)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(value||0);
+    const integer=(value)=>new Intl.NumberFormat('en-US').format(value||0);
+    function toast(message){const el=$('toast');el.textContent=message;el.classList.remove('hidden');clearTimeout(window.__toast);window.__toast=setTimeout(()=>el.classList.add('hidden'),3200)}
+    function headers(json=false){const h={};if(json)h['content-type']='application/json';if(state.token)h.authorization=`Bearer ${state.token}`;return h}
+    function hydrateMedia(url){return url?url.replace('__SESSION_TOKEN__',encodeURIComponent(state.token)):url}
+    async function api(path,options={}){const response=await fetch(path,{...options,headers:{...headers(Boolean(options.body)),...(options.headers||{})}});let payload={};try{payload=await response.json()}catch{}if(!response.ok)throw new Error(payload.error?.message||`Request failed (${response.status})`);return payload}
+    async function checkHealth(){try{const health=await fetch('/health').then(r=>r.json());$('healthBadge').textContent=`${health.ffmpeg?'FFmpeg ready':'FFmpeg missing'} · ${health.authMode}`;$('tokenBox').classList.toggle('hidden',health.authMode!=='token'||Boolean(state.token));return health}catch(error){$('healthBadge').textContent='Runtime unavailable';throw error}}
+    function renderDashboard(data){$('mTotal').textContent=integer(data.content.total);$('mRendered').textContent=integer(data.content.rendered+data.content.measured);$('mViews').textContent=integer(data.performance.views);$('mRevenue').textContent=money(data.performance.revenue)}
+    function renderItems(items){state.items=items;const list=$('contentList');if(!items.length){list.innerHTML='<div class="empty">No content yet.</div>';return}list.innerHTML=items.map(item=>`<article class="item"><div class="item-head"><div><h3>${escapeHtml(item.topic)}</h3><p>${escapeHtml(item.hook)}</p></div><span class="status ${item.status}">${item.status}</span></div><div class="item-actions"><button class="btn secondary" data-open="${item.id}">Open</button>${item.status==='failed'?`<button class="btn danger" data-retry="${item.id}">Retry render</button>`:''}</div></article>`).join('');list.querySelectorAll('[data-open]').forEach(button=>button.onclick=()=>openItem(button.dataset.open));list.querySelectorAll('[data-retry]').forEach(button=>button.onclick=()=>queueRender(button.dataset.retry))}
+    function escapeHtml(value){return String(value||'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]))}
+    async function load(){try{const [dashboard,content]=await Promise.all([api('/api/dashboard'),api('/api/content?limit=50')]);renderDashboard(dashboard);renderItems(content.items)}catch(error){if(String(error.message).toLowerCase().includes('authentication')){$('tokenBox').classList.remove('hidden')}else toast(error.message)}}
+    async function openItem(id){try{const item=await api(`/api/content/${encodeURIComponent(id)}`);state.selected=item;$('detailTitle').textContent=item.topic;$('detailSub').textContent=`${item.audience} · ${item.durationSeconds}s · ${item.status}`;$('detailScript').textContent=item.script;const video=$('videoPreview');if(item.renderJob?.mediaUrl){video.src=hydrateMedia(item.renderJob.mediaUrl);video.classList.remove('hidden')}else{video.removeAttribute('src');video.classList.add('hidden')}$('detailCard').classList.remove('hidden');$('measureCard').classList.add('hidden');$('detailCard').scrollIntoView({behavior:'smooth',block:'start'})}catch(error){toast(error.message)}}
+    async function queueRender(id){try{await api(`/api/content/${encodeURIComponent(id)}/render`,{method:'POST'});toast('Render queued');await load();if(state.selected?.id===id)await openItem(id)}catch(error){toast(error.message)}}
+    $('createForm').onsubmit=async(event)=>{event.preventDefault();const button=$('createButton');button.disabled=true;try{const payload={topic:$('topic').value,audience:$('audience').value,objective:$('objective').value,cta:$('cta').value,durationSeconds:Number($('duration').value)};const item=await api('/api/content',{method:'POST',headers:{'idempotency-key':`ui-${Date.now()}-${Math.random().toString(16).slice(2)}`},body:JSON.stringify(payload)});$('topic').value='';toast('Content created and render queued');await load();await openItem(item.id)}catch(error){toast(error.message)}finally{button.disabled=false}};
+    $('refresh').onclick=load;$('saveToken').onclick=async()=>{state.token=$('apiToken').value.trim();sessionStorage.setItem('contentOsToken',state.token);$('tokenBox').classList.add('hidden');await load()};$('closeDetail').onclick=()=>{$('detailCard').classList.add('hidden');$('measureCard').classList.add('hidden')};$('retryRender').onclick=()=>state.selected&&queueRender(state.selected.id);$('openMeasure').onclick=()=>{if(!state.selected)return;$('measureCard').classList.remove('hidden');$('measureCard').scrollIntoView({behavior:'smooth'})};$('cancelMeasure').onclick=()=>$('measureCard').classList.add('hidden');
+    $('measureForm').onsubmit=async(event)=>{event.preventDefault();if(!state.selected)return;try{const fields=['impressions','views','watchSeconds','completions','clicks','leads','conversions','revenue'];const payload={platform:$('platform').value};fields.forEach(field=>payload[field]=Number($(field).value||0));await api(`/api/content/${encodeURIComponent(state.selected.id)}/metrics`,{method:'POST',body:JSON.stringify(payload)});toast('Performance recorded');$('measureCard').classList.add('hidden');await load();await openItem(state.selected.id)}catch(error){toast(error.message)}};
+    (async()=>{try{await checkHealth();if(state.token||$('tokenBox').classList.contains('hidden'))await load();setInterval(load,5000)}catch(error){toast(error.message)}})();
+  </script>
+</body>
+</html>

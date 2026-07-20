@@ -3,6 +3,8 @@
 .env
 .env.*
 .cyvx/
+data/content-os/
+artifacts/content-os/
 data/memory/partner-memory.json
 data/missions/latest-partner-mission.json
 data/partner/latest-brief.json

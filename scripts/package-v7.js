@@ -24,9 +24,10 @@ const manifest = {
   name: pkg.name,
   version: pkg.version,
   built_at: new Date().toISOString(),
-  production_entrypoint: "api/runtime-v7.js",
+  production_entrypoint: "api/runtime-cinematic.js",
+  production_core: "api/runtime-v7.js",
   node: pkg.engines?.node || ">=22",
-  public_routes: ["/", "/healthz", "/readyz", "/api/public/status", "/api/public/worlds", "/w/:slug", "/os"],
+  public_routes: ["/", "/public", "/control", "/missions", "/operator", "/revenue", "/field-manual", "/spark", "/healthz", "/readyz", "/api/public/status", "/api/public/worlds", "/w/:slug", "/os"],
   control_plane: {
     bind: "127.0.0.1",
     default_port_offset: 4,
@@ -40,6 +41,8 @@ const manifest = {
     "lead-capture",
     "outcome-learning",
     "runtime-readiness",
+    "cinematic-public-experience",
+    "production-control-room",
   ],
 };
 fs.writeFileSync(path.join(DIST, "v7-manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);

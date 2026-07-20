@@ -1,0 +1,102 @@
+name: Security Gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "23 3 * * 1"
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  codeql:
+    name: CodeQL JavaScript analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - name: Detect active CodeQL setup
+        id: codeql-setup
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/detect-codeql-setup.js
+      - uses: github/codeql-action/init@v4
+        if: steps.codeql-setup.outputs.mode == 'advanced'
+        with:
+          languages: javascript-typescript
+          build-mode: none
+      - uses: github/codeql-action/analyze@v4
+        if: steps.codeql-setup.outputs.mode == 'advanced'
+        with:
+          category: /language:javascript-typescript
+      - name: Verify GitHub default CodeQL setup
+        if: steps.codeql-setup.outputs.mode == 'default'
+        run: echo "GitHub default CodeQL setup is configured for JavaScript/TypeScript."
+      - name: Deterministic source-security fallback
+        if: steps.codeql-setup.outputs.mode == 'fallback'
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo "::warning::GitHub CodeQL service is unavailable; executing deterministic source and dependency security gates."
+          npm ci --no-audit --no-fund
+          npm run source:audit
+          npm audit --omit=dev --audit-level=high
+
+  dependency-audit:
+    name: Runtime dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm audit --omit=dev --audit-level=high
+
+  dependency-review:
+    name: Pull request dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: Detect dependency graph availability
+        id: dependency-graph
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          status="$(curl --silent --show-error --output /tmp/cyvx-sbom.json --write-out '%{http_code}' \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/dependency-graph/sbom")"
+          if [ "$status" = "200" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "Dependency graph unavailable (HTTP $status); using locked-install and audit fallback."
+          fi
+      - uses: actions/dependency-review-action@v5
+        if: steps.dependency-graph.outputs.available == 'true'
+        with:
+          fail-on-severity: high
+          fail-on-scopes: runtime
+      - name: Deterministic dependency fallback
+        if: steps.dependency-graph.outputs.available != 'true'
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git diff --check "${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}" -- package.json package-lock.json
+          npm ci --no-audit --no-fund
+          npm audit --omit=dev --audit-level=high

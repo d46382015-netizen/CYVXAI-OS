@@ -22,9 +22,7 @@ on:
       - ".github/workflows/company-control.yml"
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pull-requests: write
+permissions: write-all
 
 concurrency:
   group: company-control-${{ github.ref }}

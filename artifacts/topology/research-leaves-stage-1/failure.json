@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "failed_closed",
+  "request_id": "research-leaves-stage-1",
+  "workflow_run_id": "29710743777",
+  "source_commit": "52d06688dd9e8a118a4c83da5dbbdc77ef5a80c8",
+  "generated_at": "2026-07-20T01:19:56.104Z",
+  "topology_run_id": "research-leaves-2026-07-20T01-19-10-332Z-a5fe9394",
+  "error": "Full production verification failed after path-aware rewriting",
+  "rollback_verified": false,
+  "rollback_expected_digest": null,
+  "rollback_actual_digest": null
+}

@@ -1,0 +1,41 @@
+name: CYVX Field Manual Content
+
+on:
+  pull_request:
+    paths:
+      - "services/content-growth/**"
+      - "scripts/verify-field-manual-content.js"
+      - "test/field-manual*.test.js"
+      - ".github/workflows/field-manual-content.yml"
+  push:
+    branches: [main]
+    paths:
+      - "services/content-growth/**"
+      - "scripts/verify-field-manual-content.js"
+      - "test/field-manual*.test.js"
+      - ".github/workflows/field-manual-content.yml"
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Verify publication system
+        run: node scripts/verify-field-manual-content.js
+      - name: Retain proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: field-manual-content-proof-${{ github.run_id }}
+          path: artifacts/field-manual-content
+          if-no-files-found: error
+          retention-days: 30

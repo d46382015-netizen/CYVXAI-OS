@@ -22,8 +22,7 @@ on:
       - ".github/workflows/autonomous-company-runtime-v2.yml"
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: write-all
 
 jobs:
   verify:

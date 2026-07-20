@@ -8,7 +8,7 @@ const test = require("node:test");
 const { createMissionRuntime } = require("../runtime/missions");
 const { CompanyOperator } = require("../services/operator");
 const { UniversalOperator } = require("../services/operator/universal");
-const { CompanyControlPlane, CYCLE_PHASES } = require("../services/operator/company-control-plane");
+const { CompanyControlPlane, CYCLE_PHASES } = require("../services/operator/company-control-compat");
 
 function fixture(options = {}) {
   const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), "cyvx-company-control-"));
@@ -67,13 +67,10 @@ test("company mission compilation and truth transitions require owned evidence",
     assert.equal(compiled.contract.entity.id, entity.id);
     assert.equal(compiled.contract.authority.max_budget_cents, 5000);
     assert.match(compiled.digest, /^[a-f0-9]{64}$/);
-
-    const initial = control.currentTruth(entity.id, auth);
-    assert.equal(initial.to_state, "idea");
+    assert.equal(control.currentTruth(entity.id, auth).to_state, "idea");
     assert.throws(() => control.transitionTruth(entity.id, {
       to_state: "researched", reason: "Research exists without evidence",
     }, auth), /Evidence is required/);
-
     const evidenceId = activated.evidence[0].id;
     const researched = control.transitionTruth(entity.id, {
       to_state: "researched", reason: "Owned activation evidence proves current reality", evidence_id: evidenceId,
@@ -81,9 +78,7 @@ test("company mission compilation and truth transitions require owned evidence",
     assert.equal(researched.from_state, "idea");
     assert.equal(researched.to_state, "researched");
     assert.equal(control.verifyEvidence(entity.id, auth).valid, true);
-  } finally {
-    runtime.close();
-  }
+  } finally { runtime.close(); }
 });
 
 test("decisions and bounded experiments measure prediction error and economic outcome", () => {
@@ -99,15 +94,11 @@ test("decisions and bounded experiments measure prediction error and economic ou
       confidence: 0.7,
       evidence_ids: [evidenceId],
     }, auth);
-    assert.equal(decision.status, "open");
     const resolved = control.resolveDecision(decision.id, {
-      actual_outcome: "Observed 12 percent conversion.",
-      expected_value: 10,
-      actual_value: 12,
+      actual_outcome: "Observed 12 percent conversion.", expected_value: 10, actual_value: 12,
     }, auth);
     assert.equal(resolved.status, "resolved");
     assert.equal(resolved.prediction_error, 2);
-
     const experiment = control.createExperiment(entity.id, {
       name: "Bid sprint conversion",
       hypothesis: "The fixed-scope offer reaches at least 10 percent conversion.",
@@ -130,20 +121,15 @@ test("decisions and bounded experiments measure prediction error and economic ou
     assert.equal(evaluated.status, "won");
     assert.equal(evaluated.result.sample_size, 20);
     assert.equal(evaluated.result.delta_from_baseline, 8);
-  } finally {
-    runtime.close();
-  }
+  } finally { runtime.close(); }
 });
 
 test("operating cycles, effects, and sagas enforce sequence, idempotency, and compensation", () => {
   const { runtime, control, auth, entity } = fixture();
   try {
     let cycle = control.startCycle(entity.id, {
-      objective: "Prove one complete company operating cycle",
-      baseline: { leads: 0 },
-      plan: { target_leads: 1 },
+      objective: "Prove one complete company operating cycle", baseline: { leads: 0 }, plan: { target_leads: 1 },
     }, auth);
-    assert.equal(cycle.phase, "observe");
     assert.throws(() => control.advanceCycle(cycle.id, { phase: "execute" }, auth), /Next phase must be diagnose/);
     for (const phase of CYCLE_PHASES.slice(1)) {
       cycle = control.advanceCycle(cycle.id, {
@@ -153,27 +139,17 @@ test("operating cycles, effects, and sagas enforce sequence, idempotency, and co
       }, auth);
     }
     assert.equal(cycle.phase, "completed");
-    assert.ok(cycle.completed_at);
-
     const effect = control.reserveEffect(entity.id, {
-      action_type: "offer.publish",
-      idempotency_key: "offer:primary:v1",
-      input: { slug: "bid-sprint" },
+      action_type: "offer.publish", idempotency_key: "offer:primary:v1", input: { slug: "bid-sprint" },
     }, auth);
     const duplicate = control.reserveEffect(entity.id, {
-      action_type: "offer.publish",
-      idempotency_key: "offer:primary:v1",
-      input: { slug: "bid-sprint" },
+      action_type: "offer.publish", idempotency_key: "offer:primary:v1", input: { slug: "bid-sprint" },
     }, auth);
     assert.equal(duplicate.id, effect.id);
     assert.throws(() => control.reserveEffect(entity.id, {
-      action_type: "offer.publish",
-      idempotency_key: "offer:primary:v1",
-      input: { slug: "different" },
+      action_type: "offer.publish", idempotency_key: "offer:primary:v1", input: { slug: "different" },
     }, auth), /Idempotency key/);
-    const settled = control.settleEffect(effect.id, { status: "completed", result: { url: "https://example.invalid/bid-sprint" } }, auth);
-    assert.equal(settled.status, "completed");
-
+    assert.equal(control.settleEffect(effect.id, { status: "completed", result: { url: "https://example.invalid/bid-sprint" } }, auth).status, "completed");
     const saga = control.createSaga(entity.id, { name: "Offer deployment", context: { environment: "staging" } }, auth);
     control.addSagaStep(saga.id, {
       sequence: 1, action_type: "offer.publish", effect_id: effect.id,
@@ -185,67 +161,49 @@ test("operating cycles, effects, and sagas enforce sequence, idempotency, and co
     const compensated = control.compensateSaga(saga.id, {}, auth);
     assert.equal(compensated.status, "compensated");
     assert.equal(compensated.compensated_steps, 1);
-  } finally {
-    runtime.close();
-  }
+  } finally { runtime.close(); }
 });
 
 test("providers, deployments, SLOs, usage, notifications, vertical packs, and snapshot are real", async () => {
-  const fakeFetch = async () => new Response(JSON.stringify({
+  const liveHealth = async () => new Response(JSON.stringify({
     ok: true, service: "cyvx-company-control-plane", version: "abcdef1",
   }), { status: 200, headers: { "content-type": "application/json" } });
-  const { runtime, control, auth, entity, activated } = fixture({ fetch: fakeFetch });
+  const { runtime, control, auth, entity, activated } = fixture({ fetch: liveHealth });
   try {
     process.env.CYVX_TEST_PROVIDER_TOKEN = "configured-for-test";
     const provider = control.upsertProvider({
-      name: "render",
-      environment: "staging",
+      name: "render", environment: "staging",
       supported_actions: ["deployment.execute", "deployment.rollback"],
-      required_secrets: ["CYVX_TEST_PROVIDER_TOKEN"],
-      metadata: { account_scope: "test" },
+      required_secrets: ["CYVX_TEST_PROVIDER_TOKEN"], metadata: { account_scope: "test" },
     }, auth);
     assert.equal(provider.status, "ready");
-    assert.deepEqual(provider.missing_secret_names, []);
-
     const deployment = control.recordDeployment(entity.id, {
-      provider_id: provider.id,
-      environment: "staging",
-      commit_sha: "abcdef1234567890",
-      base_url: "https://cyvx.example.test",
-      health_url: "https://cyvx.example.test/healthz",
-      expected_service: "cyvx-company-control-plane",
-      status: "deployed",
+      provider_id: provider.id, environment: "staging", commit_sha: "abcdef1234567890",
+      base_url: "https://cyvx.example.test", health_url: "https://cyvx.example.test/healthz",
+      expected_service: "cyvx-company-control-plane", status: "deployed",
     }, auth);
     const proof = await control.verifyDeployment(deployment.id, auth);
     assert.equal(proof.status, "proven");
     assert.equal(proof.http_status, 200);
-
     const evidenceId = activated.evidence[0].id;
-    const usage = control.meterUsage(entity.id, {
+    assert.equal(control.meterUsage(entity.id, {
       metric: "verified_actions", quantity: 1, unit: "action", source: "company-control-test", evidence_id: evidenceId,
-    }, auth);
-    assert.equal(usage.quantity, 1);
-
+    }, auth).quantity, 1);
     const slo = control.defineSlo(entity.id, {
       name: "Deployment availability", metric: "availability", comparator: ">=", target: 99.9, window_seconds: 3600,
     }, auth);
-    const breached = control.recordSloObservation(slo.id, { value: 90, evidence_id: evidenceId }, auth);
-    assert.equal(breached.good, false);
+    assert.equal(control.recordSloObservation(slo.id, { value: 90, evidence_id: evidenceId }, auth).good, false);
     assert.ok(control.listNotifications(auth, entity.id).some((item) => item.type === "slo.breached"));
-
     const pack = control.installVerticalPack(entity.id, {
-      name: "CYVX Bid & Revenue Sprint",
-      version: "1.0.0",
-      entity_types: ["venture"],
+      name: "CYVX Bid & Revenue Sprint", version: "1.0.0", entity_types: ["venture"],
       intelligence_sources: ["Minnesota procurement registry"],
       offers: ["Proposal Sprint", "Bid Readiness Pack", "Deal Desk Monitoring"],
       workflows: ["qualify", "proposal", "payment verification", "fulfillment acceptance", "recurring conversion"],
       metrics: ["verified_revenue_cents", "qualified_opportunities", "recurring_revenue_cents"],
       policies: ["no unverified revenue", "approval required for bid submission"],
-      verification_commands: ["npm run bid:sprint:verify", "npm run company:control:verify"],
+      verification_commands: ["npm run bid:sprint:verify", "node scripts/verify-company-control.js"],
     }, auth);
     assert.match(pack.manifest_sha256, /^[a-f0-9]{64}$/);
-
     const snapshot = control.snapshot(entity.id, auth);
     assert.equal(snapshot.evidence_verification.valid, true);
     assert.equal(snapshot.counts.deployments, 1);

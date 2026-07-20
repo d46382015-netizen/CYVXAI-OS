@@ -1,0 +1,78 @@
+[
+  {
+    "pillar": "capital",
+    "slug": "business-cash-flow-system",
+    "title": "Build a Business Cash-Flow Control System",
+    "hook": "Profit on paper does not pay this week's obligations.",
+    "outcome": "A weekly view of available cash, committed outflows, receivables, and runway.",
+    "difficulty": "Beginner",
+    "time": "60 min",
+    "cost": "$0",
+    "steps": [
+      "Separate business and personal accounts and define who can move money.",
+      "Track opening cash, posted inflows, posted outflows, upcoming obligations, receivables, and restricted funds.",
+      "Reconcile bank and processor activity instead of relying only on invoices.",
+      "Create thresholds for taxes, payroll, operations, refunds, reserves, and owner draws.",
+      "Review weekly and document any assumption, missing account, pending item, or stale data."
+    ],
+    "cta": "Save this and build your cash view before your next sale.",
+    "disclaimer": "Educational only. Cash-flow treatment, taxes, and accounting requirements vary by business and jurisdiction."
+  },
+  {
+    "pillar": "capital",
+    "slug": "price-for-profit",
+    "title": "Price for Delivery, Risk, and Growth",
+    "hook": "A price can look high and still leave the business broke.",
+    "outcome": "A pricing floor and target built from real delivery economics.",
+    "difficulty": "Beginner",
+    "time": "45 min",
+    "cost": "$0",
+    "steps": [
+      "Calculate direct labor, contractors, software, materials, payment fees, support, rework, and delivery overhead.",
+      "Add sales cost, administrative capacity, taxes, bad debt, and a risk allowance.",
+      "Set a minimum gross-margin requirement and a capacity limit.",
+      "Compare price to the customer's alternative and value, then define scope and change control.",
+      "Review actual margin after delivery and update assumptions."
+    ],
+    "cta": "Comment PRICE for the pricing worksheet.",
+    "disclaimer": "Pricing must comply with applicable laws and contracts. Value estimates are assumptions, not guaranteed customer results."
+  },
+  {
+    "pillar": "capital",
+    "slug": "build-operating-reserve",
+    "title": "Build an Operating Reserve Before Growth Breaks You",
+    "hook": "Growth increases timing risk before it increases safety.",
+    "outcome": "A reserve policy tied to actual obligations and volatility.",
+    "difficulty": "Beginner",
+    "time": "45 min",
+    "cost": "Varies",
+    "steps": [
+      "List essential monthly obligations and the costs of shutting down or pausing safely.",
+      "Measure how volatile collections, refunds, chargebacks, repairs, and customer concentration are.",
+      "Choose a reserve target range and define what qualifies as an emergency use.",
+      "Move reserve funds into a separate, appropriately insured account with controlled access.",
+      "Review the policy after major contracts, hiring, debt, or cost changes."
+    ],
+    "cta": "Save this before increasing fixed expenses.",
+    "disclaimer": "Educational only, not individualized financial advice. Consider liquidity, insurance limits, taxes, and professional guidance."
+  },
+  {
+    "pillar": "capital",
+    "slug": "funding-readiness-room",
+    "title": "Build a Funding-Ready Data Room",
+    "hook": "Capital gets slower and more expensive when your records cannot survive questions.",
+    "outcome": "A secure, current evidence package for lenders, grants, investors, or partners.",
+    "difficulty": "Intermediate",
+    "time": "2–6 hr",
+    "cost": "$0+",
+    "steps": [
+      "Create an index covering entity documents, ownership, finances, taxes, contracts, customers, operations, security, and risks.",
+      "Reconcile financial statements to bank and processor evidence and explain unusual items.",
+      "Document use of funds, milestones, repayment or return logic, downside plan, and governance.",
+      "Use role-based access, expiration, watermarking where appropriate, and an access log.",
+      "Update the room monthly and remove obsolete or contradictory versions."
+    ],
+    "cta": "Comment FUNDING for the data-room index.",
+    "disclaimer": "Funding terms and disclosures can create legal and financial obligations. Use qualified advisors for actual transactions."
+  }
+]

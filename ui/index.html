@@ -1,30 +1,199 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="color-scheme" content="dark"/>
-<title>CYVX Agency OS</title>
-<link rel="stylesheet" href="./styles.css"/>
-<link rel="stylesheet" href="/github-control-plane.css?v=1"/>
-<link rel="stylesheet" href="/reality-os.css?v=4"/>
-<link rel="stylesheet" href="/chat-assets-advanced.css?v=1"/>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07080a">
+  <meta name="color-scheme" content="dark">
+  <title>CYVX Control Room</title>
+  <link rel="stylesheet" href="/control.css?v=1">
 </head>
 <body>
-<div id="app"></div>
-<script src="./app.js"></script>
-<div id="productPanel" hidden data-test-required="productPanel"></div>
-<div id="workflowDomain" hidden data-test-required="workflowDomain"></div>
-<div id="searchInput" hidden data-test-required="searchInput"></div>
-<div id="clearSearchBtn" hidden data-test-required="clearSearchBtn"></div>
-<div id="workflowRunBtn" hidden data-test-required="workflowRunBtn"></div>
-<div id="workflowOutput" hidden data-test-required="workflowOutput"></div>
-<div id="patternIntelligencePanel" hidden data-test-required="patternIntelligencePanel"></div>
-<div id="recommendationIntelligencePanel" hidden data-test-required="recommendationIntelligencePanel"></div>
-<div id="priorityIntelligencePanel" hidden data-test-required="priorityIntelligencePanel"></div>
-<div id="intelligenceSummaryPanel" hidden data-test-required="intelligenceSummaryPanel"></div>
-<script src="/reality-os.js?v=4"></script>
-<script src="/chat-assets-advanced.js?v=1"></script>
-<script src="/github-control-plane.js?v=1"></script>
+  <canvas id="realityCanvas" aria-hidden="true"></canvas>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <div class="control-shell">
+    <aside class="rail" aria-label="Control room navigation">
+      <a href="/" class="rail-brand" title="CYVX public site"><span>C</span><b>CYVX</b></a>
+      <nav>
+        <button class="rail-button active" data-view="overview" title="Overview"><span>◉</span><small>Overview</small></button>
+        <button class="rail-button" data-view="missions" title="Missions"><span>◇</span><small>Missions</small></button>
+        <button class="rail-button" data-view="proof" title="Evidence and proof"><span>⌁</span><small>Proof</small></button>
+        <button class="rail-button" data-view="runtime" title="Runtime"><span>∆</span><small>Runtime</small></button>
+      </nav>
+      <div class="rail-footer">
+        <a href="/spark" title="Spark world factory">S</a>
+        <a href="/field-manual" title="Field Manual">F</a>
+        <a href="/operator" title="Universal operator">O</a>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div>
+          <p>CYVX / AUTONOMOUS COMPANY CONTROL</p>
+          <h1 id="viewTitle">Executive overview</h1>
+        </div>
+        <div class="topbar-actions">
+          <button id="runtimePill" class="runtime-pill" data-action="refresh"><i></i><span>Checking runtime</span></button>
+          <button id="commandButton" class="icon-button" data-action="command" title="Command palette">/</button>
+          <button id="authButton" class="operator-button" data-action="auth"><span id="operatorAvatar">D</span><b id="operatorLabel">Connect operator</b></button>
+        </div>
+      </header>
+
+      <main>
+        <section class="view active" data-view-panel="overview">
+          <div class="executive-grid">
+            <article class="core-panel glass-panel">
+              <div class="panel-label"><span>REALITY CORE</span><b id="coreTimestamp">LIVE</b></div>
+              <div class="core-stage">
+                <div class="reality-orbit orbit-one"><i></i></div>
+                <div class="reality-orbit orbit-two"><i></i></div>
+                <button class="reality-core" data-action="refresh" aria-label="Refresh runtime">
+                  <small>CYVX</small><strong>Ω</strong><span id="coreHealth">SYNCING</span>
+                </button>
+                <div class="core-node node-missions"><span>MISSIONS</span><b id="coreMissions">—</b></div>
+                <div class="core-node node-worker"><span>WORKER</span><b id="coreWorker">—</b></div>
+                <div class="core-node node-proof"><span>PROOF</span><b id="coreProof">—</b></div>
+                <div class="core-node node-revenue"><span>REVENUE</span><b id="coreRevenue">—</b></div>
+              </div>
+              <form id="commandForm" class="reality-command">
+                <span>&gt;</span>
+                <input id="commandInput" autocomplete="off" placeholder="status · create mission · self scan · verify proof">
+                <button type="submit">Execute</button>
+              </form>
+            </article>
+
+            <article class="next-action glass-panel">
+              <div class="panel-label"><span>NEXT BEST ACTION</span><b id="actionConfidence">LIVE</b></div>
+              <p id="nextConstraint">Connect the operator session to load durable mission reality.</p>
+              <h2 id="nextAction">Create and execute one measurable mission.</h2>
+              <div class="action-row">
+                <button class="primary" data-action="new-mission">Create mission <span>→</span></button>
+                <button data-action="run-selected">Run selected to idle</button>
+              </div>
+              <div class="signal-line"><i></i></div>
+            </article>
+
+            <article class="metric-card glass-panel"><span>RUNTIME</span><b id="metricRuntime">—</b><small id="metricRuntimeDetail">Gateway status</small></article>
+            <article class="metric-card glass-panel"><span>MISSIONS</span><b id="metricMissions">—</b><small id="metricMissionDetail">Authenticate to inspect</small></article>
+            <article class="metric-card glass-panel"><span>CAPABILITIES</span><b id="metricCapabilities">—</b><small>Live public registry</small></article>
+            <article class="metric-card glass-panel"><span>OUTCOMES</span><b id="metricOutcomes">—</b><small>Measured runtime output</small></article>
+          </div>
+
+          <div class="lower-grid">
+            <article class="mission-stream glass-panel">
+              <div class="panel-head"><div><p>MISSION STREAM</p><h2>Durable work in motion</h2></div><button data-action="refresh-missions">Refresh</button></div>
+              <div id="missionStream" class="mission-list"><div class="empty-state">Connect an operator session to load missions.</div></div>
+            </article>
+            <article class="activity-panel glass-panel">
+              <div class="panel-head"><div><p>RUNTIME ACTIVITY</p><h2>What the system knows now</h2></div><button data-action="self-scan">Self scan</button></div>
+              <div id="activityFeed" class="activity-feed">
+                <div><time>NOW</time><span>Public runtime status requested.</span></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" data-view-panel="missions">
+          <div class="section-head">
+            <div><p>GOVERNED EXECUTION</p><h2>Mission control</h2></div>
+            <div><button data-action="refresh-missions">Refresh</button><button class="primary" data-action="new-mission">New mission</button></div>
+          </div>
+          <div class="mission-control-grid">
+            <aside class="mission-catalog glass-panel"><div id="missionCatalog" class="mission-list"><div class="empty-state">No mission data loaded.</div></div></aside>
+            <article class="mission-detail glass-panel" id="missionDetail">
+              <div class="empty-state">Select a mission to inspect its state, job, evidence, audit, and outcome.</div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" data-view-panel="proof">
+          <div class="section-head"><div><p>EVIDENCE LEDGER</p><h2>Proof, not promises</h2></div><div><button data-action="repo-proof">Mission proof</button><button class="primary" data-action="verify-proof">Verify selected evidence</button></div></div>
+          <div class="proof-layout">
+            <article class="proof-hero glass-panel"><div class="proof-seal">✓</div><div><span>SELECTED MISSION</span><h2 id="proofMissionTitle">No mission selected</h2><p id="proofMissionState">Choose a mission to load its evidence chain and exportable proof.</p></div><button data-action="export-proof">Export JSON</button></article>
+            <div id="evidenceGrid" class="evidence-grid"><div class="empty-state">Evidence appears here after a mission records proof.</div></div>
+          </div>
+        </section>
+
+        <section class="view" data-view-panel="runtime">
+          <div class="section-head"><div><p>PRODUCTION SYSTEM</p><h2>Runtime topology</h2></div><button class="primary" data-action="refresh">Refresh topology</button></div>
+          <div id="runtimeTopology" class="topology-grid">
+            <article class="topology-card glass-panel"><span>PUBLIC GATEWAY</span><b>Checking…</b><small>Health and readiness</small></article>
+          </div>
+          <article class="glass-panel raw-panel"><div class="panel-head"><div><p>LIVE SNAPSHOT</p><h2>Machine-readable truth</h2></div><button data-action="copy-runtime">Copy JSON</button></div><pre id="runtimeJson">{}</pre></article>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <dialog id="authDialog">
+    <form method="dialog" class="modal-shell" id="authForm">
+      <button class="modal-close" value="cancel" aria-label="Close">×</button>
+      <p class="modal-kicker">OPERATOR IDENTITY</p>
+      <h2>Connect to durable mission runtime.</h2>
+      <p>Local development can issue a short-lived admin token. Production operators can paste an authorized bearer token.</p>
+      <div class="tab-row"><button type="button" class="active" data-auth-mode="local">Local session</button><button type="button" data-auth-mode="token">Bearer token</button></div>
+      <div id="localAuthFields">
+        <label>Organization<input id="authOrganization" value="default" autocomplete="organization"></label>
+        <label>User ID<input id="authUser" value="admin-local" autocomplete="username"></label>
+      </div>
+      <div id="tokenAuthFields" hidden>
+        <label>Bearer token<textarea id="authToken" rows="5" placeholder="Paste authorized CYVX mission token"></textarea></label>
+      </div>
+      <div id="authMessage" class="form-message" hidden></div>
+      <button id="connectButton" class="primary wide-button" type="submit">Connect operator</button>
+      <button id="logoutButton" class="wide-button" type="button">Clear saved session</button>
+    </form>
+  </dialog>
+
+  <dialog id="missionDialog">
+    <form method="dialog" class="modal-shell" id="missionForm">
+      <button class="modal-close" value="cancel" aria-label="Close">×</button>
+      <p class="modal-kicker">NEW DURABLE MISSION</p>
+      <h2>Turn reality into governed work.</h2>
+      <label>Mission title<input id="missionTitle" maxlength="200" required placeholder="Launch first verified customer outcome"></label>
+      <label>Objective<textarea id="missionObjective" maxlength="2000" required placeholder="Describe the measurable outcome, not just the task."></textarea></label>
+      <div class="form-grid">
+        <label>Risk<select id="missionRisk"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></label>
+        <label>Priority<input id="missionPriority" type="number" min="1" max="100" value="80"></label>
+      </div>
+      <label>Primary success metric<input id="missionMetric" value="verified measurable outcome" maxlength="160"></label>
+      <label>Constraints<textarea id="missionConstraints" placeholder="One constraint per line"></textarea></label>
+      <div id="missionMessage" class="form-message" hidden></div>
+      <button id="createMissionButton" class="primary wide-button" type="submit">Create mission</button>
+    </form>
+  </dialog>
+
+  <dialog id="proofDialog">
+    <form method="dialog" class="modal-shell" id="proofForm">
+      <button class="modal-close" value="cancel" aria-label="Close">×</button>
+      <p class="modal-kicker">MEASURED PROOF</p>
+      <h2>Record the outcome and learning.</h2>
+      <label>Result summary<textarea id="proofSummary" required placeholder="What actually happened?"></textarea></label>
+      <div class="form-grid"><label>Metric name<input id="proofMetricName" value="outcome"></label><label>Metric value<input id="proofMetricValue" type="number" step="any" value="1"></label></div>
+      <label>Lesson learned<textarea id="proofLesson" required placeholder="What should the next mission know?"></textarea></label>
+      <label>Next improvement<textarea id="proofImprovement" required placeholder="What should Growth generate next?"></textarea></label>
+      <div id="proofMessage" class="form-message" hidden></div>
+      <button class="primary wide-button" type="submit">Record evidence and evaluate</button>
+    </form>
+  </dialog>
+
+  <dialog id="outputDialog"><form method="dialog" class="modal-shell output-shell"><button class="modal-close" value="cancel" aria-label="Close">×</button><p class="modal-kicker" id="outputKicker">SYSTEM OUTPUT</p><h2 id="outputTitle">Result</h2><div id="outputBody"></div></form></dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div id="productPanel" hidden data-test-required="productPanel"></div>
+  <div id="workflowDomain" hidden data-test-required="workflowDomain"></div>
+  <div id="searchInput" hidden data-test-required="searchInput"></div>
+  <div id="clearSearchBtn" hidden data-test-required="clearSearchBtn"></div>
+  <div id="workflowRunBtn" hidden data-test-required="workflowRunBtn"></div>
+  <div id="workflowOutput" hidden data-test-required="workflowOutput"></div>
+  <div id="patternIntelligencePanel" hidden data-test-required="patternIntelligencePanel"></div>
+  <div id="recommendationIntelligencePanel" hidden data-test-required="recommendationIntelligencePanel"></div>
+  <div id="priorityIntelligencePanel" hidden data-test-required="priorityIntelligencePanel"></div>
+  <div id="intelligenceSummaryPanel" hidden data-test-required="intelligenceSummaryPanel"></div>
+
+  <script src="/control.js?v=1" defer></script>
 </body>
 </html>

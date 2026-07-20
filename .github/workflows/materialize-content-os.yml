@@ -49,8 +49,10 @@ jobs:
         run: echo '1a04a4f48df04c28b9399962d5640f2f0dea0f97b106bf119fe9bd83ee5bf99c  .content-os-payload/part-02' | sha256sum -c -
       - name: Verify transfer part 03
         run: echo '17fa7653d2d78072b93c0e2651a846ce8bb389804baceed10ec11f07c814125d  .content-os-payload/part-03' | sha256sum -c -
-      - name: Verify transfer part 04
-        run: echo 'ffd81a4e8214b0290fae876f399f100fb9a0ce55a3e8fd67e63b13ee75e9b966  .content-os-payload/part-04' | sha256sum -c -
+      - name: Verify transfer part 04a
+        run: echo '2c7a1abf753ab5e9ab0e9128bcc2d2c81881058988d6b5cb6437695fa12ff0c2  .content-os-payload/part-04' | sha256sum -c -
+      - name: Verify transfer part 04b
+        run: echo '9ebebc7193be994ac1aecec8aa7556cf78e977b316f4510746c42a49d716bbf1  .content-os-payload/part-04b' | sha256sum -c -
       - name: Verify transfer part 05
         run: echo '5ebc8ba86e5c43787f876a82bddf5dd92b0350c1fef0acaaa51474fea186e0b0  .content-os-payload/part-05' | sha256sum -c -
 

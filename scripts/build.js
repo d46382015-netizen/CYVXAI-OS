@@ -34,20 +34,23 @@ function writeManifest() {
     built_at: new Date().toISOString(),
     node: pkg.engines?.node || ">=22",
     entrypoints: {
-      production: "api/runtime-v7.js",
+      production: "api/runtime-cinematic.js",
+      production_core: "api/runtime-v7.js",
+      public_experience: "api/public-experience.js",
       public_core: "api/public.js",
       production_gateway: "api/production.js",
       legacy_api: "api/index.js",
       spark: "spark/server.js",
-      spark_ui: "spark/ui/index.html",
-      operator_ui: "ui/index.html"
+      public_ui: "ui/public.html",
+      control_room: "ui/index.html",
+      spark_ui: "spark/ui/index.html"
     },
     control_plane: {
       bind: "127.0.0.1",
       default_port_offset: 4,
       routes: ["/healthz", "/readyz", "/api/control-plane", "/api/overview", "/metrics"]
     },
-    public_routes: ["/", "/healthz", "/readyz", "/api/public/status", "/api/public/worlds", "/api/public/sparks/:id", "/api/v1/sparks", "/api/v1/sparks/:id/approval", "/api/v1/sparks/:id/execute", "/api/v1/worlds/:id/leads", "/w/:slug", "/os"]
+    public_routes: ["/", "/public", "/control", "/missions", "/operator", "/revenue", "/field-manual", "/spark", "/healthz", "/readyz", "/api/public/status", "/api/public/worlds", "/api/public/sparks/:id", "/api/v1/sparks", "/api/v1/sparks/:id/approval", "/api/v1/sparks/:id/execute", "/api/v1/worlds/:id/leads", "/w/:slug", "/os"]
   };
   fs.writeFileSync(path.join(DIST, "build-manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
 }

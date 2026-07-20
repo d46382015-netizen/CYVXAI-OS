@@ -1,0 +1,66 @@
+name: Materialize Content OS Slice
+
+on:
+  push:
+    branches: [feature/content-os-production-slice]
+    paths:
+      - '.content-os-payload/**'
+      - '.github/workflows/materialize-content-os.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: materialize-content-os
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v5
+        with:
+          ref: feature/content-os-production-slice
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Materialize and verify production slice
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          cat .content-os-payload/part-* | base64 --decode > /tmp/content-os.tgz
+          echo '6980efac704748916dcf34d843e726f9b953f36d844f79e5f56a59a1d9c4b557  /tmp/content-os.tgz' | sha256sum -c -
+          tar -xzf /tmp/content-os.tgz
+
+          npm ci --no-audit --no-fund
+          node --check services/content-os/index.js
+          node --check services/content-os/server.js
+          node --check services/content-os/worker.js
+          node --check scripts/verify-content-os.js
+          bash -n scripts/content-os.sh
+          npm run content:test
+          npm run content:verify
+
+      - name: Replace transfer payload with verified source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          rm -rf .content-os-payload
+          rm -f .github/workflows/materialize-content-os.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Build Content OS topic-to-measure production slice'
+          git push origin HEAD:feature/content-os-production-slice

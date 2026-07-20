@@ -24,6 +24,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 concurrency:
   group: company-control-${{ github.ref }}
@@ -46,6 +47,25 @@ jobs:
           set -o pipefail
           mkdir -p artifacts/company-control
           node scripts/verify-company-control.js 2>&1 | tee artifacts/company-control/verification.log
+      - name: Publish actionable failure to pull request
+        if: failure() && github.event_name == 'pull_request'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          {
+            echo '## Company control verification failure'
+            echo
+            echo 'The focused production gate failed. Redacted log tail:'
+            echo
+            echo '```text'
+            tail -n 120 artifacts/company-control/verification.log
+            echo '```'
+            echo
+            echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          } > /tmp/company-control-failure.md
+          gh pr comment "$PR_NUMBER" --body-file /tmp/company-control-failure.md
       - name: Write machine-readable receipt
         if: always()
         shell: bash

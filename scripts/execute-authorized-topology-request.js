@@ -7,6 +7,7 @@ const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const { hashTree, stableStringify: topologyStableStringify } = require("../services/topology-consolidation");
 const { restoreAndRewrite } = require("../services/topology-consolidation/path-aware-rewrite");
+const { restoreGovernedGitBaseline } = require("../services/topology-consolidation/governed-rollback");
 
 const ROOT = process.cwd();
 const REQUEST_PATH = path.join(ROOT, ".cyvx", "topology-execution.json");
@@ -18,6 +19,8 @@ const REQUEST = "research-leaves-stage-1";
 const BRANCH = "mission/research-leaves-consolidation-stage-1";
 const MOVES = ["physics", "science", "thermodynamics", "formal", "futures", "civilization"].map((source) => ({ source, target: `research/${source}` }));
 let activeRunId = null;
+let activeSourceCommit = null;
+let activeBaselineDigest = null;
 
 function main() {
   authorize();
@@ -27,13 +30,16 @@ function main() {
   writeJson(path.join(PROOF_DIR, "request.json"), request);
 
   const sourceCommit = runText("git", ["rev-parse", "HEAD"]).trim();
+  activeSourceCommit = sourceCommit;
   const scan = topologyJson(["scan", "--json"]);
   const plan = topologyJson(["plan", STAGE, "--json"]);
+  activeBaselineDigest = String(plan.baseline && plan.baseline.tree_digest || "");
   writeJson(path.join(PROOF_DIR, "scan.json"), scan);
   writeJson(path.join(PROOF_DIR, "plan.json"), plan);
   if (!plan.ok || plan.summary.blocked_moves !== 0 || plan.summary.active_moves !== MOVES.length) fail("The current plan is not the authorized six-move stage", { summary: plan.summary });
   const approval = String(plan.approval && plan.approval.digest || "");
   if (!/^[a-f0-9]{64}$/.test(approval)) fail("The plan did not produce a valid SHA-256 approval digest");
+  if (!/^[a-f0-9]{64}$/.test(activeBaselineDigest)) fail("The plan did not produce a valid baseline tree digest");
   fs.writeFileSync(path.join(PROOF_DIR, "approved-digest.txt"), `${approval}\n`, { mode: 0o600 });
 
   const applied = runCaptured(process.execPath, [path.join(ROOT, "scripts", "topology-consolidation.js"), "apply", STAGE, "--approve", approval, "--verify", "none", "--json"]);
@@ -82,6 +88,8 @@ function main() {
   if (!status.trim()) fail("The verified migration produced no repository changes");
   copyStateStore();
   activeRunId = null;
+  activeSourceCommit = null;
+  activeBaselineDigest = null;
   writeOutput("executed", "true");
   writeOutput("run_id", state.run_id);
   writeOutput("proof_digest", proof.proof.digest);
@@ -140,6 +148,20 @@ if (require.main === module) {
     if (activeRunId) {
       try { rollback = topologyJson(["rollback", activeRunId, "--json"]); }
       catch (rollbackError) { rollback = { ok: false, error: rollbackError.message }; }
+      if (!rollback || !rollback.rollback || rollback.rollback.verified !== true) {
+        try {
+          rollback = restoreGovernedGitBaseline({
+            root: ROOT,
+            sourceCommit: activeSourceCommit,
+            expectedDigest: activeBaselineDigest,
+            statePath: runStatePath(activeRunId),
+            config: CONFIG,
+            requiredBranch: BRANCH,
+          });
+        } catch (recoveryError) {
+          rollback = { ok: false, error: recoveryError.message, prior_rollback: rollback };
+        }
+      }
     }
     fs.mkdirSync(PROOF_DIR, { recursive: true, mode: 0o700 });
     copyStateStore();

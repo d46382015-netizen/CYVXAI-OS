@@ -5,7 +5,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const test = require("node:test");
-const { rewriteContent, mapRepositoryPath, reverseMapRepositoryPath } = require("../services/topology-consolidation/path-aware-rewrite");
+const { rewriteContent, shouldRewriteExplicitPaths, mapRepositoryPath, reverseMapRepositoryPath } = require("../services/topology-consolidation/path-aware-rewrite");
 const executionOperator = require("../scripts/execute-authorized-topology-request");
 
 const moves = [{ source: "futures", target: "research/futures" }];
@@ -52,6 +52,18 @@ test("a moved importer rebases relative imports to unmoved repository roots", ()
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
+});
+
+test("topology self-test fixtures are never rewritten as repository paths", () => {
+  const source = [
+    'const moves = [{ source: "futures", target: "research/futures" }];',
+    'assert.equal(mapRepositoryPath("futures/trajectory_engine.js", moves), "research/futures/trajectory_engine.js");',
+  ].join("\n");
+  const rewritten = rewriteContent(process.cwd(), "test/topology-path-aware-rewrite.test.js", "test/topology-path-aware-rewrite.test.js", source, moves);
+  assert.equal(shouldRewriteExplicitPaths("test/topology-path-aware-rewrite.test.js"), false);
+  assert.equal(shouldRewriteExplicitPaths("test/topology-consolidation.test.js"), false);
+  assert.equal(shouldRewriteExplicitPaths("docs/architecture.md"), true);
+  assert.equal(rewritten, source);
 });
 
 test("forward and reverse path mapping are exact", () => {

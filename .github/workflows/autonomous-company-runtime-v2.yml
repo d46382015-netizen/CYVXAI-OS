@@ -1,0 +1,47 @@
+name: CYVX Autonomous Company Runtime v2
+
+on:
+  pull_request:
+    paths:
+      - "services/company-runtime/**"
+      - "scripts/start-autonomous-company-runtime.js"
+      - "scripts/verify-autonomous-company-runtime.js"
+      - "test/autonomous-company-runtime-v2.test.js"
+      - "docs/AUTONOMOUS_COMPANY_RUNTIME_V2.md"
+      - "package.json"
+      - ".github/workflows/autonomous-company-runtime-v2.yml"
+  push:
+    branches: [main]
+    paths:
+      - "services/company-runtime/**"
+      - "scripts/start-autonomous-company-runtime.js"
+      - "scripts/verify-autonomous-company-runtime.js"
+      - "test/autonomous-company-runtime-v2.test.js"
+      - "docs/AUTONOMOUS_COMPANY_RUNTIME_V2.md"
+      - "package.json"
+      - ".github/workflows/autonomous-company-runtime-v2.yml"
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Verify autonomous company runtime
+        run: npm run company:runtime:verify
+      - name: Retain verification proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autonomous-company-runtime-v2-${{ github.run_id }}
+          path: artifacts/autonomous-company-runtime/verification.json
+          if-no-files-found: error
+          retention-days: 30

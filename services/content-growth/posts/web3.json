@@ -1,0 +1,59 @@
+[
+  {
+    "pillar": "web3",
+    "slug": "secure-self-custody-wallet",
+    "title": "Secure a Self-Custody Wallet Before Funding It",
+    "hook": "The seed phrase is not a password reset. It is control of the asset.",
+    "outcome": "A compartmentalized wallet setup with tested recovery.",
+    "difficulty": "Intermediate",
+    "time": "45–90 min",
+    "cost": "Hardware wallet optional",
+    "steps": [
+      "Choose a wallet whose code, reputation, supported networks, and recovery model you understand.",
+      "Create it on a clean device. Never photograph, cloud-sync, email, or paste the seed phrase into a website.",
+      "Store recovery material offline in separate secure locations and test recovery with an empty wallet.",
+      "Use separate wallets for storage, transactions, experiments, and public identity.",
+      "Send a small test transaction, verify addresses on trusted displays, and review approvals regularly."
+    ],
+    "cta": "Save this before moving funds on-chain.",
+    "disclaimer": "Digital assets can be lost permanently and may be highly volatile. Educational only, not investment advice."
+  },
+  {
+    "pillar": "web3",
+    "slug": "smart-contract-due-diligence",
+    "title": "Read the Contract Before You Trust the Website",
+    "hook": "A polished interface can point to dangerous or upgradeable code.",
+    "outcome": "A practical smart-contract risk review before interacting.",
+    "difficulty": "Advanced",
+    "time": "60–180 min",
+    "cost": "$0+",
+    "steps": [
+      "Confirm the exact chain and contract address through multiple trusted sources.",
+      "Check whether source code is verified and whether the deployed bytecode matches.",
+      "Inspect owner privileges, upgradeability, pause controls, minting, fees, allowlists, oracles, and withdrawal paths.",
+      "Review audits, disclosed issues, bug bounties, admin-key controls, and changes since the audit.",
+      "Simulate the transaction, limit approvals, use a low-value wallet, and monitor resulting permissions."
+    ],
+    "cta": "Comment CONTRACT for the review checklist.",
+    "disclaimer": "Audits and verified code do not guarantee safety. Smart-contract interactions can be irreversible."
+  },
+  {
+    "pillar": "web3",
+    "slug": "tokenize-real-world-asset",
+    "title": "What Tokenizing a Real-World Asset Actually Requires",
+    "hook": "A token does not automatically create ownership, cash flow, or legal enforceability.",
+    "outcome": "A reality-first map from underlying asset to rights, compliance, custody, and reporting.",
+    "difficulty": "Advanced",
+    "time": "2–8 hr research",
+    "cost": "Varies",
+    "steps": [
+      "Identify the actual asset, owner, jurisdiction, liabilities, cash flows, and transfer restrictions.",
+      "Define exactly what the token represents: access, a claim, equity, debt, revenue share, or something else.",
+      "Map securities, money-transmission, tax, consumer, property, privacy, and identity requirements.",
+      "Design custody, servicing, governance, defaults, redemptions, records, and dispute handling.",
+      "Connect on-chain supply to off-chain evidence and independent reporting."
+    ],
+    "cta": "Share this with anyone calling a token 'the asset.'",
+    "disclaimer": "Tokenization can involve complex securities, property, tax, custody, and financial-services laws. Obtain qualified legal advice."
+  }
+]

@@ -1,0 +1,78 @@
+[
+  {
+    "pillar": "own",
+    "slug": "what-is-cash-flowing-asset",
+    "title": "Know What a Cash-Flowing Asset Really Is",
+    "hook": "An asset is not valuable because somebody called it passive.",
+    "outcome": "A repeatable method to evaluate ownership, cash flow, durability, and risk.",
+    "difficulty": "Beginner",
+    "time": "30 min",
+    "cost": "$0",
+    "steps": [
+      "Identify the legal or practical ownership right and what control it actually gives you.",
+      "Map gross inflows, operating costs, taxes, maintenance, financing, vacancies, refunds, and labor.",
+      "Calculate net cash flow under normal, downside, and break-even assumptions.",
+      "Assess concentration, liquidity, legal, technical, market, and operator dependency risks.",
+      "Define what evidence would prove the asset is improving or deteriorating."
+    ],
+    "cta": "Save this before buying an 'income asset.'",
+    "disclaimer": "Educational only, not investment, tax, or legal advice. Verify assumptions with qualified professionals."
+  },
+  {
+    "pillar": "own",
+    "slug": "build-digital-product-asset",
+    "title": "Build a Digital Product That Gets Better After Every Sale",
+    "hook": "A file becomes an asset when delivery, support, measurement, and improvement are systemized.",
+    "outcome": "A sellable digital product with automated delivery and a learning loop.",
+    "difficulty": "Intermediate",
+    "time": "2–7 days",
+    "cost": "$0+",
+    "steps": [
+      "Choose one narrow outcome already requested by a real audience.",
+      "Create the smallest complete product: instructions, templates, examples, validation, and support boundaries.",
+      "Connect checkout, tax settings, receipts, delivery, access control, refunds, and analytics.",
+      "Capture activation, completion, support friction, refund reason, and customer outcome.",
+      "Update the product from evidence and version every release."
+    ],
+    "cta": "Comment PRODUCT for the asset checklist.",
+    "disclaimer": "Follow payment, tax, consumer-protection, privacy, and platform requirements that apply to your location and customers."
+  },
+  {
+    "pillar": "own",
+    "slug": "protect-business-ip-basics",
+    "title": "Protect the Work Your Business Creates",
+    "hook": "Ownership becomes expensive to untangle after money and collaborators arrive.",
+    "outcome": "A basic intellectual-property and access-control inventory.",
+    "difficulty": "Beginner",
+    "time": "60 min",
+    "cost": "$0+",
+    "steps": [
+      "List brand names, domains, code, designs, content, customer data, processes, and inventions.",
+      "Record who created each item, under what agreement, and where the source files live.",
+      "Use written contractor and employee agreements appropriate to your jurisdiction.",
+      "Control repository, domain, cloud, payment, and social account access through business-owned accounts.",
+      "Track registrations, licenses, renewals, third-party components, and evidence of creation."
+    ],
+    "cta": "Share this with every founder using personal accounts for company assets.",
+    "disclaimer": "This is general education, not legal advice. Intellectual-property rules and contract requirements vary."
+  },
+  {
+    "pillar": "own",
+    "slug": "acquisition-scorecard",
+    "title": "Score a Small Business Before You Buy It",
+    "hook": "Revenue can be real while the business is still unbuyable.",
+    "outcome": "A first-pass acquisition scorecard that exposes dependencies and verification needs.",
+    "difficulty": "Advanced",
+    "time": "2–6 hr",
+    "cost": "$0+",
+    "steps": [
+      "Verify revenue using bank, processor, tax, invoice, and customer evidence—not a spreadsheet alone.",
+      "Normalize owner pay, one-time expenses, deferred maintenance, refunds, debt, and required working capital.",
+      "Measure customer, supplier, employee, channel, location, and owner concentration.",
+      "Inspect contracts, licenses, litigation, security, privacy, assets, liabilities, and transferability.",
+      "Build downside scenarios and a diligence list before discussing valuation or financing."
+    ],
+    "cta": "Comment ACQUIRE for the diligence scorecard.",
+    "disclaimer": "Business acquisitions require legal, accounting, tax, operational, and often industry-specific professional review."
+  }
+]

@@ -4,6 +4,7 @@ const crypto = require("node:crypto");
 const http = require("node:http");
 const { RuntimeError, verifyToken } = require("../../runtime/missions/base");
 const { readBody, sendJson, match } = require("./server");
+require("./company-control-compat");
 const { createCompanyControlHttpRuntime } = require("./company-control-server");
 
 function securityHeaders(res, production) {

@@ -1,0 +1,154 @@
+name: Activate First CYVX Company
+
+on:
+  workflow_run:
+    workflows: ["Deploy CYVX v7"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: activate-first-company-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  verify-public-activation:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CYVX_STAGING_URL: ${{ secrets.CYVX_STAGING_URL }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Confirm public HTTPS company activation
+        id: activation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          base="${CYVX_STAGING_URL:-https://cyvx-staging.onrender.com}"
+          base="${base%/}"
+          case "$base" in https://*) ;; *) echo "::error::CYVX staging URL must use HTTPS"; exit 1;; esac
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+
+          ready=false
+          for attempt in $(seq 1 90); do
+            if curl --proto '=https' --tlsv1.2 --fail --silent --show-error "$base/api/v1/company-runtime/public/status" > /tmp/first-company-status.json; then
+              if node - <<'NODE'
+          const fs = require('node:fs');
+          const status = JSON.parse(fs.readFileSync('/tmp/first-company-status.json', 'utf8'));
+          const company = (status.companies || []).find((item) => item.name === 'CYVX Bid & Revenue Sprint');
+          if (!status.ok || status.service !== 'cyvx-autonomous-company-runtime') process.exit(1);
+          if (!company) process.exit(1);
+          if (Number(company.completed_tasks || 0) < 9) process.exit(1);
+          if (Number(company.proof_artifacts || 0) < 9) process.exit(1);
+          if (Number(company.learnings || 0) < 1) process.exit(1);
+          if (Number(company.revenue_cents || 0) !== 0) process.exit(1);
+          NODE
+              then
+                ready=true
+                break
+              fi
+            fi
+            sleep 10
+          done
+          if [ "$ready" != true ]; then
+            echo "::error::First company did not become publicly verifiable at $base within fifteen minutes."
+            test -f /tmp/first-company-status.json && cat /tmp/first-company-status.json || true
+            exit 1
+          fi
+
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error "$base/" | grep 'Reality becomes'
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error "$base/control-room" | grep 'Autonomous Company Control Room'
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error "$base/healthz" > /tmp/first-company-health.json
+          node -e 'const x=require("/tmp/first-company-health.json");if(!x.ok)process.exit(1)'
+
+      - name: Write durable public activation receipt
+        env:
+          PUBLIC_BASE_URL: ${{ steps.activation.outputs.base }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/company-runtime
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const statusRaw = fs.readFileSync('/tmp/first-company-status.json', 'utf8');
+          const healthRaw = fs.readFileSync('/tmp/first-company-health.json', 'utf8');
+          const status = JSON.parse(statusRaw);
+          const health = JSON.parse(healthRaw);
+          const company = status.companies.find((item) => item.name === 'CYVX Bid & Revenue Sprint');
+          const receipt = {
+            schema_version: 1,
+            status: 'passed',
+            environment: 'staging',
+            public_base_url: process.env.PUBLIC_BASE_URL,
+            https_verified: String(process.env.PUBLIC_BASE_URL || '').startsWith('https://'),
+            service: status.service,
+            company: {
+              id: company.id,
+              name: company.name,
+              status: company.status,
+              mission_status: company.mission_status,
+              contract_status: company.contract_status,
+              target_metric: company.target_metric,
+              target_value: company.target_value,
+              completed_tasks: company.completed_tasks,
+              total_tasks: company.total_tasks,
+              proof_artifacts: company.proof_artifacts,
+              learnings: company.learnings,
+              leads_count: company.leads_count,
+              verified_collected_revenue_cents: company.revenue_cents,
+            },
+            measured_outcome: {
+              metric_name: 'governed_revenue_assets_completed',
+              value: company.completed_tasks,
+              unit: 'assets',
+              evidence: `${company.proof_artifacts} hashed production artifacts and ${company.learnings} persisted learning record(s)`,
+            },
+            next_cycle: 'Growth improvement task queued from the measured outcome',
+            health: { ok: health.ok === true, service: health.service || null, timestamp: health.timestamp || null },
+            response_sha256: crypto.createHash('sha256').update(statusRaw).digest('hex'),
+            source_commit_sha: process.env.GITHUB_SHA,
+            triggering_workflow_run_id: process.env.GITHUB_EVENT_NAME === 'workflow_run' ? process.env.GITHUB_RUN_ID : null,
+            workflow_run_id: process.env.GITHUB_RUN_ID,
+            workflow_run_attempt: Number(process.env.GITHUB_RUN_ATTEMPT || 1),
+            verified_at: new Date().toISOString(),
+            truth_boundary: 'This receipt proves the HTTPS runtime, company, governed internal execution, evidence artifacts, and measured learning were publicly reachable. Verified collected customer revenue remains $0 until external payment evidence is attached.',
+          };
+          fs.writeFileSync('artifacts/company-runtime/first-company-public-activation.json', JSON.stringify(receipt, null, 2) + '\n');
+          NODE
+          cat artifacts/company-runtime/first-company-public-activation.json
+
+      - name: Commit activation proof
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/company-runtime/first-company-public-activation.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Record first company public activation proof [skip ci]"
+          for attempt in 1 2 3; do
+            if git pull --rebase origin main && git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 3))
+          done
+          exit 1
+
+      - name: Retain public activation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: first-company-public-activation-${{ github.run_id }}
+          path: |
+            /tmp/first-company-status.json
+            /tmp/first-company-health.json
+            artifacts/company-runtime/first-company-public-activation.json
+          if-no-files-found: warn
+          retention-days: 90

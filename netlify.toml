@@ -1,0 +1,30 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  edge_functions = "netlify/edge-functions"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NPM_FLAGS = "--no-audit --no-fund"
+
+[[edge_functions]]
+  function = "company-runtime"
+  path = "/healthz"
+
+[[edge_functions]]
+  function = "company-runtime"
+  path = "/api/v1/company-runtime/*"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "no-cache"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store"

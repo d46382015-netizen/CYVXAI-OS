@@ -1,0 +1,82 @@
+name: Prove Netlify Production Now
+
+on:
+  pull_request:
+    paths: [.github/workflows/prove-netlify-production-now.yml]
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  prove-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - name: Verify live production company runtime
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          BASE="https://cyvxai.netlify.app"
+          ready=false
+          for attempt in $(seq 1 120); do
+            if curl --proto '=https' --tlsv1.2 --fail --silent --show-error "$BASE/healthz" > /tmp/health.json && \
+               curl --proto '=https' --tlsv1.2 --fail --silent --show-error "$BASE/api/v1/company-runtime/public/status" > /tmp/status.json; then
+              if node - <<'NODE'
+          const fs = require('node:fs');
+          const health = JSON.parse(fs.readFileSync('/tmp/health.json', 'utf8'));
+          const status = JSON.parse(fs.readFileSync('/tmp/status.json', 'utf8'));
+          const company = status.companies?.find((item) => item.name === 'CYVX Bid & Revenue Sprint');
+          if (!health.ok || health.runtime !== 'netlify-edge-blobs') process.exit(1);
+          if (!status.ok || status.runtime !== 'netlify-edge-blobs') process.exit(1);
+          if (!company || company.mission_status !== 'learned' || company.contract_status !== 'measured') process.exit(1);
+          if (Number(company.completed_tasks) < 9 || Number(company.proof_artifacts) < 9 || Number(company.learnings) < 1) process.exit(1);
+          if (Number(company.revenue_cents) !== 0) process.exit(1);
+          NODE
+              then ready=true; break; fi
+            fi
+            sleep 5
+          done
+          test "$ready" = true
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error "$BASE/" | grep 'Reality becomes'
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error "$BASE/control-room/" | grep 'Autonomous Company Control Room'
+          code="$(curl --proto '=https' --tlsv1.2 --silent --show-error --output /tmp/unauthorized.json --write-out '%{http_code}' "$BASE/api/v1/company-runtime/companies")"
+          test "$code" = 401
+          mkdir -p artifacts/company-runtime
+          node - <<'NODE'
+          const crypto = require('node:crypto');
+          const fs = require('node:fs');
+          const healthRaw = fs.readFileSync('/tmp/health.json', 'utf8');
+          const statusRaw = fs.readFileSync('/tmp/status.json', 'utf8');
+          const health = JSON.parse(healthRaw);
+          const status = JSON.parse(statusRaw);
+          const company = status.companies.find((item) => item.name === 'CYVX Bid & Revenue Sprint');
+          fs.writeFileSync('artifacts/company-runtime/netlify-production-verification.json', JSON.stringify({
+            schema_version: 1,
+            status: 'passed',
+            public_base_url: 'https://cyvxai.netlify.app',
+            https_verified: true,
+            runtime: status.runtime,
+            storage: health.storage,
+            company,
+            measured_outcome: { metric_name: company.target_metric, value: company.completed_tasks, unit: 'assets', evidence: `${company.proof_artifacts} SHA-256 artifacts and ${company.learnings} learning record(s)` },
+            verified_collected_revenue_cents: company.revenue_cents,
+            response_sha256: crypto.createHash('sha256').update(statusRaw).digest('hex'),
+            commit_sha: process.env.GITHUB_SHA,
+            workflow_run_id: process.env.GITHUB_RUN_ID,
+            verified_at: new Date().toISOString(),
+            truth_boundary: 'Production HTTPS, governed execution, proof, outcome, and learning are verified. No customer or collected revenue is claimed.'
+          }, null, 2) + '\n');
+          NODE
+          cat artifacts/company-runtime/netlify-production-verification.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: netlify-production-${{ github.run_id }}
+          path: |
+            /tmp/health.json
+            /tmp/status.json
+            /tmp/unauthorized.json
+            artifacts/company-runtime/netlify-production-verification.json
+          if-no-files-found: warn
+          retention-days: 90

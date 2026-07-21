@@ -17,28 +17,26 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          BASE="https://cyvxai.netlify.app"
           mkdir -p /tmp/netlify-production
-          for route in root health status control; do
-            case "$route" in
-              root) url="$BASE/" ;;
-              health) url="$BASE/healthz" ;;
-              status) url="$BASE/api/v1/company-runtime/public/status" ;;
-              control) url="$BASE/control-room/" ;;
-            esac
+          declare -A urls=(
+            [production-root]="https://cyvxai.netlify.app/"
+            [production-health]="https://cyvxai.netlify.app/healthz"
+            [production-status]="https://cyvxai.netlify.app/api/v1/company-runtime/public/status"
+            [production-control]="https://cyvxai.netlify.app/control-room/"
+            [main-root]="https://main--cyvxai.netlify.app/"
+            [main-health]="https://main--cyvxai.netlify.app/healthz"
+            [main-status]="https://main--cyvxai.netlify.app/api/v1/company-runtime/public/status"
+            [site-api]="https://api.netlify.com/api/v1/sites/cyvxai.netlify.app"
+            [deploys-api]="https://api.netlify.com/api/v1/sites/2277d176-db2c-4022-baaf-e98f65edf594/deploys?per_page=30"
+          )
+          for name in "${!urls[@]}"; do
             set +e
             curl --proto '=https' --tlsv1.2 --location --silent --show-error \
-              --dump-header "/tmp/netlify-production/$route.headers" \
-              --output "/tmp/netlify-production/$route.body" \
-              --write-out '%{http_code}\n' "$url" > "/tmp/netlify-production/$route.code" 2> "/tmp/netlify-production/$route.error"
+              --dump-header "/tmp/netlify-production/$name.headers" \
+              --output "/tmp/netlify-production/$name.body" \
+              --write-out '%{http_code}\n' "${urls[$name]}" > "/tmp/netlify-production/$name.code" 2> "/tmp/netlify-production/$name.error"
             set -e
           done
-          set +e
-          curl --proto '=https' --tlsv1.2 --location --silent --show-error \
-            --dump-header /tmp/netlify-production/site-api.headers \
-            --output /tmp/netlify-production/site-api.body \
-            --write-out '%{http_code}\n' "https://api.netlify.com/api/v1/sites/cyvxai.netlify.app" > /tmp/netlify-production/site-api.code 2> /tmp/netlify-production/site-api.error
-          set -e
           for file in /tmp/netlify-production/*; do echo "--- $file"; cat "$file"; done
 
       - uses: actions/upload-artifact@v4

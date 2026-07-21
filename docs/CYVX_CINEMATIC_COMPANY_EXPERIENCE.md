@@ -1,6 +1,23 @@
 # CYVXAI-OS Cinematic Company Experience
 
-The public site and autonomous company control room are now mounted directly inside the canonical CYVXAI-OS production runtime. `npm start` serves the cinematic company edge, existing mission APIs, Spark, Field Manual, universal operator, health, readiness, and control-plane behavior from one composed process.
+The public site and autonomous company control room are mounted directly inside the canonical CYVXAI-OS production runtime. `npm start` serves the cinematic company edge, existing mission APIs, Spark, Field Manual, universal operator, health, readiness, and control-plane behavior from one composed process.
+
+## First company activation
+
+Staging and production automatically activate one canonical company when it does not already exist:
+
+- Company: `CYVX Bid & Revenue Sprint`
+- Customer: commercial cleaning, landscaping, facilities, security, and small construction firms
+- Offer: a 10-day evidence-backed bid and revenue sprint
+- Price: `$1,500`
+- Governed mission: build the complete operating package required to pursue the first `$5,000` in verified collected client revenue
+- Internal target: nine completed governed revenue assets with nine hashed proof artifacts
+
+The activation is resumable and idempotent. Startup creates the company, approves its governed mission, executes the nine-agent plan to idle, records the first measured outcome, persists a receipt under the runtime data root, and queues the Growth agent's next improvement task. A restart continues an incomplete activation without duplicating the company or outcome.
+
+The first measured outcome is deliberately bounded to what the system can prove: nine completed internal production workstreams and nine hashed artifacts. It records verified collected customer revenue as `$0` until outside-world payment evidence exists.
+
+`CYVX_BOOTSTRAP_FIRST_COMPANY=false` disables this behavior. `CYVX_FIRST_COMPANY_MAXIMUM_TICKS` controls the bounded execution limit.
 
 ## Routes
 
@@ -31,10 +48,24 @@ The control room buttons call production endpoints on the same origin:
 
 The canonical runtime also runs the autonomous company scheduler. Active companies are advanced on the configured interval unless `CYVX_COMPANY_RUNTIME_AUTO_TICK=false`.
 
+## Public HTTPS proof
+
+After the main deployment workflow succeeds, `.github/workflows/activate-first-company.yml` waits for the configured staging HTTPS endpoint and verifies:
+
+- the cinematic public site is reachable over TLS;
+- `/control-room` is reachable;
+- the public company runtime API is healthy;
+- `CYVX Bid & Revenue Sprint` exists;
+- at least nine tasks and nine proof artifacts completed;
+- at least one measured learning exists;
+- collected revenue remains truthfully reported as `$0`.
+
+The workflow writes `artifacts/company-runtime/first-company-public-activation.json` to `main` and retains the raw public status and health responses as a workflow artifact.
+
 ## Security boundaries
 
 - Set `CYVX_COMPANY_RUNTIME_TOKEN` to a known secret of at least 32 characters for production control-room access.
-- When the dedicated token is absent, the runtime derives an isolated company-control token from `CYVX_AUTH_SECRET` so startup remains secure and deterministic; the derived token is never embedded in production HTML.
+- When the dedicated token is absent, the runtime derives an isolated company-control token from `CYVX_AUTH_SECRET`; the derived token is never embedded in production HTML.
 - The browser stores an explicitly entered token only in local storage and sends it only as the bearer token to the current origin.
 - Public status exposes sanitized aggregates, not task outputs, memory contents, integration secrets, or artifact paths.
 - Public pilot intake is body-limited, field-limited, email-validated, honeypot-protected, and rate-limited.
@@ -46,7 +77,7 @@ The canonical runtime also runs the autonomous company scheduler. Active compani
 ```bash
 cd ~/CYVXAI-OS && \
 export CYVX_COMPANY_RUNTIME_TOKEN="$(node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64url'))")" && \
-npm start
+CYVX_BOOTSTRAP_FIRST_COMPANY=true npm start
 ```
 
 Open:
@@ -62,9 +93,9 @@ Open:
 ```bash
 cd ~/CYVXAI-OS && \
 npm run company:runtime:verify && \
-node --test test/canonical-company-gateway.test.js && \
+node --test test/first-company-activation.test.js test/canonical-company-gateway.test.js && \
 npm test && \
 npm run build
 ```
 
-The focused canonical gateway test proves that `/`, `/control-room`, `/control`, protected company mutations, approval, run-to-idle, public proof, the existing public status API, and Spark all operate through the same production listener.
+The focused tests prove canonical route composition, authenticated company operations, resumable creation and approval, nine-agent run-to-idle execution, durable proof artifacts, the first measured outcome, next-cycle generation, and idempotent restart behavior.

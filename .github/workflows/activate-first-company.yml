@@ -6,9 +6,7 @@ on:
     types: [completed]
   workflow_dispatch:
 
-permissions:
-  contents: write
-  actions: read
+permissions: write-all
 
 concurrency:
   group: activate-first-company-${{ github.event.workflow_run.head_sha || github.sha }}
@@ -79,6 +77,7 @@ jobs:
           node - <<'NODE'
           const fs = require('node:fs');
           const crypto = require('node:crypto');
+          const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
           const statusRaw = fs.readFileSync('/tmp/first-company-status.json', 'utf8');
           const healthRaw = fs.readFileSync('/tmp/first-company-health.json', 'utf8');
           const status = JSON.parse(statusRaw);
@@ -115,8 +114,8 @@ jobs:
             next_cycle: 'Growth improvement task queued from the measured outcome',
             health: { ok: health.ok === true, service: health.service || null, timestamp: health.timestamp || null },
             response_sha256: crypto.createHash('sha256').update(statusRaw).digest('hex'),
-            source_commit_sha: process.env.GITHUB_SHA,
-            triggering_workflow_run_id: process.env.GITHUB_EVENT_NAME === 'workflow_run' ? process.env.GITHUB_RUN_ID : null,
+            source_commit_sha: event.workflow_run?.head_sha || process.env.GITHUB_SHA,
+            triggering_workflow_run_id: event.workflow_run?.id || null,
             workflow_run_id: process.env.GITHUB_RUN_ID,
             workflow_run_attempt: Number(process.env.GITHUB_RUN_ATTEMPT || 1),
             verified_at: new Date().toISOString(),

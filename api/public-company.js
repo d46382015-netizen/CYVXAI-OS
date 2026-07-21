@@ -4,6 +4,7 @@ const crypto = require("node:crypto");
 const path = require("node:path");
 const base = require("./public");
 const { AutonomousCompanyRuntime } = require("../services/company-runtime");
+const { activateFirstCompany, activationEnabled } = require("../services/company-runtime/bootstrap");
 const { createAutonomousCompanyGateway } = require("../services/company-runtime/gateway");
 const { createCompanyScheduler } = require("../services/company-runtime/scheduler");
 
@@ -36,6 +37,14 @@ async function createPublicRuntime(options = {}) {
       timeoutMs: env.CYVX_CLAUDE_TIMEOUT_MS,
     },
   });
+
+  const bootstrapFirstCompany = activationEnabled({ enabled: options.bootstrapFirstCompany }, env);
+  const firstCompanyActivation = bootstrapFirstCompany ? await activateFirstCompany(companyRuntime, {
+    organizationId: options.publicOrganization || env.CYVX_PUBLIC_ORGANIZATION || "default",
+    maximumTicks: Number(options.firstCompanyMaximumTicks || env.CYVX_FIRST_COMPANY_MAXIMUM_TICKS || 100),
+    receiptPath: options.firstCompanyReceiptPath || path.join(runtime.missions.dataRoot, "proof", "first-company-activation.json"),
+  }) : { enabled: false, reason: "first-company activation disabled" };
+
   const companyGateway = createAutonomousCompanyGateway(companyRuntime, {
     environment: production ? "production" : String(env.NODE_ENV || "development"),
     token: companyControlToken(runtime.missions, options, env),
@@ -64,6 +73,7 @@ async function createPublicRuntime(options = {}) {
 
   const closeBase = runtime.close.bind(runtime);
   runtime.companyRuntime = companyRuntime;
+  runtime.firstCompanyActivation = firstCompanyActivation;
   runtime.companyGateway = companyGateway;
   runtime.companyScheduler = companyScheduler;
   runtime.close = async () => {

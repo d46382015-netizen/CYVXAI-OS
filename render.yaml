@@ -21,6 +21,10 @@ services:
         value: production
       - key: CYVX_ENV
         value: staging
+      - key: CYVX_BOOTSTRAP_FIRST_COMPANY
+        value: "true"
+      - key: CYVX_FIRST_COMPANY_MAXIMUM_TICKS
+        value: "100"
       - key: CYVX_DATA_ROOT
         value: /var/lib/cyvx
       - key: CYVX_LOG_PATH
@@ -126,6 +130,10 @@ services:
         value: production
       - key: CYVX_ENV
         value: production
+      - key: CYVX_BOOTSTRAP_FIRST_COMPANY
+        value: "true"
+      - key: CYVX_FIRST_COMPANY_MAXIMUM_TICKS
+        value: "100"
       - key: CYVX_DATA_ROOT
         value: /var/lib/cyvx
       - key: CYVX_LOG_PATH

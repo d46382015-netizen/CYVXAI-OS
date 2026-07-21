@@ -39,6 +39,7 @@ function main() {
     "services/company-runtime/index.js",
     "services/company-runtime/server.js",
     "services/company-runtime/ui.js",
+    "services/company-runtime/bootstrap.js",
     "services/company-runtime/gateway.js",
     "services/company-runtime/scheduler.js",
     "api/public-company.js",
@@ -47,12 +48,13 @@ function main() {
     "test/autonomous-company-runtime-v2.test.js",
     "test/company-experience.test.js",
     "test/canonical-company-gateway.test.js",
+    "test/first-company-activation.test.js",
   ];
   const proofFiles = [...codeFiles, "docs/CYVX_CINEMATIC_COMPANY_EXPERIENCE.md"];
   for (const file of codeFiles) run(["--check", file]);
-  run(["--test", "test/autonomous-company-runtime-v2.test.js", "test/company-experience.test.js", "test/canonical-company-gateway.test.js"]);
+  run(["--test", "test/autonomous-company-runtime-v2.test.js", "test/company-experience.test.js", "test/canonical-company-gateway.test.js", "test/first-company-activation.test.js"]);
   writeProof({
-    schema_version: 3,
+    schema_version: 4,
     ok: true,
     generated_at: new Date().toISOString(),
     capability: "cyvx-autonomous-company-runtime-v2-canonical-cinematic-production-edge",
@@ -61,9 +63,9 @@ function main() {
     public_routes: ["/", "/api/v1/company-runtime/public/status", "/api/v1/company-runtime/public/leads"],
     control_routes: ["/control", "/control-room", "/api/v1/company-runtime/companies"],
     preserved_routes: ["/missions", "/spark", "/field-manual", "/api/public/status", "/healthz", "/readyz"],
-    durable_primitives: ["teams", "agents", "tasks", "leases", "memory", "metrics", "learnings", "integrations", "deliveries", "events", "public_lead_intake", "canonical_gateway", "autonomous_scheduler"],
+    durable_primitives: ["teams", "agents", "tasks", "leases", "memory", "metrics", "learnings", "integrations", "deliveries", "events", "public_lead_intake", "canonical_gateway", "autonomous_scheduler", "resumable_first_company_activation", "measured_outcome_receipt"],
     verified_files: proofFiles.map((file) => ({ path: file, sha256: digest(file), bytes: fs.statSync(file).size })),
-    truth_boundary: "Verification proves local canonical-runtime composition, persistent public lead intake, sanitized public proof, authenticated control-room actions, run-to-idle execution, preserved mission and Spark routes, security controls, signed webhook delivery, and tests. It does not prove a live provider credential, customer payment, or externally reachable deployment exists.",
+    truth_boundary: "Verification proves local canonical-runtime composition, resumable first-company creation and approval, nine-agent run-to-idle execution, a persisted measured outcome, queued next-cycle learning, public lead intake, sanitized public proof, authenticated controls, preserved routes, security controls, signed webhook delivery, and tests. It does not claim a live customer, payment, collected revenue, or externally reachable deployment until the public activation workflow records that evidence.",
   });
   process.stdout.write(`${JSON.stringify({ ok: true, event: "company_runtime.verified", proof: proofPath })}\n`);
 }
@@ -72,7 +74,7 @@ try {
   main();
 } catch (error) {
   writeProof({
-    schema_version: 3,
+    schema_version: 4,
     ok: false,
     generated_at: new Date().toISOString(),
     capability: "cyvx-autonomous-company-runtime-v2-canonical-cinematic-production-edge",

@@ -2,6 +2,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const { renderPublicSite, renderControlRoom } = require("../services/company-runtime/ui");
 
 const ROOT = path.join(__dirname, "..");
 const DIST = path.join(ROOT, "dist");
@@ -10,6 +11,7 @@ function main() {
   fs.rmSync(DIST, { recursive: true, force: true });
   copyDirectoryFiles("ui", path.join(DIST, "ui"), /\.(html|js|css|md)$/);
   copyDirectoryFiles(path.join("spark", "ui"), path.join(DIST, "spark", "ui"), /\.(html|js|css)$/);
+  writePublicExperience();
   writeManifest();
   console.log(`Core artifacts assembled: ${DIST}`);
 }
@@ -26,6 +28,19 @@ function copyDirectoryFiles(relativeSource, target, pattern) {
   }
 }
 
+function writePublicExperience() {
+  const publicHtml = renderPublicSite();
+  const controlHtml = renderControlRoom({ localToken: "" });
+  fs.mkdirSync(DIST, { recursive: true });
+  fs.writeFileSync(path.join(DIST, "index.html"), publicHtml);
+  fs.writeFileSync(path.join(DIST, "404.html"), publicHtml);
+  for (const route of ["control-room", "control"]) {
+    const target = path.join(DIST, route);
+    fs.mkdirSync(target, { recursive: true });
+    fs.writeFileSync(path.join(target, "index.html"), controlHtml);
+  }
+}
+
 function writeManifest() {
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
   const manifest = {
@@ -39,6 +54,9 @@ function writeManifest() {
       public_core: "api/public.js",
       company_gateway: "services/company-runtime/gateway.js",
       company_ui: "services/company-runtime/ui.js",
+      netlify_company_edge: "netlify/edge-functions/company-runtime.js",
+      netlify_public_ui: "dist/index.html",
+      netlify_control_room: "dist/control-room/index.html",
       production_gateway: "api/production.js",
       legacy_api: "api/index.js",
       spark: "spark/server.js",

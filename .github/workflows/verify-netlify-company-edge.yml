@@ -1,0 +1,160 @@
+name: Verify Netlify Company Edge
+
+on:
+  pull_request:
+    paths:
+      - netlify.toml
+      - netlify/**
+      - services/company-runtime/ui.js
+      - scripts/build.js
+      - test/netlify-company-edge.test.js
+      - .github/workflows/verify-netlify-company-edge.yml
+  push:
+    branches: [main]
+    paths:
+      - netlify.toml
+      - netlify/**
+      - services/company-runtime/ui.js
+      - scripts/build.js
+      - test/netlify-company-edge.test.js
+      - .github/workflows/verify-netlify-company-edge.yml
+  workflow_dispatch:
+
+permissions: write-all
+
+concurrency:
+  group: netlify-company-edge-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Verify source and production build
+        run: |
+          set -Eeuo pipefail
+          node --test test/netlify-company-edge.test.js test/first-company-activation.test.js
+          npm run build
+          grep 'Reality becomes' dist/index.html
+          grep 'Autonomous Company Control Room' dist/control-room/index.html
+
+      - name: Resolve public HTTPS target
+        id: target
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="https://deploy-preview-${{ github.event.pull_request.number }}--cyvxai.netlify.app"
+          else
+            base="https://cyvxai.netlify.app"
+          fi
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          echo "Testing $base"
+
+      - name: Prove company, mission, execution, evidence, outcome, and learning
+        env:
+          BASE: ${{ steps.target.outputs.base }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ready=false
+          for attempt in $(seq 1 90); do
+            if curl --proto '=https' --tlsv1.2 --fail --silent --show-error "$BASE/healthz" > /tmp/cyvx-netlify-health.json && \
+               curl --proto '=https' --tlsv1.2 --fail --silent --show-error "$BASE/api/v1/company-runtime/public/status" > /tmp/cyvx-netlify-status.json; then
+              if node - <<'NODE'
+          const fs = require('node:fs');
+          const health = JSON.parse(fs.readFileSync('/tmp/cyvx-netlify-health.json', 'utf8'));
+          const status = JSON.parse(fs.readFileSync('/tmp/cyvx-netlify-status.json', 'utf8'));
+          const company = (status.companies || []).find((item) => item.name === 'CYVX Bid & Revenue Sprint');
+          if (!health.ok || health.service !== 'cyvx-autonomous-company-runtime') process.exit(1);
+          if (health.runtime !== 'netlify-edge-blobs') process.exit(1);
+          if (!status.ok || status.service !== 'cyvx-autonomous-company-runtime') process.exit(1);
+          if (status.runtime !== 'netlify-edge-blobs') process.exit(1);
+          if (!company) process.exit(1);
+          if (company.mission_status !== 'learned') process.exit(1);
+          if (company.contract_status !== 'measured') process.exit(1);
+          if (Number(company.completed_tasks) < 9) process.exit(1);
+          if (Number(company.proof_artifacts) < 9) process.exit(1);
+          if (Number(company.learnings) < 1) process.exit(1);
+          if (Number(company.revenue_cents) !== 0) process.exit(1);
+          if (Number(status.metrics.tasks_completed) < 9) process.exit(1);
+          if (Number(status.metrics.proof_artifacts) < 9) process.exit(1);
+          if (Number(status.metrics.learnings) < 1) process.exit(1);
+          NODE
+              then
+                ready=true
+                break
+              fi
+            fi
+            sleep 5
+          done
+          if [ "$ready" != true ]; then
+            echo "::error::The Netlify company runtime did not become verifiable at $BASE."
+            test -f /tmp/cyvx-netlify-health.json && cat /tmp/cyvx-netlify-health.json || true
+            test -f /tmp/cyvx-netlify-status.json && cat /tmp/cyvx-netlify-status.json || true
+            exit 1
+          fi
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error "$BASE/" | grep 'Reality becomes'
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error "$BASE/control-room/" | grep 'Autonomous Company Control Room'
+          status="$(curl --proto '=https' --tlsv1.2 --silent --show-error --output /tmp/cyvx-netlify-unauthorized.json --write-out '%{http_code}' "$BASE/api/v1/company-runtime/companies")"
+          test "$status" = "401"
+          node -e 'const x=require("/tmp/cyvx-netlify-unauthorized.json");if(x.ok!==false||x.error.code!=="UNAUTHORIZED")process.exit(1)'
+
+      - name: Write activation proof artifact
+        env:
+          PUBLIC_BASE_URL: ${{ steps.target.outputs.base }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p artifacts/company-runtime
+          node - <<'NODE'
+          const crypto = require('node:crypto');
+          const fs = require('node:fs');
+          const healthRaw = fs.readFileSync('/tmp/cyvx-netlify-health.json', 'utf8');
+          const statusRaw = fs.readFileSync('/tmp/cyvx-netlify-status.json', 'utf8');
+          const health = JSON.parse(healthRaw);
+          const status = JSON.parse(statusRaw);
+          const company = status.companies.find((item) => item.name === 'CYVX Bid & Revenue Sprint');
+          const receipt = {
+            schema_version: 1,
+            status: 'passed',
+            public_base_url: process.env.PUBLIC_BASE_URL,
+            https_verified: process.env.PUBLIC_BASE_URL.startsWith('https://'),
+            runtime: status.runtime,
+            storage: health.storage,
+            company,
+            measured_outcome: {
+              metric_name: company.target_metric,
+              value: company.completed_tasks,
+              unit: 'assets',
+              evidence: `${company.proof_artifacts} SHA-256 proof artifacts and ${company.learnings} learning record(s)`,
+            },
+            verified_collected_revenue_cents: company.revenue_cents,
+            response_sha256: crypto.createHash('sha256').update(statusRaw).digest('hex'),
+            commit_sha: process.env.GITHUB_SHA,
+            workflow_run_id: process.env.GITHUB_RUN_ID,
+            verified_at: new Date().toISOString(),
+            truth_boundary: 'This receipt proves public HTTPS runtime reachability, governed internal execution, evidence, outcome, and learning. It does not claim a customer or collected revenue.',
+          };
+          fs.writeFileSync('artifacts/company-runtime/netlify-company-edge-verification.json', JSON.stringify(receipt, null, 2) + '\n');
+          NODE
+          cat artifacts/company-runtime/netlify-company-edge-verification.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: netlify-company-edge-${{ github.run_id }}
+          path: |
+            /tmp/cyvx-netlify-health.json
+            /tmp/cyvx-netlify-status.json
+            /tmp/cyvx-netlify-unauthorized.json
+            artifacts/company-runtime/netlify-company-edge-verification.json
+          if-no-files-found: warn
+          retention-days: 90

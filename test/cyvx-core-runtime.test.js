@@ -17,7 +17,7 @@ function fixture(options = {}) {
   const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), "cyvx-core-v1-"));
   const repoRoot = path.join(dataRoot, "workspace");
   fs.mkdirSync(repoRoot, { recursive: true });
-  const missionRuntime = createMissionRuntime({ dataRoot, repoRoot, allowLocalAuth: true });
+  const missionRuntime = createMissionRuntime({ dataRoot, allowLocalAuth: true });
   missionRuntime.logger = missionRuntime.logger || missionRuntime.store?.logger;
   const core = createCyvxCore(missionRuntime, { workspaceRoot: repoRoot, ...options });
   const principal = {

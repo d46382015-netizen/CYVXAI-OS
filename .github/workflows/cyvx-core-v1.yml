@@ -1,0 +1,52 @@
+name: CYVX Core v1
+
+on:
+  pull_request:
+    paths:
+      - "runtime/core/**"
+      - "test/cyvx-core-runtime.test.js"
+      - "scripts/verify-cyvx-core.js"
+      - "docs/CYVX_CORE_V1.md"
+      - "package.json"
+      - ".github/workflows/cyvx-core-v1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "runtime/core/**"
+      - "test/cyvx-core-runtime.test.js"
+      - "scripts/verify-cyvx-core.js"
+      - "docs/CYVX_CORE_V1.md"
+      - "package.json"
+      - ".github/workflows/cyvx-core-v1.yml"
+  workflow_dispatch:
+
+permissions: write-all
+
+concurrency:
+  group: cyvx-core-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: node --check runtime/core/context.js
+      - run: node --check runtime/core/capability-registry.js
+      - run: node --check runtime/core/builtins.js
+      - run: node --check runtime/core/kernel.js
+      - run: node --check runtime/core/index.js
+      - run: npm run core:test
+      - run: npm run core:verify
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cyvx-core-v1-verification
+          path: artifacts/cyvx-core/verification.json
+          if-no-files-found: error

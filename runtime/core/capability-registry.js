@@ -135,15 +135,23 @@ class CapabilityRegistry {
     for (let attempt = 0; attempt <= capability.retries; attempt += 1) {
       attempts = attempt + 1;
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(new Error(`Capability ${name} timed out`)), capability.timeout_ms);
+      const timeoutError = new CapabilityError("CAPABILITY_TIMEOUT", `Capability ${name} exceeded ${capability.timeout_ms}ms`, 504);
+      let timeoutHandle;
+      const timeoutPromise = new Promise((resolve, reject) => {
+        timeoutHandle = setTimeout(() => {
+          controller.abort(timeoutError);
+          reject(timeoutError);
+        }, capability.timeout_ms);
+      });
       try {
-        const raw = await Promise.resolve(capability.handler(payload, {
+        const handlerPromise = Promise.resolve().then(() => capability.handler(payload, {
           context: context.snapshot(),
           signal: controller.signal,
           invocation_id: invocationId,
           idempotency_key: idempotencyKey,
           attempt: attempts,
         }));
+        const raw = await Promise.race([handlerPromise, timeoutPromise]);
         const envelope = raw && typeof raw === "object" && !Array.isArray(raw) && (Object.hasOwn(raw, "output") || Object.hasOwn(raw, "evidence"))
           ? raw
           : { output: raw };
@@ -175,7 +183,7 @@ class CapabilityRegistry {
         if (!retryable) break;
         await sleep(Math.min(5000, 250 * (2 ** attempt)));
       } finally {
-        clearTimeout(timeout);
+        clearTimeout(timeoutHandle);
       }
     }
     const failed = {

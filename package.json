@@ -81,6 +81,8 @@
     "company:runtime": "node ./scripts/start-autonomous-company-runtime.js",
     "company:runtime:test": "node --test ./test/autonomous-company-runtime-v2.test.js",
     "company:runtime:verify": "node ./scripts/verify-autonomous-company-runtime.js",
+    "core:test": "node --test ./test/cyvx-core-runtime.test.js",
+    "core:verify": "node ./scripts/verify-cyvx-core.js",
     "universal": "node ./scripts/start-company-operator.js",
     "universal:test": "node --test ./test/universal-operator.test.js",
     "universal:verify": "node --check ./services/operator/universal.js && node --check ./services/operator/universal-server.js && node --test ./test/universal-operator.test.js",

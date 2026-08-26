@@ -6,14 +6,62 @@ on:
   pull_request:
   workflow_dispatch:
 
-permissions: write-all
+permissions:
+  contents: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  preflight:
+    name: Deterministic preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NODE_ENV: test
+      CYVX_ENV: test
+      CYVX_ALLOW_INSECURE_LOCAL: "true"
+      CYVX_AUTH_SECRET: "ci-runtime-secret-longer-than-thirty-two-characters"
+      CYVX_DATA_ROOT: /tmp/cyvx-preflight
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Validate package metadata and lockfile
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node -e 'const p=require("./package.json"); const l=require("./package-lock.json"); if(p.name!==l.name) throw new Error(`package name mismatch: ${p.name} != ${l.name}`); if(p.version!==l.version) throw new Error(`package version mismatch: ${p.version} != ${l.version}`); console.log(`package ${p.name}@${p.version}`)'
+          test -f package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Syntax-check authoritative entrypoints
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node --check ./api/runtime-v7.js
+          node --check ./api/index.js
+          node --check ./spark/server.js
+          node --check ./status/server.js
+          node --check ./scripts/build.js
+          node --check ./scripts/check-v7.js
+          node --check ./scripts/package-v7.js
+          node --check ./scripts/verify-runtime.js
+
+      - name: Run deterministic build
+        run: npm run build
+
   production-baseline:
+    needs: preflight
     name: Authoritative runtime gate and compatibility regression
     runs-on: ubuntu-latest
     timeout-minutes: 35

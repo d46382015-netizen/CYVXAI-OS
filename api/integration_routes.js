@@ -75,6 +75,37 @@ function createIntegrationRouter(hub, options = {}) {
         return true;
       }
 
+      if (req.method === "GET" && pathname === "/api/v1/integrations/krea/status") {
+        hub.policy.require(context, "integrations:read");
+        sendJson(res, 200, { ok: true, krea: hub.krea.health() });
+        return true;
+      }
+
+      if (req.method === "POST" && pathname === "/api/v1/integrations/krea/generate") {
+        hub.policy.require(context, "integrations:write", { requireMfa: true });
+        const body = await readJsonLimited(req, maxBodyBytes);
+        const result = await hub.krea.generate(body, context);
+        sendJson(res, 202, { ok: true, provider: "krea", result, trace_id: traceId(req) });
+        return true;
+      }
+
+      const kreaJobMatch = pathname.match(/^\/api\/v1\/integrations\/krea\/jobs\/([^/]+)$/);
+      if (req.method === "GET" && kreaJobMatch) {
+        hub.policy.require(context, "integrations:read");
+        const result = await hub.krea.job(decodeURIComponent(kreaJobMatch[1]), context);
+        sendJson(res, 200, { ok: true, provider: "krea", result });
+        return true;
+      }
+
+      const kreaWaitMatch = pathname.match(/^\/api\/v1\/integrations\/krea\/jobs\/([^/]+)\/wait$/);
+      if (req.method === "POST" && kreaWaitMatch) {
+        hub.policy.require(context, "integrations:write", { requireMfa: true });
+        const body = await readJsonLimited(req, maxBodyBytes);
+        const result = await hub.krea.wait(decodeURIComponent(kreaWaitMatch[1]), body, context);
+        sendJson(res, 200, { ok: true, provider: "krea", result });
+        return true;
+      }
+
       if (req.method === "POST" && pathname === "/api/v1/integrations/email") {
         hub.policy.require(context, "email:send", { requireMfa: true });
         if (!hub.flags.getBooleanValue("email.enabled", false, { tenantId: context.tenant_id })) throw forbidden("EMAIL_DISABLED", "Email delivery is disabled by feature flag.");

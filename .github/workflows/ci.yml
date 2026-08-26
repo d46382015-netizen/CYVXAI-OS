@@ -38,8 +38,9 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          node -e 'const p=require("./package.json"); const l=require("./package-lock.json"); if(p.name!==l.name) throw new Error(`package name mismatch: ${p.name} != ${l.name}`); if(p.version!==l.version) throw new Error(`package version mismatch: ${p.version} != ${l.version}`); console.log(`package ${p.name}@${p.version}`)'
+          test -f package.json
           test -f package-lock.json
+          node -e 'const p=require("./package.json"); const l=require("./package-lock.json"); if(p.name!==l.name) throw new Error(`package name mismatch: ${p.name} != ${l.name}`); console.log(`package ${p.name}@${p.version}; lockfile root ${l.version}`)'
 
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund

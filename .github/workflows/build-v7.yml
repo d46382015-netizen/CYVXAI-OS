@@ -5,7 +5,8 @@ on:
   push:
     branches: [main]
 
-permissions: write-all
+permissions:
+  contents: read
 
 concurrency:
   group: cyvx-v7-build-${{ github.ref }}
@@ -13,7 +14,9 @@ concurrency:
 
 jobs:
   build:
+    name: v7 deterministic build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -21,7 +24,7 @@ jobs:
           node-version: 24
           cache: npm
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
       - name: Assemble legacy artifacts
         run: node ./scripts/build.js
       - name: Validate v7 server and browser modules
@@ -30,7 +33,18 @@ jobs:
         run: node ./scripts/package-v7.js
       - name: Verify v7 manifest and browser assets
         run: |
+          set -Eeuo pipefail
           test -s dist/v7-manifest.json
           test -s dist/spark/ui/spark-client.js
           test -s dist/spark/ui/spark-render.js
           test -s dist/spark/ui/spark-control-actions.js
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyvx-v7-build-diagnostics
+          path: |
+            dist/v7-manifest.json
+            dist/spark/ui/*.js
+          if-no-files-found: ignore
+          retention-days: 7

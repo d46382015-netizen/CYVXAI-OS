@@ -13,6 +13,7 @@ const { StripeBilling } = require("./stripe_billing");
 const { SupabaseDataClient } = require("./supabase_data_client");
 const { QueueWorker, SupabaseQueueClient } = require("./supabase_queue");
 const { TransactionalEmail } = require("./transactional_email");
+const { KreaProvider } = require("./krea_provider");
 
 class IntegrationHub {
   constructor(options = {}) {
@@ -32,6 +33,7 @@ class IntegrationHub {
     this.sentry = options.sentry || new SentryTransport({ env: this.env, fetch: options.fetch, required: this.requirements.error_tracking });
     this.billing = options.billing || new StripeBilling({ env: this.env, dataClient: this.data, queue: this.queue, required: this.requirements.billing });
     this.workloadIdentity = options.workloadIdentity || new WorkloadIdentity({ env: this.env, fetch: options.fetch });
+    this.krea = options.krea || new KreaProvider({ env: this.env, fetch: options.fetch });
     this.worker = options.worker || new QueueWorker({ queue: this.queue, telemetry: this.telemetry, enabled: approvedByDefault(this.env.CYVX_QUEUE_WORKER) });
     this.started = false;
     this.#registerHandlers();
@@ -90,6 +92,7 @@ class IntegrationHub {
       billing: this.billing.snapshot(),
       email: this.email.snapshot(),
       workload_identity: this.workloadIdentity.snapshot(),
+      krea: this.krea.health(),
     };
     const checks = [
       check("identity", !requirements.identity || providers.identity.configured, requirements.identity, providers.identity.verification),
@@ -104,9 +107,10 @@ class IntegrationHub {
       check("billing", !requirements.billing || (providers.billing.configured && providers.billing.enabled), requirements.billing, providers.billing.enabled ? "enabled" : "disabled"),
       check("email", !requirements.email || (providers.email.configured && providers.email.enabled), requirements.email, providers.email.provider || "unconfigured"),
       check("workload_identity", !requirements.workload_identity || providers.workload_identity.exchange_configured, requirements.workload_identity, providers.workload_identity.exchange_host || "unconfigured"),
+      check("krea", !requirements.krea || providers.krea.configured, requirements.krea, providers.krea.configured ? "api-token" : "missing"),
     ];
     return {
-      version: "8.0.0-integration-baseline",
+      version: "8.1.0-integration-baseline",
       required: this.required,
       started: this.started,
       ready: checks.every((item) => !item.required || item.ok),
@@ -126,6 +130,8 @@ class IntegrationHub {
         properties: payload.properties,
       }))
       .register("ai.score", (payload, context) => this.ai.score({ ...payload, tenant_id: context.envelope.tenant_id }))
+      .register("krea.generate", (payload, context) => this.krea.generate(payload, context.envelope))
+      .register("krea.job.wait", (payload, context) => this.krea.wait(payload.job_id, payload, context.envelope))
       .register("feature_flags.refresh", () => this.flags.refresh())
       .register("housekeeping.integrations", async () => ({ flags: await this.flags.refresh(), snapshot: this.snapshot().ready }));
   }
@@ -143,6 +149,7 @@ function integrationRequirements(env, allRequired = false) {
     billing: truthy(env.CYVX_REQUIRE_BILLING),
     email: allRequired || truthy(env.CYVX_REQUIRE_EMAIL),
     workload_identity: truthy(env.CYVX_REQUIRE_WORKLOAD_IDENTITY),
+    krea: truthy(env.CYVX_REQUIRE_KREA),
   };
 }
 

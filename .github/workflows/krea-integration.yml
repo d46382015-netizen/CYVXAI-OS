@@ -1,0 +1,33 @@
+name: krea-integration
+
+on:
+  push:
+    paths:
+      - 'core/integrations/krea_provider.js'
+      - 'core/integrations/integration_hub.js'
+      - 'api/integration_routes.js'
+      - 'test/krea-provider.test.js'
+      - 'config/mcp/krea.json'
+      - 'docs/integrations/KREA.md'
+  pull_request:
+    paths:
+      - 'core/integrations/krea_provider.js'
+      - 'core/integrations/integration_hub.js'
+      - 'api/integration_routes.js'
+      - 'test/krea-provider.test.js'
+      - 'config/mcp/krea.json'
+      - 'docs/integrations/KREA.md'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check core/integrations/krea_provider.js
+      - run: node --check core/integrations/integration_hub.js
+      - run: node --check api/integration_routes.js
+      - run: node --check ui/krea-control.js
+      - run: node --test test/krea-provider.test.js

@@ -171,7 +171,7 @@ function createUniversalOperatorRuntime(options = {}) {
     }
   }
 
-  return { runtime, operator, legacyRuntime, revenue, revenueRuntime, bidSprint, bidSprintRuntime, handle, health: () => ({ universal: operator.health(), revenue: revenue.health(), bid_revenue_sprint: bidSprint.health() }) };
+  return { runtime, operator, legacyRuntime, revenue, revenueRuntime, experiment, experimentRuntime, bidSprint, bidSprintRuntime, handle, health: () => ({ universal: operator.health(), revenue: revenue.health(), one_dollar_experiment: experiment.health(), bid_revenue_sprint: bidSprint.health() }) };
 }
 
 

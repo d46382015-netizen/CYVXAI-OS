@@ -46,10 +46,11 @@ class OneDollarExperiment {
     this.stripe.verifyWebhook(rawBody,signatureHeader);
     let event;try{event=JSON.parse(String(rawBody));}catch{throw coded("INVALID_JSON",400,"Stripe webhook body is invalid JSON.");}
     if(!event.id||!event.type)throw coded("STRIPE_EVENT_INVALID",400,"Stripe event ID and type are required.");
+    if(String(this.env.NODE_ENV||"").toLowerCase()==="production"&&!event.livemode)throw coded("STRIPE_TEST_EVENT_REJECTED",400,"Test-mode Stripe events cannot affect production campaign accounting.");
     const digest=crypto.createHash("sha256").update(String(rawBody)).digest("hex");
     const inserted=this.db.prepare("INSERT OR IGNORE INTO one_dollar_webhook_events (event_id,event_type,payload_sha256,received_at) VALUES(?,?,?,?)")
       .run(String(event.id),String(event.type),digest,new Date().toISOString());
-    if(!inserted.changes)return {duplicate:true,event_id:event.id};
+    if(!inserted.changes){const prior=this.db.prepare("SELECT processed_at FROM one_dollar_webhook_events WHERE event_id=?").get(String(event.id));if(prior&&prior.processed_at)return {duplicate:true,event_id:event.id};}
     const object=event.data&&event.data.object||{},metadata=object.metadata||{};
     let handled=false;
     if(metadata.experiment_id===EXPERIMENT_ID&&event.type==="checkout.session.completed"&&object.payment_status==="paid"){

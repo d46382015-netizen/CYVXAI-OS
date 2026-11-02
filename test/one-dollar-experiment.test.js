@@ -1,0 +1,25 @@
+"use strict";
+const assert=require("node:assert/strict"),test=require("node:test");
+const {OneDollarExperiment,GOAL_PARTICIPANTS}=require("../services/revenue/one-dollar-experiment");
+class FakeDb {
+ constructor(){this.rows={checkouts:[],events:[],adjustments:[],fees:[]};}
+ exec(){}
+ prepare(sql){const d=this;
+ if(sql.includes("INSERT INTO one_dollar_checkouts"))return{run(...v){d.rows.checkouts.push({id:v[0],experiment_id:v[1],stripe_session_id:v[2],amount_cents:v[3],currency:v[4],status:"pending",referral_code:v[5],share_code:v[6],source:v[7],created_at:v[8]});return{changes:1};}};
+ if(sql.includes("INSERT OR IGNORE INTO one_dollar_webhook_events"))return{run(...v){if(d.rows.events.some(x=>x.event_id===v[0]))return{changes:0};d.rows.events.push({event_id:v[0],event_type:v[1]});return{changes:1};}};
+ if(sql.includes("UPDATE one_dollar_checkouts SET status='paid'"))return{run(pi,at,id){const x=d.rows.checkouts.find(x=>x.id===id);if(!x)return{changes:0};x.status="paid";x.payment_intent_id=pi;x.paid_at=at;return{changes:1};}};
+ if(sql.includes("UPDATE one_dollar_webhook_events SET processed_at"))return{run() {return{changes:1};}};
+ if(sql.includes("INSERT INTO one_dollar_fee_reconciliation"))return{run(id,bt,fee,currency,at){d.rows.fees.push({checkout_id:id,balance_transaction_id:bt,fee_cents:fee,currency,reconciled_at:at});return{changes:1};}};
+ if(sql.includes("INSERT INTO one_dollar_payment_adjustments"))return{run(id,checkout,kind,amount,ref,status,at){d.rows.adjustments.push({checkout_id:checkout,kind,amount_cents:amount,provider_reference:ref,status});return{changes:1};}};
+ if(sql.includes("SELECT * FROM one_dollar_checkouts WHERE id=? AND stripe_session_id=?"))return{get(id,s){return d.rows.checkouts.find(x=>x.id===id&&x.stripe_session_id===s);}};
+ if(sql.includes("SELECT * FROM one_dollar_checkouts WHERE payment_intent_id=?"))return{get(pi){return d.rows.checkouts.find(x=>x.payment_intent_id===pi);}};
+ if(sql.includes("SELECT")&&sql.includes("FROM one_dollar_checkouts WHERE status='paid'"))return{get(){return{paid_checkouts:d.rows.checkouts.filter(x=>x.status==="paid").length,gross_cents:d.rows.checkouts.filter(x=>x.status==="paid").reduce((a,x)=>a+x.amount_cents,0),refunded_cents:0,disputed_cents:0,fee_reconciled_count:d.rows.fees.length,processor_fee_cents:d.rows.fees.reduce((a,x)=>a+x.fee_cents,0),referred_checkouts:d.rows.checkouts.filter(x=>x.status==="paid"&&x.referral_code).length};}};
+ if(sql.includes("SELECT COUNT(*) AS count FROM one_dollar_checkouts"))return{get(){return{count:d.rows.checkouts.filter(x=>x.status==="paid").length};}};
+ throw Error("Unexpected SQL "+sql.slice(0,100));
+ }
+}
+function fixture(enabled=true){const db=new FakeDb(),stripe={secretKey:"sk_test",fetch:async()=>({ok:true,json:async()=>({id:"bt_1",fee:30,currency:"usd"})}),configured:()=>true,verifyWebhook:()=>true,createCheckoutSession:async()=>({id:"cs_test_1",url:"https://checkout.stripe.test/session"}),snapshot:()=>({configured:true})};return{db,experiment:new OneDollarExperiment({db,logger:{write(){}}},{env:{CYVX_ONE_DOLLAR_EXPERIMENT_ENABLED:String(enabled)},baseUrl:"https://experiment.example.test",stripe})};}
+test("campaign fails closed until enabled",async()=>{const f=fixture(false);await assert.rejects(()=>f.experiment.createCheckout(),e=>e.code==="EXPERIMENT_CHECKOUT_DISABLED");assert.equal(f.experiment.snapshot().goal_participants,GOAL_PARTICIPANTS);});
+test("checkout is fixed at one dollar and returns referral link",async()=>{const f=fixture(),out=await f.experiment.createCheckout({ref:"ABCD1234",source:"social"});assert.match(out.checkout_url,/checkout\.stripe\.test/);assert.match(out.share_url,/ref=/);assert.equal(f.db.rows.checkouts[0].amount_cents,100);assert.equal(f.db.rows.checkouts[0].referral_code,"ABCD1234");});
+test("only paid matching webhook increments verified participant count",async()=>{const f=fixture();await f.experiment.createCheckout({ref:"ABCD1234"});const c=f.db.rows.checkouts[0],event={id:"evt_paid_1",type:"checkout.session.completed",data:{object:{id:c.stripe_session_id,payment_status:"paid",amount_total:100,currency:"usd",payment_intent:"pi_1",metadata:{experiment_id:"one-dollar-experiment",checkout_id:c.id}}}};const result=await f.experiment.processWebhook(JSON.stringify(event),"sig");assert.equal(result.handled,true);assert.equal(f.experiment.snapshot().verified_participants,1);assert.equal(f.experiment.snapshot().net_proceeds_cents,null);assert.equal((await f.experiment.processWebhook(JSON.stringify(event),"sig")).duplicate,true);});
+test("wrong payment amount is rejected",async()=>{const f=fixture();await f.experiment.createCheckout();const c=f.db.rows.checkouts[0],event={id:"evt_wrong",type:"checkout.session.completed",data:{object:{id:c.stripe_session_id,payment_status:"paid",amount_total:500,currency:"usd",payment_intent:"pi_1",metadata:{experiment_id:"one-dollar-experiment",checkout_id:c.id}}}};await assert.rejects(()=>f.experiment.processWebhook(JSON.stringify(event),"sig"),e=>e.code==="CAMPAIGN_PAYMENT_AMOUNT_INVALID");assert.equal(f.experiment.snapshot().verified_participants,0);});

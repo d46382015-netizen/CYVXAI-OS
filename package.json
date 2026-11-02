@@ -121,7 +121,9 @@
     "content:status": "bash ./scripts/content-os.sh status",
     "content:test": "node --test ./test/content-os.test.js",
     "content:verify": "bash ./scripts/content-os.sh verify",
-    "test:source-integrity": "node --test ./test/source-integrity.test.js"
+    "test:source-integrity": "node --test ./test/source-integrity.test.js",
+    "experiment:test": "node --test ./test/one-dollar-experiment.test.js",
+    "experiment:verify": "node --check ./services/revenue/one-dollar-experiment.js && node --check ./services/operator/universal-server.js && node --test ./test/one-dollar-experiment.test.js"
   },
   "engines": {
     "node": ">=22"

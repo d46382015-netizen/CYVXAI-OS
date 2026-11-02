@@ -9,6 +9,7 @@ const { createCompanyOperatorRuntime, readBody, sendJson, match } = require("./s
 const { UniversalOperator, UNIVERSAL_ENTITY_TYPES } = require("./universal");
 const { VentureRevenueEngine } = require("../revenue/engine");
 const { createRevenueHttpRuntime } = require("../revenue/server");
+const { OneDollarExperiment } = require("../revenue/one-dollar-experiment");
 const { BidRevenueSprintOperator, createBidRevenueSprintHttpRuntime } = require("../revenue/bid-sprint");
 
 function securityHeaders(res, production) {
@@ -43,6 +44,8 @@ function createUniversalOperatorRuntime(options = {}) {
   }
 
   const revenue = options.revenue || new VentureRevenueEngine(runtime, { ...options, universal: operator });
+  const experiment = options.experiment || new OneDollarExperiment(runtime, options);
+  const experimentRuntime = createOneDollarExperimentHttpRuntime({ runtime, experiment, authenticate, sendJson, readBody });
   const revenueRuntime = createRevenueHttpRuntime({
     ...options, runtime, engine: revenue, authenticate, sendJson, readBody, match,
   });
@@ -54,7 +57,7 @@ function createUniversalOperatorRuntime(options = {}) {
   async function handle(req, res, suppliedUrl) {
     const url = suppliedUrl || new URL(req.url, "http://cyvx-universal.local");
     const correlationId = String(req.headers["x-correlation-id"] || crypto.randomUUID()).slice(0, 128);
-    const universalPath = url.pathname === "/operator" || url.pathname === "/universal" || url.pathname.startsWith("/api/v2/operator/") || url.pathname.startsWith("/e/") || revenueRuntime.route(url.pathname) || bidSprintRuntime.route(url.pathname) || ["/healthz", "/readyz"].includes(url.pathname);
+    const universalPath = url.pathname === "/operator" || url.pathname === "/universal" || url.pathname.startsWith("/api/v2/operator/") || url.pathname.startsWith("/e/") || revenueRuntime.route(url.pathname) || experimentRuntime.route(url.pathname) || bidSprintRuntime.route(url.pathname) || ["/healthz", "/readyz"].includes(url.pathname);
     if (!universalPath) return legacyRuntime.handle(req, res, url);
 
     securityHeaders(res, production);
@@ -70,6 +73,7 @@ function createUniversalOperatorRuntime(options = {}) {
       }
       if (req.method === "OPTIONS") { res.statusCode = 204; return res.end(); }
 
+      if (await experimentRuntime.handle(req, res, url, { correlationId })) return;
       if (await revenueRuntime.handle(req, res, url, { correlationId })) return;
       if (await bidSprintRuntime.handle(req, res, url, { correlationId })) return;
 
@@ -82,7 +86,7 @@ function createUniversalOperatorRuntime(options = {}) {
         return res.end(body);
       }
       if (req.method === "GET" && url.pathname === "/healthz") {
-        return sendJson(res, 200, { ok: true, universal: operator.health(), venture_adapter: legacyRuntime.operator.health(), revenue: revenue.health(), bid_revenue_sprint: bidSprint.health() }, correlationId);
+        return sendJson(res, 200, { ok: true, universal: operator.health(), venture_adapter: legacyRuntime.operator.health(), revenue: revenue.health(), one_dollar_experiment: experiment.health(), bid_revenue_sprint: bidSprint.health() }, correlationId);
       }
       if (req.method === "GET" && url.pathname === "/readyz") {
         const mission = runtime.readiness();
@@ -167,7 +171,37 @@ function createUniversalOperatorRuntime(options = {}) {
     }
   }
 
-  return { runtime, operator, legacyRuntime, revenue, revenueRuntime, bidSprint, bidSprintRuntime, handle, health: () => ({ universal: operator.health(), revenue: revenue.health(), bid_revenue_sprint: bidSprint.health() }) };
+  return { runtime, operator, legacyRuntime, revenue, revenueRuntime, experiment, experimentRuntime, bidSprint, bidSprintRuntime, handle, health: () => ({ universal: operator.health(), revenue: revenue.health(), one_dollar_experiment: experiment.health(), bid_revenue_sprint: bidSprint.health() }) };
+}
+
+
+function createOneDollarExperimentHttpRuntime(options = {}) {
+  const { runtime, experiment, authenticate, sendJson, readBody } = options;
+  const uiFile = path.resolve(runtime.repoRoot, "ui", "one-dollar-experiment.html");
+  const limits = new Map();
+  function rateLimit(req) {
+    const key=String(req.socket&&req.socket.remoteAddress||"unknown"),now=Date.now(),prior=limits.get(key);
+    if(prior&&now-prior.start<60000&&prior.count>=12)throw new RuntimeError("RATE_LIMITED","Please wait before trying again.",429);
+    if(!prior||now-prior.start>=60000)limits.set(key,{start:now,count:1});else prior.count+=1;
+    if(limits.size>5000)limits.clear();
+  }
+  async function rawBody(req,maxBytes=1024*1024){const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>maxBytes)throw new RuntimeError("BODY_TOO_LARGE","Webhook payload exceeds the allowed size.",413);chunks.push(chunk);}return Buffer.concat(chunks);}
+  function route(pathname){return pathname==="/experiment"||pathname.startsWith("/api/v1/experiment/");}
+  async function handle(req,res,url,context={}) {
+    if(!route(url.pathname))return false;
+    const correlationId=context.correlationId||"one-dollar-experiment";
+    if(req.method==="GET"&&url.pathname==="/experiment"){
+      if(!fs.existsSync(uiFile))throw new RuntimeError("UI_NOT_FOUND","Campaign UI is unavailable.",404);
+      const body=fs.readFileSync(uiFile);res.statusCode=200;res.setHeader("content-type","text/html; charset=utf-8");res.setHeader("cache-control","no-store");res.setHeader("content-length",body.length);res.end(body);return true;
+    }
+    if(req.method==="GET"&&url.pathname==="/api/v1/experiment/public"){sendJson(res,200,{ok:true,experiment:experiment.snapshot()},correlationId);return true;}
+    if(req.method==="GET"&&url.pathname==="/api/v1/experiment/health"){sendJson(res,200,{ok:true,experiment:experiment.health()},correlationId);return true;}
+    if(req.method==="POST"&&url.pathname==="/api/v1/experiment/checkout"){rateLimit(req);const input=await readBody(req,16*1024);const checkout=await experiment.createCheckout(input);sendJson(res,201,{ok:true,checkout},correlationId);return true;}
+    if(req.method==="POST"&&url.pathname==="/api/v1/experiment/stripe/webhook"){const raw=await rawBody(req);const result=await experiment.processWebhook(raw.toString("utf8"),req.headers["stripe-signature"]);sendJson(res,200,{ok:true,result},correlationId);return true;}
+    if(req.method==="POST"&&url.pathname==="/api/v1/experiment/admin/reconcile"){const auth=authenticate(req);if(!["admin","owner"].includes(String(auth.role||"").toLowerCase()))throw new RuntimeError("FORBIDDEN","Administrator access is required.",403);const input=await readBody(req,16*1024);const result=await experiment.reconcilePendingFees(input.limit);sendJson(res,200,{ok:true,result,snapshot:experiment.snapshot()},correlationId);return true;}
+    throw new RuntimeError("NOT_FOUND","Experiment route not found.",404);
+  }
+  return {route,handle,health:()=>experiment.health()};
 }
 
 function createUniversalOperatorHttpServer(operatorRuntime) {
